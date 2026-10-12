@@ -1,0 +1,35 @@
+{
+  "name": "healthalyst-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "check-types": "turbo run check-types",
+    "test": "turbo run test",
+    "test:watch": "turbo run test:watch",
+    "test:coverage": "turbo run test:coverage",
+    "check-format": "prettier --check .",
+    "format": "prettier --write .",
+    "test-all": "pnpm check-format && pnpm lint && pnpm check-types && pnpm test && pnpm build",
+    "prepare": "husky",
+    "pre-commit": "lint-staged",
+    "commitlint": "commitlint"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.4.0",
+    "prettier": "^3.9.9",
+    "turbo": "^2.5.5"
+  },
+  "packageManager": "pnpm@10.27.0",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "lint-staged": {
+    "*.{js,cjs,mjs,jsx,ts,tsx,json,css,md,yml,yaml}": "prettier --check"
+  }
+}

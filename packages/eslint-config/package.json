@@ -1,0 +1,21 @@
+{
+  "name": "@healthalyst/eslint-config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base": "./base.js",
+    "./next": "./next.js"
+  },
+  "dependencies": {
+    "@eslint/js": "^10.0.1",
+    "@next/eslint-plugin-next": "^16.3.8",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-turbo": "^2.5.5",
+    "typescript-eslint": "^8.39.0"
+  },
+  "peerDependencies": {
+    "eslint": "^10.0.0"
+  }
+}

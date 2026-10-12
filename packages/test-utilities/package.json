@@ -1,0 +1,26 @@
+{
+  "name": "@healthalyst/test-utilities",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./setup": "./src/setup.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@testing-library/jest-dom": "~6.9.1"
+  },
+  "peerDependencies": {
+    "vitest": ">=5"
+  },
+  "devDependencies": {
+    "@healthalyst/eslint-config": "workspace:*",
+    "@healthalyst/typescript-config": "workspace:*",
+    "eslint": "^10.12.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

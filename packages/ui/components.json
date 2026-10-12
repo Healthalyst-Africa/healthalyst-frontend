@@ -1,0 +1,21 @@
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "new-york",
+  "rsc": true,
+  "tsx": true,
+  "tailwind": {
+    "config": "../../apps/health-schedule/tailwind.config.ts",
+    "css": "src/styles.css",
+    "baseColor": "neutral",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "iconLibrary": "lucide",
+  "aliases": {
+    "components": "@healthalyst/ui/components",
+    "utils": "@healthalyst/ui/lib/utilities",
+    "hooks": "@healthalyst/ui/hooks",
+    "lib": "@healthalyst/ui/lib",
+    "ui": "@healthalyst/ui/components"
+  }
+}
