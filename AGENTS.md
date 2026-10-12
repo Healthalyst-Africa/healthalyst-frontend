@@ -55,9 +55,16 @@ code, repository policies, or branding into it.
   primitives; keep route entry points, content and application behaviour in the
   owning app. Do not introduce a separate application-local component foundation.
 - The package is exported as `@healthalyst/ui`. Import components through its
-  published exports, for example `@healthalyst/ui/components/button`. Never reach
-  into another workspace's source using relative paths or duplicate primitives
-  inside an application.
+  published exports, for example `@healthalyst/ui/components/action-button`.
+  Never reach into another workspace's source using relative paths or duplicate
+  primitives inside an application.
+- Product code must use the shared `ActionButton` from
+  `@healthalyst/ui/components/action-button` for buttons. Do not import or render
+  the shadcn `Button` primitive directly in applications or other shared
+  components. The `ActionButton` component in `packages/ui` is the only allowed
+  consumer of the underlying `button` primitive; it provides shared loading,
+  disabled, and icon behavior. Use links for navigation rather than wrapping a
+  button in an anchor.
 - Application-specific branded wrappers may live in
   `apps/health-schedule/src/components/ui`, but must compose the shared
   primitives. Keep HealthAlyst colours, typography, copy, layout, and business
@@ -89,6 +96,12 @@ code, repository policies, or branding into it.
   controls as custom clickable containers when a shared primitive exists.
 - Keep package exports, shared styles, Next.js transpilation, and Tailwind source
   scanning aligned when adding or moving components.
+- Product and shared UI code must import icons through the `@healthalyst/icons`
+  workspace package. Do not import an icon library directly in applications or
+  `packages/ui`. Add icons to the shared package API with semantic names when
+  needed. The package owns the chosen third-party icon dependency, keeping
+  applications independent of that vendor's package API. When adding shadcn
+  components, route generated vendor imports through the shared icon package.
 
 ## Repository structure and tooling
 

@@ -1,22 +1,12 @@
 import OrganizationRegistrationForm from "~/components/organization-registration-form";
+import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 import Link from "next/link";
 
 export default function HomePage() {
   return (
     <main className="min-h-screen">
       <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 md:px-10">
-        <a
-          className="flex items-center gap-3"
-          href="/"
-          aria-label="HealthAlyst home"
-        >
-          <span className="flex size-10 items-center justify-center rounded-full bg-primary font-serif text-lg font-semibold text-primary-foreground">
-            H
-          </span>
-          <span className="font-serif text-xl font-semibold tracking-tight">
-            HealthAlyst
-          </span>
-        </a>
+        <HealthAlystBrand />
         <div className="flex items-center gap-5">
           <p className="hidden text-sm text-muted-foreground sm:block">
             Organisation onboarding
@@ -32,9 +22,6 @@ export default function HomePage() {
 
       <div className="mx-auto grid max-w-7xl gap-10 px-5 pb-16 pt-5 md:grid-cols-[0.9fr_1.1fr] md:px-10 md:pt-14">
         <section className="flex flex-col justify-center gap-7 md:pb-16">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">
-            HealthSchedule access
-          </p>
           <div className="flex flex-col gap-5">
             <h1 className="max-w-xl font-serif text-4xl leading-tight tracking-tight md:text-5xl">
               Set up your organisation on HealthAlyst.

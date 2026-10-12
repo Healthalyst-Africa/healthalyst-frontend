@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { Button } from "@healthalyst/ui/components/button";
+import { ActionButton } from "@healthalyst/ui/components/action-button";
 import {
   Card,
   CardContent,
@@ -17,9 +17,13 @@ import {
 } from "@healthalyst/ui/components/field";
 import { Input } from "@healthalyst/ui/components/input";
 import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@healthalyst/ui/components/native-select";
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@healthalyst/ui/components/select";
 
 type SessionResponse = {
   accessToken: string;
@@ -237,27 +241,28 @@ export default function OrganizationStatusLookup() {
                 <FieldLabel htmlFor="organizationId">
                   Choose an organisation
                 </FieldLabel>
-                <NativeSelect
-                  id="organizationId"
+                <Select
                   name="organizationId"
                   value={selectedOrganizationId}
-                  onChange={(changeEvent) =>
-                    setSelectedOrganizationId(changeEvent.target.value)
-                  }
+                  onValueChange={setSelectedOrganizationId}
                   required
                 >
-                  <NativeSelectOption value="" disabled>
-                    Select an organisation
-                  </NativeSelectOption>
-                  {organizations.map((organizationChoice) => (
-                    <NativeSelectOption
-                      key={organizationChoice.organizationId}
-                      value={organizationChoice.organizationId}
-                    >
-                      {organizationChoice.organizationName}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
+                  <SelectTrigger id="organizationId">
+                    <SelectValue placeholder="Select an organisation" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {organizations.map((organizationChoice) => (
+                        <SelectItem
+                          key={organizationChoice.organizationId}
+                          value={organizationChoice.organizationId}
+                        >
+                          {organizationChoice.organizationName}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
               </Field>
             )}
             <Field>
@@ -272,9 +277,13 @@ export default function OrganizationStatusLookup() {
             </Field>
           </FieldGroup>
           {errorMessage && <FieldError>{errorMessage}</FieldError>}
-          <Button type="submit" disabled={isLoading}>
-            {isLoading ? "Signing in…" : "Sign in"}
-          </Button>
+          <ActionButton
+            type="submit"
+            isLoading={isLoading}
+            loadingText="Signing in…"
+          >
+            Sign in
+          </ActionButton>
         </form>
 
         {applicationStatus && (

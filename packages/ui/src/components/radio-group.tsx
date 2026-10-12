@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import * as RadioGroupPrimitive from "@radix-ui/react-radio-group";
-import { Circle } from "lucide-react";
+import { CircleIcon } from "@healthalyst/icons";
 
 import { cn } from "@healthalyst/ui/lib/utilities";
 
@@ -34,7 +34,7 @@ const RadioGroupItem = React.forwardRef<
       {...properties}
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <Circle aria-hidden="true" className="size-3.5 fill-primary" />
+        <CircleIcon aria-hidden="true" className="size-3.5 fill-primary" />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   );

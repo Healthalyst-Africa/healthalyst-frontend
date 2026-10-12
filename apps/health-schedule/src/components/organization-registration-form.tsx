@@ -2,30 +2,22 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowRight, Check, LoaderCircle } from "lucide-react";
-import { Button } from "@healthalyst/ui/components/button";
+import { ArrowRightIcon, CheckIcon } from "@healthalyst/icons";
+import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { DynamicFormFields } from "@healthalyst/ui/components/dynamic-form-fields";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@healthalyst/ui/components/card";
+import { FieldError } from "@healthalyst/ui/components/field";
+import { validateFormData } from "@healthalyst/ui/lib/form-definition";
 import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@healthalyst/ui/components/field";
-import { Input } from "@healthalyst/ui/components/input";
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from "@healthalyst/ui/components/native-select";
-
-type OrganizationType =
-  "HOSPITAL" | "CLINIC" | "DIAGNOSTIC_CENTRE" | "LABORATORY" | "PHARMACY";
+  organizationRegistrationFormDefinition,
+  organizationTypeOptions,
+  type OrganizationType,
+} from "~/lib/organization-registration-form-definition";
 
 type RegistrationResponse = {
   applicationId: string;
@@ -47,17 +39,16 @@ function isRegistrationResponse(
   );
 }
 
-const organizationTypes: Array<{ value: OrganizationType; label: string }> = [
-  { value: "HOSPITAL", label: "Hospital" },
-  { value: "CLINIC", label: "Clinic" },
-  { value: "DIAGNOSTIC_CENTRE", label: "Diagnostic centre" },
-  { value: "LABORATORY", label: "Laboratory" },
-  { value: "PHARMACY", label: "Pharmacy" },
-];
+function isOrganizationType(value: string): value is OrganizationType {
+  return organizationTypeOptions.some(
+    (organizationType) => organizationType.value === value
+  );
+}
 
 export default function OrganizationRegistrationForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [registrationResponse, setRegistrationResponse] =
     useState<RegistrationResponse | null>(null);
 
@@ -67,17 +58,54 @@ export default function OrganizationRegistrationForm() {
     formEvent.preventDefault();
     setErrorMessage(null);
 
-    const formData = new FormData(formEvent.currentTarget);
-    const apiAddress = process.env.NEXT_PUBLIC_HEALTHALYST_API_URL;
-    const passwordValue = formData.get("password");
-
-    if (
-      typeof passwordValue !== "string" ||
-      new TextEncoder().encode(passwordValue).length > 72
-    ) {
-      setErrorMessage("Use a password that is no longer than 72 UTF-8 bytes.");
+    const validationResult = validateFormData(
+      organizationRegistrationFormDefinition,
+      new FormData(formEvent.currentTarget)
+    );
+    if (!validationResult.valid) {
+      setFieldErrors(validationResult.errors);
+      const firstInvalidField = Object.keys(validationResult.errors)[0];
+      if (firstInvalidField) {
+        const control =
+          formEvent.currentTarget.elements.namedItem(firstInvalidField);
+        if (control instanceof HTMLElement) control.focus();
+      }
       return;
     }
+
+    const registrationValues = validationResult.values;
+    if (registrationValues.password !== registrationValues.confirmPassword) {
+      setFieldErrors({ confirmPassword: "Passwords do not match." });
+      const confirmPasswordControl =
+        formEvent.currentTarget.elements.namedItem("confirmPassword");
+      if (confirmPasswordControl instanceof HTMLElement) {
+        confirmPasswordControl.focus();
+      }
+      return;
+    }
+
+    const administratorName = `${registrationValues.firstName} ${registrationValues.lastName}`;
+    if (administratorName.length > 120) {
+      setFieldErrors({
+        lastName:
+          "First and last name together must be no more than 120 characters.",
+      });
+      const lastNameControl =
+        formEvent.currentTarget.elements.namedItem("lastName");
+      if (lastNameControl instanceof HTMLElement) {
+        lastNameControl.focus();
+      }
+      return;
+    }
+
+    const organizationTypeValue = registrationValues.organizationType;
+    if (!isOrganizationType(organizationTypeValue)) {
+      setFieldErrors({ organizationType: "Select a valid organisation type." });
+      return;
+    }
+
+    setFieldErrors({});
+    const apiAddress = process.env.NEXT_PUBLIC_HEALTHALYST_API_URL;
 
     if (!apiAddress) {
       setErrorMessage(
@@ -96,13 +124,13 @@ export default function OrganizationRegistrationForm() {
           headers: { "Content-Type": "application/json" },
           credentials: "include",
           body: JSON.stringify({
-            organizationName: formData.get("organizationName"),
-            organizationType: formData.get("organizationType"),
-            registrationNumber: formData.get("registrationNumber"),
+            organizationName: registrationValues.organizationName,
+            organizationType: organizationTypeValue,
+            registrationNumber: registrationValues.registrationNumber,
             countryCode: "NG",
-            administratorName: formData.get("administratorName"),
-            emailAddress: formData.get("emailAddress"),
-            password: formData.get("password"),
+            administratorName,
+            emailAddress: registrationValues.emailAddress,
+            password: registrationValues.password,
           }),
         }
       );
@@ -153,7 +181,7 @@ export default function OrganizationRegistrationForm() {
       <Card className="self-start border-border bg-card shadow-sm">
         <CardContent className="flex flex-col items-start gap-5 px-6 py-10 md:px-9">
           <span className="flex size-12 items-center justify-center rounded-full bg-secondary text-primary">
-            <Check aria-hidden="true" />
+            <CheckIcon aria-hidden="true" />
           </span>
           <div className="flex flex-col gap-2">
             <h2 className="font-serif text-2xl font-semibold">
@@ -190,121 +218,38 @@ export default function OrganizationRegistrationForm() {
   return (
     <Card className="self-start border-border bg-card shadow-sm">
       <CardHeader className="gap-2 px-6 pt-7 md:px-9 md:pt-9">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          Organisation application
-        </p>
         <CardTitle className="font-serif text-2xl">
           Create your administrator account
         </CardTitle>
-        <CardDescription className="text-sm leading-6">
-          The person registering becomes the first administrator for this
-          organisation.
-        </CardDescription>
       </CardHeader>
       <CardContent className="px-6 pb-7 md:px-9 md:pb-9">
         <form
           className="flex flex-col gap-6"
           onSubmit={handleRegistrationSubmit}
+          noValidate
         >
-          <FieldGroup className="gap-5">
-            <Field>
-              <FieldLabel htmlFor="organizationName">
-                Registered organisation name
-              </FieldLabel>
-              <Input
-                autoComplete="organization"
-                id="organizationName"
-                name="organizationName"
-                maxLength={160}
-                placeholder="As shown on your registration documents"
-                required
-              />
-            </Field>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field>
-                <FieldLabel htmlFor="organizationType">
-                  Organisation type
-                </FieldLabel>
-                <NativeSelect
-                  id="organizationType"
-                  name="organizationType"
-                  defaultValue=""
-                  required
-                >
-                  <NativeSelectOption value="" disabled>
-                    Select a type
-                  </NativeSelectOption>
-                  {organizationTypes.map((organizationType) => (
-                    <NativeSelectOption
-                      key={organizationType.value}
-                      value={organizationType.value}
-                    >
-                      {organizationType.label}
-                    </NativeSelectOption>
-                  ))}
-                </NativeSelect>
-              </Field>
-              <Field>
-                <FieldLabel htmlFor="registrationNumber">
-                  Registration number
-                </FieldLabel>
-                <Input
-                  autoComplete="off"
-                  id="registrationNumber"
-                  name="registrationNumber"
-                  maxLength={64}
-                  placeholder="Organisation registration ID"
-                  required
-                />
-              </Field>
-            </div>
-
-            <div className="border-t border-border pt-5">
-              <h3 className="text-sm font-semibold">Administrator details</h3>
-              <p className="mt-1 text-sm leading-6 text-muted-foreground">
-                Use the person’s own work email. This account will manage the
-                organisation after approval.
-              </p>
-            </div>
-
-            <Field>
-              <FieldLabel htmlFor="administratorName">Full name</FieldLabel>
-              <Input
-                autoComplete="name"
-                id="administratorName"
-                name="administratorName"
-                maxLength={120}
-                required
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="emailAddress">Work email address</FieldLabel>
-              <Input
-                autoComplete="email"
-                id="emailAddress"
-                name="emailAddress"
-                type="email"
-                maxLength={254}
-                required
-              />
-            </Field>
-            <Field>
-              <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input
-                autoComplete="new-password"
-                id="password"
-                name="password"
-                type="password"
-                minLength={12}
-                maxLength={72}
-                required
-              />
-              <FieldDescription>
-                Use at least 12 characters and no more than 72 UTF-8 bytes.
-              </FieldDescription>
-            </Field>
-          </FieldGroup>
+          <DynamicFormFields
+            definition={organizationRegistrationFormDefinition}
+            errors={fieldErrors}
+            disabled={isSubmitting}
+            onFieldChange={(fieldName) => {
+              setFieldErrors((currentErrors) => {
+                if (
+                  !currentErrors[fieldName] &&
+                  !(fieldName === "password" && currentErrors.confirmPassword)
+                ) {
+                  return currentErrors;
+                }
+                const updatedErrors = { ...currentErrors };
+                delete updatedErrors[fieldName];
+                if (fieldName === "password") {
+                  delete updatedErrors.confirmPassword;
+                }
+                return updatedErrors;
+              });
+              setErrorMessage(null);
+            }}
+          />
 
           {errorMessage && <FieldError>{errorMessage}</FieldError>}
 
@@ -313,16 +258,16 @@ export default function OrganizationRegistrationForm() {
               By submitting, you confirm that you are authorised to register
               this organisation. Do not include patient or clinical information.
             </p>
-            <Button className="w-full" type="submit" disabled={isSubmitting}>
-              {isSubmitting ? (
-                <LoaderCircle aria-hidden="true" className="animate-spin" />
-              ) : (
-                <ArrowRight aria-hidden="true" data-icon="inline-end" />
-              )}
-              {isSubmitting
-                ? "Submitting application"
-                : "Submit for verification"}
-            </Button>
+            <ActionButton
+              className="w-full"
+              size="large"
+              type="submit"
+              isLoading={isSubmitting}
+              loadingText="Submitting application"
+              trailingIcon={<ArrowRightIcon aria-hidden="true" />}
+            >
+              Submit for verification
+            </ActionButton>
           </div>
         </form>
       </CardContent>

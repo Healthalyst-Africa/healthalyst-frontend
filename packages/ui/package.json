@@ -14,16 +14,17 @@
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "@healthalyst/icons": "workspace:*",
     "@radix-ui/react-accordion": "^1.2.20",
     "@radix-ui/react-dialog": "^1.2.0",
     "@radix-ui/react-label": "^2.1.16",
     "@radix-ui/react-radio-group": "^1.4.8",
+    "@radix-ui/react-select": "^2.4.0",
     "@radix-ui/react-separator": "^1.1.16",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-tabs": "^1.1.22",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "lucide-react": "^0.417.0",
     "tailwind-merge": "^2.6.1"
   },
   "peerDependencies": {

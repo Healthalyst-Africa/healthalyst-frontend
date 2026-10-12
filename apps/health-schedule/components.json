@@ -17,5 +17,5 @@
     "lib": "~/lib",
     "ui": "@healthalyst/ui/components"
   },
-  "iconLibrary": "lucide"
+  "iconLibrary": "tabler"
 }

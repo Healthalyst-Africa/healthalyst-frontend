@@ -1,0 +1,26 @@
+{
+  "name": "@healthalyst/icons",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tabler/icons-react": "^3.47.0"
+  },
+  "peerDependencies": {
+    "react": ">=18.2.0"
+  },
+  "devDependencies": {
+    "@healthalyst/eslint-config": "workspace:*",
+    "@healthalyst/typescript-config": "workspace:*",
+    "@types/react": "^19.2.7",
+    "eslint": "^10.12.0",
+    "typescript": "^5.9.3"
+  }
+}

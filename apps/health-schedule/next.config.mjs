@@ -4,7 +4,7 @@ const nextConfiguration = {
   reactStrictMode: true,
   output: "standalone",
   outputFileTracingRoot: fileURLToPath(new URL("../..", import.meta.url)),
-  transpilePackages: ["@healthalyst/ui"],
+  transpilePackages: ["@healthalyst/ui", "@healthalyst/icons"],
   typescript: {
     ignoreBuildErrors: false,
   },

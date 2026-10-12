@@ -6,7 +6,7 @@ import {
   cva as createClassVariants,
   type VariantProps as VariantProperties,
 } from "class-variance-authority";
-import { X as CloseIcon } from "lucide-react";
+import { CloseIcon } from "@healthalyst/icons";
 
 import { cn } from "@healthalyst/ui/lib/utilities";
 

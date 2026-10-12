@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@healthalyst/ui": "workspace:*",
-    "lucide-react": "^0.417.0",
+    "@healthalyst/icons": "workspace:*",
     "next": "16.3.8",
     "react": "19.2.4",
     "react-dom": "19.2.4"
