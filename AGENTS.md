@@ -36,7 +36,7 @@ code, repository policies, or branding into it.
   filenames, protocol values, schema keys, generated lockfiles, and framework
   attributes are compatibility contracts. Keep their required spelling. Examples
   include `package.json`, `tsconfig.json`, `AGENTS.md`, `next.config.mjs`,
-  `components.json`, `@healthalyst/ui`, `~/lib`, React's `ref` attribute, HTML's
+  `components.json`, `@healthalyst/ui`, React's `ref` attribute, HTML's
   `id` and `src` attributes, Tailwind utility names, and environment variable names
   read by tools. This does not permit abbreviated local variables: alias imported
   symbols when needed, such as `cva as createClassVariants`.
@@ -105,15 +105,18 @@ code, repository policies, or branding into it.
 
 ## Repository structure and tooling
 
-| Location                              | Responsibility                                                         |
-| ------------------------------------- | ---------------------------------------------------------------------- |
-| `apps/health-schedule/src/app`        | Next.js routes, layouts, and metadata                                  |
-| `apps/health-schedule/src/components` | Product compositions and branded wrappers                              |
-| `apps/health-schedule/public`         | Files served directly by public paths                                  |
-| `packages/ui`                         | Shared shadcn primitives, neutral tokens, reusable interface utilities |
-| `packages/eslint-config`              | Shared lint configuration                                              |
-| `packages/typescript-config`          | Shared strict compiler configuration                                   |
-| `packages/test-utilities`             | Shared testing setup                                                   |
+| Location                                  | Responsibility                                                         |
+| ----------------------------------------- | ---------------------------------------------------------------------- |
+| `apps/health-schedule/src/app`            | Next.js routes, layouts, and metadata                                  |
+| `apps/health-schedule/src/features`       | Product workflows, including their UI, validation, hooks, and API code |
+| `apps/health-schedule/src/infrastructure` | Application-wide providers and runtime setup                           |
+| `apps/health-schedule/src/shared`         | App-local helpers used by multiple workflows                           |
+| `apps/health-schedule/src/components`     | App-wide branded wrappers                                              |
+| `apps/health-schedule/public`             | Files served directly by public paths                                  |
+| `packages/ui`                             | Shared shadcn primitives, neutral tokens, reusable interface utilities |
+| `packages/eslint-config`                  | Shared lint configuration                                              |
+| `packages/typescript-config`              | Shared strict compiler configuration                                   |
+| `packages/test-utilities`                 | Shared testing setup                                                   |
 
 - Read manifests rather than assuming versions. The current stack uses Next.js
   App Router, React, TypeScript, Tailwind 3, pnpm workspaces, and Turborepo.
@@ -126,6 +129,10 @@ code, repository policies, or branding into it.
   `ignoreBuildErrors` to true.
 - Use `~/` for application source imports and package exports for workspace
   imports. Applications must not depend on other applications.
+- Keep route files thin. Place product behavior in the owning feature, runtime
+  setup in `infrastructure`, and app-local helpers in `shared` only when more
+  than one workflow uses them. Keep query hooks separate from HTTP clients and
+  form definitions; do not use `lib` as a catch-all folder.
 - Keep changes focused. Do not upgrade dependencies, replace the state system,
   add new services, or introduce new build tools without a task requirement.
 
@@ -138,6 +145,10 @@ code, repository policies, or branding into it.
   properties must be serializable. Validate every external input at the boundary.
 - Keep strict types. Prefer explicit domain types and discriminated unions over
   `any`, unchecked casts, non-null assertions, or silent fallback data.
+- Define form validation in Zod schemas owned by the application. Keep field
+  limits, cross-field rules, and request shaping out of form components and
+  shared visual packages. Show schema errors beside their fields and focus the
+  first invalid control.
 - Use Next.js routing, metadata, fonts, and image features appropriately. Keep
   route metadata, canonical addresses, and public configuration consistent with
   the deployed environment. Never publish localhost canonical addresses.
@@ -146,6 +157,34 @@ code, repository policies, or branding into it.
   real behavior behind them.
 - Clean up effects and subscriptions. Keep hooks deterministic and accessible
   content usable before hydration. Respect reduced motion for reveals and scroll.
+
+## API and HTTP workflow
+
+- Use Axios for browser HTTP requests to backend applications. Do not introduce
+  `fetch` unless the user explicitly requests it. Declare Axios and TanStack
+  React Query in the owning application, not in product-neutral UI packages.
+- Configure one Axios instance per backend boundary in the owning application's
+  API layer. Read its public base address from a documented environment variable,
+  set a finite timeout, and fail clearly when configuration is missing. Keep
+  secrets out of `NEXT_PUBLIC_*` values and never put access tokens in URLs.
+- Put endpoint paths, request and response shapes, response validation, bearer
+  headers, and HTTP error translation in application API services. Components
+  must not construct URLs, call Axios directly, or parse transport errors.
+- Use a scoped TanStack Query provider for application data. Keep query keys in
+  the API layer, use `useQuery` for reads and `useMutation` for writes, and
+  invalidate or separate cached data when the signed-in identity changes. Do
+  not put passwords or bearer tokens in query keys or persist the query cache.
+- Handle conflict, validation, unauthorized, forbidden, timeout, and connection
+  failures explicitly. Retry only safe reads when appropriate; never retry a
+  registration or other write automatically. Keep API errors recoverable in the
+  relevant form or page.
+- Match credentials and token handling to each backend's actual contract. The
+  current accounts API uses bearer tokens for protected reads and does not allow
+  credentialed cross-origin browser requests. Do not add cookie credentials,
+  refresh flows, or global redirects without a matching backend capability.
+- Review the backend contract before adding a call. Keep application-specific
+  services and hooks inside their application; move code to a shared package only
+  when multiple products genuinely share a stable, product-neutral contract.
 
 ## HealthSchedule onboarding requirements
 

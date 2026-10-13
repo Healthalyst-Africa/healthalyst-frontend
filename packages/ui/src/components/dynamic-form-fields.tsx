@@ -15,6 +15,7 @@ import {
   FieldSet,
 } from "@healthalyst/ui/components/field";
 import { Input } from "@healthalyst/ui/components/input";
+import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import {
   Select,
   SelectContent,
@@ -108,6 +109,16 @@ function DynamicFormField({
           minLength={field.minLength}
           maxLength={field.maxLength}
           rows={field.rows}
+        />
+      ) : field.kind === "password" ? (
+        <PasswordInput
+          {...controlProperties}
+          visibilityLabel={field.label}
+          borderless={field.borderless}
+          autoComplete={field.autoComplete}
+          placeholder={field.placeholder}
+          minLength={field.minLength}
+          maxLength={field.maxLength}
         />
       ) : (
         <Input
