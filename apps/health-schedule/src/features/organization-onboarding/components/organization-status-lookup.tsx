@@ -16,6 +16,7 @@ import {
   FieldLabel,
 } from "@healthalyst/ui/components/field";
 import { Input } from "@healthalyst/ui/components/input";
+import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import {
   AccountsAuthorizationError,
   OrganizationSelectionRequiredError,
@@ -99,10 +100,7 @@ export default function OrganizationStatusLookup() {
 
   return (
     <Card className="border-border bg-card shadow-sm">
-      <CardHeader className="gap-2 px-6 pt-7 md:px-9 md:pt-9">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-          Administrator sign-in
-        </p>
+      <CardHeader className="gap-2 px-8 pt-7 md:px-12 md:pt-9">
         <CardTitle className="font-serif text-2xl">
           Check your application
         </CardTitle>
@@ -111,14 +109,17 @@ export default function OrganizationStatusLookup() {
           organisation.
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-6 pb-7 md:px-9 md:pb-9">
+      <CardContent className="px-8 pb-7 md:px-12 md:pb-9">
         <form
           className="flex flex-col gap-5"
           onSubmit={handleSignIn}
           noValidate
         >
           <FieldGroup className="gap-5">
-            <Field data-invalid={Boolean(fieldErrors.emailAddress)}>
+            <Field
+              className="gap-1.5"
+              data-invalid={Boolean(fieldErrors.emailAddress)}
+            >
               <FieldLabel htmlFor="emailAddress">Work email address</FieldLabel>
               <Input
                 autoComplete="email"
@@ -143,7 +144,10 @@ export default function OrganizationStatusLookup() {
               )}
             </Field>
             {organizations.length > 0 && (
-              <Field data-invalid={Boolean(fieldErrors.organizationId)}>
+              <Field
+                className="gap-1.5"
+                data-invalid={Boolean(fieldErrors.organizationId)}
+              >
                 <FieldLabel htmlFor="organizationId">
                   Choose an organisation
                 </FieldLabel>
@@ -191,13 +195,16 @@ export default function OrganizationStatusLookup() {
                 )}
               </Field>
             )}
-            <Field data-invalid={Boolean(fieldErrors.password)}>
+            <Field
+              className="gap-1.5"
+              data-invalid={Boolean(fieldErrors.password)}
+            >
               <FieldLabel htmlFor="password">Password</FieldLabel>
-              <Input
+              <PasswordInput
                 autoComplete="current-password"
                 id="password"
                 name="password"
-                type="password"
+                visibilityLabel="Password"
                 required
                 aria-invalid={Boolean(fieldErrors.password) || undefined}
                 aria-describedby={
@@ -230,6 +237,8 @@ export default function OrganizationStatusLookup() {
               </ActionButton>
             )}
           <ActionButton
+            className="w-full"
+            size="large"
             type="submit"
             isLoading={isLoading}
             loadingText="Signing in…"
@@ -240,7 +249,7 @@ export default function OrganizationStatusLookup() {
 
         {applicationStatus && (
           <section
-            className="mt-7 border-t border-border pt-6"
+            className="mt-7 rounded-xl border border-border bg-muted/60 p-5 sm:p-6"
             aria-live="polite"
           >
             <h2 className="font-serif text-xl font-semibold">
@@ -259,7 +268,7 @@ export default function OrganizationStatusLookup() {
             )}
             <p className="mt-4 text-xs text-muted-foreground">
               Reference:{" "}
-              <span className="font-mono">
+              <span className="break-all font-mono">
                 {applicationStatus.applicationId}
               </span>
             </p>

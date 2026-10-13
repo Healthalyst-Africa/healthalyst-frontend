@@ -2,7 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { ArrowRightIcon, CheckIcon } from "@healthalyst/icons";
+import { CheckIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { DynamicFormFields } from "@healthalyst/ui/components/dynamic-form-fields";
 import {
@@ -125,7 +125,6 @@ export default function OrganizationRegistrationForm() {
               type="submit"
               isLoading={isSubmitting}
               loadingText="Submitting application"
-              trailingIcon={<ArrowRightIcon aria-hidden="true" />}
             >
               Submit for verification
             </ActionButton>
