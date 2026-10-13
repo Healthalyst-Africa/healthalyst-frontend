@@ -1,15 +1,6 @@
 import type { FormDefinition } from "@healthalyst/ui/lib/form-definition";
-
-export const organizationTypeOptions = [
-  { value: "HOSPITAL", label: "Hospital" },
-  { value: "CLINIC", label: "Clinic" },
-  { value: "DIAGNOSTIC_CENTRE", label: "Diagnostic centre" },
-  { value: "LABORATORY", label: "Laboratory" },
-  { value: "PHARMACY", label: "Pharmacy" },
-] as const;
-
-export type OrganizationType =
-  (typeof organizationTypeOptions)[number]["value"];
+import { organizationTypeOptions } from "~/features/organization-onboarding/model/organization-types";
+import { ORGANIZATION_REGISTRATION_LIMITS } from "~/features/organization-onboarding/model/organization-registration-schema";
 
 export const organizationRegistrationFormDefinition = {
   identifier: "organization-registration",
@@ -23,7 +14,7 @@ export const organizationRegistrationFormDefinition = {
           label: "Registered organisation name",
           autoComplete: "organization",
           placeholder: "As shown on your registration documents",
-          maxLength: 160,
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.organizationName,
           required: true,
         },
       ],
@@ -46,7 +37,7 @@ export const organizationRegistrationFormDefinition = {
           label: "Registration number",
           autoComplete: "off",
           placeholder: "Organisation registration ID",
-          maxLength: 64,
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.registrationNumber,
           required: true,
         },
       ],
@@ -67,7 +58,7 @@ export const organizationRegistrationFormDefinition = {
           autoComplete: "given-name",
           hideLabel: true,
           borderless: true,
-          maxLength: 60,
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.administratorNamePart,
           required: true,
         },
         {
@@ -78,7 +69,7 @@ export const organizationRegistrationFormDefinition = {
           autoComplete: "family-name",
           hideLabel: true,
           borderless: true,
-          maxLength: 60,
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.administratorNamePart,
           required: true,
         },
         {
@@ -89,7 +80,7 @@ export const organizationRegistrationFormDefinition = {
           autoComplete: "email",
           hideLabel: true,
           borderless: true,
-          maxLength: 254,
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.emailAddress,
           columnSpan: 2,
           required: true,
         },
@@ -101,9 +92,8 @@ export const organizationRegistrationFormDefinition = {
           autoComplete: "new-password",
           hideLabel: true,
           borderless: true,
-          minLength: 12,
-          maxLength: 72,
-          maxByteLength: 72,
+          minLength: ORGANIZATION_REGISTRATION_LIMITS.passwordMinimum,
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.passwordMaximum,
           required: true,
         },
         {
@@ -114,9 +104,8 @@ export const organizationRegistrationFormDefinition = {
           autoComplete: "new-password",
           hideLabel: true,
           borderless: true,
-          minLength: 12,
-          maxLength: 72,
-          maxByteLength: 72,
+          minLength: ORGANIZATION_REGISTRATION_LIMITS.passwordMinimum,
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.passwordMaximum,
           required: true,
         },
       ],

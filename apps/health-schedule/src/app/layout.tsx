@@ -3,6 +3,7 @@ import type React from "react";
 import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
 import "@healthalyst/ui/styles.css";
 import "./globals.css";
+import { ApplicationQueryProvider } from "~/infrastructure/query/query-provider";
 
 const serifFont = Source_Serif_4({
   subsets: ["latin"],
@@ -33,7 +34,9 @@ export default function RootLayout({
       lang="en"
       className={`${serifFont.variable} ${sansSerifFont.variable}`}
     >
-      <body className={sansSerifFont.className}>{children}</body>
+      <body className={sansSerifFont.className}>
+        <ApplicationQueryProvider>{children}</ApplicationQueryProvider>
+      </body>
     </html>
   );
 }

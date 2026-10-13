@@ -1,4 +1,4 @@
-import OrganizationStatusLookup from "~/components/organization-status-lookup";
+import { OrganizationStatusLookup } from "~/features/organization-onboarding";
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 
 export default function SignInPage() {

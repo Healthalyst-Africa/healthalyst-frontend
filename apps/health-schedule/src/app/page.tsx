@@ -1,4 +1,4 @@
-import OrganizationRegistrationForm from "~/components/organization-registration-form";
+import { OrganizationRegistrationForm } from "~/features/organization-onboarding";
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 import Link from "next/link";
 
