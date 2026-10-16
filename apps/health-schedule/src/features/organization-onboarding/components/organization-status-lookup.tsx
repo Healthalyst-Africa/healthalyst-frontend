@@ -19,6 +19,7 @@ import { Input } from "@healthalyst/ui/components/input";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import {
   AccountsAuthorizationError,
+  EmailVerificationRequiredError,
   OrganizationSelectionRequiredError,
   type ApplicationStatus,
   type OrganizationChoice,
@@ -34,6 +35,7 @@ import {
   parseFormData,
 } from "~/shared/forms/form-validation";
 import { createSignInSchema } from "~/features/organization-onboarding/model/sign-in-schema";
+import { useResendEmailVerificationMutation } from "~/features/organization-onboarding/hooks/use-email-verification";
 import {
   Select,
   SelectContent,
@@ -42,6 +44,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@healthalyst/ui/components/select";
+import OrganizationEvidenceRequests from "~/features/organization-onboarding/components/organization-evidence-requests";
 
 const statusLabels: Record<ApplicationStatus["status"], string> = {
   PENDING_REVIEW: "Pending review",
@@ -56,6 +59,7 @@ export default function OrganizationStatusLookup() {
   const [organizations, setOrganizations] = useState<OrganizationChoice[]>([]);
   const [selectedOrganizationId, setSelectedOrganizationId] = useState("");
   const sessionMutation = useCreateSessionMutation();
+  const resendVerificationMutation = useResendEmailVerificationMutation();
   const applicationQuery = useMyApplicationQuery(session);
   const applicationStatus = session ? applicationQuery.data : null;
   const isLoading = sessionMutation.isPending || applicationQuery.isFetching;
@@ -224,6 +228,36 @@ export default function OrganizationStatusLookup() {
             </Field>
           </FieldGroup>
           {errorMessage && <FieldError>{errorMessage}</FieldError>}
+          {sessionMutation.error instanceof EmailVerificationRequiredError && (
+            <div className="flex flex-col gap-2">
+              <ActionButton
+                type="button"
+                variant="outline"
+                isLoading={resendVerificationMutation.isPending}
+                loadingText="Requesting confirmation"
+                onClick={() => {
+                  const emailAddress = sessionMutation.variables?.emailAddress;
+                  if (emailAddress) {
+                    resendVerificationMutation.mutate(emailAddress);
+                  }
+                }}
+                disabled={!sessionMutation.variables?.emailAddress}
+              >
+                Resend confirmation email
+              </ActionButton>
+              {resendVerificationMutation.isSuccess && (
+                <p className="text-sm text-muted-foreground" role="status">
+                  If that address has an unconfirmed account, a new link will be
+                  sent shortly.
+                </p>
+              )}
+              {resendVerificationMutation.error && (
+                <FieldError>
+                  {resendVerificationMutation.error.message}
+                </FieldError>
+              )}
+            </div>
+          )}
           {applicationQuery.isError &&
             session &&
             !(applicationQuery.error instanceof AccountsAuthorizationError) && (
@@ -273,6 +307,9 @@ export default function OrganizationStatusLookup() {
               </span>
             </p>
           </section>
+        )}
+        {session && applicationQuery.isSuccess && (
+          <OrganizationEvidenceRequests session={session} />
         )}
       </CardContent>
     </Card>

@@ -1,12 +1,14 @@
 import type { FormDefinition } from "@healthalyst/ui/lib/form-definition";
 import { organizationTypeOptions } from "~/features/organization-onboarding/model/organization-types";
+import { productInterestOptions } from "~/features/organization-onboarding/model/organization-interest-options";
 import { ORGANIZATION_REGISTRATION_LIMITS } from "~/features/organization-onboarding/model/organization-registration-schema";
 
 export const organizationRegistrationFormDefinition = {
   identifier: "organization-registration",
   sections: [
     {
-      identifier: "organization-name",
+      identifier: "organization-identity",
+      columns: 2,
       fields: [
         {
           kind: "text",
@@ -15,19 +17,14 @@ export const organizationRegistrationFormDefinition = {
           autoComplete: "organization",
           placeholder: "As shown on your registration documents",
           maxLength: ORGANIZATION_REGISTRATION_LIMITS.organizationName,
+          columnSpan: 2,
           required: true,
         },
-      ],
-    },
-    {
-      identifier: "organization-registration",
-      columns: 2,
-      fields: [
         {
           kind: "select",
           name: "organizationType",
           label: "Organisation type",
-          placeholder: "Select a type",
+          placeholder: "Select an organisation type",
           required: true,
           options: organizationTypeOptions,
         },
@@ -43,11 +40,60 @@ export const organizationRegistrationFormDefinition = {
       ],
     },
     {
+      identifier: "organization-contact-details",
+      columns: 2,
+      fields: [
+        {
+          kind: "email",
+          name: "organizationEmailAddress",
+          label: "Organisation email address",
+          placeholder: "Organisation email address",
+          autoComplete: "email",
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.organizationEmailAddress,
+          columnSpan: 2,
+          required: true,
+        },
+        {
+          kind: "tel",
+          name: "organizationPhoneNumber",
+          label: "Organisation phone number (optional)",
+          placeholder: "Organisation phone number (optional)",
+          autoComplete: "tel",
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.organizationPhoneNumber,
+          required: false,
+        },
+        {
+          kind: "url",
+          name: "websiteUrl",
+          label: "Website URL (optional)",
+          placeholder: "https://www.example.org",
+          autoComplete: "url",
+          maxLength: ORGANIZATION_REGISTRATION_LIMITS.websiteUrl,
+          required: false,
+        },
+      ],
+    },
+    {
+      identifier: "product-interest",
+      fields: [
+        {
+          kind: "select",
+          name: "productInterest",
+          label: "Product of interest…",
+          placeholder: "Product of interest…",
+          required: true,
+          options: productInterestOptions,
+        },
+      ],
+    },
+  ],
+} as const satisfies FormDefinition;
+
+export const administratorDetailsFormDefinition = {
+  identifier: "organization-registration",
+  sections: [
+    {
       identifier: "administrator-details",
-      title: "Administrator details",
-      description:
-        "The person who registers will manage this organisation after approval.",
-      separated: true,
       columns: 2,
       fields: [
         {

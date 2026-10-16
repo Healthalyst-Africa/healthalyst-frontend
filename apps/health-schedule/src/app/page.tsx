@@ -4,8 +4,8 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen">
-      <header className="mx-auto flex max-w-7xl items-center justify-between px-5 py-6 md:px-10">
+    <main className="flex min-h-screen flex-col">
+      <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-6 md:px-10">
         <HealthAlystBrand />
         <div className="flex items-center gap-5">
           <p className="hidden text-sm text-muted-foreground sm:block">
@@ -20,8 +20,8 @@ export default function HomePage() {
         </div>
       </header>
 
-      <div className="mx-auto grid max-w-7xl gap-10 px-5 pb-16 pt-5 md:grid-cols-[0.9fr_1.1fr] md:px-10 md:pt-14">
-        <section className="flex flex-col justify-center gap-7 md:pb-16">
+      <div className="mx-auto grid w-full max-w-7xl flex-1 content-center gap-10 px-5 py-8 lg:grid-cols-[0.9fr_1.1fr] lg:px-10 lg:py-14">
+        <section className="flex flex-col justify-center gap-7">
           <div className="flex flex-col gap-5">
             <h1 className="max-w-xl font-serif text-4xl leading-tight tracking-tight md:text-5xl">
               Set up your organisation on HealthAlyst.

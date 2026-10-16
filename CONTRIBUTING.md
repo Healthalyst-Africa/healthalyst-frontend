@@ -25,7 +25,7 @@ Requirements: Node.js 22.13 or newer and pnpm 10.27.0. From the repository root:
 ```sh
 pnpm install --frozen-lockfile
 cp -n apps/health-schedule/.env.example apps/health-schedule/.env.local
-pnpm dev --filter @healthalyst/health-schedule -- --port 3002
+pnpm --filter @healthalyst/health-schedule dev
 ```
 
 The portal reads `NEXT_PUBLIC_HEALTHALYST_API_URL` to contact the standalone API.
