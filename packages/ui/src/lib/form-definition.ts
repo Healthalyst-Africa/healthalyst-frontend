@@ -15,7 +15,7 @@ type FormFieldBase = {
 
 export type FormFieldDefinition =
   | (FormFieldBase & {
-      kind: "text" | "email" | "password" | "tel" | "textarea";
+      kind: "text" | "email" | "password" | "tel" | "url" | "textarea";
       autoComplete?: string;
       placeholder?: string;
       minLength?: number;

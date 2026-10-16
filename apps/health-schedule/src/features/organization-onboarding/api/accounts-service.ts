@@ -1,4 +1,5 @@
 import { isAxiosError } from "axios";
+import type { ProductInterest } from "~/features/organization-onboarding/model/organization-interest-options";
 import type { OrganizationType } from "~/features/organization-onboarding/model/organization-types";
 import {
   AccountsApiConfigurationError,
@@ -9,6 +10,10 @@ export type RegistrationRequest = {
   organizationName: string;
   organizationType: OrganizationType;
   registrationNumber: string;
+  organizationEmailAddress: string;
+  organizationPhoneNumber: string | null;
+  websiteUrl: string | null;
+  productInterest: ProductInterest;
   countryCode: "NG";
   administratorName: string;
   emailAddress: string;
@@ -18,6 +23,7 @@ export type RegistrationRequest = {
 export type RegistrationResponse = {
   applicationId: string;
   status: "PENDING_REVIEW";
+  emailVerificationRequired: true;
 };
 
 export type SessionRequest = {
@@ -44,6 +50,29 @@ export type ApplicationStatus = {
   reviewNote?: string | null;
 };
 
+export type OrganizationRegistrationStatus = ApplicationStatus["status"];
+
+export type EvidenceRequestStatus = "REQUESTED" | "SUBMITTED" | "ACCEPTED";
+
+export type EvidenceDocument = {
+  documentId: string;
+  originalFilename: string;
+  mediaType: "application/pdf" | "image/jpeg" | "image/png";
+  sizeBytes: number;
+  uploadedAt: string;
+};
+
+export type EvidenceRequest = {
+  requestId: string;
+  applicationId: string;
+  title: string;
+  instructions: string;
+  status: EvidenceRequestStatus;
+  reviewerNote: string | null;
+  createdAt: string;
+  documents: EvidenceDocument[];
+};
+
 const applicationStatuses = new Set<string>([
   "PENDING_REVIEW",
   "CHANGES_REQUESTED",
@@ -59,7 +88,8 @@ function isRegistrationResponse(value: unknown): value is RegistrationResponse {
   return (
     isRecord(value) &&
     typeof value.applicationId === "string" &&
-    value.status === "PENDING_REVIEW"
+    value.status === "PENDING_REVIEW" &&
+    value.emailVerificationRequired === true
   );
 }
 
@@ -90,6 +120,36 @@ function isApplicationStatus(value: unknown): value is ApplicationStatus {
     (value.reviewNote === undefined ||
       value.reviewNote === null ||
       typeof value.reviewNote === "string")
+  );
+}
+
+function isEvidenceDocument(value: unknown): value is EvidenceDocument {
+  return (
+    isRecord(value) &&
+    typeof value.documentId === "string" &&
+    typeof value.originalFilename === "string" &&
+    (value.mediaType === "application/pdf" ||
+      value.mediaType === "image/jpeg" ||
+      value.mediaType === "image/png") &&
+    typeof value.sizeBytes === "number" &&
+    typeof value.uploadedAt === "string"
+  );
+}
+
+function isEvidenceRequest(value: unknown): value is EvidenceRequest {
+  return (
+    isRecord(value) &&
+    typeof value.requestId === "string" &&
+    typeof value.applicationId === "string" &&
+    typeof value.title === "string" &&
+    typeof value.instructions === "string" &&
+    (value.status === "REQUESTED" ||
+      value.status === "SUBMITTED" ||
+      value.status === "ACCEPTED") &&
+    (value.reviewerNote == null || typeof value.reviewerNote === "string") &&
+    typeof value.createdAt === "string" &&
+    Array.isArray(value.documents) &&
+    value.documents.every(isEvidenceDocument)
   );
 }
 
@@ -125,6 +185,13 @@ export class AccountsAuthorizationError extends Error {
       cause,
     });
     this.name = "AccountsAuthorizationError";
+  }
+}
+
+export class EmailVerificationRequiredError extends Error {
+  constructor(cause: unknown) {
+    super("Confirm your email address before signing in.", { cause });
+    this.name = "EmailVerificationRequiredError";
   }
 }
 
@@ -209,10 +276,56 @@ export async function createSession(
     if (error.response?.status === 401) {
       throw new Error("Email or password is incorrect.", { cause: error });
     }
+    if (
+      error.response?.status === 403 &&
+      isRecord(error.response.data) &&
+      error.response.data.code === "EMAIL_VERIFICATION_REQUIRED"
+    ) {
+      throw new EmailVerificationRequiredError(error);
+    }
     throw new Error(
       isConnectionFailure(error)
         ? getConnectionFailureMessage(error)
         : "We could not sign you in. Try again shortly.",
+      { cause: error }
+    );
+  }
+}
+
+export async function confirmEmailAddress(token: string): Promise<void> {
+  try {
+    await getAccountsHttpClient().post(
+      "/api/v1/auth/email-verification/confirm",
+      { token }
+    );
+  } catch (error) {
+    if (error instanceof AccountsApiConfigurationError) throw error;
+    if (!isAxiosError(error)) throw error;
+    throw new Error(
+      getResponseMessage(error.response?.data) ??
+        (isConnectionFailure(error)
+          ? getConnectionFailureMessage(error)
+          : "This confirmation link is invalid or has expired. Request a new one."),
+      { cause: error }
+    );
+  }
+}
+
+export async function resendEmailVerification(
+  emailAddress: string
+): Promise<void> {
+  try {
+    await getAccountsHttpClient().post(
+      "/api/v1/auth/email-verification/resend",
+      { emailAddress }
+    );
+  } catch (error) {
+    if (error instanceof AccountsApiConfigurationError) throw error;
+    if (!isAxiosError(error)) throw error;
+    throw new Error(
+      isConnectionFailure(error)
+        ? getConnectionFailureMessage(error)
+        : "We could not request another confirmation email. Try again shortly.",
       { cause: error }
     );
   }
@@ -246,6 +359,84 @@ export async function getMyApplication(
       isConnectionFailure(error)
         ? getConnectionFailureMessage(error)
         : "We could not load the organisation application. Try again.",
+      { cause: error }
+    );
+  }
+}
+
+export async function getMyEvidenceRequests(
+  session: SessionResponse
+): Promise<EvidenceRequest[]> {
+  return getEvidenceRequests(
+    session,
+    "/api/v1/organization-registrations/mine/evidence-requests"
+  );
+}
+
+async function getEvidenceRequests(
+  session: SessionResponse,
+  endpoint: string
+): Promise<EvidenceRequest[]> {
+  try {
+    const response = await getAccountsHttpClient().get<unknown>(endpoint, {
+      headers: { Authorization: `${session.tokenType} ${session.accessToken}` },
+    });
+    if (
+      !Array.isArray(response.data) ||
+      !response.data.every(isEvidenceRequest)
+    ) {
+      throw new Error(
+        "The evidence request service returned an unexpected response."
+      );
+    }
+    return response.data;
+  } catch (error) {
+    if (error instanceof AccountsApiConfigurationError) throw error;
+    if (!isAxiosError(error)) throw error;
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      throw new AccountsAuthorizationError(error);
+    }
+    throw new Error(
+      isConnectionFailure(error)
+        ? getConnectionFailureMessage(error)
+        : (getResponseMessage(error.response?.data) ??
+            "We could not load evidence requests. Try again."),
+      { cause: error }
+    );
+  }
+}
+
+export async function submitEvidenceDocument(
+  session: SessionResponse,
+  requestId: string,
+  file: File
+): Promise<EvidenceRequest> {
+  const formData = new FormData();
+  formData.append("file", file);
+  try {
+    const response = await getAccountsHttpClient().post<unknown>(
+      `/api/v1/organization-registrations/mine/evidence-requests/${requestId}/documents`,
+      formData,
+      {
+        headers: {
+          Authorization: `${session.tokenType} ${session.accessToken}`,
+        },
+      }
+    );
+    if (!isEvidenceRequest(response.data)) {
+      throw new Error(
+        "The evidence upload service returned an unexpected response."
+      );
+    }
+    return response.data;
+  } catch (error) {
+    if (error instanceof AccountsApiConfigurationError) throw error;
+    if (!isAxiosError(error)) throw error;
+    throw new Error(
+      getResponseMessage(error.response?.data) ??
+        (isConnectionFailure(error)
+          ? getConnectionFailureMessage(error)
+          : "We could not upload this file. Check the file and try again."),
       { cause: error }
     );
   }
