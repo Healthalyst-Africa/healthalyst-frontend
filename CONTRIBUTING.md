@@ -24,13 +24,18 @@ Requirements: Node.js 22.13 or newer and pnpm 10.27.0. From the repository root:
 
 ```sh
 pnpm install --frozen-lockfile
+cp -n apps/organization/.env.example apps/organization/.env.local
 cp -n apps/health-schedule/.env.example apps/health-schedule/.env.local
-pnpm --filter @healthalyst/health-schedule dev
+pnpm --filter @healthalyst/organization --filter @healthalyst/health-schedule dev
 ```
 
-HealthSchedule reads `NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL` to contact the
-HealthAlyst Platform API; any backend that implements its documented contract
-can be used. The super-admin portal still reads `NEXT_PUBLIC_HEALTHALYST_API_URL`.
+The organisation app (`apps/organization`, port 5173) holds registration,
+email confirmation and sign-in for every HealthAlyst product. It reads
+`NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL` to contact the HealthAlyst Platform
+API; any backend that implements its documented contract can be used. Product
+apps such as HealthSchedule (port 5174) link to it through
+`NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL` instead of building their own
+onboarding. The super-admin portal still reads `NEXT_PUBLIC_HEALTHALYST_API_URL`.
 This value is public configuration, not a credential. Never put secrets in
 `NEXT_PUBLIC_*` variables. The backend must separately allow the frontend origin.
 

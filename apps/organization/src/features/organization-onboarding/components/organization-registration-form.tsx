@@ -25,6 +25,7 @@ import {
   clearRegistrationFieldErrors,
   registrationSchema,
 } from "~/features/organization-onboarding/model/organization-registration-schema";
+import type { OrganizationProduct } from "~/features/organization-onboarding/model/organization-registration-options";
 import {
   focusFirstInvalidField,
   parseFormData,
@@ -46,7 +47,12 @@ type PendingStepFocus =
  * values at the end. Each step is checked before moving on, and the whole
  * schema is checked again on submission.
  */
-export default function OrganizationRegistrationForm() {
+export default function OrganizationRegistrationForm({
+  initialProducts = [],
+}: {
+  /** Products to pre-select, for example from the product app a visitor came from. */
+  initialProducts?: readonly OrganizationProduct[];
+}) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -258,6 +264,7 @@ export default function OrganizationRegistrationForm() {
                         .map((section) => section.identifier)
                         .join(" ")}
                       definition={definition}
+                      defaultSelections={{ products: initialProducts }}
                       errors={fieldErrors}
                       disabled={isSubmitting}
                       onFieldChange={handleFieldChange}

@@ -27,6 +27,8 @@ type MultiSelectProperties = {
   name: string;
   options: readonly FormOption[];
   placeholder: string;
+  /** Options chosen when the field first appears. */
+  defaultValues?: readonly string[];
   searchPlaceholder?: string;
   emptyMessage?: string;
   maximumSelections?: number;
@@ -46,6 +48,7 @@ export function MultiSelect({
   name,
   options,
   placeholder,
+  defaultValues = [],
   searchPlaceholder = "Search",
   emptyMessage = "No matching options.",
   maximumSelections,
@@ -56,7 +59,11 @@ export function MultiSelect({
 }: MultiSelectProperties) {
   const [isOpen, setIsOpen] = useState(false);
   const commandReference = useRef<HTMLDivElement>(null);
-  const [selectedValues, setSelectedValues] = useState<string[]>([]);
+  const [selectedValues, setSelectedValues] = useState<string[]>(() =>
+    options
+      .map((option) => option.value)
+      .filter((value) => defaultValues.includes(value))
+  );
   const selectedOptions = options.filter((option) =>
     selectedValues.includes(option.value)
   );

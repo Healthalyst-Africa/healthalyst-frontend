@@ -120,3 +120,86 @@ export async function signOut(accessToken: string): Promise<void> {
     throw toPlatformApiError(error, "We could not sign you out. Try again.");
   }
 }
+
+const authenticatorSetupSchema = z.object({
+  factorId: z.string().min(1),
+  secret: z.string().min(1),
+  otpauthUrl: z.string().startsWith("otpauth://"),
+});
+
+/** The new authenticator to scan: its QR address and secret. */
+export type AuthenticatorSetup = z.infer<typeof authenticatorSetupSchema>;
+
+/**
+ * `POST /v1/auth/mfa/totp/setup` with the `enrolmentToken` from email
+ * confirmation or the password step. `401 AUTH_TOKEN_EXPIRED` when that
+ * token has run out; `AUTH_TOKEN_INVALID` also when an authenticator is
+ * already confirmed.
+ */
+export async function startAuthenticatorSetup(
+  enrolmentToken: string
+): Promise<AuthenticatorSetup> {
+  try {
+    const response = await getPlatformHttpClient().post<unknown>(
+      "/v1/auth/mfa/totp/setup",
+      { enrolmentToken }
+    );
+    const setup = authenticatorSetupSchema.safeParse(response.data);
+    if (!setup.success) {
+      throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
+    }
+    return setup.data;
+  } catch (error) {
+    throw toPlatformApiError(
+      error,
+      "We could not start setting up your authenticator app. Try again."
+    );
+  }
+}
+
+const recoveryCodesSchema = z.array(z.string().min(1)).min(1);
+
+const authenticatorConfirmationSchema = z.union([
+  sessionSchema.extend({ recoveryCodes: recoveryCodesSchema }),
+  z.object({ recoveryCodes: recoveryCodesSchema }),
+]);
+
+export type AuthenticatorConfirmation = {
+  /** Shown once; each signs in once when the authenticator is unavailable. */
+  recoveryCodes: string[];
+  /** Present when enrolling with an `enrolmentToken`: the user is signed in. */
+  session: PlatformSession | null;
+};
+
+/**
+ * `POST /v1/auth/mfa/totp/confirm` with the first code from the newly added
+ * authenticator. With an `enrolmentToken` the answer is a full session plus
+ * the recovery codes. `401 AUTH_MFA_INVALID` for a wrong code;
+ * `409 MFA_ALREADY_CONFIRMED` when this account already has one.
+ */
+export async function confirmAuthenticator(confirmation: {
+  enrolmentToken: string;
+  factorId: string;
+  code: string;
+}): Promise<AuthenticatorConfirmation> {
+  try {
+    const response = await getPlatformHttpClient().post<unknown>(
+      "/v1/auth/mfa/totp/confirm",
+      confirmation
+    );
+    const confirmed = authenticatorConfirmationSchema.safeParse(response.data);
+    if (!confirmed.success) {
+      throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
+    }
+    const { recoveryCodes, ...rest } = confirmed.data;
+    const session = sessionSchema.safeParse(rest);
+    return {
+      recoveryCodes,
+      session: session.success ? session.data : null,
+    };
+  } catch (error) {
+    throw toPlatformApiError(error, "We could not check the code. Try again.", {
+      code: "code",
+    });
+  }
+}

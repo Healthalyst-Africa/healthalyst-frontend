@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { Badge } from "@healthalyst/ui/components/badge";
 import { Card, CardContent } from "@healthalyst/ui/components/card";
 import {
   Field,
@@ -14,6 +13,8 @@ import {
 import { Input } from "@healthalyst/ui/components/input";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import { PlatformApiError } from "~/features/organization-onboarding/api/platform-api-error";
+import AuthenticatorEnrolment from "~/features/organization-onboarding/components/authenticator-enrolment";
+import SignedInSummary from "~/features/organization-onboarding/components/signed-in-summary";
 import type {
   PlatformSession,
   SignInMethod,
@@ -21,7 +22,6 @@ import type {
 import {
   usePasswordSignInMutation,
   useSignInCodeMutation,
-  useSignOutMutation,
 } from "~/features/organization-onboarding/hooks/use-sign-in";
 import {
   authenticatorCodeSchema,
@@ -43,27 +43,8 @@ type SignInStage =
       methods: readonly SignInMethod[];
       method: SignInMethod;
     }
-  | { kind: "enrolment-required" }
+  | { kind: "enrolment-required"; enrolmentToken: string }
   | { kind: "signed-in"; session: PlatformSession };
-
-/** Organisation and application statuses from the Platform API. */
-const STATUS_LABELS: Record<string, string> = {
-  DRAFT: "Draft",
-  PENDING_VERIFICATION: "Waiting for verification",
-  UNDER_REVIEW: "Under review",
-  CHANGES_REQUESTED: "Changes requested",
-  ACTIVE: "Approved",
-  SUSPENDED: "Suspended",
-  REJECTED: "Not approved",
-  DEACTIVATED: "Deactivated",
-};
-
-function describeStatus(status: string): string {
-  return (
-    STATUS_LABELS[status] ??
-    status.charAt(0) + status.slice(1).toLowerCase().replace(/_/g, " ")
-  );
-}
 
 function ApiErrorMessage({ error }: { error: Error }) {
   return (
@@ -104,7 +85,6 @@ export default function SignIn() {
   const hasChangedStageReference = useRef(false);
   const passwordMutation = usePasswordSignInMutation();
   const codeMutation = useSignInCodeMutation();
-  const signOutMutation = useSignOutMutation();
 
   useEffect(() => {
     // Move focus to the new heading when the stage changes, not on load.
@@ -140,7 +120,10 @@ export default function SignIn() {
     passwordMutation.mutate(validationResult.data, {
       onSuccess: (passwordStep) => {
         if (passwordStep.status === "MFA_ENROLMENT_REQUIRED") {
-          showStage({ kind: "enrolment-required" });
+          showStage({
+            kind: "enrolment-required",
+            enrolmentToken: passwordStep.enrolmentToken,
+          });
           return;
         }
         const method = passwordStep.methods.includes("totp")
@@ -194,33 +177,41 @@ export default function SignIn() {
     );
   }
 
-  function handleSignOut() {
-    if (stage.kind !== "signed-in") return;
-    signOutMutation.mutate(stage.session.accessToken, {
-      // The token is dropped either way; it expires on its own soon after.
-      onSettled: () => showStage({ kind: "password" }, "You have signed out."),
-    });
+  if (stage.kind === "enrolment-required") {
+    return (
+      <AuthenticatorEnrolment
+        enrolmentToken={stage.enrolmentToken}
+        onEnrolled={(confirmation) =>
+          confirmation.session
+            ? showStage({ kind: "signed-in", session: confirmation.session })
+            : showStage(
+                { kind: "password" },
+                "Your authenticator app is set up. Sign in to continue."
+              )
+        }
+      />
+    );
   }
 
-  const heading =
-    stage.kind === "code"
-      ? "Enter your sign-in code"
-      : stage.kind === "enrolment-required"
-        ? "Set up an authenticator app"
-        : stage.kind === "signed-in"
-          ? `Welcome, ${stage.session.user.firstName}`
-          : "Sign in";
+  if (stage.kind === "signed-in") {
+    return (
+      <SignedInSummary
+        session={stage.session}
+        onSignedOut={() =>
+          showStage({ kind: "password" }, "You have signed out.")
+        }
+      />
+    );
+  }
+
+  const heading = stage.kind === "code" ? "Enter your sign-in code" : "Sign in";
 
   const introduction =
     stage.kind === "code"
       ? stage.method === "totp"
         ? "Open your authenticator app and enter the 6-digit code for HealthAlyst."
         : "Enter one of the recovery codes you saved when you set up your authenticator app. Each code works once."
-      : stage.kind === "enrolment-required"
-        ? "Your password is correct, but this account has no authenticator app yet."
-        : stage.kind === "signed-in"
-          ? "You are signed in to HealthAlyst."
-          : "Use the administrator email address and password from registration.";
+      : "Use the administrator email address and password from registration.";
 
   return (
     <div className="flex flex-col gap-6">
@@ -421,80 +412,6 @@ export default function SignIn() {
                 </ActionButton>
               </div>
             </form>
-          )}
-
-          {stage.kind === "enrolment-required" && (
-            <>
-              <p className="text-sm leading-6 text-muted-foreground">
-                Every HealthAlyst administrator account is protected with a code
-                from an authenticator app. Authenticator set-up is not available
-                in this version of HealthSchedule yet.
-              </p>
-              <ActionButton
-                className="w-full"
-                size="large"
-                type="button"
-                variant="outline"
-                onClick={() => showStage({ kind: "password" })}
-              >
-                Back to sign in
-              </ActionButton>
-            </>
-          )}
-
-          {stage.kind === "signed-in" && (
-            <>
-              <div className="flex flex-col gap-1">
-                <p className="text-sm font-medium">
-                  {stage.session.user.firstName} {stage.session.user.lastName}
-                </p>
-                {stage.session.user.email && (
-                  <p className="break-all text-sm text-muted-foreground">
-                    {stage.session.user.email}
-                  </p>
-                )}
-              </div>
-              {stage.session.memberships.length > 0 ? (
-                <section aria-labelledby="sign-in-organizations-heading">
-                  <h3
-                    id="sign-in-organizations-heading"
-                    className="text-sm font-semibold"
-                  >
-                    Your organisations
-                  </h3>
-                  <ul className="mt-3 flex flex-col divide-y divide-border rounded-lg border border-border">
-                    {stage.session.memberships.map((membership) => (
-                      <li
-                        key={membership.membershipId}
-                        className="flex items-center justify-between gap-3 px-4 py-3"
-                      >
-                        <span className="text-sm font-medium">
-                          {membership.organization.name}
-                        </span>
-                        <Badge className="shrink-0" variant="secondary">
-                          {describeStatus(membership.organization.status)}
-                        </Badge>
-                      </li>
-                    ))}
-                  </ul>
-                </section>
-              ) : (
-                <p className="text-sm text-muted-foreground">
-                  This account does not belong to an organisation yet.
-                </p>
-              )}
-              <ActionButton
-                className="w-full"
-                size="large"
-                type="button"
-                variant="outline"
-                isLoading={signOutMutation.isPending}
-                loadingText="Signing out"
-                onClick={handleSignOut}
-              >
-                Sign out
-              </ActionButton>
-            </>
           )}
         </CardContent>
       </Card>

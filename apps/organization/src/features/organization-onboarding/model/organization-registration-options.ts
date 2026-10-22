@@ -38,6 +38,25 @@ export const productOptions = [
 
 export type OrganizationProduct = (typeof productOptions)[number]["value"];
 
+/**
+ * Products named in a link from a product app, such as
+ * `?product=healthschedule` or `?product=labconnect,pharmadesk`, for
+ * pre-selecting them in registration. Unknown names are ignored.
+ */
+export function readProductsFromQuery(
+  queryValue: string | readonly string[] | undefined
+): OrganizationProduct[] {
+  const requestedNames = (
+    typeof queryValue === "string" ? [queryValue] : (queryValue ?? [])
+  )
+    .flatMap((value) => value.split(","))
+    .map((value) => value.trim().toUpperCase());
+
+  return productOptions
+    .map((option) => option.value)
+    .filter((product) => requestedNames.includes(product));
+}
+
 /** The 36 states and the Federal Capital Territory, by Platform state code. */
 export const nigerianStateOptions = [
   { value: "AB", label: "Abia" },

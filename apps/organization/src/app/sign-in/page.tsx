@@ -17,12 +17,12 @@ export default function SignInPage() {
       footer={
         <div className="flex flex-col items-center gap-3">
           <p className="text-sm text-muted-foreground">
-            New to HealthSchedule?{" "}
+            New to HealthAlyst?{" "}
             <Link
               className="font-semibold text-primary underline underline-offset-4"
               href="/"
             >
-              Register your facility
+              Register your organisation
             </Link>
           </p>
         </div>

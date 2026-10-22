@@ -30,6 +30,8 @@ import { Textarea } from "@healthalyst/ui/components/textarea";
 
 type DynamicFormFieldsProperties = {
   definition: FormDefinition;
+  /** Choices already made in multi-select fields, by field name. */
+  defaultSelections?: Readonly<Record<string, readonly string[]>>;
   errors?: Readonly<Record<string, string>>;
   disabled?: boolean;
   onFieldChange?: (fieldName: string) => void;
@@ -69,12 +71,14 @@ function DynamicFormField({
   definition,
   field,
   error,
+  defaultSelection,
   disabled,
   onFieldChange,
 }: {
   definition: FormDefinition;
   field: FormFieldDefinition;
   error?: string;
+  defaultSelection?: readonly string[];
   disabled: boolean;
   onFieldChange?: (fieldName: string) => void;
 }) {
@@ -230,6 +234,7 @@ function DynamicFormField({
           name={field.name}
           options={field.options}
           placeholder={field.placeholder}
+          defaultValues={defaultSelection}
           maximumSelections={field.maximumSelections}
           disabled={disabled}
           invalid={Boolean(error)}
@@ -278,6 +283,7 @@ function DynamicFormField({
 
 export function DynamicFormFields({
   definition,
+  defaultSelections = {},
   errors = {},
   disabled = false,
   onFieldChange,
@@ -299,6 +305,7 @@ export function DynamicFormFields({
                 definition={definition}
                 field={field}
                 error={errors[field.name]}
+                defaultSelection={defaultSelections[field.name]}
                 disabled={disabled}
                 onFieldChange={onFieldChange}
               />

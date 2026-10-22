@@ -1,26 +1,23 @@
-# HealthSchedule client structure
+# HealthSchedule
+
+Patient scheduling and clinical operations for hospitals and clinics, as one
+HealthAlyst product. It runs on port 5174 in development.
+
+HealthSchedule has no registration or sign-in screens of its own. Every
+HealthAlyst product uses the shared organisation app (`apps/organization`)
+for those, so an organisation registers once and can use several products.
+HealthSchedule links there through `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL`,
+with `?product=healthschedule` so registration pre-selects HealthSchedule.
+
+## Structure
 
 ```text
 src/
-  app/                         Next.js route entry points, root layout, styles
+  app/                         Route entry points, root layout, styles
   components/ui/               App-wide branded wrappers
-  features/
-    organization-onboarding/
-      api/                     Accounts HTTP client, endpoint service, query keys
-      components/              Registration and application status screens
-      hooks/                   TanStack Query hooks for the onboarding flow
-      model/                   Organisation options and Zod form schemas
-      index.ts                 Screens exposed to routes
-  infrastructure/query/        App-wide TanStack Query client and provider
-  shared/forms/                Form helpers used by more than one workflow
+  infrastructure/
+    organization-app/          Links into the organisation app
 ```
 
-Routes import feature screens through `index.ts`. Feature components use their
-own hooks and model; hooks call feature API services. API services own endpoint
-paths, transport errors, and response validation. The root layout installs the
-application query provider.
-
-Keep new product workflows in their own `features/<workflow>` folder. Use
-`shared` only for code reused by multiple workflows in this app, and `packages`
-for stable, product-neutral capabilities shared across applications. Keep
-framework configuration and public assets at the app root, as Next.js expects.
+Keep product workflows in their own `features/<workflow>` folder, and use
+`packages` for stable, product-neutral capabilities shared across applications.

@@ -1,5 +1,7 @@
 "use client";
 
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { EmailSentIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
@@ -11,6 +13,9 @@ import {
 } from "@healthalyst/ui/components/field";
 import { Input } from "@healthalyst/ui/components/input";
 import { PlatformApiError } from "~/features/organization-onboarding/api/platform-api-error";
+import type { PlatformSession } from "~/features/organization-onboarding/api/platform-authentication-service";
+import AuthenticatorEnrolment from "~/features/organization-onboarding/components/authenticator-enrolment";
+import SignedInSummary from "~/features/organization-onboarding/components/signed-in-summary";
 import {
   useEmailVerificationMutation,
   useEmailVerificationResendMutation,
@@ -119,6 +124,9 @@ export default function EmailVerification() {
   >(undefined);
   const headingReference = useRef<HTMLHeadingElement>(null);
   const verificationMutation = useEmailVerificationMutation();
+  const router = useRouter();
+  const [session, setSession] = useState<PlatformSession | null>(null);
+  const [hasFinishedEnrolment, setHasFinishedEnrolment] = useState(false);
   const verificationError = verificationMutation.error;
   const isLinkExpired =
     verificationError instanceof PlatformApiError &&
@@ -139,6 +147,28 @@ export default function EmailVerification() {
       headingReference.current?.focus();
     }
   }, [verificationMutation.isSuccess]);
+
+  if (session) {
+    return (
+      <SignedInSummary
+        session={session}
+        onSignedOut={() => router.push("/sign-in")}
+      />
+    );
+  }
+
+  const enrolmentToken = verificationMutation.data?.enrolmentToken;
+  if (enrolmentToken && !hasFinishedEnrolment) {
+    return (
+      <AuthenticatorEnrolment
+        enrolmentToken={enrolmentToken}
+        onEnrolled={(confirmation) => {
+          setHasFinishedEnrolment(true);
+          setSession(confirmation.session);
+        }}
+      />
+    );
+  }
 
   const heading = verificationMutation.isSuccess
     ? "Email address confirmed"
@@ -181,15 +211,16 @@ export default function EmailVerification() {
               Reading your confirmation link…
             </p>
           ) : verificationMutation.isSuccess ? (
-            <div className="flex flex-col gap-2">
-              <p className="text-sm font-medium">
-                Next: set up an authenticator app
-              </p>
+            <div className="flex flex-col gap-3">
               <p className="text-sm leading-6 text-muted-foreground">
-                The administrator account is protected with a code from an
-                authenticator app. Authenticator set-up is not available in this
-                version of HealthSchedule yet.
+                Sign in with your email address and password to continue.
               </p>
+              <Link
+                className="inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                href="/sign-in"
+              >
+                Go to sign in
+              </Link>
             </div>
           ) : isLinkExpired || verificationToken === null ? (
             <ResendConfirmationForm />

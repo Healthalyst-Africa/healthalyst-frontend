@@ -3,7 +3,6 @@ import type React from "react";
 import { Inter, Young_Serif } from "next/font/google";
 import "@healthalyst/ui/styles.css";
 import "./globals.css";
-import { ApplicationQueryProvider } from "~/infrastructure/query/query-provider";
 
 // Young Serif for headings. It has one weight, already heavy, so headings use
 // `font-normal`.
@@ -23,9 +22,9 @@ const sansSerifFont = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "HealthAlyst | Organisation onboarding",
+  title: "HealthSchedule | HealthAlyst",
   description:
-    "Register your healthcare organisation and request access to HealthSchedule.",
+    "Patient scheduling and clinical operations for hospitals and clinics, part of HealthAlyst.",
   robots: { index: false, follow: false },
 };
 
@@ -37,9 +36,7 @@ export default function RootLayout({
       lang="en"
       className={`${serifFont.variable} ${sansSerifFont.variable}`}
     >
-      <body className={sansSerifFont.className}>
-        <ApplicationQueryProvider>{children}</ApplicationQueryProvider>
-      </body>
+      <body className={sansSerifFont.className}>{children}</body>
     </html>
   );
 }
