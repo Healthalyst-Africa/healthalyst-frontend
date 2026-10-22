@@ -1,7 +1,12 @@
 {
   "$schema": "https://turbo.build/schema.json",
   "globalDependencies": [".env*"],
-  "globalEnv": ["NODE_ENV", "NEXT_PUBLIC_HEALTHALYST_API_URL"],
+  "globalEnv": [
+    "NODE_ENV",
+    "NEXT_PUBLIC_HEALTHALYST_API_URL",
+    "NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL",
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY"
+  ],
   "tasks": {
     "build": {
       "dependsOn": ["^build"],

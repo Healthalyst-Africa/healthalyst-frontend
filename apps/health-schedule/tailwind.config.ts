@@ -47,6 +47,7 @@ const tailwindConfiguration = {
         gold: {
           DEFAULT: "rgb(var(--brand-gold) / <alpha-value>)",
           light: "rgb(var(--brand-gold-light) / <alpha-value>)",
+          subtle: "rgb(var(--brand-gold-subtle) / <alpha-value>)",
         },
         "accent-on-primary":
           "rgb(var(--brand-accent-on-primary) / <alpha-value>)",

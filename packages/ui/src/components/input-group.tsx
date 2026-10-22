@@ -10,7 +10,7 @@ function InputGroup({ className, ...properties }: ComponentProps<"div">) {
       role="group"
       data-slot="input-group"
       className={cn(
-        "group/input-group relative flex h-11 w-full min-w-0 items-center rounded-md border border-input bg-card shadow-sm transition-colors",
+        "group/input-group relative flex h-11 w-full min-w-0 items-center rounded-md border border-input/35 bg-card shadow-sm transition-colors hover:border-input",
         "has-[[data-slot=input-group-control]:focus-visible]:ring-1 has-[[data-slot=input-group-control]:focus-visible]:ring-ring",
         "has-[[data-slot=input-group-control][aria-invalid=true]]:border-destructive",
         className

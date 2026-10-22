@@ -28,7 +28,9 @@ cp -n apps/health-schedule/.env.example apps/health-schedule/.env.local
 pnpm --filter @healthalyst/health-schedule dev
 ```
 
-The portal reads `NEXT_PUBLIC_HEALTHALYST_API_URL` to contact the standalone API.
+HealthSchedule reads `NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL` to contact the
+HealthAlyst Platform API; any backend that implements its documented contract
+can be used. The super-admin portal still reads `NEXT_PUBLIC_HEALTHALYST_API_URL`.
 This value is public configuration, not a credential. Never put secrets in
 `NEXT_PUBLIC_*` variables. The backend must separately allow the frontend origin.
 

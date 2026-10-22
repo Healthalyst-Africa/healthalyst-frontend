@@ -1,22 +1,45 @@
 import { z } from "zod";
-import type { RegistrationRequest } from "~/features/organization-onboarding/api/accounts-service";
-import { productInterestOptions } from "~/features/organization-onboarding/model/organization-interest-options";
-import { organizationTypeOptions } from "~/features/organization-onboarding/model/organization-types";
+import type { PlatformRegistrationDetails } from "~/features/organization-onboarding/api/platform-onboarding-service";
+import {
+  nigerianStateOptions,
+  organizationTypeOptions,
+  productOptions,
+} from "~/features/organization-onboarding/model/organization-registration-options";
 
-export const ORGANIZATION_REGISTRATION_LIMITS = {
-  organizationName: 160,
-  registrationNumber: 64,
-  organizationEmailAddress: 254,
-  organizationPhoneNumber: 40,
-  websiteUrl: 2048,
-  productInterest: 160,
-  administratorNamePart: 60,
-  administratorName: 120,
+/** Field limits from the Platform API's `RegistrationBody`. */
+export const REGISTRATION_LIMITS = {
+  organizationName: 200,
   emailAddress: 254,
-  passwordMinimum: 12,
-  passwordMaximum: 72,
-  passwordByteMaximum: 72,
+  addressLine: 300,
+  city: 100,
+  localGovernmentArea: 100,
+  administratorNamePart: 100,
+  passwordMinimum: 10,
+  passwordMaximum: 128,
+  productsMaximum: 3,
 } as const;
+
+/** E.164, as the Platform API requires: a plus sign and 8 to 15 digits. */
+const INTERNATIONAL_PHONE_PATTERN = /^\+[1-9]\d{7,14}$/;
+
+/** Corporate Affairs Commission numbers, optionally prefixed RC, BN or IT. */
+const CORPORATE_AFFAIRS_COMMISSION_NUMBER_PATTERN = /^(RC|BN|IT)?\s?\d{4,8}$/i;
+
+/**
+ * Accepts a Nigerian number as people usually write it and returns it in
+ * E.164: `0803 123 4567` and `234 803 123 4567` both become `+2348031234567`.
+ * Other international numbers must already start with a plus sign.
+ */
+export function toInternationalPhoneNumber(phoneNumber: string): string {
+  const compactNumber = phoneNumber.replace(/[\s().-]/g, "");
+  if (/^0\d{10}$/.test(compactNumber)) {
+    return `+234${compactNumber.slice(1)}`;
+  }
+  if (/^234\d{10}$/.test(compactNumber)) {
+    return `+${compactNumber}`;
+  }
+  return compactNumber;
+}
 
 const requiredText = (label: string, maximumLength: number) =>
   z
@@ -27,132 +50,152 @@ const requiredText = (label: string, maximumLength: number) =>
       error: `${label} must be no more than ${maximumLength} characters.`,
     });
 
-const requiredPassword = (label: string) =>
+const optionalText = (label: string, maximumLength: number) =>
   z
-    .string({ error: `${label} is required.` })
-    .min(1, { error: `${label} is required.` })
-    .min(ORGANIZATION_REGISTRATION_LIMITS.passwordMinimum, {
-      error: `${label} must be at least ${ORGANIZATION_REGISTRATION_LIMITS.passwordMinimum} characters.`,
-    })
-    .max(ORGANIZATION_REGISTRATION_LIMITS.passwordMaximum, {
-      error: `${label} must be no more than ${ORGANIZATION_REGISTRATION_LIMITS.passwordMaximum} characters.`,
-    })
+    .string()
+    .trim()
+    .max(maximumLength, {
+      error: `${label} must be no more than ${maximumLength} characters.`,
+    });
+
+const phoneNumber = (label: string) =>
+  z
+    .string()
+    .trim()
+    .transform(toInternationalPhoneNumber)
     .refine(
-      (value) =>
-        new TextEncoder().encode(value).length <=
-        ORGANIZATION_REGISTRATION_LIMITS.passwordByteMaximum,
+      (internationalNumber) =>
+        INTERNATIONAL_PHONE_PATTERN.test(internationalNumber),
       {
-        error: `${label} must be no more than ${ORGANIZATION_REGISTRATION_LIMITS.passwordByteMaximum} UTF-8 bytes.`,
+        error: `Enter ${label} with its country code, for example +2348031234567 or 08031234567.`,
       }
     );
 
-const optionalWebsiteUrl = z
-  .string()
-  .trim()
-  .max(ORGANIZATION_REGISTRATION_LIMITS.websiteUrl, {
-    error: `Website URL must be no more than ${ORGANIZATION_REGISTRATION_LIMITS.websiteUrl} characters.`,
-  })
-  .refine(
-    (websiteUrl) => {
-      if (websiteUrl === "") {
-        return true;
-      }
+const password = (label: string) =>
+  z
+    .string({ error: `${label} is required.` })
+    .min(1, { error: `${label} is required.` })
+    .min(REGISTRATION_LIMITS.passwordMinimum, {
+      error: `${label} must be at least ${REGISTRATION_LIMITS.passwordMinimum} characters.`,
+    })
+    .max(REGISTRATION_LIMITS.passwordMaximum, {
+      error: `${label} must be no more than ${REGISTRATION_LIMITS.passwordMaximum} characters.`,
+    });
 
-      try {
-        const parsedWebsiteUrl = new URL(websiteUrl);
-
-        return (
-          (parsedWebsiteUrl.protocol === "https:" ||
-            parsedWebsiteUrl.protocol === "http:") &&
-          parsedWebsiteUrl.hostname.length > 0
-        );
-      } catch {
-        return false;
-      }
-    },
-    {
-      error: "Enter a valid website URL starting with http:// or https://.",
-    }
+const emailAddress = (label: string) =>
+  requiredText(label, REGISTRATION_LIMITS.emailAddress).pipe(
+    z.email({ error: `Enter a valid ${label.toLowerCase()}.` })
   );
 
-export const organizationRegistrationSchema = z
+const valuesOf = <Option extends { value: string }>(
+  options: readonly Option[]
+) =>
+  options.map((option) => option.value) as [
+    Option["value"],
+    ...Option["value"][],
+  ];
+
+/** Unchecked boxes submit nothing, one box a string, several an array. */
+const checkedValues = (value: unknown): unknown =>
+  value === undefined || value === ""
+    ? []
+    : Array.isArray(value)
+      ? value
+      : [value];
+
+export const registrationSchema = z
   .object({
-    organizationName: requiredText(
+    legalName: requiredText(
       "Registered organisation name",
-      ORGANIZATION_REGISTRATION_LIMITS.organizationName
+      REGISTRATION_LIMITS.organizationName
     ),
-    organizationType: z.enum(
-      organizationTypeOptions.map(
-        (organizationTypeOption) => organizationTypeOption.value
-      ),
-      {
-        error: "Select a valid organisation type.",
-      }
+    tradingName: optionalText(
+      "Trading name",
+      REGISTRATION_LIMITS.organizationName
     ),
-    registrationNumber: requiredText(
-      "Registration number",
-      ORGANIZATION_REGISTRATION_LIMITS.registrationNumber
-    ),
-    organizationEmailAddress: requiredText(
-      "Organisation email address",
-      ORGANIZATION_REGISTRATION_LIMITS.organizationEmailAddress
-    ).pipe(z.email({ error: "Enter a valid organisation email address." })),
-    organizationPhoneNumber: z
+    organizationType: z.enum(valuesOf(organizationTypeOptions), {
+      error: "Select the type of facility.",
+    }),
+    corporateAffairsCommissionNumber: z
       .string()
       .trim()
-      .max(ORGANIZATION_REGISTRATION_LIMITS.organizationPhoneNumber, {
-        error: `Organisation phone number must be no more than ${ORGANIZATION_REGISTRATION_LIMITS.organizationPhoneNumber} characters.`,
-      }),
-    websiteUrl: optionalWebsiteUrl,
-    productInterest: z.enum(
-      productInterestOptions.map(
-        (productInterestOption) => productInterestOption.value
+      .refine(
+        (registrationNumber) =>
+          registrationNumber === "" ||
+          CORPORATE_AFFAIRS_COMMISSION_NUMBER_PATTERN.test(registrationNumber),
+        {
+          error:
+            "Enter the Corporate Affairs Commission number as shown on the certificate, for example RC 1234567.",
+        }
       ),
-      { error: "Select the product you are interested in." }
+    organizationEmailAddress: emailAddress("Organisation email address"),
+    organizationPhoneNumber: phoneNumber("the organisation phone number"),
+    addressLine: requiredText(
+      "Street address",
+      REGISTRATION_LIMITS.addressLine
+    ),
+    city: requiredText("Town or city", REGISTRATION_LIMITS.city),
+    stateCode: z.enum(valuesOf(nigerianStateOptions), {
+      error: "Select the state.",
+    }),
+    localGovernmentArea: optionalText(
+      "Local government area",
+      REGISTRATION_LIMITS.localGovernmentArea
+    ),
+    products: z.preprocess(
+      checkedValues,
+      z
+        .array(z.enum(valuesOf(productOptions)))
+        .min(1, { error: "Choose at least one product." })
+        .max(REGISTRATION_LIMITS.productsMaximum)
     ),
     firstName: requiredText(
       "First name",
-      ORGANIZATION_REGISTRATION_LIMITS.administratorNamePart
+      REGISTRATION_LIMITS.administratorNamePart
     ),
     lastName: requiredText(
       "Last name",
-      ORGANIZATION_REGISTRATION_LIMITS.administratorNamePart
+      REGISTRATION_LIMITS.administratorNamePart
     ),
-    emailAddress: requiredText(
-      "Work email address",
-      ORGANIZATION_REGISTRATION_LIMITS.emailAddress
-    ).pipe(z.email({ error: "Enter a valid email address." })),
-    password: requiredPassword("Password"),
-    confirmPassword: requiredPassword("Confirm password"),
+    emailAddress: emailAddress("Work email address"),
+    administratorPhoneNumber: z
+      .union([
+        z.literal("").transform(() => undefined),
+        phoneNumber("your mobile number"),
+      ])
+      .optional(),
+    password: password("Password"),
+    confirmPassword: password("Confirm password"),
+    policiesAccepted: z.literal("on", {
+      error:
+        "Accept the terms of service, privacy notice and data processing agreement to continue.",
+    }),
   })
   .refine((values) => values.password === values.confirmPassword, {
     error: "Passwords do not match.",
     path: ["confirmPassword"],
   })
-  .refine(
-    (values) =>
-      `${values.firstName} ${values.lastName}`.length <=
-      ORGANIZATION_REGISTRATION_LIMITS.administratorName,
-    {
-      error: `First and last name together must be no more than ${ORGANIZATION_REGISTRATION_LIMITS.administratorName} characters.`,
-      path: ["lastName"],
-    }
-  )
-  .transform((values): RegistrationRequest => ({
-    organizationName: values.organizationName,
-    organizationType: values.organizationType,
-    registrationNumber: values.registrationNumber,
-    organizationEmailAddress: values.organizationEmailAddress,
-    organizationPhoneNumber:
-      values.organizationPhoneNumber === ""
-        ? null
-        : values.organizationPhoneNumber,
-    websiteUrl: values.websiteUrl === "" ? null : values.websiteUrl,
-    productInterest: values.productInterest,
-    countryCode: "NG",
-    administratorName: `${values.firstName} ${values.lastName}`,
-    emailAddress: values.emailAddress,
-    password: values.password,
+  .transform((values): PlatformRegistrationDetails => ({
+    organization: {
+      legalName: values.legalName,
+      tradingName: values.tradingName || undefined,
+      type: values.organizationType,
+      email: values.organizationEmailAddress,
+      phone: values.organizationPhoneNumber,
+      addressLine: values.addressLine,
+      city: values.city,
+      stateCode: values.stateCode,
+      lga: values.localGovernmentArea || undefined,
+      cacNumber: values.corporateAffairsCommissionNumber || undefined,
+      products: values.products,
+    },
+    admin: {
+      firstName: values.firstName,
+      lastName: values.lastName,
+      email: values.emailAddress,
+      phone: values.administratorPhoneNumber,
+      password: values.password,
+    },
   }));
 
 const registrationFieldDependencies: Record<string, string[]> = {

@@ -14,7 +14,9 @@ import {
   FieldLegend,
   FieldSet,
 } from "@healthalyst/ui/components/field";
+import { Checkbox } from "@healthalyst/ui/components/checkbox";
 import { Input } from "@healthalyst/ui/components/input";
+import { MultiSelect } from "@healthalyst/ui/components/multi-select";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import {
   Select,
@@ -32,6 +34,36 @@ type DynamicFormFieldsProperties = {
   disabled?: boolean;
   onFieldChange?: (fieldName: string) => void;
 };
+
+/**
+ * A field's label text, followed by an asterisk when the field is required.
+ * Controls with a native `required` state already announce it, so the
+ * asterisk stays visual for them; others pass `announceRequired` to have
+ * "required" read with their label.
+ */
+function FieldLabelText({
+  label,
+  required = false,
+  announceRequired = false,
+}: {
+  label: string;
+  required?: boolean;
+  announceRequired?: boolean;
+}) {
+  return (
+    <span>
+      {label}
+      {required && (
+        <>
+          <span aria-hidden="true" className="ml-0.5 text-destructive">
+            *
+          </span>
+          {announceRequired && <span className="sr-only"> (required)</span>}
+        </>
+      )}
+    </span>
+  );
+}
 
 function DynamicFormField({
   definition,
@@ -55,6 +87,93 @@ function DynamicFormField({
     [descriptionIdentifier, errorIdentifier].filter(Boolean).join(" ") ||
     undefined;
 
+  if (field.kind === "checkbox") {
+    return (
+      <Field
+        className={cn("gap-1.5", field.columnSpan === 2 && "sm:col-span-2")}
+        data-invalid={Boolean(error)}
+        data-disabled={disabled}
+      >
+        <div className="flex items-start gap-3">
+          <Checkbox
+            className="mt-0.5"
+            id={fieldIdentifier}
+            name={field.name}
+            value={field.value ?? "on"}
+            required={field.required}
+            disabled={disabled}
+            aria-invalid={Boolean(error) || undefined}
+            aria-describedby={describedBy}
+            onCheckedChange={() => onFieldChange?.(field.name)}
+          />
+          <FieldLabel
+            className="font-normal leading-5"
+            htmlFor={fieldIdentifier}
+          >
+            <FieldLabelText label={field.label} required={field.required} />
+          </FieldLabel>
+        </div>
+        {field.description && (
+          <FieldDescription id={descriptionIdentifier}>
+            {field.description}
+          </FieldDescription>
+        )}
+        {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
+      </Field>
+    );
+  }
+
+  if (field.kind === "checkbox-group") {
+    return (
+      <FieldSet
+        className={cn("gap-2", field.columnSpan === 2 && "sm:col-span-2")}
+        id={fieldIdentifier}
+        tabIndex={-1}
+        aria-invalid={Boolean(error) || undefined}
+        aria-describedby={describedBy}
+        data-invalid={Boolean(error)}
+      >
+        <FieldLegend
+          className={cn("mb-3 text-sm", field.hideLabel && "sr-only")}
+          variant="label"
+        >
+          <FieldLabelText
+            label={field.label}
+            required={field.required}
+            announceRequired
+          />
+        </FieldLegend>
+        {field.description && (
+          <FieldDescription id={descriptionIdentifier}>
+            {field.description}
+          </FieldDescription>
+        )}
+        <div className="flex flex-col gap-3">
+          {field.options.map((option) => {
+            const optionIdentifier = `${fieldIdentifier}-${option.value}`;
+
+            return (
+              <div key={option.value} className="flex items-center gap-3">
+                <Checkbox
+                  id={optionIdentifier}
+                  name={field.name}
+                  value={option.value}
+                  disabled={disabled}
+                  aria-invalid={Boolean(error) || undefined}
+                  onCheckedChange={() => onFieldChange?.(field.name)}
+                />
+                <FieldLabel className="font-light" htmlFor={optionIdentifier}>
+                  {option.label}
+                </FieldLabel>
+              </div>
+            );
+          })}
+        </div>
+        {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
+      </FieldSet>
+    );
+  }
+
   const controlProperties = {
     id: fieldIdentifier,
     name: field.name,
@@ -75,7 +194,11 @@ function DynamicFormField({
         className={field.hideLabel ? "sr-only" : undefined}
         htmlFor={fieldIdentifier}
       >
-        {field.label}
+        <FieldLabelText
+          label={field.label}
+          required={field.required}
+          announceRequired={field.kind === "multi-select"}
+        />
       </FieldLabel>
       {field.kind === "select" ? (
         <Select
@@ -101,6 +224,18 @@ function DynamicFormField({
             </SelectGroup>
           </SelectContent>
         </Select>
+      ) : field.kind === "multi-select" ? (
+        <MultiSelect
+          identifier={fieldIdentifier}
+          name={field.name}
+          options={field.options}
+          placeholder={field.placeholder}
+          maximumSelections={field.maximumSelections}
+          disabled={disabled}
+          invalid={Boolean(error)}
+          describedBy={describedBy}
+          onValueChange={() => onFieldChange?.(field.name)}
+        />
       ) : field.kind === "textarea" ? (
         <Textarea
           {...controlProperties}
@@ -181,7 +316,7 @@ export function DynamicFormFields({
           >
             <FieldSet className="gap-0">
               <FieldLegend
-                className="mb-0 font-serif text-xl font-semibold leading-tight"
+                className="mb-0 font-serif text-xl font-normal leading-tight"
                 variant="label"
               >
                 {section.title}

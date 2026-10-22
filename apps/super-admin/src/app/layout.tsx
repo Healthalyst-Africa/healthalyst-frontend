@@ -1,20 +1,24 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
+import { Inter, Young_Serif } from "next/font/google";
 import "@healthalyst/ui/styles.css";
 import "./globals.css";
 import { ApplicationQueryProvider } from "~/infrastructure/query/query-provider";
 import { StaffSessionProvider } from "~/features/staff-auth/context/staff-session-provider";
 
-const serifFont = Source_Serif_4({
+// Young Serif for headings. It has one weight, already heavy, so headings use
+// `font-normal`.
+const serifFont = Young_Serif({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: "400",
   variable: "--font-serif",
   display: "swap",
 });
 
-const sansSerifFont = Source_Sans_3({
+// Inter for all other text; its optical-size axis tightens larger sizes.
+const sansSerifFont = Inter({
   subsets: ["latin"],
+  axes: ["opsz"],
   variable: "--font-sans",
   display: "swap",
 });

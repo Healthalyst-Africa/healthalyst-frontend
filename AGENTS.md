@@ -188,11 +188,28 @@ code, repository policies, or branding into it.
 
 ## HealthSchedule onboarding requirements
 
-- Follow the HealthAlyst marketing website's current design system: its default
-  green and coral palette, Source Sans 3 and Source Serif 4 typography, semantic
-  shadcn tokens, and compact radius scale. Keep the product app's theme values in
-  its CSS variables and Tailwind token map; do not scatter raw brand colors across
-  components. Keep `packages/ui` product-neutral.
+- Follow the HealthAlyst marketing website's design system
+  (https://www.healthalystafrica.com, `DESIGN.md` in the `marketing-module`
+  repository):
+  - **Palette, "green and gold":** primary green `#145A46`, ink `#112C23`,
+    secondary text `#40584E`, cream ground `#FAF7EF`, green tint `#EAF2EC`,
+    borders `#CDDCD2`, control outline `#748B80`, brand gold `#C8A062`, pale
+    gold `#E4D0B1` for gold on green, subtle gold `#FFFCF5`, error `#B42318`.
+    Gold reaches only 2.4:1 on white: use it for markers and decoration, never
+    for text, focus or buttons on light surfaces. shadcn's `accent` token is
+    the green hover tint here; the brand gold is the `gold` tokens.
+  - **Surfaces:** pages are white (`bg-card`), like the marketing website.
+    The cream `background` token is for occasional bands only, not the page.
+  - **Typography:** Young Serif (`font-serif`) for page, section and panel
+    headings, always `font-normal` because it has a single heavy weight; Inter
+    (`font-sans`) for all other text.
+  - **Shape:** full-pill buttons with semibold labels; fields with a soft
+    border (the control outline at 35%) that darkens on hover, and a 2 px focus
+    ring offset from the edge.
+  - Use semantic shadcn tokens and the compact radius scale. Keep the product
+    app's theme values in its CSS variables and Tailwind token map; do not
+    scatter raw brand colors across components. Keep `packages/ui`
+    product-neutral.
 - Keep product names, capabilities, and application statuses consistent with
   approved requirements. Do not invent verification outcomes or compliance claims.
 - Use clear, complete English and connect each action to a real route or operation.
@@ -277,3 +294,14 @@ changes explicitly so reviewers can assess all affected applications.
 - [shadcn components configuration](https://ui.shadcn.com/docs/components-json)
 - [Turborepo documentation](https://turborepo.com/docs)
 - [Accessibility standard](https://www.w3.org/TR/WCAG22/)
+
+<!-- BEGIN:turborepo-agent-rules -->
+
+# This is NOT the Turborepo you know
+
+Turborepo configuration, task behavior, and CLI commands can vary between installed versions and may differ from your training data. Resolve the `turbo` package from this file's directory or relevant workspace; in monorepos, it may not be visible from the repository root. For example, run `node -p "require.resolve('turbo/package.json')"` from a workspace that depends on `turbo`.
+
+Read `docs/README.md` inside that installed package first, then read the relevant pages from its `docs/` directory before changing Turborepo configuration or commands. Heed deprecation notices. These bundled docs match the installed package version and are available without network access.
+
+This block is written and re-added by `turbo` before repository-scoped commands when an AI agent is detected. In the Turborepo source repository, its template is defined in `crates/turborepo-cli/src/cli/agent_guidance.rs`. Removing the managed block while updates are enabled means a later qualifying invocation will add it again. Set `"agentGuidance": false` in the root `turbo.json` or `turbo.jsonc` to opt out; this does not remove an existing block. Keep the block committed with your work to avoid an uncommitted change on the next agent invocation.
+<!-- END:turborepo-agent-rules -->

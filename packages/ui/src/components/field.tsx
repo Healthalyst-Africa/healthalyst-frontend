@@ -62,29 +62,26 @@ function FieldGroup({ className, ...properties }: React.ComponentProps<"div">) {
   );
 }
 
-const fieldVariants = createClassVariants(
-  "group/field data-[invalid=true]:text-destructive flex w-full gap-3",
-  {
-    variants: {
-      orientation: {
-        vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
-        horizontal: [
-          "flex-row items-center",
-          "[&>[data-slot=field-label]]:flex-auto",
-          "has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px has-[>[data-slot=field-content]]:items-start",
-        ],
-        responsive: [
-          "md:flex-row md:items-center md:[&>*]:w-auto flex-col [&>*]:w-full [&>.sr-only]:w-auto",
-          "md:[&>[data-slot=field-label]]:flex-auto",
-          "md:has-[>[data-slot=field-content]]:items-start md:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
-        ],
-      },
+const fieldVariants = createClassVariants("group/field flex w-full gap-3", {
+  variants: {
+    orientation: {
+      vertical: ["flex-col [&>*]:w-full [&>.sr-only]:w-auto"],
+      horizontal: [
+        "flex-row items-center",
+        "[&>[data-slot=field-label]]:flex-auto",
+        "has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px has-[>[data-slot=field-content]]:items-start",
+      ],
+      responsive: [
+        "md:flex-row md:items-center md:[&>*]:w-auto flex-col [&>*]:w-full [&>.sr-only]:w-auto",
+        "md:[&>[data-slot=field-label]]:flex-auto",
+        "md:has-[>[data-slot=field-content]]:items-start md:has-[>[data-slot=field-content]]:[&>[role=checkbox],[role=radio]]:mt-px",
+      ],
     },
-    defaultVariants: {
-      orientation: "vertical",
-    },
-  }
-);
+  },
+  defaultVariants: {
+    orientation: "vertical",
+  },
+});
 
 function Field({
   className,
@@ -236,7 +233,7 @@ function FieldError({
     <div
       role="alert"
       data-slot="field-error"
-      className={cn("text-destructive text-sm font-normal", className)}
+      className={cn("text-destructive text-sm font-light italic", className)}
       {...properties}
     >
       {content}

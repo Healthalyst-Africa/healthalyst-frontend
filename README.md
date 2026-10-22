@@ -19,7 +19,7 @@ Add each independently deployable client application under `apps/`. Keep generic
 
 ## Commands
 
-HealthSchedule runs locally on port `3006`, and Super Admin runs on `3007`. Both use the Accounts API on port `8081`; the HealthSchedule backend sandbox uses port `8082`. These ports are separate from the local Eventorch clients (`3003` to `3005`) and server (`8080`).
+HealthSchedule runs locally on port `5173`, and Super Admin runs on `3007`. Both use the Accounts API on port `8081`; the HealthSchedule backend sandbox uses port `8082`. These ports are separate from the local Eventorch clients (`3003` to `3005`) and server (`8080`).
 
 The organisation onboarding flow includes email confirmation, signed-in
 application status and reviewer-requested evidence uploads. HealthAlyst staff

@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "health-schedule",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@healthalyst/health-schedule", "dev"],
+      "port": 5173
+    }
+  ]
+}

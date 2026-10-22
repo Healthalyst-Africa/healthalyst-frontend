@@ -5,13 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@healthalyst/ui/components/card";
+import { Card, CardContent } from "@healthalyst/ui/components/card";
 import {
   Field,
   FieldError,
@@ -81,20 +75,22 @@ export function StaffSignInForm() {
             height={52}
           />
           <div>
-            <p className="font-serif text-xl font-semibold">HealthAlyst</p>
+            <p className="font-serif text-xl font-normal">HealthAlyst</p>
             <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
               Super Admin
             </p>
           </div>
         </div>
+        <header className="flex flex-col items-center gap-2 text-center">
+          <h1 className="font-serif text-3xl font-normal leading-tight">
+            Staff sign in
+          </h1>
+          <p className="text-sm leading-6 text-muted-foreground">
+            Use your HealthAlyst staff account to open the company dashboard.
+          </p>
+        </header>
         <Card className="border-border bg-card shadow-sm">
-          <CardHeader className="gap-2 px-7 pt-8">
-            <CardTitle className="font-serif text-2xl">Staff sign in</CardTitle>
-            <CardDescription>
-              Use your HealthAlyst staff account to open the company dashboard.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="px-7 pb-8">
+          <CardContent className="px-7 py-8">
             <form
               className="flex flex-col gap-5"
               onSubmit={handleSubmit}

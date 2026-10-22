@@ -17,7 +17,7 @@ const SearchField = forwardRef<HTMLInputElement, SearchFieldProperties>(
   ({ className, inputClassName, ...properties }, elementReference) => (
     <div
       className={cn(
-        "relative flex h-10 min-w-0 items-center rounded-md border border-input bg-background transition-colors",
+        "relative flex h-10 min-w-0 items-center rounded-md border border-input/35 bg-background transition-colors hover:border-input",
         "focus-within:border-ring focus-within:ring-2 focus-within:ring-ring/20",
         className
       )}

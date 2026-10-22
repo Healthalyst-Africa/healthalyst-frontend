@@ -1,6 +1,8 @@
 export type FormOption = {
   value: string;
   label: string;
+  /** A shorter label for places with little room, such as a chosen chip. */
+  selectedLabel?: string;
 };
 
 type FormFieldBase = {
@@ -26,6 +28,23 @@ export type FormFieldDefinition =
       kind: "select";
       placeholder: string;
       options: readonly FormOption[];
+    })
+  | (FormFieldBase & {
+      /** One box submitted as `value` (default "on") when checked, such as a consent. */
+      kind: "checkbox";
+      value?: string;
+    })
+  | (FormFieldBase & {
+      /** A dropdown of several choices; each chosen option submits its value. */
+      kind: "multi-select";
+      placeholder: string;
+      options: readonly FormOption[];
+      maximumSelections?: number;
+    })
+  | (FormFieldBase & {
+      /** Several boxes sharing `name`; each checked option submits its value. */
+      kind: "checkbox-group";
+      options: readonly FormOption[];
     });
 
 export type FormSectionDefinition = {
@@ -41,3 +60,10 @@ export type FormDefinition = {
   identifier: string;
   sections: readonly FormSectionDefinition[];
 };
+
+/** Every field name a definition renders, in display order. */
+export function formDefinitionFieldNames(definition: FormDefinition): string[] {
+  return definition.sections.flatMap((section) =>
+    section.fields.map((field) => field.name)
+  );
+}
