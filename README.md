@@ -11,6 +11,7 @@ apps/
   super-admin/               HealthAlyst staff dashboard and review client
 packages/
   eslint-config/              Shared ESLint flat configurations
+  platform-api/               Shared NestJS Platform API transport and authentication
   test-utilities/             Shared Vitest setup
   typescript-config/          Shared TypeScript presets
   ui/                         Brand-neutral shadcn components and styles
@@ -20,16 +21,24 @@ Add each independently deployable client application under `apps/`. The organiza
 
 ## Commands
 
-HealthSchedule runs locally on port `5173`, and Super Admin runs on `3007`. Both use the Accounts API on port `8081`; the HealthSchedule backend sandbox uses port `8082`. These ports are separate from the local Eventorch clients (`3003` to `3005`) and server (`8080`).
+The organisation hub runs locally on port `5173`, HealthSchedule on `3000`,
+and Super Admin on `8080`. These origins are currently allowed by the NestJS
+Platform API's CORS configuration. The NestJS Platform API is the shared backend for
+identity, authentication, organisation context and platform review across
+HealthAlyst apps. The organisation hub and Super Admin currently call it
+directly through `NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL`; HealthSchedule
+links to the hub and has not added API calls yet. Product spokes can also call
+their documented product API for product-specific workflows.
 
 The organisation onboarding flow includes email confirmation, signed-in
 application status and reviewer-requested evidence uploads. HealthAlyst staff
-review applications, evidence, and decisions in Super Admin.
-Evidence files are sent to the Accounts API for scanning and private storage. The
-frontend never receives a storage URL or object-storage credentials.
+review applications, uploaded documents, and decisions in Super Admin. File
+uploads and document viewing use short-lived URLs returned by the Platform API;
+the frontend never receives storage credentials.
 
 ```sh
 pnpm install
+pnpm --filter @healthalyst/organization dev
 pnpm --filter @healthalyst/health-schedule dev
 pnpm --filter @healthalyst/super-admin dev
 pnpm build

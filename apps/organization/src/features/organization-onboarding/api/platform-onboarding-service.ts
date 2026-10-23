@@ -1,4 +1,9 @@
 import { z } from "zod";
+export {
+  resendEmailVerification,
+  verifyPlatformEmailAddress,
+} from "@healthalyst/platform-api/authentication-service";
+export type { EmailVerificationResponse } from "@healthalyst/platform-api/authentication-service";
 import type {
   NigerianStateCode,
   OrganizationType,
@@ -53,6 +58,52 @@ const policyVersionsSchema = z.object({
   dpa: z.string().min(1),
 });
 
+const documentTypeSchema = z.enum([
+  "CAC_CERTIFICATE",
+  "FACILITY_LICENCE",
+  "MEDICAL_DIRECTOR_LICENCE",
+  "MLSCN_LICENCE",
+  "PCN_PREMISES_LICENCE",
+  "NHIA_ACCREDITATION",
+  "PROOF_OF_ADDRESS",
+  "OTHER",
+]);
+
+const organizationTypeReferenceSchema = z.object({
+  type: z.enum([
+    "CLINIC",
+    "HOSPITAL",
+    "SPECIALIST_CLINIC",
+    "DIAGNOSTIC_CENTRE",
+    "LABORATORY",
+    "IMAGING_CENTRE",
+    "PHARMACY",
+    "MULTI_BRANCH_GROUP",
+  ]),
+  required: z.array(documentTypeSchema),
+  optional: z.array(documentTypeSchema),
+});
+
+const organizationTypesResponseSchema = z.object({
+  data: z.array(organizationTypeReferenceSchema),
+});
+
+const nigerianStatesResponseSchema = z.object({
+  data: z.array(
+    z.object({
+      code: z.string(),
+      name: z.string(),
+    })
+  ),
+});
+
+export type PlatformOrganizationTypeReference = z.infer<
+  typeof organizationTypeReferenceSchema
+>;
+export type PlatformNigerianState = z.infer<
+  typeof nigerianStatesResponseSchema
+>["data"][number];
+
 const registrationResponseSchema = z.object({
   status: z.literal("PENDING_EMAIL_VERIFICATION"),
   message: z.string(),
@@ -105,6 +156,48 @@ export async function getPolicyVersions(): Promise<PolicyVersions> {
   }
 }
 
+/** `GET /v1/reference/organization-types` for onboarding document rules. */
+export async function getPlatformOrganizationTypes(): Promise<
+  PlatformOrganizationTypeReference[]
+> {
+  try {
+    const response = await getPlatformHttpClient().get<unknown>(
+      "/v1/reference/organization-types"
+    );
+    const organizationTypes = organizationTypesResponseSchema.safeParse(
+      response.data
+    );
+    if (!organizationTypes.success) {
+      throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
+    }
+    return organizationTypes.data.data;
+  } catch (error) {
+    throw toPlatformApiError(
+      error,
+      "We could not load the organisation types. Try again shortly."
+    );
+  }
+}
+
+/** `GET /v1/reference/states` for current Nigerian state codes and names. */
+export async function getPlatformNigerianStates(): Promise<
+  PlatformNigerianState[]
+> {
+  try {
+    const response = await getPlatformHttpClient().get<unknown>(
+      "/v1/reference/states"
+    );
+    const states = nigerianStatesResponseSchema.safeParse(response.data);
+    if (!states.success) throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
+    return states.data.data;
+  } catch (error) {
+    throw toPlatformApiError(
+      error,
+      "We could not load the list of Nigerian states. Try again shortly."
+    );
+  }
+}
+
 /**
  * Registers an organisation and its administrator with the Platform API. It
  * reads the current policy versions first, because the registration must name
@@ -139,72 +232,6 @@ export async function registerOrganizationOnPlatform(
       error,
       "We could not submit the application. Try again shortly.",
       REGISTRATION_FIELD_NAMES_BY_PATH
-    );
-  }
-}
-
-const acceptedResponseSchema = z.object({
-  status: z.literal("ACCEPTED"),
-});
-
-/**
- * `POST /v1/auth/verify-email/resend`. Always `202 ACCEPTED`, whether or not
- * an unconfirmed account uses the address, so the answer reveals nothing.
- */
-export async function resendEmailVerification(
-  emailAddress: string
-): Promise<void> {
-  try {
-    const response = await getPlatformHttpClient().post<unknown>(
-      "/v1/auth/verify-email/resend",
-      { email: emailAddress }
-    );
-    if (!acceptedResponseSchema.safeParse(response.data).success) {
-      throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
-    }
-  } catch (error) {
-    throw toPlatformApiError(
-      error,
-      "We could not request a new confirmation link. Try again shortly."
-    );
-  }
-}
-
-const emailVerificationResponseSchema = z.object({
-  verified: z.literal(true),
-  enrolmentToken: z.string().optional(),
-  expiresIn: z.number().int().optional(),
-});
-
-export type EmailVerificationResponse = z.infer<
-  typeof emailVerificationResponseSchema
->;
-
-/**
- * `POST /v1/auth/verify-email` with the token from the emailed link
- * (`/verify-email?token=…`). When the account has no authenticator yet, the
- * answer carries a short-lived `enrolmentToken` for setting one up. An
- * expired or already used link answers `410 TOKEN_EXPIRED`.
- */
-export async function verifyPlatformEmailAddress(
-  verificationToken: string
-): Promise<EmailVerificationResponse> {
-  try {
-    const response = await getPlatformHttpClient().post<unknown>(
-      "/v1/auth/verify-email",
-      { token: verificationToken }
-    );
-    const verificationResponse = emailVerificationResponseSchema.safeParse(
-      response.data
-    );
-    if (!verificationResponse.success) {
-      throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
-    }
-    return verificationResponse.data;
-  } catch (error) {
-    throw toPlatformApiError(
-      error,
-      "We could not confirm the email address. Try again shortly."
     );
   }
 }

@@ -150,11 +150,9 @@ const SET_UP_STEPS = [
 
 function ScanAndConfirm({
   setup,
-  enrolmentToken,
   confirmationMutation,
 }: {
   setup: AuthenticatorSetup;
-  enrolmentToken: string;
   confirmationMutation: ReturnType<typeof useAuthenticatorConfirmationMutation>;
 }) {
   const [code, setCode] = useState("");
@@ -178,7 +176,6 @@ function ScanAndConfirm({
     setCodeError(null);
     confirmationMutation.mutate(
       {
-        enrolmentToken,
         factorId: setup.factorId,
         code: validationResult.data.code,
       },
@@ -499,15 +496,14 @@ function RecoveryCodes({
 
 /**
  * Sets up an authenticator app for an account that has none, using the
- * `enrolmentToken` from email confirmation or the password step:
+ * short-lived HttpOnly challenge cookie established by email confirmation or
+ * the password step:
  * `POST /v1/auth/mfa/totp/setup`, then `POST /v1/auth/mfa/totp/confirm` with
  * the first code. The recovery codes are shown once, before `onEnrolled`.
  */
 export default function AuthenticatorEnrolment({
-  enrolmentToken,
   onEnrolled,
 }: {
-  enrolmentToken: string;
   onEnrolled: (confirmation: AuthenticatorConfirmation) => void;
 }) {
   const hasStartedSetupReference = useRef(false);
@@ -520,8 +516,8 @@ export default function AuthenticatorEnrolment({
     // effects twice in development.
     if (hasStartedSetupReference.current) return;
     hasStartedSetupReference.current = true;
-    setupMutation.mutate(enrolmentToken);
-  }, [enrolmentToken, setupMutation]);
+    setupMutation.mutate();
+  }, [setupMutation]);
 
   if (confirmationMutation.data) {
     const confirmation = confirmationMutation.data;
@@ -562,7 +558,6 @@ export default function AuthenticatorEnrolment({
     return (
       <ScanAndConfirm
         setup={setup}
-        enrolmentToken={enrolmentToken}
         confirmationMutation={confirmationMutation}
       />
     );
@@ -582,7 +577,7 @@ export default function AuthenticatorEnrolment({
               <ActionButton
                 type="button"
                 variant="outline"
-                onClick={() => setupMutation.mutate(enrolmentToken)}
+                onClick={() => setupMutation.mutate()}
               >
                 Try again
               </ActionButton>

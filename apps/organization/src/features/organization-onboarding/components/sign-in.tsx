@@ -47,11 +47,10 @@ type SignInStage =
   | { kind: "password" }
   | {
       kind: "code";
-      mfaToken: string;
       methods: readonly SignInMethod[];
       method: SignInMethod;
     }
-  | { kind: "enrolment-required"; enrolmentToken: string };
+  | { kind: "enrolment-required" };
 
 function ApiErrorMessage({ error }: { error: Error }) {
   return (
@@ -73,14 +72,14 @@ function ApiErrorMessage({ error }: { error: Error }) {
 }
 
 /**
- * Sign-in against the Platform API: the password step
- * (`POST /v1/auth/login`), then a code from the authenticator app or a
- * recovery code (`POST /v1/auth/mfa/verify`). The session's access token is
- * kept in memory only, so it ends when the page is closed or reloaded.
+ * Sign in through the same-origin Platform API service. The backend-for-frontend keeps the
+ * short-lived MFA challenge in an HttpOnly cookie and access and refresh
+ * tokens in its server-side session.
  */
 export default function SignIn() {
   const router = useRouter();
-  const { platformSession, setPlatformSession } = usePlatformSession();
+  const { platformSession, isRestoring, setPlatformSession } =
+    usePlatformSession();
   const [stage, setStage] = useState<SignInStage>({ kind: "password" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [stageNotice, setStageNotice] = useState<string | null>(null);
@@ -133,10 +132,7 @@ export default function SignIn() {
     passwordMutation.mutate(validationResult.data, {
       onSuccess: (passwordStep) => {
         if (passwordStep.status === "MFA_ENROLMENT_REQUIRED") {
-          showStage({
-            kind: "enrolment-required",
-            enrolmentToken: passwordStep.enrolmentToken,
-          });
+          showStage({ kind: "enrolment-required" });
           return;
         }
         const method = passwordStep.methods.includes("totp")
@@ -144,7 +140,6 @@ export default function SignIn() {
           : (passwordStep.methods[0] ?? "totp");
         showStage({
           kind: "code",
-          mfaToken: passwordStep.mfaToken,
           methods: passwordStep.methods,
           method,
         });
@@ -168,7 +163,6 @@ export default function SignIn() {
     setFieldErrors({});
     codeMutation.mutate(
       {
-        mfaToken: stage.mfaToken,
         method: stage.method,
         code: validationResult.data.code,
       },
@@ -201,7 +195,6 @@ export default function SignIn() {
     return (
       <OrganizationSignInLayout>
         <AuthenticatorEnrolment
-          enrolmentToken={stage.enrolmentToken}
           onEnrolled={(confirmation) =>
             confirmation.session
               ? completeSignIn(confirmation.session)
@@ -222,6 +215,20 @@ export default function SignIn() {
           <CardContent className="px-5 py-6 sm:px-6 md:px-8 md:py-8">
             <p className="text-sm text-muted-foreground" role="status">
               Opening your organisation application…
+            </p>
+          </CardContent>
+        </Card>
+      </OrganizationSignInLayout>
+    );
+  }
+
+  if (isRestoring) {
+    return (
+      <OrganizationSignInLayout>
+        <Card className="border-border bg-card shadow-sm" aria-busy="true">
+          <CardContent className="px-5 py-6 sm:px-6 md:px-8 md:py-8">
+            <p className="text-sm text-muted-foreground" role="status">
+              Checking your sign-in…
             </p>
           </CardContent>
         </Card>
@@ -365,6 +372,14 @@ export default function SignIn() {
                     )}
                   </Field>
                 </FieldGroup>
+                <p className="-mt-3 self-end text-sm">
+                  <Link
+                    className="text-primary underline-offset-4 hover:underline"
+                    href="/forgot-password"
+                  >
+                    Forgot password?
+                  </Link>
+                </p>
                 {passwordMutation.error && (
                   <ApiErrorMessage error={passwordMutation.error} />
                 )}

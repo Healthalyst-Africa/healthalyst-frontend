@@ -6,24 +6,45 @@ code, and (later) the organisation profile, members and enabled products.
 Product apps such as HealthSchedule do not build their own onboarding screens;
 they link here.
 
-It calls the HealthAlyst Platform API at
-`NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL` and runs on port 5173 in
-development.
+The browser calls this app's same-origin backend-for-frontend at `/api/platform`; the backend-for-frontend calls
+the HealthAlyst NestJS Platform API using the server-only
+`HEALTHALYST_PLATFORM_API_URL`. The app runs on port 5173 in development.
 
 ## Entry points for product apps
 
-| Route           | Purpose                                                                                      |
-| --------------- | -------------------------------------------------------------------------------------------- |
-| `/`             | Registration. `?product=healthschedule` (or `labconnect`, `pharmadesk`) pre-selects products |
-| `/sign-in`      | Sign-in: password, then an authenticator or recovery code                                    |
-| `/application`  | Signed-in organisation application status and checklist                                      |
-| `/verify-email` | The page the Platform API's confirmation email links to (`?token=`)                          |
+| Route              | Purpose                                                                                      |
+| ------------------ | -------------------------------------------------------------------------------------------- |
+| `/`                | Registration. `?product=healthschedule` (or `labconnect`, `pharmadesk`) pre-selects products |
+| `/sign-in`         | Sign-in: password, then an authenticator or recovery code                                    |
+| `/application`     | Signed-in organisation application status and checklist                                      |
+| `/verify-email`    | The page the Platform API's confirmation email links to (`?token=`)                          |
+| `/forgot-password` | Request a password reset link                                                                |
+| `/reset-password`  | Set a new password from the one-time email link                                              |
 
 `/sign-in` only handles the password and authenticator or recovery-code steps.
 After successful sign-in, the organisation hub routes to `/application`, where
-the user can review their organisation status and checklist. The signed-in
-session is held in memory while navigating between those routes. Reloading the
-page clears it and returns the user to sign-in.
+the user can review their organisation status and checklist. The backend-for-frontend keeps the
+Platform access and refresh tokens in encrypted server-side Redis storage. The
+browser receives an opaque, host-only `HttpOnly; Secure; SameSite=Strict`
+session cookie; JavaScript cannot read either token. During MFA or
+authenticator enrolment, the backend-for-frontend sets a separate short-lived
+HttpOnly challenge cookie scoped to `/api/platform/v1/auth`; the UI receives
+only the challenge state, not the credential. On reload, the app calls
+`GET /v1/me` through the
+backend-for-frontend, which refreshes the API session when needed.
+
+Set `HEALTHALYST_PLATFORM_API_URL`, `HEALTHALYST_APP_ORIGIN`,
+`HEALTHALYST_PLATFORM_SESSION_REDIS_URL`, and `HEALTHALYST_PLATFORM_SESSION_SECRET` in the app's
+local environment. The secret must contain at least 32 bytes. Local Redis is
+available from the backend development Compose setup. The process-memory store
+is only a development fallback when no Redis URL is set; sessions in that
+fallback end when the Next.js server restarts. Production requires a reachable
+private Redis service and a stable, app-specific secret shared by every
+instance of this app. Use TLS for a remotely hosted Redis service.
+
+The backend-for-frontend sends the app origin and `X-Requested-With: healthalyst` to the Platform
+API when refreshing. The backend's existing origin/CSRF policy must allow the
+deployed app origin; browser-to-Render CORS is no longer part of this request.
 
 ## Structure
 

@@ -3,14 +3,15 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3007",
+    "dev": "next dev --port 8080",
     "build": "next build",
-    "start": "next start --port 3007",
+    "start": "next start --port 8080",
     "lint": "eslint ./src",
     "check-types": "tsc --pretty --noEmit"
   },
   "dependencies": {
     "@healthalyst/icons": "workspace:*",
+    "@healthalyst/platform-api": "workspace:*",
     "@healthalyst/ui": "workspace:*",
     "@tanstack/react-query": "^5.104.2",
     "axios": "^1.20.0",

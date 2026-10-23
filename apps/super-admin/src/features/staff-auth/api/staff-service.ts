@@ -1,88 +1,128 @@
 import { isAxiosError } from "axios";
-import { z } from "zod";
-import { getStaffHttpClient } from "~/features/staff-auth/api/staff-http-client";
+import {
+  confirmAuthenticator,
+  getCurrentPlatformProfile,
+  restorePlatformSession,
+  signInWithPassword,
+  signOut,
+  startAuthenticatorSetup,
+  switchPlatformContext,
+  verifySignInCode,
+  type AuthenticatorSetup,
+  type PasswordStepResponse,
+  type PlatformProfile,
+  type PlatformSession,
+  type SignInMethod,
+} from "@healthalyst/platform-api/authentication-service";
+import { toPlatformApiError } from "@healthalyst/platform-api/api-error";
 
-const staffIdentitySchema = z.object({
-  staffAccountId: z.uuid(),
-  fullName: z.string(),
-  emailAddress: z.email(),
-  role: z.literal("SUPER_ADMIN"),
-});
+export type StaffIdentity = {
+  staffAccountId: string;
+  fullName: string;
+  emailAddress: string;
+  platformRoles: string[];
+};
 
-const staffSignInResponseSchema = z.object({
-  expiresInSeconds: z.number().positive(),
-  staff: staffIdentitySchema,
-});
-
-export type StaffIdentity = z.infer<typeof staffIdentitySchema>;
+export type { AuthenticatorSetup, PasswordStepResponse, SignInMethod };
 
 export function explainStaffApiError(error: unknown, fallback: string): Error {
-  if (!isAxiosError(error))
-    return error instanceof Error ? error : new Error(fallback);
-  if (error.response?.status === 401)
-    return new Error("Your staff session has expired. Sign in again.");
-  if (error.response?.status === 403)
-    return new Error("Your account cannot perform this action.");
-  if (error.response?.status === 409)
-    return new Error("This application changed. Refresh and try again.");
-  if (!error.response)
-    return new Error(
-      "HealthAlyst could not be reached. Check the connection and try again."
-    );
-  const responseMessage = error.response.data as unknown;
-  if (
-    typeof responseMessage === "object" &&
-    responseMessage !== null &&
-    "message" in responseMessage &&
-    typeof responseMessage.message === "string"
-  ) {
-    return new Error(responseMessage.message);
-  }
-  return new Error(fallback);
+  return toPlatformApiError(error, fallback);
 }
 
 export async function createStaffSession(
   emailAddress: string,
   password: string
-): Promise<StaffIdentity> {
+): Promise<PasswordStepResponse> {
   try {
-    const response = await getStaffHttpClient().post<unknown>(
-      "/api/v1/staff/auth/session",
-      { emailAddress, password }
-    );
-    return staffSignInResponseSchema.parse(response.data).staff;
+    return await signInWithPassword({ identifier: emailAddress, password });
   } catch (error) {
     if (isAxiosError(error) && error.response?.status === 401) {
       throw new Error("Email or password is incorrect.", { cause: error });
     }
-    throw explainStaffApiError(error, "We could not sign you in. Try again.");
+    throw toPlatformApiError(error, "We could not sign you in. Try again.");
   }
+}
+
+export async function startStaffAuthenticatorSetup(): Promise<AuthenticatorSetup> {
+  return startAuthenticatorSetup();
+}
+
+export async function verifyStaffSignInCode(verification: {
+  method: SignInMethod;
+  code: string;
+}): Promise<StaffIdentity> {
+  const session = await verifySignInCode(verification);
+  return activatePlatformStaffSession(session);
+}
+
+export async function confirmStaffAuthenticatorSetup(confirmation: {
+  factorId: string;
+  code: string;
+}): Promise<{ staffIdentity: StaffIdentity; recoveryCodes: string[] }> {
+  const confirmationResult = await confirmAuthenticator(confirmation);
+  if (!confirmationResult.session) {
+    throw new Error(
+      "The authenticator was confirmed, but sign-in did not finish. Sign in again."
+    );
+  }
+  return {
+    staffIdentity: await activatePlatformStaffSession(
+      confirmationResult.session
+    ),
+    recoveryCodes: confirmationResult.recoveryCodes,
+  };
 }
 
 export async function getCurrentStaffIdentity(): Promise<StaffIdentity> {
+  const restoredSession = await restorePlatformSession();
+  return activatePlatformStaffSession(restoredSession);
+}
+
+export async function endStaffSession(): Promise<void> {
+  await signOut();
+}
+
+async function activatePlatformStaffSession(
+  session: PlatformSession
+): Promise<StaffIdentity> {
+  if (session.platformRoles.length === 0) {
+    await signOut().catch(() => undefined);
+    throw new Error("This account does not have HealthAlyst staff access.");
+  }
+
+  if (session.activeContext.realm !== "PLATFORM") {
+    await switchPlatformContext({ realm: "PLATFORM" });
+  }
+
   try {
-    const response = await getStaffHttpClient().get<unknown>(
-      "/api/v1/staff/auth/me"
-    );
-    return staffIdentitySchema.parse(response.data);
-  } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 401) {
-      throw error;
+    const profile = await getCurrentPlatformProfile();
+    if (profile.activeContext.realm !== "PLATFORM") {
+      throw new Error("We could not open the HealthAlyst staff workspace.");
     }
-    throw explainStaffApiError(
+    return toStaffIdentity(profile);
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 403) {
+      await signOut().catch(() => undefined);
+      throw new Error("This account does not have HealthAlyst staff access.", {
+        cause: error,
+      });
+    }
+    throw toPlatformApiError(
       error,
-      "We could not restore your staff session."
+      "We could not open the HealthAlyst staff workspace."
     );
   }
 }
 
-export async function endStaffSession(): Promise<void> {
-  try {
-    await getStaffHttpClient().post("/api/v1/staff/auth/sign-out");
-  } catch (error) {
-    throw explainStaffApiError(
-      error,
-      "We could not end this session. Try again."
-    );
+function toStaffIdentity(profile: PlatformProfile): StaffIdentity {
+  const fullName = `${profile.user.firstName} ${profile.user.lastName}`.trim();
+  if (!profile.user.email) {
+    throw new Error("This staff account does not have a work email address.");
   }
+  return {
+    staffAccountId: profile.user.id,
+    fullName,
+    emailAddress: profile.user.email,
+    platformRoles: profile.platformRoles,
+  };
 }

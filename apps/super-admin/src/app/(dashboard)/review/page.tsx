@@ -27,7 +27,7 @@ function ReviewQueue({
           Application reviews
         </h1>
         <p className="mt-2 text-sm text-muted-foreground">
-          Review verified organisations, request evidence, and record a
+          Claim submitted applications, inspect uploaded documents, and record a
           decision.
         </p>
       </div>
@@ -55,13 +55,13 @@ function ReviewQueue({
       {reviewQueue.isSuccess && reviewQueue.data.length === 0 && (
         <Card>
           <CardContent className="p-6 text-sm text-muted-foreground">
-            No verified applications are awaiting a decision.
+            No submitted applications are awaiting review.
           </CardContent>
         </Card>
       )}
       {reviewQueue.data?.map((application) => (
         <ReviewApplicationCard
-          key={application.applicationId}
+          key={application.id}
           application={application}
           staffIdentity={staffIdentity}
         />

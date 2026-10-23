@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { isAxiosError } from "axios";
+import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import {
   getCurrentStaffIdentity,
   type StaffIdentity,
@@ -48,7 +49,10 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
       setStatus("authenticated");
     } catch (error) {
       updateStaffIdentity(null);
-      if (isAxiosError(error) && error.response?.status === 401) {
+      if (
+        (error instanceof PlatformApiError && error.status === 401) ||
+        (isAxiosError(error) && error.response?.status === 401)
+      ) {
         setStatus("unauthenticated");
         return;
       }
@@ -74,12 +78,12 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
     }
 
     window.addEventListener(
-      "healthalyst-staff-session-expired",
+      "healthalyst-platform-session-expired",
       handleExpiredStaffSession
     );
     return () => {
       window.removeEventListener(
-        "healthalyst-staff-session-expired",
+        "healthalyst-platform-session-expired",
         handleExpiredStaffSession
       );
     };

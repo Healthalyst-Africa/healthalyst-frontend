@@ -1,7 +1,7 @@
 # HealthSchedule
 
 Patient scheduling and clinical operations for hospitals and clinics, as one
-HealthAlyst product. It runs on port 5174 in development.
+HealthAlyst product. It runs on port 3000 in development.
 
 HealthSchedule has no registration or sign-in screens of its own. Every
 HealthAlyst product uses the shared organisation app (`apps/organization`)

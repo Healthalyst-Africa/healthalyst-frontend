@@ -30,7 +30,7 @@ function describeStatus(status: string): string {
 /**
  * Who is signed in and the organisations they belong to, from the session
  * returned by sign-in or authenticator set-up. Signing out calls
- * `POST /v1/auth/logout`; the in-memory token is dropped either way.
+ * `POST /v1/auth/logout`; the backend-for-frontend clears the host-only cookie.
  */
 export default function OrganizationApplicationSummary({
   session,
@@ -74,7 +74,6 @@ export default function OrganizationApplicationSummary({
           </div>
           {session.memberships.length === 1 && session.memberships[0] ? (
             <OrganizationApplicationWorkspace
-              accessToken={session.accessToken}
               organizationId={session.memberships[0].organization.id}
               userId={session.user.id}
             />
@@ -119,7 +118,7 @@ export default function OrganizationApplicationSummary({
             isLoading={signOutMutation.isPending}
             loadingText="Signing out"
             onClick={() =>
-              signOutMutation.mutate(session.accessToken, {
+              signOutMutation.mutate(undefined, {
                 onSettled: onSignedOut,
               })
             }

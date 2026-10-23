@@ -5,6 +5,10 @@ import {
   organizationTypeOptions,
   productOptions,
 } from "~/features/organization-onboarding/model/organization-registration-options";
+import {
+  createPasswordSchema,
+  PASSWORD_LIMITS,
+} from "~/features/organization-onboarding/model/password-rules";
 
 /** Field limits from the Platform API's `RegistrationBody`. */
 export const REGISTRATION_LIMITS = {
@@ -14,8 +18,8 @@ export const REGISTRATION_LIMITS = {
   city: 100,
   localGovernmentArea: 100,
   administratorNamePart: 100,
-  passwordMinimum: 10,
-  passwordMaximum: 128,
+  passwordMinimum: PASSWORD_LIMITS.minimum,
+  passwordMaximum: PASSWORD_LIMITS.maximum,
   productsMaximum: 3,
 } as const;
 
@@ -70,17 +74,6 @@ const phoneNumber = (label: string) =>
         error: `Enter ${label} with its country code, for example +2348031234567 or 08031234567.`,
       }
     );
-
-const password = (label: string) =>
-  z
-    .string({ error: `${label} is required.` })
-    .min(1, { error: `${label} is required.` })
-    .min(REGISTRATION_LIMITS.passwordMinimum, {
-      error: `${label} must be at least ${REGISTRATION_LIMITS.passwordMinimum} characters.`,
-    })
-    .max(REGISTRATION_LIMITS.passwordMaximum, {
-      error: `${label} must be no more than ${REGISTRATION_LIMITS.passwordMaximum} characters.`,
-    });
 
 const emailAddress = (label: string) =>
   requiredText(label, REGISTRATION_LIMITS.emailAddress).pipe(
@@ -164,8 +157,8 @@ export const registrationSchema = z
         phoneNumber("your mobile number"),
       ])
       .optional(),
-    password: password("Password"),
-    confirmPassword: password("Confirm password"),
+    password: createPasswordSchema("Password"),
+    confirmPassword: createPasswordSchema("Confirm password"),
     policiesAccepted: z.literal("on", {
       error:
         "Accept the terms of service, privacy notice and data processing agreement to continue.",

@@ -23,24 +23,8 @@ import {
   focusFirstInvalidField,
   parseFormData,
 } from "~/shared/forms/form-validation";
+import { readOneTimeTokenFromAddress } from "~/shared/security/read-one-time-token-from-address";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
-
-/**
- * Reads the token from the emailed link, `/verify-email?token=…`, and also
- * accepts it after `#`. It is then removed from the address bar so it is not
- * kept in history or shared by accident.
- */
-function readVerificationTokenFromAddress(): string | null {
-  const address = new URL(window.location.href);
-  const token =
-    address.searchParams.get("token") ??
-    new URLSearchParams(address.hash.slice(1)).get("token");
-  if (token) {
-    address.searchParams.delete("token");
-    window.history.replaceState(null, "", address.pathname + address.search);
-  }
-  return token;
-}
 
 function ResendConfirmationForm() {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
@@ -138,7 +122,7 @@ export default function EmailVerification() {
     // once: React runs effects twice in development.
     if (hasReadTokenReference.current) return;
     hasReadTokenReference.current = true;
-    setVerificationToken(readVerificationTokenFromAddress());
+    setVerificationToken(readOneTimeTokenFromAddress());
   }, []);
 
   useEffect(() => {
@@ -161,11 +145,11 @@ export default function EmailVerification() {
     );
   }
 
-  const enrolmentToken = verificationMutation.data?.enrolmentToken;
-  if (enrolmentToken && !hasFinishedEnrolment) {
+  const authenticatorEnrolmentRequired =
+    verificationMutation.data?.authenticatorEnrolmentRequired;
+  if (authenticatorEnrolmentRequired && !hasFinishedEnrolment) {
     return (
       <AuthenticatorEnrolment
-        enrolmentToken={enrolmentToken}
         onEnrolled={(confirmation) => {
           if (confirmation.session) {
             setPlatformSession(confirmation.session);

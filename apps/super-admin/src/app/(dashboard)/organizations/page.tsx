@@ -38,13 +38,8 @@ function OrganizationsList({
   >;
 }) {
   const searchTerm = useSearchParams().get("search")?.trim() ?? "";
-  const organizationsQuery = useOrganizationsQuery(staffIdentity);
-  const matchingOrganizations = (organizationsQuery.data ?? []).filter(
-    (application) =>
-      application.organizationName
-        .toLocaleLowerCase()
-        .includes(searchTerm.toLocaleLowerCase())
-  );
+  const organizationsQuery = useOrganizationsQuery(staffIdentity, searchTerm);
+  const matchingOrganizations = organizationsQuery.data ?? [];
   return (
     <>
       <div>
@@ -107,7 +102,7 @@ function OrganizationsList({
                   <thead>
                     <tr className="border-b border-border text-xs text-muted-foreground">
                       <th className="py-3 pr-4">Organisation</th>
-                      <th className="py-3 pr-4">Product</th>
+                      <th className="py-3 pr-4">Organisation type</th>
                       <th className="py-3 pr-4">Status</th>
                       <th className="py-3">Submitted</th>
                     </tr>
@@ -115,19 +110,17 @@ function OrganizationsList({
                   <tbody>
                     {matchingOrganizations.map((application) => (
                       <tr
-                        key={application.applicationId}
+                        key={application.id}
                         className="border-b border-border last:border-0"
                       >
                         <td className="py-4 pr-4">
                           <p className="font-semibold">
-                            {application.organizationName}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            {application.organizationEmailAddress}
+                            {application.displayName || application.legalName}
                           </p>
                         </td>
                         <td className="py-4 pr-4">
-                          {application.productInterest}
+                          {application.type?.replaceAll("_", " ") ??
+                            "Not provided"}
                         </td>
                         <td className="py-4 pr-4">
                           {application.status
@@ -135,9 +128,11 @@ function OrganizationsList({
                             .toLowerCase()}
                         </td>
                         <td className="py-4">
-                          {new Intl.DateTimeFormat("en", {
-                            dateStyle: "medium",
-                          }).format(new Date(application.submittedAt))}
+                          {application.submittedAt
+                            ? new Intl.DateTimeFormat("en", {
+                                dateStyle: "medium",
+                              }).format(new Date(application.submittedAt))
+                            : "Not submitted"}
                         </td>
                       </tr>
                     ))}

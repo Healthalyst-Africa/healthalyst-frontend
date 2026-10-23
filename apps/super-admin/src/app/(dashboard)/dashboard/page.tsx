@@ -33,12 +33,16 @@ function DashboardOverview({
     ReturnType<typeof useStaffSession>["staffIdentity"]
   >;
 }) {
-  const organizationsQuery = useOrganizationsQuery(staffIdentity);
+  const organizationsQuery = useOrganizationsQuery(staffIdentity, "");
   const reviewQueue = useReviewQueueQuery(staffIdentity);
   const applications = [...(organizationsQuery.data ?? [])].sort(
     (firstApplication, secondApplication) =>
-      new Date(secondApplication.submittedAt).getTime() -
-      new Date(firstApplication.submittedAt).getTime()
+      new Date(
+        secondApplication.submittedAt ?? secondApplication.createdAt
+      ).getTime() -
+      new Date(
+        firstApplication.submittedAt ?? firstApplication.createdAt
+      ).getTime()
   );
   const metrics = [
     {
@@ -49,7 +53,7 @@ function DashboardOverview({
     {
       label: "Pending review",
       value: applications.filter(
-        (application) => application.status === "PENDING_REVIEW"
+        (application) => application.status === "PENDING_VERIFICATION"
       ).length,
       icon: ReviewIcon,
     },
@@ -63,7 +67,7 @@ function DashboardOverview({
     {
       label: "Approved",
       value: applications.filter(
-        (application) => application.status === "APPROVED"
+        (application) => application.status === "ACTIVE"
       ).length,
       icon: OrganizationIcon,
     },
@@ -185,11 +189,11 @@ function DashboardOverview({
                 <ul className="divide-y divide-border">
                   {applications.slice(0, 5).map((application) => (
                     <li
-                      key={application.applicationId}
+                      key={application.id}
                       className="flex flex-wrap items-center justify-between gap-3 py-3 text-sm"
                     >
                       <span className="font-medium">
-                        {application.organizationName}
+                        {application.displayName || application.legalName}
                       </span>
                       <span className="text-muted-foreground">
                         {application.status.replaceAll("_", " ").toLowerCase()}

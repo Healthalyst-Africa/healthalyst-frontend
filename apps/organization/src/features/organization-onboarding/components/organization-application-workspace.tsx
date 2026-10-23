@@ -126,16 +126,13 @@ function ApplicationLoadError({
 }
 
 export default function OrganizationApplicationWorkspace({
-  accessToken,
   organizationId,
   userId,
 }: {
-  accessToken: string;
   organizationId: string;
   userId: string;
 }) {
   const applicationQuery = useOrganizationApplicationQuery({
-    accessToken,
     organizationId,
     userId,
   });

@@ -3,15 +3,25 @@
 import {
   createContext,
   useContext,
+  useCallback,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
-import type { PlatformSession } from "~/features/organization-onboarding/api/platform-authentication-service";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  restorePlatformSession,
+  type PlatformSession,
+} from "~/features/organization-onboarding/api/platform-authentication-service";
+import { PlatformApiError } from "~/features/organization-onboarding/api/platform-api-error";
 
 type PlatformSessionContextValue = {
   platformSession: PlatformSession | null;
-  setPlatformSession: (platformSession: PlatformSession) => void;
+  isRestoring: boolean;
+  restoreError: Error | null;
+  restoreSession: () => Promise<void>;
+  setPlatformSession: (nextPlatformSession: PlatformSession) => void;
   clearPlatformSession: () => void;
 };
 
@@ -19,15 +29,98 @@ const platformSessionContext =
   createContext<PlatformSessionContextValue | null>(null);
 
 export function PlatformSessionProvider({ children }: { children: ReactNode }) {
+  const queryClient = useQueryClient();
   const [platformSession, updatePlatformSession] =
     useState<PlatformSession | null>(null);
+  const [isRestoring, setIsRestoring] = useState(true);
+  const [restoreError, setRestoreError] = useState<Error | null>(null);
+
+  const restoreSession = useCallback(async () => {
+    setIsRestoring(true);
+    setRestoreError(null);
+    queryClient.clear();
+    try {
+      const restoredSession = await restorePlatformSession();
+      setRestoreError(null);
+      updatePlatformSession(restoredSession);
+    } catch (error) {
+      updatePlatformSession(null);
+      if (!(error instanceof PlatformApiError && error.status === 401)) {
+        setRestoreError(
+          error instanceof Error
+            ? error
+            : new Error("We could not restore your sign-in.")
+        );
+      }
+    } finally {
+      setIsRestoring(false);
+    }
+  }, [queryClient]);
+
+  useEffect(() => {
+    void restoreSession();
+  }, [restoreSession]);
+
+  useEffect(() => {
+    function handleExpiredPlatformSession() {
+      updatePlatformSession(null);
+      setRestoreError(null);
+      setIsRestoring(false);
+      queryClient.clear();
+    }
+
+    window.addEventListener(
+      "healthalyst-platform-session-expired",
+      handleExpiredPlatformSession
+    );
+    return () => {
+      window.removeEventListener(
+        "healthalyst-platform-session-expired",
+        handleExpiredPlatformSession
+      );
+    };
+  }, [queryClient]);
+
+  const setPlatformSession = useCallback(
+    (nextPlatformSession: PlatformSession) => {
+      const currentContext = platformSession?.activeContext;
+      const nextContext = nextPlatformSession.activeContext;
+      const sessionScopeChanged =
+        platformSession !== null &&
+        (platformSession.user.id !== nextPlatformSession.user.id ||
+          currentContext?.realm !== nextContext.realm ||
+          currentContext?.organizationId !== nextContext.organizationId ||
+          currentContext?.branchId !== nextContext.branchId);
+      if (sessionScopeChanged) queryClient.clear();
+      setRestoreError(null);
+      updatePlatformSession(nextPlatformSession);
+    },
+    [platformSession, queryClient]
+  );
+
+  const clearPlatformSession = useCallback(() => {
+    setRestoreError(null);
+    updatePlatformSession(null);
+    queryClient.clear();
+  }, [queryClient]);
+
   const contextValue = useMemo(
     () => ({
       platformSession,
-      setPlatformSession: updatePlatformSession,
-      clearPlatformSession: () => updatePlatformSession(null),
+      isRestoring,
+      restoreError,
+      restoreSession,
+      setPlatformSession,
+      clearPlatformSession,
     }),
-    [platformSession]
+    [
+      platformSession,
+      isRestoring,
+      restoreError,
+      restoreSession,
+      setPlatformSession,
+      clearPlatformSession,
+    ]
   );
 
   return (
