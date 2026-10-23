@@ -8,6 +8,7 @@ type SplitPanelLayoutProperties = {
   children: ReactNode;
   compactHeader?: ReactNode;
   footer?: ReactNode;
+  showcaseVisible?: boolean;
   className?: string;
   showcaseClassName?: string;
   contentClassName?: string;
@@ -20,7 +21,8 @@ type SplitPanelLayoutProperties = {
  * scrolls within its own border. The showcase is hidden on smaller screens,
  * where `compactHeader` takes its place above the content. The visible
  * headings live in the content, so `title` is the page heading for assistive
- * technology.
+ * technology. Set `showcaseVisible` to false for a centered single-panel view;
+ * in that view, `compactHeader` remains visible at every screen size.
  */
 export function SplitPanelLayout({
   title,
@@ -29,6 +31,7 @@ export function SplitPanelLayout({
   children,
   compactHeader,
   footer,
+  showcaseVisible = true,
   className,
   showcaseClassName,
   contentClassName,
@@ -39,16 +42,25 @@ export function SplitPanelLayout({
     // keep their own widths and are centred together as one group, so wide
     // screens show equal margins on both sides.
     <div className={cn("min-h-dvh", className)}>
-      <div className="grid min-h-dvh w-full gap-6 p-4 lg:h-dvh lg:grid-cols-[min(45.5rem,calc((100%_-_4rem)/2))_minmax(0,32rem)] lg:grid-rows-[minmax(0,1fr)] lg:justify-center lg:gap-16 lg:overflow-hidden lg:p-6">
-        <aside
-          aria-label={showcaseLabel}
-          className={cn(
-            "relative isolate hidden h-full flex-col items-center justify-center gap-8 overflow-hidden rounded-2xl p-10 text-center lg:flex xl:p-14",
-            showcaseClassName
-          )}
-        >
-          {showcase}
-        </aside>
+      <div
+        className={cn(
+          "grid min-h-dvh w-full gap-6 p-4 lg:h-dvh lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:p-6",
+          showcaseVisible
+            ? "lg:grid-cols-[min(45.5rem,calc((100%_-_4rem)/2))_minmax(0,32rem)] lg:justify-center lg:gap-16"
+            : "lg:grid-cols-[minmax(0,1fr)] lg:justify-center"
+        )}
+      >
+        {showcaseVisible && (
+          <aside
+            aria-label={showcaseLabel}
+            className={cn(
+              "relative isolate hidden h-full flex-col items-center justify-center gap-8 overflow-hidden rounded-2xl p-10 text-center lg:flex xl:p-14",
+              showcaseClassName
+            )}
+          >
+            {showcase}
+          </aside>
+        )}
         <main
           className={cn(
             "flex flex-col items-center justify-center px-1 py-8 sm:px-6 lg:min-h-0 lg:px-0 lg:py-0",
@@ -62,7 +74,11 @@ export function SplitPanelLayout({
               contentWidthClassName
             )}
           >
-            {compactHeader && <div className="lg:hidden">{compactHeader}</div>}
+            {compactHeader && (
+              <div className={cn("shrink-0", showcaseVisible && "lg:hidden")}>
+                {compactHeader}
+              </div>
+            )}
             <div className="flex w-full flex-col lg:min-h-0 [&>*]:w-full lg:[&>*]:relative lg:[&>*]:min-h-0 lg:[&>*]:overflow-y-auto lg:[&>*]:overscroll-contain">
               {children}
             </div>

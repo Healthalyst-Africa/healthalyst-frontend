@@ -2,20 +2,21 @@
 @tailwind components;
 @tailwind utilities;
 
-.registration-scroll-area {
+* {
   scrollbar-color: hsl(var(--primary)) transparent;
   scrollbar-width: thin;
 }
 
-.registration-scroll-area::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 0.375rem;
+  height: 0.375rem;
 }
 
-.registration-scroll-area::-webkit-scrollbar-track {
+*::-webkit-scrollbar-track {
   background: transparent;
 }
 
-.registration-scroll-area::-webkit-scrollbar-thumb {
+*::-webkit-scrollbar-thumb {
   background-color: hsl(var(--primary));
   border: 1px solid transparent;
   border-radius: 9999px;
@@ -44,18 +45,16 @@
     --accent-foreground: 162.86 63.64% 21.57%;
     --destructive: 4.23 76.47% 40%;
     --destructive-foreground: 0 0% 100%;
-    --border: 140 17.65% 83.33%;
-    --input: 151.3 9.02% 50%;
+    /* Structural and form-control borders use the green-subtle palette token. */
+    --border: var(--brand-sand);
+    --input: var(--border);
     --ring: 162.86 63.64% 21.57%;
     --brand-forest: 20 90 70;
     --brand-forest-mid: 15 70 55;
     --brand-forest-deep: 17 44 35;
-    /* Brand gold #C8A062 from the HealthAlyst Africa Figma file. It reaches
-       only 2.4:1 on white: use it for markers and decoration, never for text
-       or focus on light surfaces. */
     --brand-gold: 200 160 98;
     --brand-gold-light: 228 208 177;
-    --brand-gold-subtle: 255 252 245;
+    --brand-gold-subtle: 226 217 200;
     /* Pale gold for text and icons on the brand green (5.4:1). */
     --brand-accent-on-primary: 228 208 177;
     --brand-cream: 250 247 239;

@@ -22,8 +22,8 @@ const NativeSelect = React.forwardRef<
         data-slot="native-select"
         data-size={controlSize}
         className={cn(
-          "h-11 w-full min-w-0 appearance-none rounded-md border border-input/35 hover:border-input bg-transparent px-3 py-2 pr-9 text-sm shadow-sm transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground placeholder:text-xs placeholder:font-light placeholder:text-muted-foreground/50 disabled:pointer-events-none disabled:cursor-not-allowed data-[size=small]:h-8 data-[size=small]:py-1 dark:bg-input/30 dark:hover:bg-input/50",
-          "focus-visible:ring-2 focus-visible:ring-ring",
+          "h-11 w-full min-w-0 appearance-none rounded-md border border-border hover:border-border bg-transparent px-3 py-2 pr-9 text-sm transition-[color,box-shadow] outline-none selection:bg-primary selection:text-primary-foreground placeholder:text-xs placeholder:font-light placeholder:text-muted-foreground/50 disabled:pointer-events-none disabled:cursor-not-allowed data-[size=small]:h-8 data-[size=small]:py-1 dark:bg-input/30 dark:hover:bg-input/50",
+          "focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring",
           "aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40",
           className
         )}

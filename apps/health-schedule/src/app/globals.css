@@ -45,7 +45,7 @@
     --destructive: 4.23 76.47% 40%;
     --destructive-foreground: 0 0% 100%;
     --border: 140 17.65% 83.33%;
-    --input: 151.3 9.02% 50%;
+    --input: var(--border);
     --ring: 162.86 63.64% 21.57%;
     --brand-forest: 20 90 70;
     --brand-forest-mid: 15 70 55;

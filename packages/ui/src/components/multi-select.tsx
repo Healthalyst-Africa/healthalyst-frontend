@@ -89,7 +89,7 @@ export function MultiSelect({
         disabled={disabled}
         aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
-        className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md border border-input/35 bg-transparent px-3 py-2 text-left text-sm shadow-sm transition-colors hover:border-input focus:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive"
+        className="flex min-h-11 w-full items-center justify-between gap-2 rounded-md border border-border bg-transparent px-3 py-2 text-left text-sm transition-colors hover:border-border focus:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive"
       >
         {selectedOptions.length > 0 ? (
           <span className="flex flex-wrap gap-1.5">

@@ -111,7 +111,7 @@ function DynamicFormField({
             onCheckedChange={() => onFieldChange?.(field.name)}
           />
           <FieldLabel
-            className="font-normal leading-5"
+            className="text-xs font-normal leading-5"
             htmlFor={fieldIdentifier}
           >
             <FieldLabelText label={field.label} required={field.required} />

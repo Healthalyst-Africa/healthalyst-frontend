@@ -260,7 +260,7 @@ function ScanAndConfirm({
                 <div className="flex items-center justify-between gap-3 rounded-lg bg-secondary px-4 py-3">
                   <p
                     aria-label={`Setup key: ${setup.secret.split("").join(" ")}`}
-                    className="flex flex-wrap gap-x-3 gap-y-1 text-base font-medium tabular-nums tracking-[0.12em] text-foreground"
+                    className="flex flex-wrap gap-x-3 gap-y-1 text-sm font-medium tabular-nums tracking-[0.12em] text-foreground"
                   >
                     {setupKeyGroups.map((group, groupIndex) => (
                       <span key={`${group}-${groupIndex}`}>{group}</span>
@@ -270,20 +270,20 @@ function ScanAndConfirm({
                     className="shrink-0"
                     type="button"
                     variant="ghost"
-                    size="small"
-                    leadingIcon={<CopyIcon />}
+                    size="icon"
+                    aria-label="Copy setup key"
                     onClick={async () =>
                       setKeyCopyStatus(
                         (await copyText(setup.secret))
-                          ? "Key copied."
-                          : "Copying is not available here. Type the key in."
+                          ? "Setup key copied."
+                          : "Copying is not available here. Type the setup key in."
                       )
                     }
                   >
-                    Copy key
+                    <CopyIcon aria-hidden="true" className="size-4" />
                   </ActionButton>
                 </div>
-                <p aria-live="polite" className="text-xs text-muted-foreground">
+                <p aria-live="polite" className="sr-only">
                   {keyCopyStatus}
                 </p>
               </AccordionContent>
@@ -423,7 +423,11 @@ function RecoveryCodes({
               your phone, such as a password manager.
             </AlertDescription>
           </Alert>
-          <ul aria-label="Recovery codes" className="grid grid-cols-2 gap-2">
+          <ul
+            aria-label="Recovery codes"
+            className="grid h-48 grid-cols-1 gap-2 overflow-y-auto overscroll-contain pr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            tabIndex={0}
+          >
             {recoveryCodes.map((recoveryCode) => (
               <li
                 key={recoveryCode}

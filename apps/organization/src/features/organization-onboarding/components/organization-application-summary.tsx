@@ -5,6 +5,7 @@ import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { Badge } from "@healthalyst/ui/components/badge";
 import { Card, CardContent } from "@healthalyst/ui/components/card";
 import type { PlatformSession } from "~/features/organization-onboarding/api/platform-authentication-service";
+import OrganizationApplicationWorkspace from "~/features/organization-onboarding/components/organization-application-workspace";
 import { useSignOutMutation } from "~/features/organization-onboarding/hooks/use-sign-in";
 
 /** Organisation and application statuses from the Platform API. */
@@ -31,7 +32,7 @@ function describeStatus(status: string): string {
  * returned by sign-in or authenticator set-up. Signing out calls
  * `POST /v1/auth/logout`; the in-memory token is dropped either way.
  */
-export default function SignedInSummary({
+export default function OrganizationApplicationSummary({
   session,
   onSignedOut,
 }: {
@@ -56,7 +57,7 @@ export default function SignedInSummary({
           Welcome, {session.user.firstName}
         </h2>
         <p className="max-w-sm text-sm leading-6 text-muted-foreground">
-          You are signed in to HealthAlyst.
+          Track your organisation application and complete the remaining steps.
         </p>
       </div>
       <Card className="border-border bg-card shadow-sm">
@@ -71,7 +72,13 @@ export default function SignedInSummary({
               </p>
             )}
           </div>
-          {session.memberships.length > 0 ? (
+          {session.memberships.length === 1 && session.memberships[0] ? (
+            <OrganizationApplicationWorkspace
+              accessToken={session.accessToken}
+              organizationId={session.memberships[0].organization.id}
+              userId={session.user.id}
+            />
+          ) : session.memberships.length > 1 ? (
             <section aria-labelledby="signed-in-organizations-heading">
               <h3
                 id="signed-in-organizations-heading"
@@ -94,10 +101,14 @@ export default function SignedInSummary({
                   </li>
                 ))}
               </ul>
+              <p className="mt-3 text-sm text-muted-foreground">
+                Contact HealthAlyst to open an application for a specific
+                organisation.
+              </p>
             </section>
           ) : (
             <p className="text-sm text-muted-foreground">
-              This account does not belong to an organisation yet.
+              This account is not linked to an organisation application yet.
             </p>
           )}
           <ActionButton

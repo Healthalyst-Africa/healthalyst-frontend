@@ -6,7 +6,8 @@ This repository contains Healthalyst client applications. Other local repositori
 
 ```text
 apps/
-  health-schedule/           HealthSchedule organisation onboarding client
+  organization/              Shared organisation hub for onboarding and application status
+  health-schedule/           HealthSchedule product app (spoke)
   super-admin/               HealthAlyst staff dashboard and review client
 packages/
   eslint-config/              Shared ESLint flat configurations
@@ -15,7 +16,7 @@ packages/
   ui/                         Brand-neutral shadcn components and styles
 ```
 
-Add each independently deployable client application under `apps/`. Keep generic shared capabilities in `packages/`. All shadcn primitives belong in `packages/ui`, including those used by a single application. Keep app branding, routes, and product-specific behavior inside the owning app.
+Add each independently deployable client application under `apps/`. The organization app is the shared hub that product apps link to for account onboarding and application status. Keep generic shared capabilities in `packages/`. All shadcn primitives belong in `packages/ui`, including those used by a single application. Keep app branding, routes, and product-specific behavior inside the owning app.
 
 ## Commands
 

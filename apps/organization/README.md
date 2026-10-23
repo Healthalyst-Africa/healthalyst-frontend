@@ -16,11 +16,14 @@ development.
 | --------------- | -------------------------------------------------------------------------------------------- |
 | `/`             | Registration. `?product=healthschedule` (or `labconnect`, `pharmadesk`) pre-selects products |
 | `/sign-in`      | Sign-in: password, then an authenticator or recovery code                                    |
+| `/application`  | Signed-in organisation application status and checklist                                      |
 | `/verify-email` | The page the Platform API's confirmation email links to (`?token=`)                          |
 
-Returning the signed-in user to the product they came from (`returnTo`)
-waits for the session decision: which domains the apps and the API share, so
-the API's refresh cookie reaches every app.
+`/sign-in` only handles the password and authenticator or recovery-code steps.
+After successful sign-in, the organisation hub routes to `/application`, where
+the user can review their organisation status and checklist. The signed-in
+session is held in memory while navigating between those routes. Reloading the
+page clears it and returns the user to sign-in.
 
 ## Structure
 

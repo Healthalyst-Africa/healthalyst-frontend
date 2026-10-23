@@ -236,7 +236,7 @@ export default function OrganizationRegistrationForm({
       </div>
       <Card
         ref={cardReference}
-        className="registration-scroll-area border-border bg-card shadow-sm lg:relative lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain"
+        className="border-border bg-card shadow-sm lg:relative lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain"
       >
         <CardContent className="flex flex-col gap-6 px-6 py-7 md:px-8 md:py-8">
           <form

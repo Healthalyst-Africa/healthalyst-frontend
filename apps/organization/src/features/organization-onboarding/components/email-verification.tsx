@@ -13,9 +13,7 @@ import {
 } from "@healthalyst/ui/components/field";
 import { Input } from "@healthalyst/ui/components/input";
 import { PlatformApiError } from "~/features/organization-onboarding/api/platform-api-error";
-import type { PlatformSession } from "~/features/organization-onboarding/api/platform-authentication-service";
 import AuthenticatorEnrolment from "~/features/organization-onboarding/components/authenticator-enrolment";
-import SignedInSummary from "~/features/organization-onboarding/components/signed-in-summary";
 import {
   useEmailVerificationMutation,
   useEmailVerificationResendMutation,
@@ -25,6 +23,7 @@ import {
   focusFirstInvalidField,
   parseFormData,
 } from "~/shared/forms/form-validation";
+import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
 
 /**
  * Reads the token from the emailed link, `/verify-email?token=…`, and also
@@ -125,7 +124,7 @@ export default function EmailVerification() {
   const headingReference = useRef<HTMLHeadingElement>(null);
   const verificationMutation = useEmailVerificationMutation();
   const router = useRouter();
-  const [session, setSession] = useState<PlatformSession | null>(null);
+  const { platformSession, setPlatformSession } = usePlatformSession();
   const [hasFinishedEnrolment, setHasFinishedEnrolment] = useState(false);
   const verificationError = verificationMutation.error;
   const isLinkExpired =
@@ -148,12 +147,17 @@ export default function EmailVerification() {
     }
   }, [verificationMutation.isSuccess]);
 
-  if (session) {
+  useEffect(() => {
+    if (platformSession) {
+      router.replace("/application");
+    }
+  }, [platformSession, router]);
+
+  if (platformSession) {
     return (
-      <SignedInSummary
-        session={session}
-        onSignedOut={() => router.push("/sign-in")}
-      />
+      <p className="text-sm text-muted-foreground" role="status">
+        Opening your organisation application…
+      </p>
     );
   }
 
@@ -163,8 +167,11 @@ export default function EmailVerification() {
       <AuthenticatorEnrolment
         enrolmentToken={enrolmentToken}
         onEnrolled={(confirmation) => {
+          if (confirmation.session) {
+            setPlatformSession(confirmation.session);
+            return;
+          }
           setHasFinishedEnrolment(true);
-          setSession(confirmation.session);
         }}
       />
     );
