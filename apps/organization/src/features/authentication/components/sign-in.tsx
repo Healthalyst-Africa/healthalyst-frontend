@@ -25,6 +25,7 @@ import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import AuthenticatorEnrolment from "~/features/authentication/components/authenticator-enrolment";
 import { SIGN_IN_LIMITS } from "~/features/authentication/config/authentication-limits";
 import { clearFieldError } from "~/shared/forms/form-validation";
+import { AuthenticatedApplicationRedirectState } from "~/features/authentication/components/authenticated-application-redirect-state";
 
 function ApiErrorMessage({ error }: { error: Error }) {
   return (
@@ -60,6 +61,8 @@ export default function SignIn() {
     codeMutation,
     platformSession,
     isRestoring,
+    isRedirecting,
+    redirectError,
     showStage,
     completeSignIn,
     handlePasswordSubmit,
@@ -85,16 +88,14 @@ export default function SignIn() {
     );
   }
 
-  if (platformSession) {
+  if (platformSession && (isRedirecting || redirectError)) {
     return (
       <OrganizationSignInLayout>
-        <Card className="border-border bg-card shadow-sm" aria-busy="true">
-          <CardContent className="px-5 py-6 sm:px-6 md:px-8 md:py-8">
-            <p className="text-sm text-muted-foreground" role="status">
-              Opening your organisation application…
-            </p>
-          </CardContent>
-        </Card>
+        <AuthenticatedApplicationRedirectState
+          platformSession={platformSession}
+          isRedirecting={isRedirecting}
+          redirectError={redirectError}
+        />
       </OrganizationSignInLayout>
     );
   }

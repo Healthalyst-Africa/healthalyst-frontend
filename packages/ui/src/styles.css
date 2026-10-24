@@ -1,65 +1,83 @@
+/* HealthAlyst's shared visual tokens are owned here for every frontend app. */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 4%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 4%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 4%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
-  --accent: 0 0% 96%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --ring: 0 0% 4%;
+  color-scheme: light;
   --radius: 0.5rem;
-}
-
-.dark {
-  --background: 0 0% 4%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 4%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 4%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 15%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 64%;
-  --accent: 0 0% 15%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 15%;
-  --input: 0 0% 15%;
-  --ring: 0 0% 83%;
-}
-
-:root {
-  --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: 240 5.3% 26.1%;
-  --sidebar-primary: 240 5.9% 10%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 240 4.8% 95.9%;
-  --sidebar-accent-foreground: 240 5.9% 10%;
-  --sidebar-border: 220 13% 91%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
-}
-.dark {
-  --sidebar-background: 240 5.9% 10%;
-  --sidebar-foreground: 240 4.8% 95.9%;
-  --sidebar-primary: 224.3 76.3% 48%;
+  --background: 0 0% 100%;
+  --foreground: 160 44.26% 11.96%;
+  --card: 0 0% 100%;
+  --card-foreground: 160 44.26% 11.96%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 160 44.26% 11.96%;
+  --primary: 162.86 63.64% 21.57%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 135 23.53% 93.33%;
+  --secondary-foreground: 162.86 63.64% 21.57%;
+  --muted: 135 23.53% 93.33%;
+  --muted-foreground: 155 15.79% 29.8%;
+  /* shadcn's accent is the green hover tint; brand gold stays separate. */
+  --accent: 135 23.53% 93.33%;
+  --accent-foreground: 162.86 63.64% 21.57%;
+  --destructive: 4.23 76.47% 40%;
+  --destructive-foreground: 0 0% 100%;
+  --brand-forest: 0.42 0.075 169.253;
+  --brand-forest-mid: 0.355 0.062 170.533;
+  --brand-forest-deep: 0.269 0.037 169.313;
+  --brand-gold: 0.729 0.093 77.45;
+  --brand-gold-light: 0.866 0.047 78.802;
+  --brand-gold-subtle: 0.888 0.025 83.415;
+  --brand-accent-on-primary: 0.866 0.047 78.802;
+  --brand-cream: 0.976 0.011 89.721;
+  --brand-cream-dark: 0.953 0.012 153.669;
+  --brand-cream-light: 0.986 0.008 56.317;
+  --brand-sand: 0.88 0.021 156.771;
+  --brand-sand-dark: 0.76 0.038 162.895;
+  --brand-ink: 0.269 0.037 169.313;
+  --brand-ink-soft: 0.438 0.034 167.279;
+  /* Border values are OKLCH channels, matching the sand brand tokens. */
+  --border: var(--brand-sand);
+  --input: var(--border);
+  --ring: 162.86 63.64% 21.57%;
+  /* Shared app surfaces stay white; cream is an explicit band color. */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 160 44.26% 11.96%;
+  --sidebar-primary: 162.86 63.64% 21.57%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 3.7% 15.9%;
-  --sidebar-accent-foreground: 240 4.8% 95.9%;
-  --sidebar-border: 240 3.7% 15.9%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
+  --sidebar-accent: 135 23.53% 93.33%;
+  --sidebar-accent-foreground: 162.86 63.64% 21.57%;
+  --sidebar-border: var(--brand-sand);
+  --sidebar-ring: 162.86 63.64% 21.57%;
+}
+
+* {
+  border-color: oklch(var(--border));
+  scrollbar-color: hsl(var(--primary)) transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 0.375rem;
+  height: 0.375rem;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--primary));
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+}
+
+body {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Young Serif has one already-heavy weight; do not synthesize another. */
+.font-serif {
+  font-synthesis-weight: none;
 }

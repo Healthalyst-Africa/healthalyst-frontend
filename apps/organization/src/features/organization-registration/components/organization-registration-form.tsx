@@ -8,6 +8,7 @@ import { Card, CardContent } from "@healthalyst/ui/components/card";
 import { FieldError } from "@healthalyst/ui/components/field";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
+import { getOrganizationRegistrationSiteKey } from "@healthalyst/config/environment";
 import RegistrationConfirmation from "~/features/organization-registration/components/registration-confirmation";
 import TurnstileChallenge from "~/features/organization-registration/components/turnstile-challenge";
 import { registrationSteps } from "~/features/organization-registration/config/organization-registration-form-definition";
@@ -158,7 +159,7 @@ export default function OrganizationRegistrationForm({
                 <TurnstileChallenge
                   key={captchaChallengeKey}
                   onResponseTokenChange={handleCaptchaTokenChange}
-                  siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                  siteKey={getOrganizationRegistrationSiteKey()}
                 />
               )}
               {isFinalStep && (

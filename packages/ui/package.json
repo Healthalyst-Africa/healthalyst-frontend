@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./styles.css": "./src/styles.css",
+    "./tailwind-preset": "./tailwind-preset.cjs",
     "./components/*": "./src/components/*.tsx",
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts",

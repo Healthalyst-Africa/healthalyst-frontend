@@ -14,8 +14,11 @@ flowchart TD
   Organization --> Interface[Shared interface package]
   SuperAdmin[Internal Super Admin app] --> Interface
   HealthSchedule --> Interface
+  Organization --> Config[Shared public configuration]
+  HealthSchedule --> Config
   Organization --> Platform[Shared Platform transport]
   SuperAdmin --> Platform
+  Platform --> Config
   Platform --> Browser[Browser requests and auth contracts]
   Browser --> Nest[NestJS Platform API]
   Browser --> Product[Product bearer API transport]
@@ -30,6 +33,7 @@ The NestJS backend remains the authority for permissions and business rules.
 | `apps/organization`     | Shared account authentication, registration, application status and organisation management integration |
 | `apps/health-schedule`  | HealthSchedule product entry and future scheduling workflows                                            |
 | `apps/super-admin`      | Platform staff authentication, workspace and organisation review                                        |
+| `packages/config`       | Shared public environment names, parsing and validation                                                 |
 | `packages/platform-api` | Stable Platform auth contract, browser transport and refresh lifecycle                                  |
 | `packages/ui`           | Neutral shadcn primitives and reusable visual compositions                                              |
 | `packages/icons`        | Semantic icon exports and the icon vendor dependency                                                    |
@@ -90,14 +94,19 @@ unchanged; use descriptive names for project-authored identifiers.
 | Route destinations                                                  | App `config/routes.ts` or `config/application-routes.ts`   |
 | Endpoint paths, allowed options, field limits, upload limits        | Owning feature `config/`                                   |
 | Shared timeout, refresh margin, public requests and session signals | `platform-api/src/config/browser-config.ts`                |
-| API origin and fixed proxy target                                   | App environment; see `docs/authentication.md`              |
+| Public app origins, Platform API origin and validation              | `packages/config`                                          |
+| Platform API fixed proxy target and rewrite                         | `packages/platform-api/next-config.mjs`                    |
+| App route paths                                                     | Owning app `src/config/`                                   |
 | Brand colours and interaction tokens                                | App stylesheet and Tailwind map                            |
 | Neutral reusable visual behaviour                                   | UI package `config/`                                       |
 | One-off labels and local rendering choices                          | Owning view, unless several views share a presentation map |
 
-Do not create a monorepo-wide constants file. Configuration follows its owner so
-a registration change does not require searching unrelated apps. Do not expose
-secrets through public configuration or put auth credentials in browser storage.
+`packages/config` is the shared source for public environment names and their
+validation. Apps still own route paths, and each independently deployed app
+keeps its own environment values. `packages/platform-api` owns the API rewrite
+and reads its server-only proxy target. This centralises shared rules without
+turning the package into a bucket for feature settings. Do not expose secrets
+through public configuration or put auth credentials in browser storage.
 
 ## Shared packages
 

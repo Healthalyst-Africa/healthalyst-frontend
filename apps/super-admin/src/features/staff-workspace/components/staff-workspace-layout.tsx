@@ -124,7 +124,6 @@ export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
   return (
     <DashboardShell
       className="super-admin-dashboard"
-      contentClassName="md:shadow-none"
       brand={
         <div className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center">
           <Image
@@ -167,14 +166,16 @@ export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
                 type="button"
                 size="icon"
                 variant="ghost"
-                className="size-9 border border-border/40 bg-background/40 shadow-none hover:bg-muted/60"
+                className="size-9 border border-border/40 bg-card/40 shadow-none hover:bg-muted/60"
                 aria-label="Notifications"
               >
                 <NotificationIcon aria-hidden="true" className="size-4" />
               </ActionButton>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-80">
-              <h2 className="text-sm font-semibold">Notifications</h2>
+              <h2 className="font-serif text-base font-normal">
+                Notifications
+              </h2>
               <p className="mt-2 text-sm text-muted-foreground">
                 Staff notifications are not available yet.
               </p>

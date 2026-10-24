@@ -123,7 +123,7 @@ export function ReviewApplicationCard({
               noValidate
             >
               <div>
-                <h3 className="font-semibold">Approve organisation</h3>
+                <h3 className="font-serif font-normal">Approve organisation</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Complete every verification check and choose the products to
                   enable.
@@ -207,7 +207,7 @@ export function ReviewApplicationCard({
               noValidate
             >
               <div>
-                <h3 className="font-semibold">Reject application</h3>
+                <h3 className="font-serif font-normal">Reject application</h3>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Rejection is terminal. Give the applicant a clear reason.
                 </p>

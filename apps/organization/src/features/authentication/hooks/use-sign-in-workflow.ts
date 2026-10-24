@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
-import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
+import { useAuthenticatedApplicationRedirect } from "~/features/authentication/hooks/use-authenticated-application-redirect";
 import {
   clearFieldError,
   focusFirstInvalidField,
@@ -23,9 +22,13 @@ import {
 } from "~/features/authentication/hooks/use-sign-in";
 
 export function useSignInWorkflow() {
-  const router = useRouter();
   const { platformSession, isRestoring, setPlatformSession } =
     usePlatformSession();
+  const { isRedirecting, redirectError } = useAuthenticatedApplicationRedirect({
+    platformSession,
+    isRestoring,
+    redirectOrganizationSession: true,
+  });
   const [stage, setStage] = useState<SignInStage>({ kind: "password" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [stageNotice, setStageNotice] = useState<string | null>(null);
@@ -33,12 +36,6 @@ export function useSignInWorkflow() {
   const hasChangedStageReference = useRef(false);
   const passwordMutation = usePasswordSignInMutation();
   const codeMutation = useSignInCodeMutation();
-
-  useEffect(() => {
-    if (platformSession) {
-      router.replace(ORGANIZATION_ROUTES.application);
-    }
-  }, [platformSession, router]);
 
   useEffect(() => {
     // Move focus to the new heading when the stage changes, not on load.
@@ -155,6 +152,8 @@ export function useSignInWorkflow() {
     codeMutation,
     platformSession,
     isRestoring,
+    isRedirecting,
+    redirectError,
     showStage,
     completeSignIn,
     handlePasswordSubmit,

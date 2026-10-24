@@ -1,14 +1,11 @@
 /* eslint-disable no-undef */
 import { fileURLToPath } from "node:url";
-import { createPlatformApiRewrites } from "@healthalyst/platform-api/next-config";
+import { createPlatformApiRewritesFromEnvironment } from "@healthalyst/platform-api/next-config";
 
 const nextConfiguration = {
   reactStrictMode: true,
   rewrites() {
-    return createPlatformApiRewrites({
-      browserAddress: process.env.NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL,
-      upstreamAddress: process.env.HEALTHALYST_PLATFORM_API_URL,
-    });
+    return createPlatformApiRewritesFromEnvironment();
   },
   headers() {
     return [
@@ -21,6 +18,7 @@ const nextConfiguration = {
   output: "standalone",
   outputFileTracingRoot: fileURLToPath(new URL("../..", import.meta.url)),
   transpilePackages: [
+    "@healthalyst/config",
     "@healthalyst/ui",
     "@healthalyst/icons",
     "@healthalyst/platform-api",

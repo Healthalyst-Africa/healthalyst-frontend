@@ -1,9 +1,10 @@
 import { PLATFORM_SESSION_SIGNALS } from "../config/browser-config";
+import { getPlatformApiBrowserAddress } from "@healthalyst/config/platform-api-environment";
 import {
   createPlatformClient,
   type PlatformClient,
 } from "./create-platform-client";
-import { validatePlatformApiAddress } from "./config/api-address";
+import { PlatformApiConfigurationError } from "./errors/platform-api-configuration-error";
 
 let browserPlatformClient: PlatformClient | undefined;
 
@@ -30,9 +31,11 @@ export function getPlatformHttpClient() {
 }
 
 export function getPlatformApiAddress(): string {
-  return validatePlatformApiAddress(
-    process.env.NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL
-  );
+  try {
+    return getPlatformApiBrowserAddress();
+  } catch {
+    throw new PlatformApiConfigurationError();
+  }
 }
 
 export function clearPlatformSession() {

@@ -62,7 +62,7 @@ export function OrganizationApplicationDetails({
   return (
     <section className="flex flex-col gap-5 rounded-lg border border-border bg-muted/30 p-4">
       <div>
-        <h3 className="text-lg font-semibold">Application details</h3>
+        <h3 className="font-serif text-lg font-normal">Application details</h3>
         <p className="mt-1 text-sm text-muted-foreground">
           Uploaded documents are provided by the organisation. Secure viewing
           links expire after one minute.

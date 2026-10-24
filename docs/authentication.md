@@ -47,6 +47,17 @@ Copy each app's `.env.example` into its ignored `.env.local`.
 | `HEALTHALYST_PLATFORM_API_URL`                 | Fixed upstream origin for that proxy; only needed when the public address is `/` |
 | `NEXT_PUBLIC_TURNSTILE_SITE_KEY`               | Public registration challenge key in the organisation hub                        |
 | `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL` | Hub navigation destination in HealthSchedule                                     |
+| `NEXT_PUBLIC_HEALTHALYST_SUPER_ADMIN_APP_URL`  | Super Admin destination for platform staff signing in through the hub            |
+
+Set the Super Admin destination to `http://localhost:3007` locally and to the
+deployed Super Admin app address for deployed builds.
+
+The public environment names and their URL/key validation live in
+`@healthalyst/config`. The Platform API package owns the `/v1` rewrite and reads
+the server-only `HEALTHALYST_PLATFORM_API_URL`. Keep each app's `.env.local` and
+deployment values in that app's environment: the apps build and deploy
+independently. `NEXT_PUBLIC_*` values are embedded in the browser bundle during
+the build, so they must be set for the intended environment before building.
 
 For local development against Render:
 

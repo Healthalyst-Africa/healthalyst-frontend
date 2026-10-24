@@ -1,3 +1,7 @@
+/* eslint-disable no-undef */
+
+import { getPlatformApiBrowserAddress } from "@healthalyst/config/platform-api-environment";
+
 /** A transport-only proxy for the existing API cookie contract. No session is stored here. */
 export function createPlatformApiRewrites({ browserAddress, upstreamAddress }) {
   if (browserAddress?.trim() !== "/") return [];
@@ -25,4 +29,12 @@ export function createPlatformApiRewrites({ browserAddress, upstreamAddress }) {
   return [
     { source: "/v1/:path*", destination: `${parsedAddress.origin}/v1/:path*` },
   ];
+}
+
+/** Builds rewrites from the same shared environment contract used by the apps. */
+export function createPlatformApiRewritesFromEnvironment() {
+  return createPlatformApiRewrites({
+    browserAddress: getPlatformApiBrowserAddress(),
+    upstreamAddress: process.env.HEALTHALYST_PLATFORM_API_URL,
+  });
 }

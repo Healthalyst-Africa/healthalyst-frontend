@@ -1,3 +1,5 @@
+import { getOrganizationHubAddress } from "@healthalyst/config/environment";
+
 export const ORGANIZATION_APP_ROUTES = {
   registration: "/",
   signIn: "/sign-in",
@@ -5,8 +7,5 @@ export const ORGANIZATION_APP_ROUTES = {
 } as const;
 
 export function getOrganizationAppAddress(): string | undefined {
-  return process.env.NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL?.trim().replace(
-    /\/$/,
-    ""
-  );
+  return getOrganizationHubAddress();
 }

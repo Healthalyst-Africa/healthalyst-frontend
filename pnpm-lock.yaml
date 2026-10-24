@@ -29,6 +29,9 @@ importers:
 
   apps/health-schedule:
     dependencies:
+      '@healthalyst/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@healthalyst/icons':
         specifier: workspace:*
         version: link:../../packages/icons
@@ -84,6 +87,9 @@ importers:
 
   apps/organization:
     dependencies:
+      '@healthalyst/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@healthalyst/icons':
         specifier: workspace:*
         version: link:../../packages/icons
@@ -210,6 +216,28 @@ importers:
         specifier: ^5.9.3
         version: 5.9.3
 
+  packages/config:
+    dependencies:
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
+    devDependencies:
+      '@healthalyst/eslint-config':
+        specifier: workspace:*
+        version: link:../eslint-config
+      '@healthalyst/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/node':
+        specifier: ^22.0.0
+        version: 22.20.5
+      eslint:
+        specifier: ^10.12.0
+        version: 10.12.0(jiti@2.6.1)
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
   packages/eslint-config:
     dependencies:
       '@eslint/js':
@@ -261,6 +289,9 @@ importers:
 
   packages/platform-api:
     dependencies:
+      '@healthalyst/config':
+        specifier: workspace:*
+        version: link:../config
       axios:
         specifier: ^1.20.0
         version: 1.20.0

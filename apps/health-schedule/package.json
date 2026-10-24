@@ -10,6 +10,7 @@
     "check-types": "tsc --pretty --noEmit"
   },
   "dependencies": {
+    "@healthalyst/config": "workspace:*",
     "@healthalyst/icons": "workspace:*",
     "@healthalyst/platform-api": "workspace:*",
     "@healthalyst/ui": "workspace:*",

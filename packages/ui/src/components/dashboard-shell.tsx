@@ -63,11 +63,11 @@ function DashboardShellContent({
       </Sidebar>
       <SidebarInset
         className={cn(
-          "min-h-0 min-w-0 overflow-hidden border border-border bg-background",
+          "min-h-0 min-w-0 overflow-hidden border border-border bg-card md:peer-data-[variant=inset]:shadow-none",
           contentClassName
         )}
       >
-        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 rounded-t-xl border-b border-border bg-background px-3 sm:px-5">
+        <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 rounded-t-xl border-b border-border bg-card px-3 sm:px-5">
           <SidebarTrigger />
           <div className="min-w-0 flex-1">{toolbar}</div>
           {actions}

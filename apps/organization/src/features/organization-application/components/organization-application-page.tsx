@@ -9,6 +9,8 @@ import { Card, CardContent } from "@healthalyst/ui/components/card";
 import OrganizationApplicationLayout from "~/components/ui/organization-application-layout";
 import OrganizationApplicationSummary from "~/features/organization-application/components/organization-application-summary";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
+import { useAuthenticatedApplicationRedirect } from "~/features/authentication/hooks/use-authenticated-application-redirect";
+import { AuthenticatedApplicationRedirectState } from "~/features/authentication/components/authenticated-application-redirect-state";
 
 export default function OrganizationApplicationPage() {
   const router = useRouter();
@@ -19,6 +21,11 @@ export default function OrganizationApplicationPage() {
     restoreSession,
     clearPlatformSession,
   } = usePlatformSession();
+  const { isRedirecting, redirectError } = useAuthenticatedApplicationRedirect({
+    platformSession,
+    isRestoring,
+    redirectOrganizationSession: false,
+  });
 
   useEffect(() => {
     if (!isRestoring && !restoreError && !platformSession) {
@@ -32,7 +39,13 @@ export default function OrganizationApplicationPage() {
 
   return (
     <OrganizationApplicationLayout>
-      {platformSession ? (
+      {isRedirecting || redirectError ? (
+        <AuthenticatedApplicationRedirectState
+          platformSession={platformSession}
+          isRedirecting={isRedirecting}
+          redirectError={redirectError}
+        />
+      ) : platformSession ? (
         <OrganizationApplicationSummary
           session={platformSession}
           onSignedOut={handleSignedOut}

@@ -41,7 +41,7 @@ function DashboardOverview({
           <p className="mb-4 text-xs text-muted-foreground">
             Workspace / Overview
           </p>
-          <h1 className="text-2xl font-semibold tracking-tight">
+          <h1 className="font-serif text-3xl font-normal tracking-tight">
             Company overview
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
