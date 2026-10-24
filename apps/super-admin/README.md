@@ -1,6 +1,8 @@
 # HealthAlyst Super Admin
 
-The independently deployed internal staff app runs locally on port 8080. It owns
+The independently deployed internal staff app runs at `http://localhost:3007`
+with both `pnpm dev` and `pnpm start`. Set `HEALTHALYST_APP_ORIGIN` to that
+same address in the local environment. It owns
 Platform staff sign-in, the staff workspace and organisation application review.
 It does not own organisation employee sign-in or product workflows.
 

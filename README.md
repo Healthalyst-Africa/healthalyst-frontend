@@ -22,15 +22,29 @@ Add each independently deployable client application under `apps/`. The organiza
 
 ## Commands
 
-The organisation hub runs locally on port `5173`, HealthSchedule on `3000`,
-and Super Admin on `8080`. These origins are currently allowed by the NestJS
-Platform API's CORS configuration. The NestJS Platform API is the shared backend for
+The frontend apps use these ports for both `dev` and `start`:
+
+| Application      | Local address         |
+| ---------------- | --------------------- |
+| Organisation hub | http://localhost:3005 |
+| HealthSchedule   | http://localhost:3006 |
+| Super Admin      | http://localhost:3007 |
+
+Run `pnpm dev` from this directory to start all three apps, or use the filtered
+commands below to start them separately. Restart existing development processes
+after changing their port configuration.
+
+The NestJS Platform API is the shared backend for
 identity, authentication, organisation context and platform review across
 HealthAlyst apps. The organisation hub and Super Admin call their same-origin
 `/api/platform` backend-for-frontend. It calls NestJS using the server-only
 `HEALTHALYST_PLATFORM_API_URL` and holds tokens in encrypted server session storage. HealthSchedule
 links to the hub and has not added API calls yet. Product spokes can also call
-their documented product API for product-specific workflows.
+their documented product API for product-specific workflows. The backend's
+origin policy must allow the configured organisation and Super Admin origins
+for session refresh. Each app's `HEALTHALYST_APP_ORIGIN` must match its own
+address, and HealthSchedule's `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL`
+must point to the organisation hub.
 
 Read [code organisation](docs/code-organization.md) for feature folders,
 configuration ownership, shared package internals and enforced import direction.

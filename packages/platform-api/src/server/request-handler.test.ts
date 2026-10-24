@@ -14,7 +14,7 @@ import { platformApiClient } from "./http/upstream-client";
 import { readCookieValue } from "./session/cookies";
 import type { PlatformRouteConfiguration } from "./types/platform-session";
 
-const APPLICATION_ORIGIN = "http://localhost:5173";
+const APPLICATION_ORIGIN = "http://localhost:3005";
 const ROUTE_CONFIGURATION: PlatformRouteConfiguration = {
   application: "organization",
   localOrigin: APPLICATION_ORIGIN,

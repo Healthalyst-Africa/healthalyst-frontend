@@ -8,7 +8,9 @@ they link here.
 
 The browser calls this app's same-origin backend-for-frontend at `/api/platform`; the backend-for-frontend calls
 the HealthAlyst NestJS Platform API using the server-only
-`HEALTHALYST_PLATFORM_API_URL`. The app runs on port 5173 in development.
+`HEALTHALYST_PLATFORM_API_URL`. The app runs at `http://localhost:3005` with
+both `pnpm dev` and `pnpm start`. Set `HEALTHALYST_APP_ORIGIN` to that same
+address in the local environment.
 
 ## Entry points for product apps
 

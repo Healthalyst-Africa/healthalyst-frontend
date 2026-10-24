@@ -200,9 +200,9 @@ The NestJS contract supports itemised reviewer change requests and secure upload
 
 | App            | Manifest port | Current relevant local target                                                       |
 | -------------- | ------------- | ----------------------------------------------------------------------------------- |
-| Organisation   | 5173          | Same-origin organisation backend-for-frontend; server calls the NestJS Platform API |
-| HealthSchedule | 3000          | Links to the organisation app at localhost:5173; no API calls yet                   |
-| Super Admin    | 8080          | Same-origin Super Admin backend-for-frontend; server calls the NestJS Platform API  |
+| Organisation   | 3005          | Same-origin organisation backend-for-frontend; server calls the NestJS Platform API |
+| HealthSchedule | 3006          | Links to the organisation app at localhost:3005; no API calls yet                   |
+| Super Admin    | 3007          | Same-origin Super Admin backend-for-frontend; server calls the NestJS Platform API  |
 
 All three Next.js configurations use standalone output and shared-package transpilation. The organisation and Super Admin browsers call their own same-origin backend-for-frontend; those backend-for-frontends call the Platform API from the server. The browser no longer needs Platform API CORS access. Refresh still supplies the app origin and `X-Requested-With: healthalyst` because the backend validates those request headers.
 

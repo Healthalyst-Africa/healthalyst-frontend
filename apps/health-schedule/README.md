@@ -1,13 +1,15 @@
 # HealthSchedule
 
 Patient scheduling and clinical operations for hospitals and clinics, as one
-HealthAlyst product. It runs on port 3000 in development.
+HealthAlyst product. It runs at `http://localhost:3006` with both `pnpm dev`
+and `pnpm start`.
 
 HealthSchedule has no registration or sign-in screens of its own. Every
 HealthAlyst product uses the shared organisation app (`apps/organization`)
 for those, so an organisation registers once and can use several products.
 HealthSchedule links there through `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL`,
 with `?product=healthschedule` so registration pre-selects HealthSchedule.
+For local development, set that variable to `http://localhost:3005`.
 
 ## Structure
 
