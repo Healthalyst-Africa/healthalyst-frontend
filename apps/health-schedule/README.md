@@ -10,6 +10,9 @@ for those, so an organisation registers once and can use several products.
 HealthSchedule links there through `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL`,
 with `?product=healthschedule` so registration pre-selects HealthSchedule.
 For local development, set that variable to `http://localhost:3005`.
+Copy `.env.example` to `.env.local` for the shared Platform transport configuration.
+See [authentication](../../docs/authentication.md) for the backend cookie contract
+and the product bearer-client factory to use when product workflows are added.
 
 ## Structure
 

@@ -8,12 +8,14 @@ export type StaffSignInStage =
   | { kind: "password" }
   | {
       kind: "verification";
+      mfaToken: string;
       methods: SignInMethod[];
       method: SignInMethod;
     }
-  | { kind: "enrollment-loading" }
+  | { kind: "enrollment-loading"; enrolmentToken: string }
   | {
       kind: "enrollment";
+      enrolmentToken: string;
       setup: AuthenticatorSetup;
     }
   | {

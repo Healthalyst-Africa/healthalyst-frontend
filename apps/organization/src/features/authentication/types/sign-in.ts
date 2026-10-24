@@ -4,7 +4,8 @@ export type SignInStage =
   | { kind: "password" }
   | {
       kind: "code";
+      mfaToken: string;
       methods: readonly SignInMethod[];
       method: SignInMethod;
     }
-  | { kind: "enrolment-required" };
+  | { kind: "enrolment-required"; enrolmentToken: string };

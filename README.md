@@ -34,18 +34,19 @@ Run `pnpm dev` from this directory to start all three apps, or use the filtered
 commands below to start them separately. Restart existing development processes
 after changing their port configuration.
 
-The NestJS Platform API is the shared backend for
-identity, authentication, organisation context and platform review across
-HealthAlyst apps. The organisation hub and Super Admin call their same-origin
-`/api/platform` backend-for-frontend. It calls NestJS using the server-only
-`HEALTHALYST_PLATFORM_API_URL` and holds tokens in encrypted server session storage. HealthSchedule
-links to the hub and has not added API calls yet. Product spokes can also call
-their documented product API for product-specific workflows. The backend's
-origin policy must allow the configured organisation and Super Admin origins
-for session refresh. Each app's `HEALTHALYST_APP_ORIGIN` must match its own
-address, and HealthSchedule's `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL`
-must point to the organisation hub.
+The NestJS Platform API is the shared authority for identity, authentication,
+organisation context and platform review. The shared browser transport follows
+its current contract: memory-only bearer access tokens and the API's HttpOnly
+refresh cookie. On reload it refreshes and loads `/v1/me`.
 
+For local development against Render, each app can proxy `/v1` through a fixed
+Next.js rewrite. This forwards the API's own responses and cookies without
+creating frontend sessions. Deployed direct requests need a same-site API origin
+and the backend's exact CORS/origin allowlist. See
+[authentication](docs/authentication.md) for configuration, failure behavior,
+product API transport, and the one-time sign-in needed after migration.
+HealthSchedule currently links to the hub; scheduling/product screens are
+separate work.
 Read [code organisation](docs/code-organization.md) for feature folders,
 configuration ownership, shared package internals and enforced import direction.
 

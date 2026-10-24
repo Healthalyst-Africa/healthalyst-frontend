@@ -17,8 +17,8 @@ flowchart TD
   Organization --> Platform[Shared Platform transport]
   SuperAdmin --> Platform
   Platform --> Browser[Browser requests and auth contracts]
-  Platform --> Server[Server BFF and session storage]
-  Server --> Nest[NestJS API on Render]
+  Browser --> Nest[NestJS Platform API]
+  Browser --> Product[Product bearer API transport]
 ```
 
 An app never imports another app's source. Product spokes navigate to the hub;
@@ -30,7 +30,7 @@ The NestJS backend remains the authority for permissions and business rules.
 | `apps/organization`     | Shared account authentication, registration, application status and organisation management integration |
 | `apps/health-schedule`  | HealthSchedule product entry and future scheduling workflows                                            |
 | `apps/super-admin`      | Platform staff authentication, workspace and organisation review                                        |
-| `packages/platform-api` | Stable Platform auth contract, browser transport and server BFF implementation                          |
+| `packages/platform-api` | Stable Platform auth contract, browser transport and refresh lifecycle                                  |
 | `packages/ui`           | Neutral shadcn primitives and reusable visual compositions                                              |
 | `packages/icons`        | Semantic icon exports and the icon vendor dependency                                                    |
 | Tooling packages        | Focused ESLint, TypeScript and test presets                                                             |
@@ -85,16 +85,15 @@ unchanged; use descriptive names for project-authored identifiers.
 
 ## What belongs in configuration
 
-| Value                                                             | Owner                                                      |
-| ----------------------------------------------------------------- | ---------------------------------------------------------- |
-| Route destinations                                                | App `config/routes.ts` or `config/application-routes.ts`   |
-| Endpoint paths, allowed options, field limits, upload limits      | Owning feature `config/`                                   |
-| Shared browser timeout, session signals, same-origin BFF path     | `platform-api/src/config/browser-config.ts`                |
-| Cookie/refresh policy, allowed proxy routes, Redis policy         | `platform-api/src/server/config/`                          |
-| Backend address, origins, Redis credentials and encryption secret | Server-only environment, read by server configuration      |
-| Brand colours and interaction tokens                              | App stylesheet and Tailwind map                            |
-| Neutral reusable visual behaviour                                 | UI package `config/`                                       |
-| One-off labels and local rendering choices                        | Owning view, unless several views share a presentation map |
+| Value                                                               | Owner                                                      |
+| ------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Route destinations                                                  | App `config/routes.ts` or `config/application-routes.ts`   |
+| Endpoint paths, allowed options, field limits, upload limits        | Owning feature `config/`                                   |
+| Shared timeout, refresh margin, public requests and session signals | `platform-api/src/config/browser-config.ts`                |
+| API origin and fixed proxy target                                   | App environment; see `docs/authentication.md`              |
+| Brand colours and interaction tokens                                | App stylesheet and Tailwind map                            |
+| Neutral reusable visual behaviour                                   | UI package `config/`                                       |
+| One-off labels and local rendering choices                          | Owning view, unless several views share a presentation map |
 
 Do not create a monorepo-wide constants file. Configuration follows its owner so
 a registration change does not require searching unrelated apps. Do not expose
@@ -106,11 +105,13 @@ secrets through public configuration or put auth credentials in browser storage.
 types and endpoint configuration. The existing public `authentication-service`
 import exposes that module without exposing its internal file layout.
 
-`platform-api/src/browser` owns Axios and error translation. Its `server` module
-owns request validation, cookies, challenge handling, encryption, refresh and
-session-store adapters. `src/server.ts` is the stable public entry point. Redis
-and the development memory store implement one session-store interface; token
-storage remains server-side.
+`platform-api/src/browser` owns the Axios client, error translation, private
+memory credential store, single-flight refresh, and bearer interceptors. The
+Platform backend owns the HttpOnly refresh cookie. The package's
+`next-config` export provides a fixed `/v1` transport rewrite for local/Render
+use. It creates no frontend session and does not store credentials on the server.
+Product API clients share their app's Platform credential lifecycle and send
+bearer tokens without cookies. See [authentication](authentication.md).
 
 `ui/src/components` retains shadcn primitive entry points. Private form rendering
 helpers live in `components/forms`, reusable form metadata in `types`, and form

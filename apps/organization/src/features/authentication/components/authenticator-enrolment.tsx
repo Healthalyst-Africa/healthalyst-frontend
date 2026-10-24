@@ -359,18 +359,20 @@ function RecoveryCodes({
 
 /**
  * Sets up an authenticator app for an account that has none, using the
- * short-lived HttpOnly challenge cookie established by email confirmation or
+ * short-lived enrolment token returned by email confirmation or
  * the password step:
  * `POST /v1/auth/mfa/totp/setup`, then `POST /v1/auth/mfa/totp/confirm` with
  * the first code. The recovery codes are shown once, before `onEnrolled`.
  */
 export default function AuthenticatorEnrolment({
+  enrolmentToken,
   onEnrolled,
 }: {
+  enrolmentToken: string;
   onEnrolled: (confirmation: AuthenticatorConfirmation) => void;
 }) {
   const { setup, setupMutation, confirmationMutation, isExpired } =
-    useAuthenticatorEnrolmentWorkflow();
+    useAuthenticatorEnrolmentWorkflow(enrolmentToken);
 
   if (confirmationMutation.data) {
     const confirmation = confirmationMutation.data;

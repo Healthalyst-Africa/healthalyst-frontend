@@ -7,8 +7,11 @@
     "./api-error": "./src/browser/errors/index.ts",
     "./authentication-service": "./src/authentication/index.ts",
     "./http-client": "./src/browser/index.ts",
-    "./server": "./src/server.ts",
-    "./config": "./src/config/browser-config.ts"
+    "./config": "./src/config/browser-config.ts",
+    "./next-config": {
+      "types": "./next-config.d.mts",
+      "default": "./next-config.mjs"
+    }
   },
   "scripts": {
     "lint": "eslint ./src --max-warnings=0",
@@ -17,7 +20,6 @@
   },
   "dependencies": {
     "axios": "^1.20.0",
-    "ioredis": "^6.0.0",
     "zod": "^4.6.5"
   },
   "devDependencies": {

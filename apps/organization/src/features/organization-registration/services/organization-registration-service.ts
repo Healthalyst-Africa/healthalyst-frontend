@@ -1,4 +1,5 @@
 import { getPlatformHttpClient } from "@healthalyst/platform-api/http-client";
+import { PUBLIC_PLATFORM_REQUEST } from "@healthalyst/platform-api/config";
 import { toPlatformApiError } from "@healthalyst/platform-api/api-error";
 import {
   policyVersionsSchema,
@@ -25,7 +26,8 @@ import {
 export async function getPolicyVersions(): Promise<PolicyVersions> {
   try {
     const response = await getPlatformHttpClient().get<unknown>(
-      REGISTRATION_ENDPOINTS.policies
+      REGISTRATION_ENDPOINTS.policies,
+      PUBLIC_PLATFORM_REQUEST
     );
     const policyVersions = policyVersionsSchema.safeParse(response.data);
     if (!policyVersions.success) {
@@ -46,7 +48,8 @@ export async function getPlatformOrganizationTypes(): Promise<
 > {
   try {
     const response = await getPlatformHttpClient().get<unknown>(
-      REGISTRATION_ENDPOINTS.organizationTypes
+      REGISTRATION_ENDPOINTS.organizationTypes,
+      PUBLIC_PLATFORM_REQUEST
     );
     const organizationTypes = organizationTypesResponseSchema.safeParse(
       response.data
@@ -69,7 +72,8 @@ export async function getPlatformNigerianStates(): Promise<
 > {
   try {
     const response = await getPlatformHttpClient().get<unknown>(
-      REGISTRATION_ENDPOINTS.states
+      REGISTRATION_ENDPOINTS.states,
+      PUBLIC_PLATFORM_REQUEST
     );
     const states = nigerianStatesResponseSchema.safeParse(response.data);
     if (!states.success) throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
@@ -102,7 +106,8 @@ export async function registerOrganizationOnPlatform(
   try {
     const response = await getPlatformHttpClient().post<unknown>(
       REGISTRATION_ENDPOINTS.registrations,
-      registrationRequest
+      registrationRequest,
+      PUBLIC_PLATFORM_REQUEST
     );
     const registrationResponse = registrationResponseSchema.safeParse(
       response.data

@@ -5,7 +5,11 @@ import type {
   StepUpVerificationRequest,
   PlatformTokenResponse,
 } from "../types/authentication";
-import { getPlatformHttpClient } from "../../browser/http-client";
+import {
+  getPlatformClient,
+  getPlatformHttpClient,
+} from "../../browser/http-client";
+import { PUBLIC_PLATFORM_REQUEST } from "../../config/browser-config";
 import {
   AUTHENTICATION_ENDPOINTS,
   BODYLESS_POST_HEADERS,
@@ -17,14 +21,21 @@ import {
 } from "../schemas/authenticator";
 import { UNEXPECTED_RESPONSE_MESSAGE } from "../errors/authentication-errors";
 import { toPlatformApiError } from "../../browser/errors/index";
-import { sessionSchema, tokenResponseSchema } from "../schemas/identity";
+import {
+  sessionSchema,
+  sessionResponseSchema,
+  tokenResponseSchema,
+} from "../schemas/identity";
 
-/** Start setup using the short-lived HttpOnly enrolment challenge cookie. */
-export async function startAuthenticatorSetup(): Promise<AuthenticatorSetup> {
+/** An enrolment challenge starts setup before login; otherwise a bearer session is required. */
+export async function startAuthenticatorSetup(
+  enrolmentToken?: string
+): Promise<AuthenticatorSetup> {
   try {
     const response = await getPlatformHttpClient().post<unknown>(
       AUTHENTICATION_ENDPOINTS.authenticatorSetup,
-      {}
+      enrolmentToken ? { enrolmentToken } : {},
+      enrolmentToken ? PUBLIC_PLATFORM_REQUEST : undefined
     );
     const setup = authenticatorSetupSchema.safeParse(response.data);
     if (!setup.success) throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
@@ -44,15 +55,21 @@ export async function confirmAuthenticator(
   try {
     const response = await getPlatformHttpClient().post<unknown>(
       AUTHENTICATION_ENDPOINTS.authenticatorConfirmation,
-      confirmation
+      confirmation,
+      confirmation.enrolmentToken ? PUBLIC_PLATFORM_REQUEST : undefined
     );
     const confirmed = authenticatorConfirmationSchema.safeParse(response.data);
     if (!confirmed.success) throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
     const { recoveryCodes, ...sessionFields } = confirmed.data;
-    const session = sessionSchema.safeParse(sessionFields);
+    const session = sessionResponseSchema.safeParse(sessionFields);
+    if (session.success)
+      getPlatformClient().replaceAccessCredential(
+        session.data,
+        session.data.user.id
+      );
     return {
       recoveryCodes,
-      session: session.success ? session.data : null,
+      session: session.success ? sessionSchema.parse(session.data) : null,
     };
   } catch (error) {
     throw toPlatformApiError(error, "We could not check the code. Try again.", {
@@ -77,7 +94,7 @@ export async function regenerateRecoveryCodes(): Promise<string[]> {
   }
 }
 
-/** `POST /v1/auth/step-up`; the backend-for-frontend keeps the token server-side. */
+/** `POST /v1/auth/step-up` replaces the transport's access token after recent MFA. */
 export async function verifyStepUpCode(
   verification: StepUpVerificationRequest
 ): Promise<PlatformTokenResponse> {
@@ -88,7 +105,9 @@ export async function verifyStepUpCode(
     );
     const tokenResponse = tokenResponseSchema.safeParse(response.data);
     if (!tokenResponse.success) throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
-    return tokenResponse.data;
+    getPlatformClient().replaceAccessCredential(tokenResponse.data);
+    const { tokenType, expiresIn, activeContext } = tokenResponse.data;
+    return { tokenType, expiresIn, activeContext };
   } catch (error) {
     throw toPlatformApiError(error, "We could not verify your code.", {
       code: "code",

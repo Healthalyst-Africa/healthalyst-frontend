@@ -58,6 +58,9 @@ export function useSignInWorkflow() {
   }
 
   function completeSignIn(session: PlatformSession) {
+    passwordMutation.reset();
+    codeMutation.reset();
+    setStage({ kind: "password" });
     setPlatformSession(session);
   }
 
@@ -78,7 +81,10 @@ export function useSignInWorkflow() {
     passwordMutation.mutate(validationResult.data, {
       onSuccess: (passwordStep) => {
         if (passwordStep.status === "MFA_ENROLMENT_REQUIRED") {
-          showStage({ kind: "enrolment-required" });
+          showStage({
+            kind: "enrolment-required",
+            enrolmentToken: passwordStep.enrolmentToken,
+          });
           return;
         }
         const method = passwordStep.methods.includes("totp")
@@ -86,6 +92,7 @@ export function useSignInWorkflow() {
           : (passwordStep.methods[0] ?? "totp");
         showStage({
           kind: "code",
+          mfaToken: passwordStep.mfaToken,
           methods: passwordStep.methods,
           method,
         });
@@ -109,6 +116,7 @@ export function useSignInWorkflow() {
     setFieldErrors({});
     codeMutation.mutate(
       {
+        mfaToken: stage.mfaToken,
         method: stage.method,
         code: validationResult.data.code,
       },

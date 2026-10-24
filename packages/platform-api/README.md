@@ -1,43 +1,55 @@
 # Platform API integration
 
-This package shares the NestJS Platform contract across frontend apps. Apps own
-their workflows and supply server route configuration; the package owns browser
-transport, authentication requests and the BFF session implementation.
+Shared NestJS Platform authentication contracts and browser transport. Each app
+owns its workflows, providers, query cache, and API address.
 
-## Public imports
-
-| Import                                             | Responsibility                                                |
-| -------------------------------------------------- | ------------------------------------------------------------- |
-| `@healthalyst/platform-api/authentication-service` | Auth operations and domain types                              |
-| `@healthalyst/platform-api/http-client`            | Same-origin Axios transport                                   |
-| `@healthalyst/platform-api/api-error`              | Normalised transport errors                                   |
-| `@healthalyst/platform-api/config`                 | Safe browser transport settings and session signals           |
-| `@healthalyst/platform-api/server`                 | Server route handler only; never import in a client component |
+| Public import                                      | Responsibility                                                          |
+| -------------------------------------------------- | ----------------------------------------------------------------------- |
+| `@healthalyst/platform-api/authentication-service` | Typed auth operations and identity types                                |
+| `@healthalyst/platform-api/http-client`            | Platform Axios instance, product client factory, local session clearing |
+| `@healthalyst/platform-api/api-error`              | Validated backend and transport errors                                  |
+| `@healthalyst/platform-api/config`                 | Public-request policy and session events                                |
+| `@healthalyst/platform-api/next-config`            | Fixed `/v1` transport rewrite for cookie-compatible environments        |
 
 ```text
 src/
-  authentication/           Auth services, schemas, types, endpoint config
-  browser/                  Axios, response error schema and error translation
-  config/                   Public transport defaults
-  server/
-    authentication/         Temporary MFA/enrolment challenge handling
-    config/                 Runtime settings, request/route/session policies
-    http/                   Request validation and upstream response processing
-    schemas/                Stored session validation
-    session/                Cookies, encryption, refresh and session lifecycle
-    stores/                 Redis and development memory adapters
-    types/                  Server contracts
-    request-handler.ts      Request orchestration
-  server.ts                 Public server entry
+  authentication/
+    config/                   Endpoint paths and request defaults
+    schemas/                  Actual backend wire responses and identity snapshots
+    services/                 Auth operations, response validation, credential replacement
+    types/                    Public auth contracts
+    tests/                    Backend contract and profile restoration checks
+  browser/
+    config/                   API origin validation
+    interceptors/             Bearer headers, bounded authentication retry, context isolation
+    session/                  Private memory credential store and single-flight refresh
+    errors/                   API and configuration failures
+    schemas/                  Backend error envelopes
+    types/                    Internal request and credential types
+    tests/                    Transport, concurrency, failure, product-boundary tests
+    create-platform-client.ts Isolated transport factory
+    http-client.ts            Browser-only app singleton
+  config/                     Shared public transport policy
+next-config.mjs               Transport-only Next.js rewrite configuration
 ```
 
-Browser requests go to `/api/platform` on the app's origin. Access and refresh
-tokens remain in encrypted server session storage. The browser receives an opaque
-HttpOnly session cookie. The server entry reads the documented server-only
-environment variables from the app process; see the owning app's `.env.example`.
-Do not import server internals from browser code or persist bearer tokens in a
-browser cache.
+Access tokens live in a private transport closure, never localStorage,
+sessionStorage, cookies written by JavaScript, query results, or React identity
+state. The API sets its HttpOnly refresh cookie. MFA/enrolment challenges stay
+in the active workflow and are sent in the backend's required request fields.
 
-Tests exercise the public request handler and profile restoration contract.
-Internal files can be reorganised without changing consumer import paths.
-See [code organisation](../../docs/code-organization.md) for dependency rules.
+Authenticated calls obtain a credential through Platform refresh when needed.
+Concurrent callers share one refresh; an explicit `AUTH_TOKEN_EXPIRED` may replay
+a request once after refresh. Other write failures are never automatically
+repeated. Context-changing refresh cannot replay an operation for another
+organisation. Product clients use bearer tokens without cookies, and always
+refresh through Platform API.
+
+Use `createProductHttpClient(productApiOrigin)` once in the owning product app's
+API layer when adding product API calls. It shares that app's Platform token
+lifecycle without importing another application. Product audience failures do
+not clear a valid Platform session.
+
+See [authentication](../../docs/authentication.md) for environment setup, cookie
+constraints, session recovery, and migration behavior, and
+[code organisation](../../docs/code-organization.md) for ownership rules.

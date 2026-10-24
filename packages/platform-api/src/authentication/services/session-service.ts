@@ -1,4 +1,8 @@
-import { getPlatformHttpClient } from "../../browser/http-client";
+import {
+  clearPlatformSession,
+  getPlatformClient,
+  getPlatformHttpClient,
+} from "../../browser/http-client";
 import {
   AUTHENTICATION_ENDPOINTS,
   BODYLESS_POST_HEADERS,
@@ -8,7 +12,7 @@ import type { PlatformSessionList } from "../types/authentication";
 import { sessionListSchema } from "../schemas/sessions";
 import { UNEXPECTED_RESPONSE_MESSAGE } from "../errors/authentication-errors";
 
-/** End the current Platform API session through the backend-for-frontend. */
+/** End the backend session and clear the current tab's access credential. */
 export async function signOut(): Promise<void> {
   try {
     await getPlatformHttpClient().post(
@@ -18,6 +22,7 @@ export async function signOut(): Promise<void> {
         headers: BODYLESS_POST_HEADERS,
       }
     );
+    clearPlatformSession();
   } catch (error) {
     throw toPlatformApiError(error, "We could not sign you out. Try again.");
   }
@@ -33,6 +38,7 @@ export async function signOutAllSessions(): Promise<void> {
         headers: BODYLESS_POST_HEADERS,
       }
     );
+    clearPlatformSession();
   } catch (error) {
     throw toPlatformApiError(error, "We could not sign out all sessions.");
   }
@@ -62,5 +68,17 @@ export async function revokePlatformSession(
     );
   } catch (error) {
     throw toPlatformApiError(error, "We could not end that session.");
+  }
+}
+
+/** The browser sends the API's HttpOnly cookie. One refresh runs at a time per tab. */
+export async function refreshPlatformSession(): Promise<void> {
+  try {
+    await getPlatformClient().refreshAccessCredential();
+  } catch (error) {
+    throw toPlatformApiError(
+      error,
+      "We could not renew your sign-in. Try again."
+    );
   }
 }

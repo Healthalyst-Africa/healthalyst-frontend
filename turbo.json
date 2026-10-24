@@ -4,14 +4,9 @@
   "globalEnv": [
     "NODE_ENV",
     "NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL",
-    "NEXT_PUBLIC_TURNSTILE_SITE_KEY"
-  ],
-  "globalPassThroughEnv": [
-    "HEALTHALYST_PLATFORM_API_URL",
-    "HEALTHALYST_APP_ORIGIN",
-    "HEALTHALYST_PLATFORM_SESSION_REDIS_URL",
-    "HEALTHALYST_PLATFORM_SESSION_SECRET",
-    "HEALTHALYST_PLATFORM_REFRESH_COOKIE_NAME"
+    "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
+    "NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL",
+    "HEALTHALYST_PLATFORM_API_URL"
   ],
   "tasks": {
     "build": {
@@ -32,7 +27,7 @@
     "test": {
       "dependsOn": ["^test"],
       "inputs": ["$TURBO_DEFAULT$", "vitest.config.ts"],
-      "outputs": ["coverage/**"]
+      "outputs": []
     },
     "test:watch": {
       "cache": false,

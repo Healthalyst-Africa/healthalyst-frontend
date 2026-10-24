@@ -20,15 +20,18 @@ import { STAFF_SIGN_IN_HEADINGS } from "~/features/staff-auth/config/staff-sign-
 
 export function useStaffSignInFlow() {
   const router = useRouter();
-  const { setStaffIdentity, staffIdentity, status } = useStaffSession();
+  const { setStaffIdentity, staffIdentity, status, sessionError } =
+    useStaffSession();
   const [stage, setStage] = useState<StaffSignInStage>({ kind: "password" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [verificationCode, setVerificationCode] = useState("");
   const [hasSavedRecoveryCodes, setHasSavedRecoveryCodes] = useState(false);
 
   const authenticatorSetupMutation = useMutation({
-    mutationFn: startAuthenticatorSetup,
-    onSuccess: (setup) => setStage({ kind: "enrollment", setup }),
+    mutationFn: (enrolmentToken: string) =>
+      startAuthenticatorSetup(enrolmentToken),
+    onSuccess: (setup, enrolmentToken) =>
+      setStage({ kind: "enrollment", setup, enrolmentToken }),
   });
 
   const passwordMutation = useMutation({
@@ -48,19 +51,24 @@ export function useStaffSignInFlow() {
         if (!method) return;
         setStage({
           kind: "verification",
+          mfaToken: passwordStep.mfaToken,
           methods: passwordStep.methods,
           method,
         });
         return;
       }
-      setStage({ kind: "enrollment-loading" });
-      authenticatorSetupMutation.mutate();
+      setStage({
+        kind: "enrollment-loading",
+        enrolmentToken: passwordStep.enrolmentToken,
+      });
+      authenticatorSetupMutation.mutate(passwordStep.enrolmentToken);
     },
   });
 
   const verificationMutation = useMutation({
     mutationFn: verifyStaffSignInCode,
     onSuccess: (nextStaffIdentity) => {
+      returnToPasswordStep();
       setStaffIdentity(nextStaffIdentity);
       router.replace(APPLICATION_ROUTES.dashboard);
     },
@@ -69,6 +77,8 @@ export function useStaffSignInFlow() {
   const authenticatorConfirmationMutation = useMutation({
     mutationFn: confirmStaffAuthenticatorSetup,
     onSuccess: ({ staffIdentity: nextStaffIdentity, recoveryCodes }) => {
+      passwordMutation.reset();
+      authenticatorSetupMutation.reset();
       setHasSavedRecoveryCodes(false);
       setStage({
         kind: "recovery-codes",
@@ -110,6 +120,7 @@ export function useStaffSignInFlow() {
     formEvent.preventDefault();
     if (stage.kind !== "verification") return;
     verificationMutation.mutate({
+      mfaToken: stage.mfaToken,
       method: stage.method,
       code: verificationCode,
     });
@@ -119,6 +130,7 @@ export function useStaffSignInFlow() {
     formEvent.preventDefault();
     if (stage.kind !== "enrollment") return;
     authenticatorConfirmationMutation.mutate({
+      enrolmentToken: stage.enrolmentToken,
       factorId: stage.setup.factorId,
       code: verificationCode,
     });
@@ -136,6 +148,7 @@ export function useStaffSignInFlow() {
   function finishAuthenticatorEnrollment() {
     if (stage.kind !== "recovery-codes" || !hasSavedRecoveryCodes) return;
     setStaffIdentity(stage.staffIdentity);
+    returnToPasswordStep();
     router.replace(APPLICATION_ROUTES.dashboard);
   }
 
@@ -156,6 +169,7 @@ export function useStaffSignInFlow() {
   return {
     stage,
     status,
+    sessionError,
     fieldErrors,
     verificationCode,
     hasSavedRecoveryCodes,

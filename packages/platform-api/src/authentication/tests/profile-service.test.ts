@@ -1,6 +1,19 @@
-import { afterEach, describe, expect, it, vi as mockUtilities } from "vitest";
-import { restorePlatformSession } from "../index";
-import { getPlatformHttpClient } from "../../browser/http-client";
+import {
+  beforeAll,
+  afterAll,
+  afterEach,
+  describe,
+  expect,
+  it,
+  vi as mockUtilities,
+} from "vitest";
+import { getCurrentPlatformProfile, restorePlatformSession } from "../index";
+import {
+  getPlatformClient,
+  getPlatformHttpClient,
+} from "../../browser/http-client";
+
+import { createCredential } from "../../browser/tests/transport-fixtures";
 
 const BRANCH_IDENTIFIER = "00000000-0000-4000-8000-000000000004";
 
@@ -40,6 +53,16 @@ function createProfileResponse(branchIdentifiers: string[]) {
     },
   };
 }
+
+beforeAll(() => {
+  mockUtilities.stubGlobal("window", new EventTarget());
+  mockUtilities.stubEnv("NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL", "/");
+});
+
+afterAll(() => {
+  mockUtilities.unstubAllGlobals();
+  mockUtilities.unstubAllEnvs();
+});
 
 afterEach(() => {
   mockUtilities.restoreAllMocks();
@@ -81,6 +104,50 @@ describe("session restoration from the current profile", () => {
           expect.objectContaining({ path: ["user", "id"] }),
         ]),
       },
+    });
+  });
+  it("accepts a valid profile response during ordinary access-token rotation", async () => {
+    const client = getPlatformClient();
+    client.replaceAccessCredential(
+      createCredential(),
+      "00000000-0000-4000-8000-000000000001"
+    );
+    const identityEpoch = client.getIdentityEpoch();
+    const profile = createProfileResponse(["*"]);
+    mockUtilities
+      .spyOn(getPlatformHttpClient(), "get")
+      .mockImplementationOnce(async () => {
+        client.replaceAccessCredential(
+          createCredential("rotated-access-credential")
+        );
+        return {
+          status: 200,
+          data: profile,
+          config: { platformIdentityEpoch: identityEpoch },
+        };
+      });
+    await expect(getCurrentPlatformProfile()).resolves.toEqual(profile);
+  });
+
+  it("rejects an old profile after the account has actually changed", async () => {
+    const client = getPlatformClient();
+    const identityEpoch = client.getIdentityEpoch();
+    mockUtilities
+      .spyOn(getPlatformHttpClient(), "get")
+      .mockImplementationOnce(async () => {
+        client.replaceAccessCredential(
+          createCredential("another-user-credential"),
+          "00000000-0000-4000-8000-000000000009"
+        );
+        return {
+          status: 200,
+          data: createProfileResponse(["*"]),
+          config: { platformIdentityEpoch: identityEpoch },
+        };
+      });
+    await expect(getCurrentPlatformProfile()).rejects.toMatchObject({
+      code: "AUTH_SESSION_CHANGED",
+      status: 409,
     });
   });
 });

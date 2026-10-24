@@ -6,10 +6,11 @@ import {
   useContext,
   useEffect,
   useState,
+  useRef,
   type ReactNode,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { isAxiosError } from "axios";
+import { clearPlatformSession } from "@healthalyst/platform-api/http-client";
 import { PLATFORM_SESSION_SIGNALS } from "@healthalyst/platform-api/config";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { getCurrentStaffIdentity } from "~/features/staff-auth/services/staff-service";
@@ -32,20 +33,27 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
   const [status, setStatus] = useState<StaffSessionStatus>("loading");
   const [sessionError, setSessionError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const restorationRevisionReference = useRef(0);
 
   const restoreSession = useCallback(async () => {
+    const restorationRevision = ++restorationRevisionReference.current;
+    updateStaffIdentity(null);
+    queryClient.clear();
     setStatus("loading");
     setSessionError(null);
     try {
       const restoredStaffIdentity = await getCurrentStaffIdentity();
+      if (restorationRevision !== restorationRevisionReference.current) return;
       updateStaffIdentity(restoredStaffIdentity);
       setStatus("authenticated");
     } catch (error) {
+      if (restorationRevision !== restorationRevisionReference.current) return;
       updateStaffIdentity(null);
       if (
-        (error instanceof PlatformApiError && error.status === 401) ||
-        (isAxiosError(error) && error.response?.status === 401)
+        error instanceof PlatformApiError &&
+        (error.status === 401 || error.status === 403)
       ) {
+        if (error.status === 403) setSessionError(error.message);
         setStatus("unauthenticated");
         return;
       }
@@ -56,7 +64,7 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
       );
       setStatus("error");
     }
-  }, []);
+  }, [queryClient]);
 
   useEffect(() => {
     void restoreSession();
@@ -64,6 +72,7 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     function handleExpiredStaffSession() {
+      restorationRevisionReference.current += 1;
       updateStaffIdentity(null);
       setSessionError(null);
       setStatus("unauthenticated");
@@ -74,21 +83,34 @@ export function StaffSessionProvider({ children }: { children: ReactNode }) {
       PLATFORM_SESSION_SIGNALS.expiredEvent,
       handleExpiredStaffSession
     );
+    window.addEventListener(
+      PLATFORM_SESSION_SIGNALS.contextChangedEvent,
+      restoreSession
+    );
     return () => {
+      window.removeEventListener(
+        PLATFORM_SESSION_SIGNALS.contextChangedEvent,
+        restoreSession
+      );
       window.removeEventListener(
         PLATFORM_SESSION_SIGNALS.expiredEvent,
         handleExpiredStaffSession
       );
     };
-  }, [queryClient]);
+  }, [queryClient, restoreSession]);
 
   function setStaffIdentity(nextStaffIdentity: StaffIdentity) {
+    restorationRevisionReference.current += 1;
+    if (staffIdentity?.staffAccountId !== nextStaffIdentity.staffAccountId)
+      queryClient.clear();
     updateStaffIdentity(nextStaffIdentity);
     setSessionError(null);
     setStatus("authenticated");
   }
 
   function clearSession() {
+    clearPlatformSession();
+    restorationRevisionReference.current += 1;
     updateStaffIdentity(null);
     setSessionError(null);
     setStatus("unauthenticated");

@@ -12,7 +12,7 @@ import { useSignOutMutation } from "~/features/authentication/hooks/use-sign-in"
 /**
  * Who is signed in and the organisations they belong to, from the session
  * returned by sign-in or authenticator set-up. Signing out calls
- * `POST /v1/auth/logout`; the backend-for-frontend clears the host-only cookie.
+ * `POST /v1/auth/logout`; the API clears its refresh cookie and the transport clears its access token.
  */
 export default function OrganizationApplicationSummary({
   session,

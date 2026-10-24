@@ -1,19 +1,21 @@
-import { z } from "zod";
-import { sessionSchema } from "./identity";
+import { z as schemaLibrary } from "zod";
+import { sessionResponseSchema } from "./identity";
 
-export const authenticatorSetupSchema = z.object({
-  factorId: z.string().min(1),
-  secret: z.string().min(1),
-  otpauthUrl: z.string().startsWith("otpauth://"),
+export const authenticatorSetupSchema = schemaLibrary.object({
+  factorId: schemaLibrary.string().uuid(),
+  secret: schemaLibrary.string().min(1),
+  otpauthUrl: schemaLibrary.string().startsWith("otpauth://"),
 });
 
-export const recoveryCodesSchema = z.array(z.string().min(1)).min(1);
+export const recoveryCodesSchema = schemaLibrary
+  .array(schemaLibrary.string().min(1))
+  .min(1);
 
-export const authenticatorConfirmationSchema = z.union([
-  sessionSchema.extend({ recoveryCodes: recoveryCodesSchema }),
-  z.object({ recoveryCodes: recoveryCodesSchema }),
+export const authenticatorConfirmationSchema = schemaLibrary.union([
+  sessionResponseSchema.extend({ recoveryCodes: recoveryCodesSchema }),
+  schemaLibrary.object({ recoveryCodes: recoveryCodesSchema }).strict(),
 ]);
 
-export const recoveryCodesResponseSchema = z.object({
-  recoveryCodes: z.array(z.string().min(1)).min(1),
+export const recoveryCodesResponseSchema = schemaLibrary.object({
+  recoveryCodes: schemaLibrary.array(schemaLibrary.string().min(1)).min(1),
 });

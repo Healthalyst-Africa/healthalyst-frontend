@@ -1,37 +1,45 @@
-import axios from "axios";
-
+import { PLATFORM_SESSION_SIGNALS } from "../config/browser-config";
 import {
-  PLATFORM_HTTP_CONFIGURATION,
-  PLATFORM_SESSION_SIGNALS,
-} from "../config/browser-config";
+  createPlatformClient,
+  type PlatformClient,
+} from "./create-platform-client";
+import { validatePlatformApiAddress } from "./config/api-address";
 
-const platformHttpClient = axios.create({
-  baseURL: PLATFORM_HTTP_CONFIGURATION.basePath,
-  timeout: PLATFORM_HTTP_CONFIGURATION.timeoutMilliseconds,
-  withCredentials: true,
-  headers: { "X-Requested-With": PLATFORM_HTTP_CONFIGURATION.requestedWith },
-});
+let browserPlatformClient: PlatformClient | undefined;
 
-platformHttpClient.interceptors.response.use(
-  (response) => response,
-  (error: unknown) => {
-    if (
-      axios.isAxiosError(error) &&
-      error.response?.headers[
-        PLATFORM_SESSION_SIGNALS.expiredHeader.toLowerCase()
-      ] === "true" &&
-      typeof window !== "undefined"
-    ) {
-      window.dispatchEvent(new Event(PLATFORM_SESSION_SIGNALS.expiredEvent));
-    }
-    return Promise.reject(error);
-  }
-);
+/** Never share browser credentials through a server process singleton. */
+export function getPlatformClient(): PlatformClient {
+  if (typeof window === "undefined")
+    throw new Error(
+      "Platform browser authentication cannot run on the server."
+    );
+  browserPlatformClient ??= createPlatformClient({
+    address: getPlatformApiAddress(),
+    onSessionExpired: () =>
+      window.dispatchEvent(new Event(PLATFORM_SESSION_SIGNALS.expiredEvent)),
+    onContextChanged: () =>
+      window.dispatchEvent(
+        new Event(PLATFORM_SESSION_SIGNALS.contextChangedEvent)
+      ),
+  });
+  return browserPlatformClient;
+}
 
 export function getPlatformHttpClient() {
-  return platformHttpClient;
+  return getPlatformClient().httpClient;
 }
 
 export function getPlatformApiAddress(): string {
-  return PLATFORM_HTTP_CONFIGURATION.basePath;
+  return validatePlatformApiAddress(
+    process.env.NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL
+  );
+}
+
+export function clearPlatformSession() {
+  getPlatformClient().clearSession();
+}
+
+/** Each product app owns one client per product API; all refreshes use Platform API. */
+export function createProductHttpClient(productAddress: string) {
+  return getPlatformClient().createProductHttpClient(productAddress);
 }

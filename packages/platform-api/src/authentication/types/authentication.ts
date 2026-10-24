@@ -1,4 +1,4 @@
-import type { z } from "zod";
+import type { z as schemaLibrary } from "zod";
 import type {
   signInMethodSchema,
   passwordStepResponseSchema,
@@ -12,20 +12,24 @@ import type { emailVerificationResponseSchema } from "../schemas/verification";
 import type { authenticatorSetupSchema } from "../schemas/authenticator";
 import type { sessionListSchema } from "../schemas/sessions";
 
-export type SignInMethod = z.infer<typeof signInMethodSchema>;
+export type SignInMethod = schemaLibrary.infer<typeof signInMethodSchema>;
 
-export type PasswordStepResponse = z.infer<typeof passwordStepResponseSchema>;
+export type PasswordStepResponse = schemaLibrary.infer<
+  typeof passwordStepResponseSchema
+>;
 
-/** A safe browser session summary. Access and refresh tokens stay server-side. */
-export type PlatformSession = z.infer<typeof sessionSchema>;
+/** Identity state for rendering. Access tokens remain private to the transport. */
+export type PlatformSession = schemaLibrary.infer<typeof sessionSchema>;
 
-export type PlatformProfile = z.infer<typeof meResponseSchema>;
+export type PlatformProfile = schemaLibrary.infer<typeof meResponseSchema>;
 
-export type EmailVerificationResponse = z.infer<
+export type EmailVerificationResponse = schemaLibrary.infer<
   typeof emailVerificationResponseSchema
 >;
 
-export type AuthenticatorSetup = z.infer<typeof authenticatorSetupSchema>;
+export type AuthenticatorSetup = schemaLibrary.infer<
+  typeof authenticatorSetupSchema
+>;
 
 export type AuthenticatorConfirmation = {
   recoveryCodes: string[];
@@ -33,17 +37,25 @@ export type AuthenticatorConfirmation = {
 };
 
 export type AuthenticatorConfirmationRequest = {
+  enrolmentToken?: string;
   factorId: string;
   code: string;
 };
 
-export type PlatformSessionList = z.infer<typeof sessionListSchema>;
+export type PlatformSessionList = schemaLibrary.infer<typeof sessionListSchema>;
 
-export type PlatformTokenResponse = z.infer<typeof tokenResponseSchema>;
+export type PlatformTokenResponse = Omit<
+  schemaLibrary.infer<typeof tokenResponseSchema>,
+  "accessToken"
+>;
 
 export type PasswordSignInRequest = { identifier: string; password: string };
 
-export type SignInCodeRequest = { method: SignInMethod; code: string };
+export type SignInCodeRequest = {
+  mfaToken: string;
+  method: SignInMethod;
+  code: string;
+};
 
 export type StepUpVerificationRequest = { code: string; method?: SignInMethod };
 

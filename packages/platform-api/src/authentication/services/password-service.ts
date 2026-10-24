@@ -1,4 +1,8 @@
-import { getPlatformHttpClient } from "../../browser/http-client";
+import {
+  clearPlatformSession,
+  getPlatformHttpClient,
+} from "../../browser/http-client";
+import { PUBLIC_PLATFORM_REQUEST } from "../../config/browser-config";
 import { AUTHENTICATION_ENDPOINTS } from "../config/authentication-requests";
 import { acceptedResponseSchema } from "../schemas/verification";
 import { UNEXPECTED_RESPONSE_MESSAGE } from "../errors/authentication-errors";
@@ -15,7 +19,8 @@ export async function requestPasswordReset(
   try {
     const response = await getPlatformHttpClient().post<unknown>(
       AUTHENTICATION_ENDPOINTS.forgotPassword,
-      { email: emailAddress }
+      { email: emailAddress },
+      PUBLIC_PLATFORM_REQUEST
     );
     if (!acceptedResponseSchema.safeParse(response.data).success) {
       throw new Error(UNEXPECTED_RESPONSE_MESSAGE);
@@ -25,15 +30,17 @@ export async function requestPasswordReset(
   }
 }
 
-/** `POST /v1/auth/password/reset`; the backend-for-frontend clears the session. */
+/** `POST /v1/auth/password/reset` clears the backend cookie and the local session. */
 export async function resetPassword(
   request: PasswordResetRequest
 ): Promise<void> {
   try {
     await getPlatformHttpClient().post(
       AUTHENTICATION_ENDPOINTS.resetPassword,
-      request
+      request,
+      PUBLIC_PLATFORM_REQUEST
     );
+    clearPlatformSession();
   } catch (error) {
     throw toPlatformApiError(error, "We could not reset your password.", {
       password: "password",

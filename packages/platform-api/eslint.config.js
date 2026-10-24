@@ -2,9 +2,14 @@ import baseConfiguration from "@healthalyst/eslint-config/base";
 
 const BROWSER_IMPORT_RESTRICTIONS = [
   {
-    group: ["**/server", "**/server/**", "node:*", "ioredis"],
+    group: [
+      "**/server",
+      "**/server/**",
+      "node:*",
+      "@healthalyst/platform-api/next-config",
+    ],
     message:
-      "Browser modules cannot import the server session implementation or Node.js dependencies.",
+      "Browser modules cannot import server configuration or Node.js dependencies.",
   },
   {
     group: [

@@ -13,7 +13,10 @@ export function ApplicationQueryProvider({
   const [queryClient] = useState(
     () =>
       new QueryClient({
-        defaultOptions: { queries: QUERY_CONFIGURATION },
+        defaultOptions: {
+          queries: QUERY_CONFIGURATION,
+          mutations: { retry: false, gcTime: 0 },
+        },
       })
   );
   return (

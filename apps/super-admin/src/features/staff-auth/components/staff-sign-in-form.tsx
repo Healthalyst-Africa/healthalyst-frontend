@@ -24,6 +24,7 @@ export function StaffSignInForm() {
   const {
     stage,
     status,
+    sessionError,
     fieldErrors,
     verificationCode,
     hasSavedRecoveryCodes,
@@ -135,6 +136,9 @@ export function StaffSignInForm() {
                   <FieldError role="alert">
                     {passwordMutation.error.message}
                   </FieldError>
+                )}
+                {sessionError && !passwordMutation.error && (
+                  <FieldError role="alert">{sessionError}</FieldError>
                 )}
                 {authenticatorSetupMutation.error && (
                   <FieldError role="alert">
@@ -271,7 +275,9 @@ export function StaffSignInForm() {
                   type="button"
                   isLoading={authenticatorSetupMutation.isPending}
                   loadingText="Preparing setup"
-                  onClick={() => authenticatorSetupMutation.mutate()}
+                  onClick={() =>
+                    authenticatorSetupMutation.mutate(stage.enrolmentToken)
+                  }
                 >
                   Try again
                 </ActionButton>

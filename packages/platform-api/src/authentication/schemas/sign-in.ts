@@ -1,15 +1,20 @@
-import { z } from "zod";
+import { z as schemaLibrary } from "zod";
 
-export const signInMethodSchema = z.enum(["totp", "recovery_code"]);
+export const signInMethodSchema = schemaLibrary.enum(["totp", "recovery_code"]);
 
-export const passwordStepResponseSchema = z.discriminatedUnion("status", [
-  z.object({
-    status: z.literal("MFA_REQUIRED"),
-    methods: z.array(signInMethodSchema).min(1),
-    expiresIn: z.number().int(),
-  }),
-  z.object({
-    status: z.literal("MFA_ENROLMENT_REQUIRED"),
-    expiresIn: z.number().int(),
-  }),
-]);
+export const passwordStepResponseSchema = schemaLibrary.discriminatedUnion(
+  "status",
+  [
+    schemaLibrary.object({
+      status: schemaLibrary.literal("MFA_REQUIRED"),
+      mfaToken: schemaLibrary.string().min(1).max(4096),
+      methods: schemaLibrary.array(signInMethodSchema).min(1),
+      expiresIn: schemaLibrary.number().int(),
+    }),
+    schemaLibrary.object({
+      status: schemaLibrary.literal("MFA_ENROLMENT_REQUIRED"),
+      enrolmentToken: schemaLibrary.string().min(1).max(4096),
+      expiresIn: schemaLibrary.number().int(),
+    }),
+  ]
+);

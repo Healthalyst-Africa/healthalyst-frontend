@@ -30,19 +30,13 @@ cp -n apps/super-admin/.env.example apps/super-admin/.env.local
 pnpm --filter @healthalyst/organization --filter @healthalyst/health-schedule --filter @healthalyst/super-admin dev
 ```
 
-The organisation app (`apps/organization`, port 5173) holds registration,
-email confirmation and sign-in for every HealthAlyst product. The organisation
-app and Super Admin (port 8080) call their same-origin `/api/platform` BFF,
-which calls NestJS using the server-only `HEALTHALYST_PLATFORM_API_URL`.
-HealthSchedule (port 3000)
-links to the organisation hub through
-`NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL` instead of building their own
-onboarding and does not yet make API calls. The NestJS Platform API is the
-shared authority for identity and organisation context across the frontend
-apps; documented product APIs can serve product-specific workflows. Backend
-addresses and session credentials belong in server configuration. Never put secrets in
-`NEXT_PUBLIC_*` variables. The backend currently allows the local frontend
-origins on ports 3000, 5173 and 8080.
+The organisation hub runs on port 3005, HealthSchedule on 3006, and Super Admin
+on 3007. Each app uses its own environment file. Local `/v1` calls can use a
+Next.js transport rewrite to Render; deployed direct requests require a same-site
+API origin and an allowed browser origin. The backend owns the refresh cookie,
+and the shared browser transport keeps access tokens in memory. Follow
+[authentication](docs/authentication.md) for setup and migration requirements.
+Keep all credentials out of public environment variables and browser persistence.
 
 ## Repository structure
 

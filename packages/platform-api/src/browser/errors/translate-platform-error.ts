@@ -1,10 +1,10 @@
 import { isAxiosError } from "axios";
-import { getPlatformApiAddress } from "../http-client";
 import {
   platformErrorBodySchema,
   fieldIssueSchema,
 } from "../schemas/error-response";
 import { PlatformApiError } from "./platform-api-error";
+import { PlatformApiConfigurationError } from "./platform-api-configuration-error";
 
 function toDottedPath(path: string | (string | number)[]): string {
   return Array.isArray(path) ? path.join(".") : path;
@@ -54,7 +54,7 @@ function readRetryAfterSeconds(headerValue: unknown): number | null {
 /**
  * Translates any failed Platform API call into a `PlatformApiError` whose
  * message can be shown to the user. Connection failures, including a request
- * the browser blocked under CORS, name the API address so the cause is clear.
+ * the browser blocked under CORS, retain technical details only in the cause.
  */
 export function toPlatformApiError(
   error: unknown,
@@ -65,6 +65,17 @@ export function toPlatformApiError(
     return error;
   }
 
+  if (error instanceof PlatformApiConfigurationError) {
+    return new PlatformApiError(
+      "The HealthAlyst service is not configured. Contact support if this continues.",
+      "PLATFORM_API_CONFIGURATION_MISSING",
+      null,
+      null,
+      {},
+      error
+    );
+  }
+
   if (!isAxiosError(error)) {
     return new PlatformApiError(fallbackMessage, null, null, null, {}, error);
   }
@@ -72,10 +83,9 @@ export function toPlatformApiError(
   if (!error.response) {
     const isTimeout =
       error.code === "ECONNABORTED" || error.code === "ETIMEDOUT";
-    const address = getPlatformApiAddress() ?? "the Platform API";
     const message = isTimeout
-      ? `The HealthAlyst Platform API (${address}) took too long to respond. Try again.`
-      : `We could not reach the HealthAlyst Platform API (${address}). If the browser console shows a CORS error, the API has not allowed this site yet.`;
+      ? "HealthAlyst took too long to respond. Try again."
+      : "We could not connect to HealthAlyst. Check your connection and try again.";
 
     return new PlatformApiError(message, null, null, null, {}, error);
   }

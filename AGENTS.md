@@ -114,7 +114,7 @@ code, repository policies, or branding into it.
 | `apps/<application>/src/shared`         | App-local helpers used by multiple workflows                                |
 | `apps/<application>/src/components`     | Thin branded wrappers                                                       |
 | `apps/<application>/public`             | Files served directly by public paths                                       |
-| `packages/platform-api`                 | Shared browser transport, authentication contracts and server BFF           |
+| `packages/platform-api`                 | Shared browser transport, authentication contracts and refresh lifecycle    |
 | `packages/icons`                        | Semantic icon exports                                                       |
 | `packages/ui`                           | Shared shadcn primitives, neutral tokens, reusable interface utilities      |
 | `packages/eslint-config`                | Shared lint configuration                                                   |
@@ -186,10 +186,12 @@ code, repository policies, or branding into it.
   registration or other write automatically. Keep API errors recoverable in the
   relevant form or page.
 - Match credentials and token handling to each backend's actual contract. The
-  NestJS Platform API uses bearer access and refresh credentials; the shared BFF
-  keeps them server-side and exposes opaque HttpOnly cookies to each app's browser.
-  Keep server modules out of browser imports. Do not introduce browser token
-  persistence, new refresh strategies or global redirects without a matching contract.
+  NestJS Platform API returns bearer access tokens and sets an HttpOnly refresh
+  cookie. The shared transport keeps access tokens in private browser memory,
+  coordinates refresh and restores identity through `/v1/me`. Keep credentials out
+  of browser persistence, query data and navigation URLs. A transport-only `/v1`
+  rewrite may preserve the API cookie contract for local/Render use; do not add
+  frontend session storage, custom auth cookies or OAuth flows without a matching contract.
 - Review the backend contract before adding a call. Keep application-specific
   services and hooks inside their application; move code to a shared package only
   when multiple products genuinely share a stable, product-neutral contract.

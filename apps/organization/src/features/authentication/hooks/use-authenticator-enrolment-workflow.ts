@@ -6,10 +6,11 @@ import {
   useAuthenticatorSetupMutation,
 } from "~/features/authentication/hooks/use-authenticator-enrolment";
 import { isExpiredEnrolment } from "~/features/authentication/utilities/authenticator-enrolment";
-export function useAuthenticatorEnrolmentWorkflow() {
+export function useAuthenticatorEnrolmentWorkflow(enrolmentToken: string) {
   const hasStartedSetupReference = useRef(false);
-  const setupMutation = useAuthenticatorSetupMutation();
-  const confirmationMutation = useAuthenticatorConfirmationMutation();
+  const setupMutation = useAuthenticatorSetupMutation(enrolmentToken);
+  const confirmationMutation =
+    useAuthenticatorConfirmationMutation(enrolmentToken);
   const setup = setupMutation.data;
 
   useEffect(() => {

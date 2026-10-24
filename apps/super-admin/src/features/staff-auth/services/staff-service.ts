@@ -1,10 +1,8 @@
-import { isAxiosError } from "axios";
 import {
   confirmAuthenticator,
   getCurrentPlatformProfile,
   restorePlatformSession,
   signInWithPassword,
-  signOut,
   switchPlatformContext,
   verifySignInCode,
   type PasswordStepResponse,
@@ -12,7 +10,10 @@ import {
   type PlatformSession,
   type SignInMethod,
 } from "@healthalyst/platform-api/authentication-service";
-import { toPlatformApiError } from "@healthalyst/platform-api/api-error";
+import {
+  PlatformApiError,
+  toPlatformApiError,
+} from "@healthalyst/platform-api/api-error";
 
 import type { StaffIdentity } from "~/features/staff-auth/types/staff-identity";
 
@@ -23,7 +24,7 @@ export async function createStaffSession(
   try {
     return await signInWithPassword({ identifier: emailAddress, password });
   } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 401) {
+    if (error instanceof PlatformApiError && error.status === 401) {
       throw new Error("Email or password is incorrect.", { cause: error });
     }
     throw toPlatformApiError(error, "We could not sign you in. Try again.");
@@ -31,6 +32,7 @@ export async function createStaffSession(
 }
 
 export async function verifyStaffSignInCode(verification: {
+  mfaToken: string;
   method: SignInMethod;
   code: string;
 }): Promise<StaffIdentity> {
@@ -39,6 +41,7 @@ export async function verifyStaffSignInCode(verification: {
 }
 
 export async function confirmStaffAuthenticatorSetup(confirmation: {
+  enrolmentToken: string;
   factorId: string;
   code: string;
 }): Promise<{ staffIdentity: StaffIdentity; recoveryCodes: string[] }> {
@@ -65,8 +68,14 @@ async function activatePlatformStaffSession(
   session: PlatformSession
 ): Promise<StaffIdentity> {
   if (session.platformRoles.length === 0) {
-    await signOut().catch(() => undefined);
-    throw new Error("This account does not have HealthAlyst staff access.");
+    throw new PlatformApiError(
+      "This account does not have HealthAlyst staff access.",
+      "PERMISSION_DENIED",
+      null,
+      403,
+      {},
+      undefined
+    );
   }
 
   if (session.activeContext.realm !== "PLATFORM") {
@@ -80,8 +89,7 @@ async function activatePlatformStaffSession(
     }
     return toStaffIdentity(profile);
   } catch (error) {
-    if (isAxiosError(error) && error.response?.status === 403) {
-      await signOut().catch(() => undefined);
+    if (error instanceof PlatformApiError && error.status === 403) {
       throw new Error("This account does not have HealthAlyst staff access.", {
         cause: error,
       });

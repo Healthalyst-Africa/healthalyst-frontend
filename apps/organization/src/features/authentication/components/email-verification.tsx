@@ -147,11 +147,11 @@ export default function EmailVerification() {
     );
   }
 
-  const authenticatorEnrolmentRequired =
-    verificationMutation.data?.authenticatorEnrolmentRequired;
-  if (authenticatorEnrolmentRequired && !hasFinishedEnrolment) {
+  const enrolmentToken = verificationMutation.data?.enrolmentToken;
+  if (enrolmentToken && !hasFinishedEnrolment) {
     return (
       <AuthenticatorEnrolment
+        enrolmentToken={enrolmentToken}
         onEnrolled={(confirmation) => {
           if (confirmation.session) {
             setPlatformSession(confirmation.session);

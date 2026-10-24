@@ -46,9 +46,8 @@ function ApiErrorMessage({ error }: { error: Error }) {
 }
 
 /**
- * Sign in through the same-origin Platform API service. The backend-for-frontend keeps the
- * short-lived MFA challenge in an HttpOnly cookie and access and refresh
- * tokens in its server-side session.
+ * Complete the Platform API password/MFA contract. Challenges stay in the
+ * current workflow and access credentials stay in the browser transport.
  */
 export default function SignIn() {
   const {
@@ -72,6 +71,7 @@ export default function SignIn() {
     return (
       <OrganizationSignInLayout>
         <AuthenticatorEnrolment
+          enrolmentToken={stage.enrolmentToken}
           onEnrolled={(confirmation) =>
             confirmation.session
               ? completeSignIn(confirmation.session)

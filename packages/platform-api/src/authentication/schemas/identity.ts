@@ -1,68 +1,73 @@
-import { z } from "zod";
+import { z as schemaLibrary } from "zod";
 
 // The Platform API uses "*" for access to all branches.
-const branchScopeSchema = z.array(z.string());
+const branchScopeSchema = schemaLibrary.array(schemaLibrary.string());
 
-export const authenticationContextSchema = z.object({
-  realm: z.enum(["TENANT", "PLATFORM"]),
-  organizationId: z.string().uuid().nullable(),
-  branchId: z.string().uuid().nullable().optional(),
-  organizationStatus: z.string().nullable().optional(),
-  roles: z.array(z.string()).optional(),
-  permissions: z.array(z.string()).optional(),
+export const authenticationContextSchema = schemaLibrary.object({
+  realm: schemaLibrary.enum(["TENANT", "PLATFORM"]),
+  organizationId: schemaLibrary.string().uuid().nullable(),
+  branchId: schemaLibrary.string().uuid().nullable().optional(),
+  organizationStatus: schemaLibrary.string().nullable().optional(),
+  roles: schemaLibrary.array(schemaLibrary.string()).optional(),
+  permissions: schemaLibrary.array(schemaLibrary.string()).optional(),
   branchIds: branchScopeSchema.optional(),
 });
 
-export const platformUserSchema = z.object({
-  id: z.string().uuid(),
-  firstName: z.string(),
-  lastName: z.string(),
-  email: z.string().nullable(),
-  emailVerifiedAt: z.string().nullable().optional(),
-  phone: z.string().nullable().optional(),
-  phoneVerifiedAt: z.string().nullable().optional(),
-  mfa: z.object({ totp: z.boolean() }),
+export const platformUserSchema = schemaLibrary.object({
+  id: schemaLibrary.string().uuid(),
+  firstName: schemaLibrary.string(),
+  lastName: schemaLibrary.string(),
+  email: schemaLibrary.string().nullable(),
+  emailVerifiedAt: schemaLibrary.string().nullable().optional(),
+  phone: schemaLibrary.string().nullable().optional(),
+  phoneVerifiedAt: schemaLibrary.string().nullable().optional(),
+  mfa: schemaLibrary.object({ totp: schemaLibrary.boolean() }),
 });
 
-export const membershipSchema = z.object({
-  membershipId: z.string().uuid(),
-  organization: z.object({
-    id: z.string().uuid(),
-    name: z.string(),
-    status: z.string(),
-    type: z.string().nullable(),
+export const membershipSchema = schemaLibrary.object({
+  membershipId: schemaLibrary.string().uuid(),
+  organization: schemaLibrary.object({
+    id: schemaLibrary.string().uuid(),
+    name: schemaLibrary.string(),
+    status: schemaLibrary.string(),
+    type: schemaLibrary.string().nullable(),
   }),
-  roles: z.array(z.string()),
-  products: z.array(z.string()),
+  roles: schemaLibrary.array(schemaLibrary.string()),
+  products: schemaLibrary.array(schemaLibrary.string()),
 });
 
-export const sessionSchema = z.object({
-  tokenType: z.literal("Bearer").optional(),
-  expiresIn: z.number().int().optional(),
+export const sessionSchema = schemaLibrary.object({
+  tokenType: schemaLibrary.literal("Bearer").optional(),
+  expiresIn: schemaLibrary.number().int().optional(),
   activeContext: authenticationContextSchema,
   user: platformUserSchema,
-  memberships: z.array(membershipSchema),
-  platformRoles: z.array(z.string()),
+  memberships: schemaLibrary.array(membershipSchema),
+  platformRoles: schemaLibrary.array(schemaLibrary.string()),
 });
 
-export const tokenResponseSchema = z.object({
-  tokenType: z.literal("Bearer"),
-  expiresIn: z.number().int(),
+export const tokenResponseSchema = schemaLibrary.object({
+  accessToken: schemaLibrary.string().min(1),
+  tokenType: schemaLibrary.literal("Bearer"),
+  expiresIn: schemaLibrary.number().int().positive(),
   activeContext: authenticationContextSchema,
 });
 
-export const meResponseSchema = z.object({
+export const sessionResponseSchema = sessionSchema.extend(
+  tokenResponseSchema.shape
+);
+
+export const meResponseSchema = schemaLibrary.object({
   user: platformUserSchema.extend({
-    emailVerifiedAt: z.string().nullable(),
-    phone: z.string().nullable(),
-    phoneVerifiedAt: z.string().nullable(),
+    emailVerifiedAt: schemaLibrary.string().nullable(),
+    phone: schemaLibrary.string().nullable(),
+    phoneVerifiedAt: schemaLibrary.string().nullable(),
   }),
-  memberships: z.array(membershipSchema),
-  platformRoles: z.array(z.string()),
+  memberships: schemaLibrary.array(membershipSchema),
+  platformRoles: schemaLibrary.array(schemaLibrary.string()),
   activeContext: authenticationContextSchema.extend({
-    organizationStatus: z.string().nullable(),
-    roles: z.array(z.string()),
-    permissions: z.array(z.string()),
+    organizationStatus: schemaLibrary.string().nullable(),
+    roles: schemaLibrary.array(schemaLibrary.string()),
+    permissions: schemaLibrary.array(schemaLibrary.string()),
     branchIds: branchScopeSchema,
   }),
 });

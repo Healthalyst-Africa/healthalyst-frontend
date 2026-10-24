@@ -1,72 +1,43 @@
-# HealthAlyst organisation app
+# HealthAlyst organisation hub
 
-The shared home for every HealthAlyst organisation, whichever product it
-starts from: registration, email confirmation, sign-in with an authenticator
-code, and (later) the organisation profile, members and enabled products.
-Product apps such as HealthSchedule do not build their own onboarding screens;
-they link here.
+Shared registration, email confirmation, password/MFA sign-in, application status,
+and organisation-management integration. Product apps navigate here for account
+onboarding. This app runs on port 3005 for both `dev` and `start`.
 
-The browser calls this app's same-origin backend-for-frontend at `/api/platform`; the backend-for-frontend calls
-the HealthAlyst NestJS Platform API using the server-only
-`HEALTHALYST_PLATFORM_API_URL`. The app runs at `http://localhost:3005` with
-both `pnpm dev` and `pnpm start`. Set `HEALTHALYST_APP_ORIGIN` to that same
-address in the local environment.
+| Route              | Purpose                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------ |
+| `/`                | Registration; `?product=healthschedule`, `labconnect`, or `pharmadesk` preselects products |
+| `/sign-in`         | Password, authenticator/recovery code, and initial MFA enrolment                           |
+| `/application`     | Signed-in organisation application and checklist                                           |
+| `/verify-email`    | One-time email confirmation and optional MFA enrolment                                     |
+| `/forgot-password` | Request a password reset link                                                              |
+| `/reset-password`  | Set a password from a one-time email link                                                  |
 
-## Entry points for product apps
+The shared Platform transport keeps the short-lived access token in private
+browser memory. The API owns the HttpOnly refresh cookie. On reload it refreshes
+and reads `/v1/me`; sign-in routes then open `/application`. The application
+provider owns identity state and clears cached data on identity/context changes.
+MFA challenges stay in workflow state and are sent in the backend request body.
 
-| Route              | Purpose                                                                                      |
-| ------------------ | -------------------------------------------------------------------------------------------- |
-| `/`                | Registration. `?product=healthschedule` (or `labconnect`, `pharmadesk`) pre-selects products |
-| `/sign-in`         | Sign-in: password, then an authenticator or recovery code                                    |
-| `/application`     | Signed-in organisation application status and checklist                                      |
-| `/verify-email`    | The page the Platform API's confirmation email links to (`?token=`)                          |
-| `/forgot-password` | Request a password reset link                                                                |
-| `/reset-password`  | Set a new password from the one-time email link                                              |
-
-`/sign-in` only handles the password and authenticator or recovery-code steps.
-After successful sign-in, the organisation hub routes to `/application`, where
-the user can review their organisation status and checklist. The backend-for-frontend keeps the
-Platform access and refresh tokens in encrypted server-side Redis storage. The
-browser receives an opaque, host-only `HttpOnly; Secure; SameSite=Strict`
-session cookie; JavaScript cannot read either token. During MFA or
-authenticator enrolment, the backend-for-frontend sets a separate short-lived
-HttpOnly challenge cookie scoped to `/api/platform/v1/auth`; the UI receives
-only the challenge state, not the credential. On reload, the app calls
-`GET /v1/me` through the
-backend-for-frontend, which refreshes the API session when needed.
-
-Set `HEALTHALYST_PLATFORM_API_URL`, `HEALTHALYST_APP_ORIGIN`,
-`HEALTHALYST_PLATFORM_SESSION_REDIS_URL`, and `HEALTHALYST_PLATFORM_SESSION_SECRET` in the app's
-local environment. The secret must contain at least 32 bytes. Local Redis is
-available from the backend development Compose setup. The process-memory store
-is only a development fallback when no Redis URL is set; sessions in that
-fallback end when the Next.js server restarts. Production requires a reachable
-private Redis service and a stable, app-specific secret shared by every
-instance of this app. Use TLS for a remotely hosted Redis service.
-
-The backend-for-frontend sends the app origin and `X-Requested-With: healthalyst` to the Platform
-API when refreshing. The backend's existing origin/CSRF policy must allow the
-deployed app origin; browser-to-Render CORS is no longer part of this request.
-
-## Structure
+Copy `.env.example` to `.env.local`. Local requests use `/v1` through the Next.js
+transport rewrite to Render. Use [authentication](../../docs/authentication.md)
+for direct deployed origins, cookie constraints, and migration instructions.
 
 ```text
 src/
-  app/                         Thin routes, root layout, styles and BFF entry
+  app/                         Thin routes, root layout, metadata, styles
   config/                      Routes and authentication showcase settings
-  components/ui/               Thin app-wide branded wrappers
+  components/ui/               Thin branded wrappers
   features/
     authentication/            Sign-in, email/password recovery and MFA
-    organization-registration/ Registration form and reference data
-    organization-application/  Application status, documents and submission
-    organization-management/   Profile, branch and capability integration
-  infrastructure/auth/         Session provider and server BFF configuration
+    organization-registration/ Registration and public reference data
+    organization-application/  Application status, documents and submission services
+    organization-management/   Profile, branch, capability and department services
+  infrastructure/auth/         Browser identity provider
   infrastructure/query/        Query provider and defaults
-  shared/forms/                Shared validation and focus helpers
-  shared/organization/         Reference types, schemas and values used by features
+  shared/forms/                Validation and focus helpers
+  shared/organization/         Contracts used by multiple workflows
 ```
 
-Each feature separates components, workflow hooks, services, schemas, types,
-configuration and utilities where needed. Authentication requests and transport
-come directly from `@healthalyst/platform-api`. See
-[code organisation](../../docs/code-organization.md) for dependency rules.
+See [code organisation](../../docs/code-organization.md) for dependency rules.
+Service coverage does not imply every operation has a connected screen.

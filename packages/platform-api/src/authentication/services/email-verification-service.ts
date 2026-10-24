@@ -1,5 +1,6 @@
 import type { EmailVerificationResponse } from "../types/authentication";
 import { getPlatformHttpClient } from "../../browser/http-client";
+import { PUBLIC_PLATFORM_REQUEST } from "../../config/browser-config";
 import { AUTHENTICATION_ENDPOINTS } from "../config/authentication-requests";
 import {
   emailVerificationResponseSchema,
@@ -15,7 +16,8 @@ export async function verifyPlatformEmailAddress(
   try {
     const response = await getPlatformHttpClient().post<unknown>(
       AUTHENTICATION_ENDPOINTS.verifyEmail,
-      { token: verificationToken }
+      { token: verificationToken },
+      PUBLIC_PLATFORM_REQUEST
     );
     const verificationResponse = emailVerificationResponseSchema.safeParse(
       response.data
@@ -39,7 +41,8 @@ export async function resendEmailVerification(
   try {
     const response = await getPlatformHttpClient().post<unknown>(
       AUTHENTICATION_ENDPOINTS.resendEmail,
-      { email: emailAddress }
+      { email: emailAddress },
+      PUBLIC_PLATFORM_REQUEST
     );
     if (!acceptedResponseSchema.safeParse(response.data).success) {
       throw new Error(UNEXPECTED_RESPONSE_MESSAGE);

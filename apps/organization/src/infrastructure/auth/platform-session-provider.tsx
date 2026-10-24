@@ -6,9 +6,11 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
+import { clearPlatformSession as clearPlatformAccessCredential } from "@healthalyst/platform-api/http-client";
 import { PLATFORM_SESSION_SIGNALS } from "@healthalyst/platform-api/config";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -31,20 +33,25 @@ const platformSessionContext =
 
 export function PlatformSessionProvider({ children }: { children: ReactNode }) {
   const queryClient = useQueryClient();
+  const restorationRevisionReference = useRef(0);
   const [platformSession, updatePlatformSession] =
     useState<PlatformSession | null>(null);
   const [isRestoring, setIsRestoring] = useState(true);
   const [restoreError, setRestoreError] = useState<Error | null>(null);
 
   const restoreSession = useCallback(async () => {
+    const restorationRevision = ++restorationRevisionReference.current;
+    updatePlatformSession(null);
     setIsRestoring(true);
     setRestoreError(null);
     queryClient.clear();
     try {
       const restoredSession = await restorePlatformSession();
+      if (restorationRevision !== restorationRevisionReference.current) return;
       setRestoreError(null);
       updatePlatformSession(restoredSession);
     } catch (error) {
+      if (restorationRevision !== restorationRevisionReference.current) return;
       updatePlatformSession(null);
       if (!(error instanceof PlatformApiError && error.status === 401)) {
         setRestoreError(
@@ -54,7 +61,8 @@ export function PlatformSessionProvider({ children }: { children: ReactNode }) {
         );
       }
     } finally {
-      setIsRestoring(false);
+      if (restorationRevision === restorationRevisionReference.current)
+        setIsRestoring(false);
     }
   }, [queryClient]);
 
@@ -64,6 +72,7 @@ export function PlatformSessionProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     function handleExpiredPlatformSession() {
+      restorationRevisionReference.current += 1;
       updatePlatformSession(null);
       setRestoreError(null);
       setIsRestoring(false);
@@ -74,24 +83,33 @@ export function PlatformSessionProvider({ children }: { children: ReactNode }) {
       PLATFORM_SESSION_SIGNALS.expiredEvent,
       handleExpiredPlatformSession
     );
+    window.addEventListener(
+      PLATFORM_SESSION_SIGNALS.contextChangedEvent,
+      restoreSession
+    );
     return () => {
+      window.removeEventListener(
+        PLATFORM_SESSION_SIGNALS.contextChangedEvent,
+        restoreSession
+      );
       window.removeEventListener(
         PLATFORM_SESSION_SIGNALS.expiredEvent,
         handleExpiredPlatformSession
       );
     };
-  }, [queryClient]);
+  }, [queryClient, restoreSession]);
 
   const setPlatformSession = useCallback(
     (nextPlatformSession: PlatformSession) => {
+      restorationRevisionReference.current += 1;
+      setIsRestoring(false);
       const currentContext = platformSession?.activeContext;
       const nextContext = nextPlatformSession.activeContext;
       const sessionScopeChanged =
-        platformSession !== null &&
-        (platformSession.user.id !== nextPlatformSession.user.id ||
-          currentContext?.realm !== nextContext.realm ||
-          currentContext?.organizationId !== nextContext.organizationId ||
-          currentContext?.branchId !== nextContext.branchId);
+        platformSession?.user.id !== nextPlatformSession.user.id ||
+        currentContext?.realm !== nextContext.realm ||
+        currentContext?.organizationId !== nextContext.organizationId ||
+        currentContext?.branchId !== nextContext.branchId;
       if (sessionScopeChanged) queryClient.clear();
       setRestoreError(null);
       updatePlatformSession(nextPlatformSession);
@@ -100,6 +118,9 @@ export function PlatformSessionProvider({ children }: { children: ReactNode }) {
   );
 
   const clearPlatformSession = useCallback(() => {
+    clearPlatformAccessCredential();
+    restorationRevisionReference.current += 1;
+    setIsRestoring(false);
     setRestoreError(null);
     updatePlatformSession(null);
     queryClient.clear();
