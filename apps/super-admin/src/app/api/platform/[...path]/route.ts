@@ -1,18 +1,13 @@
 import { handlePlatformBackendForFrontendRequest } from "@healthalyst/platform-api/server";
 
+import { PLATFORM_ROUTE_CONFIGURATION } from "~/infrastructure/platform/server-configuration";
+
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
 type PlatformRouteContext = {
   params: Promise<{ path: string[] }>;
 };
-
-const routeConfiguration = {
-  application: "super-admin",
-  localOrigin: "http://localhost:8080",
-  sessionCookieName: "__Host-healthalyst-super-admin-session",
-  challengeCookieName: "__Secure-healthalyst-super-admin-auth-challenge",
-} as const;
 
 async function handleRequest(
   request: Request,
@@ -21,7 +16,7 @@ async function handleRequest(
   return handlePlatformBackendForFrontendRequest(
     request,
     context.params,
-    routeConfiguration
+    PLATFORM_ROUTE_CONFIGURATION
   );
 }
 

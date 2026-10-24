@@ -1,9 +1,6 @@
 "use client";
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { useEffect, useState, type FormEvent } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { Card, CardContent } from "@healthalyst/ui/components/card";
 import {
@@ -20,176 +17,32 @@ import {
 import { Input } from "@healthalyst/ui/components/input";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import { QrCode } from "@healthalyst/ui/components/qr-code";
-import {
-  confirmStaffAuthenticatorSetup,
-  createStaffSession,
-  startStaffAuthenticatorSetup,
-  verifyStaffSignInCode,
-  type AuthenticatorSetup,
-  type PasswordStepResponse,
-  type SignInMethod,
-  type StaffIdentity,
-} from "~/features/staff-auth/api/staff-service";
-import { useStaffSession } from "~/features/staff-auth/context/staff-session-provider";
-import { staffSignInSchema } from "~/features/staff-auth/model/staff-sign-in-schema";
-
-type StaffSignInStage =
-  | { kind: "password" }
-  | {
-      kind: "mfa";
-      methods: SignInMethod[];
-      method: SignInMethod;
-    }
-  | { kind: "enrollment-loading" }
-  | {
-      kind: "enrollment";
-      setup: AuthenticatorSetup;
-    }
-  | {
-      kind: "recovery-codes";
-      staffIdentity: StaffIdentity;
-      recoveryCodes: string[];
-    };
-
-const oneTimePasswordSlotIndices = [0, 1, 2, 3, 4, 5];
+import { useStaffSignInFlow } from "~/features/staff-auth/hooks/use-staff-sign-in-flow";
+import { STAFF_AUTHENTICATOR_CONFIGURATION } from "~/features/staff-auth/config/staff-sign-in";
 
 export function StaffSignInForm() {
-  const router = useRouter();
-  const { setStaffIdentity, staffIdentity, status } = useStaffSession();
-  const [stage, setStage] = useState<StaffSignInStage>({ kind: "password" });
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [verificationCode, setVerificationCode] = useState("");
-  const [hasSavedRecoveryCodes, setHasSavedRecoveryCodes] = useState(false);
-
-  const authenticatorSetupMutation = useMutation({
-    mutationFn: startStaffAuthenticatorSetup,
-    onSuccess: (setup) => setStage({ kind: "enrollment", setup }),
-  });
-
-  const passwordMutation = useMutation({
-    mutationFn: ({
-      emailAddress,
-      password,
-    }: {
-      emailAddress: string;
-      password: string;
-    }) => createStaffSession(emailAddress, password),
-    onSuccess: (passwordStep: PasswordStepResponse) => {
-      setVerificationCode("");
-      if (passwordStep.status === "MFA_REQUIRED") {
-        const method = passwordStep.methods.includes("totp")
-          ? "totp"
-          : passwordStep.methods[0];
-        if (!method) return;
-        setStage({
-          kind: "mfa",
-          methods: passwordStep.methods,
-          method,
-        });
-        return;
-      }
-      setStage({ kind: "enrollment-loading" });
-      authenticatorSetupMutation.mutate();
-    },
-  });
-
-  const mfaMutation = useMutation({
-    mutationFn: verifyStaffSignInCode,
-    onSuccess: (nextStaffIdentity) => {
-      setStaffIdentity(nextStaffIdentity);
-      router.replace("/dashboard");
-    },
-  });
-
-  const authenticatorConfirmationMutation = useMutation({
-    mutationFn: confirmStaffAuthenticatorSetup,
-    onSuccess: ({ staffIdentity: nextStaffIdentity, recoveryCodes }) => {
-      setHasSavedRecoveryCodes(false);
-      setStage({
-        kind: "recovery-codes",
-        staffIdentity: nextStaffIdentity,
-        recoveryCodes,
-      });
-    },
-  });
-
-  useEffect(() => {
-    if (staffIdentity) router.replace("/dashboard");
-  }, [router, staffIdentity]);
-
-  function handlePasswordSubmit(formEvent: FormEvent<HTMLFormElement>) {
-    formEvent.preventDefault();
-    const formElement = formEvent.currentTarget;
-    const formData = new FormData(formElement);
-    const result = staffSignInSchema.safeParse({
-      emailAddress: formData.get("emailAddress"),
-      password: formData.get("password"),
-    });
-    if (!result.success) {
-      const errors = result.error.flatten().fieldErrors;
-      setFieldErrors({
-        emailAddress: errors.emailAddress?.[0] ?? "",
-        password: errors.password?.[0] ?? "",
-      });
-      const firstInvalidField = formElement.querySelector<HTMLInputElement>(
-        `[name="${errors.emailAddress?.length ? "emailAddress" : "password"}"]`
-      );
-      firstInvalidField?.focus();
-      return;
-    }
-    setFieldErrors({});
-    passwordMutation.mutate(result.data);
-  }
-
-  function handleVerificationSubmit(formEvent: FormEvent<HTMLFormElement>) {
-    formEvent.preventDefault();
-    if (stage.kind !== "mfa") return;
-    mfaMutation.mutate({
-      method: stage.method,
-      code: verificationCode,
-    });
-  }
-
-  function handleEnrollmentSubmit(formEvent: FormEvent<HTMLFormElement>) {
-    formEvent.preventDefault();
-    if (stage.kind !== "enrollment") return;
-    authenticatorConfirmationMutation.mutate({
-      factorId: stage.setup.factorId,
-      code: verificationCode,
-    });
-  }
-
-  function returnToPasswordStep() {
-    setVerificationCode("");
-    setStage({ kind: "password" });
-    passwordMutation.reset();
-    authenticatorSetupMutation.reset();
-    mfaMutation.reset();
-    authenticatorConfirmationMutation.reset();
-  }
-
-  function finishAuthenticatorEnrollment() {
-    if (stage.kind !== "recovery-codes" || !hasSavedRecoveryCodes) return;
-    setStaffIdentity(stage.staffIdentity);
-    router.replace("/dashboard");
-  }
-
-  const stageTitle =
-    stage.kind === "password"
-      ? "Staff sign in"
-      : stage.kind === "mfa"
-        ? "Enter your sign-in code"
-        : stage.kind === "recovery-codes"
-          ? "Save your recovery codes"
-          : "Protect your account";
-  const stageDescription =
-    stage.kind === "password"
-      ? "Use your HealthAlyst staff account to open the company dashboard."
-      : stage.kind === "mfa"
-        ? "Open your authenticator app and enter the code for HealthAlyst."
-        : stage.kind === "recovery-codes"
-          ? "Keep these codes somewhere safe. Each code can be used once if you lose access to your authenticator."
-          : "Add HealthAlyst to an authenticator app. You will use a code from it each time you sign in.";
+  const {
+    stage,
+    status,
+    fieldErrors,
+    verificationCode,
+    hasSavedRecoveryCodes,
+    setVerificationCode,
+    setHasSavedRecoveryCodes,
+    clearFieldError,
+    toggleVerificationMethod,
+    authenticatorSetupMutation,
+    passwordMutation,
+    verificationMutation,
+    authenticatorConfirmationMutation,
+    handlePasswordSubmit,
+    handleVerificationSubmit,
+    handleEnrollmentSubmit,
+    returnToPasswordStep,
+    finishAuthenticatorEnrollment,
+    stageTitle,
+    stageDescription,
+  } = useStaffSignInFlow();
 
   return (
     <main className="flex min-h-screen items-center justify-center px-5 py-12">
@@ -245,12 +98,7 @@ export function StaffSignInForm() {
                           ? "staff-email-error"
                           : undefined
                       }
-                      onChange={() =>
-                        setFieldErrors((errors) => ({
-                          ...errors,
-                          emailAddress: "",
-                        }))
-                      }
+                      onChange={() => clearFieldError("emailAddress")}
                     />
                     {fieldErrors.emailAddress && (
                       <FieldError id="staff-email-error">
@@ -274,12 +122,7 @@ export function StaffSignInForm() {
                           ? "staff-password-error"
                           : undefined
                       }
-                      onChange={() =>
-                        setFieldErrors((errors) => ({
-                          ...errors,
-                          password: "",
-                        }))
-                      }
+                      onChange={() => clearFieldError("password")}
                     />
                     {fieldErrors.password && (
                       <FieldError id="staff-password-error">
@@ -314,7 +157,7 @@ export function StaffSignInForm() {
               </form>
             )}
 
-            {stage.kind === "mfa" && (
+            {stage.kind === "verification" && (
               <form
                 className="flex flex-col items-center gap-6"
                 onSubmit={handleVerificationSubmit}
@@ -331,14 +174,17 @@ export function StaffSignInForm() {
                       aria-label="Six-digit authenticator code"
                       autoComplete="one-time-code"
                       inputMode="numeric"
-                      maxLength={6}
+                      maxLength={STAFF_AUTHENTICATOR_CONFIGURATION.codeLength}
                       value={verificationCode}
                       onChange={setVerificationCode}
-                      disabled={mfaMutation.isPending}
+                      disabled={verificationMutation.isPending}
                     >
                       <InputOTPGroup>
-                        {oneTimePasswordSlotIndices
-                          .slice(0, 3)
+                        {STAFF_AUTHENTICATOR_CONFIGURATION.slotIndices
+                          .slice(
+                            0,
+                            STAFF_AUTHENTICATOR_CONFIGURATION.groupLength
+                          )
                           .map((oneTimePasswordSlotIndex) => (
                             <InputOTPSlot
                               key={oneTimePasswordSlotIndex}
@@ -347,8 +193,8 @@ export function StaffSignInForm() {
                           ))}
                       </InputOTPGroup>
                       <InputOTPGroup>
-                        {oneTimePasswordSlotIndices
-                          .slice(3)
+                        {STAFF_AUTHENTICATOR_CONFIGURATION.slotIndices
+                          .slice(STAFF_AUTHENTICATOR_CONFIGURATION.groupLength)
                           .map((oneTimePasswordSlotIndex) => (
                             <InputOTPSlot
                               key={oneTimePasswordSlotIndex}
@@ -365,25 +211,27 @@ export function StaffSignInForm() {
                       onChange={(changeEvent) =>
                         setVerificationCode(changeEvent.target.value)
                       }
-                      disabled={mfaMutation.isPending}
+                      disabled={verificationMutation.isPending}
                     />
                   )}
                 </Field>
-                {mfaMutation.error && (
+                {verificationMutation.error && (
                   <FieldError role="alert">
-                    {mfaMutation.error.message}
+                    {verificationMutation.error.message}
                   </FieldError>
                 )}
                 <ActionButton
                   type="submit"
                   size="large"
                   className="w-full"
-                  isLoading={mfaMutation.isPending}
+                  isLoading={verificationMutation.isPending}
                   loadingText="Checking code"
                   disabled={
                     stage.method === "totp"
-                      ? verificationCode.length !== 6
-                      : verificationCode.trim().length < 6
+                      ? verificationCode.length !==
+                        STAFF_AUTHENTICATOR_CONFIGURATION.codeLength
+                      : verificationCode.trim().length <
+                        STAFF_AUTHENTICATOR_CONFIGURATION.recoveryCodeMinimumLength
                   }
                 >
                   Continue
@@ -392,14 +240,7 @@ export function StaffSignInForm() {
                   <ActionButton
                     type="button"
                     variant="link"
-                    onClick={() => {
-                      setVerificationCode("");
-                      setStage({
-                        ...stage,
-                        method:
-                          stage.method === "totp" ? "recovery_code" : "totp",
-                      });
-                    }}
+                    onClick={toggleVerificationMethod}
                   >
                     {stage.method === "totp"
                       ? "Use a recovery code instead"
@@ -452,7 +293,7 @@ export function StaffSignInForm() {
                 <QrCode
                   value={stage.setup.otpauthUrl}
                   label="Scan to add HealthAlyst to your authenticator app"
-                  size={176}
+                  size={STAFF_AUTHENTICATOR_CONFIGURATION.imageSize}
                 />
                 <p className="text-center text-sm text-muted-foreground">
                   Scan the QR code, or enter the setup key manually.
@@ -469,14 +310,14 @@ export function StaffSignInForm() {
                     aria-label="Six-digit authenticator code"
                     autoComplete="one-time-code"
                     inputMode="numeric"
-                    maxLength={6}
+                    maxLength={STAFF_AUTHENTICATOR_CONFIGURATION.codeLength}
                     value={verificationCode}
                     onChange={setVerificationCode}
                     disabled={authenticatorConfirmationMutation.isPending}
                   >
                     <InputOTPGroup>
-                      {oneTimePasswordSlotIndices
-                        .slice(0, 3)
+                      {STAFF_AUTHENTICATOR_CONFIGURATION.slotIndices
+                        .slice(0, STAFF_AUTHENTICATOR_CONFIGURATION.groupLength)
                         .map((oneTimePasswordSlotIndex) => (
                           <InputOTPSlot
                             key={oneTimePasswordSlotIndex}
@@ -485,8 +326,8 @@ export function StaffSignInForm() {
                         ))}
                     </InputOTPGroup>
                     <InputOTPGroup>
-                      {oneTimePasswordSlotIndices
-                        .slice(3)
+                      {STAFF_AUTHENTICATOR_CONFIGURATION.slotIndices
+                        .slice(STAFF_AUTHENTICATOR_CONFIGURATION.groupLength)
                         .map((oneTimePasswordSlotIndex) => (
                           <InputOTPSlot
                             key={oneTimePasswordSlotIndex}
@@ -507,7 +348,10 @@ export function StaffSignInForm() {
                   className="w-full"
                   isLoading={authenticatorConfirmationMutation.isPending}
                   loadingText="Protecting account"
-                  disabled={verificationCode.length !== 6}
+                  disabled={
+                    verificationCode.length !==
+                    STAFF_AUTHENTICATOR_CONFIGURATION.codeLength
+                  }
                 >
                   Confirm authenticator
                 </ActionButton>

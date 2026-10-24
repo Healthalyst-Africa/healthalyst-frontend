@@ -1,4 +1,4 @@
-import OrganizationApplicationPage from "~/features/organization-onboarding/components/organization-application-page";
+import OrganizationApplicationPage from "~/features/organization-application/components/organization-application-page";
 
 export default function ApplicationRoute() {
   return <OrganizationApplicationPage />;

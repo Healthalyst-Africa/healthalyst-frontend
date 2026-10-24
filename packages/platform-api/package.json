@@ -4,10 +4,11 @@
   "private": true,
   "type": "module",
   "exports": {
-    "./api-error": "./src/api-error.ts",
-    "./authentication-service": "./src/authentication-service.ts",
-    "./http-client": "./src/http-client.ts",
-    "./server": "./src/server.ts"
+    "./api-error": "./src/browser/errors/index.ts",
+    "./authentication-service": "./src/authentication/index.ts",
+    "./http-client": "./src/browser/index.ts",
+    "./server": "./src/server.ts",
+    "./config": "./src/config/browser-config.ts"
   },
   "scripts": {
     "lint": "eslint ./src --max-warnings=0",

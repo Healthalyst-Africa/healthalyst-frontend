@@ -16,7 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@healthalyst/ui/components/popover";
-import type { FormOption } from "@healthalyst/ui/lib/form-definition";
+import type { FormOption } from "@healthalyst/ui/types/form-definition";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 /** Lists longer than this get a search box. */

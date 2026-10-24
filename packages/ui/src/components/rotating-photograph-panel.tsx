@@ -1,52 +1,14 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 import { PauseIcon, PlayIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
-/** Time each word, and its photograph, stays before the next. */
-const SLIDE_DURATION_IN_MILLISECONDS = 3600;
-
-export type RotatingPhotographSlide = {
-  /** The word shown in the heading while this photograph is. */
-  word: string;
-  /** A filling, decorative photograph, such as `next/image` with `fill`. */
-  photograph: ReactNode;
-};
-
-type RotatingPhotographPanelProperties = {
-  /** The heading's fixed opening, such as "Digital infrastructure for". */
-  headingLead: string;
-  /** Every word in full, read by screen readers after the lead. */
-  spokenEnding: string;
-  /** Shown instead of the rotating word under reduced motion. */
-  stillWord: string;
-  slides: readonly RotatingPhotographSlide[];
-  /** Shown above the heading, such as a logo. */
-  brand?: ReactNode;
-  lede?: ReactNode;
-  /** Colours the rotating word, such as a brand accent. */
-  wordClassName?: string;
-  pauseLabel?: string;
-  playLabel?: string;
-};
-
-function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => setPrefersReducedMotion(mediaQuery.matches);
-
-    update();
-    mediaQuery.addEventListener("change", update);
-
-    return () => mediaQuery.removeEventListener("change", update);
-  }, []);
-
-  return prefersReducedMotion;
-}
+import type { RotatingPhotographPanelProperties } from "../types/photograph-panel";
+export type { RotatingPhotographSlide } from "../types/photograph-panel";
+import { usePrefersReducedMotion } from "../hooks/use-prefers-reduced-motion";
+import { PHOTOGRAPH_ROTATION_CONFIGURATION } from "../config/photograph-rotation";
 
 /**
  * The marketing website's rotating hero, for a brand-coloured panel: a
@@ -85,8 +47,11 @@ export function RotatingPhotographPanel({
     }
 
     const interval = window.setInterval(
-      () => setSlideIndex((index) => (index + 1) % slides.length),
-      SLIDE_DURATION_IN_MILLISECONDS
+      () =>
+        setSlideIndex(
+          (currentSlideIndex) => (currentSlideIndex + 1) % slides.length
+        ),
+      PHOTOGRAPH_ROTATION_CONFIGURATION.slideDurationMilliseconds
     );
 
     return () => window.clearInterval(interval);
@@ -95,19 +60,21 @@ export function RotatingPhotographPanel({
   return (
     <>
       <div aria-hidden="true" className="absolute inset-0 -z-20">
-        {slides.map((slide, index) => (
+        {slides.map((slide, candidateSlideIndex) => (
           <div
             key={slide.word}
             className={cn(
               "absolute inset-0 transition-[opacity,transform] ease-out motion-reduce:scale-100 motion-reduce:transition-none",
-              index === slideIndex
+              candidateSlideIndex === slideIndex
                 ? "scale-110 opacity-100"
                 : "scale-100 opacity-0"
             )}
             style={{
               /* Fade in 1.2 s; the showing photograph zooms slowly over 7 s. */
               transitionDuration:
-                index === slideIndex ? "1200ms, 7000ms" : "1200ms, 1200ms",
+                candidateSlideIndex === slideIndex
+                  ? PHOTOGRAPH_ROTATION_CONFIGURATION.activeTransitionDuration
+                  : PHOTOGRAPH_ROTATION_CONFIGURATION.inactiveTransitionDuration,
             }}
           >
             {slide.photograph}
@@ -145,14 +112,14 @@ export function RotatingPhotographPanel({
                 <span aria-hidden="true">{stillWord}</span>
               ) : (
                 <span aria-hidden="true" className="inline-grid">
-                  {slides.map((slide, index) => (
+                  {slides.map((slide, candidateSlideIndex) => (
                     <span
                       key={slide.word}
                       className={cn(
                         "col-start-1 row-start-1 transition-[opacity,transform] ease-out",
-                        index === slideIndex
+                        candidateSlideIndex === slideIndex
                           ? "translate-y-0 opacity-100 delay-200 duration-500"
-                          : index ===
+                          : candidateSlideIndex ===
                               (slideIndex + slides.length - 1) % slides.length
                             ? "-translate-y-3 opacity-0 duration-200"
                             : "translate-y-3 opacity-0 duration-200"

@@ -2,6 +2,10 @@
 
 Review date: 23 October 2026. This records the hub-and-spoke architecture and the implementation in this working tree; the live NestJS Platform Swagger contract is the API source of truth.
 
+For the current source layout following the module refactor, see
+[code organisation](code-organization.md). The Swagger observations below are
+from the original review; the organisation refactor did not re-fetch live specs.
+
 ## Evidence and scope
 
 The frontend is on `feat/platform-registration`, with existing uncommitted changes. This review distinguishes the intended app boundaries from which clients and API flows are currently implemented.
@@ -97,7 +101,7 @@ Paths below are relative to each independent application origin.
 | Super Admin    | `/organizations` | Platform organisation list with server-side search                                                           |
 | Super Admin    | `/review`        | Claim/release, document viewing, itemised change requests, checklist approval and rejection                  |
 
-The hub currently has no organisation/product home, organisation switcher, product launcher, profile/branch/role/member/partner routes, password reset page or invitation acceptance page. The shared API package includes password reset services; the password-reset and invitation-acceptance routes are not implemented yet.
+The hub has `/forgot-password` and `/reset-password` screens. It still has no organisation/product home, organisation switcher, product launcher, profile/branch/role/member/partner routes or invitation acceptance page.
 
 Moving the application display onto `/application` addresses its route placement. The next destination after sign-in still needs to be chosen from identity, context, organisation status and product access. An unconditional application redirect cannot represent the complete hub journey.
 

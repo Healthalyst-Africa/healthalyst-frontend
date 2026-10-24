@@ -1,3 +1,4 @@
+import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -5,7 +6,7 @@ export default function HealthAlystBrand() {
   return (
     <Link
       className="flex w-fit items-center rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-      href="/"
+      href={ORGANIZATION_ROUTES.registration}
       aria-label="HealthAlyst Africa home"
     >
       <Image

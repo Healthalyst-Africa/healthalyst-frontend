@@ -1,6 +1,5 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import {
   Card,
@@ -14,146 +13,36 @@ import {
   FieldLabel,
 } from "@healthalyst/ui/components/field";
 import { Textarea } from "@healthalyst/ui/components/textarea";
-import type { StaffIdentity } from "~/features/staff-auth/api/staff-service";
-import type {
-  OrganizationApplication,
-  ProductCode,
-  ReviewChecklist,
-} from "~/features/organization-oversight/api/organization-service";
 import { OrganizationApplicationDetails } from "~/features/organization-oversight/components/organization-application-details";
+import { useReviewApplication } from "~/features/organization-oversight/hooks/use-review-application";
+import type { ReviewApplicationProperties } from "~/features/organization-oversight/types/review-controller";
 import {
-  useClaimOrganizationMutation,
-  useOrganizationDetailQuery,
-  useReleaseOrganizationMutation,
-  useReviewDecisionMutation,
-} from "~/features/organization-oversight/hooks/use-organization-oversight";
-import {
-  approvalDecisionSchema,
-  rejectionDecisionSchema,
-} from "~/features/organization-oversight/model/review-schemas";
-
-const reviewChecklistItems: {
-  name: keyof ReviewChecklist;
-  label: string;
-}[] = [
-  { name: "cacVerified", label: "CAC certificate checked" },
-  { name: "facilityLicenceVerified", label: "Facility licence checked" },
-  { name: "directorLicenceVerified", label: "Director licence checked" },
-  { name: "addressPlausible", label: "Organisation address is plausible" },
-  { name: "duplicateChecked", label: "Possible duplicates checked" },
-];
-
-const availableProducts: { code: ProductCode; label: string }[] = [
-  { code: "HEALTHSCHEDULE", label: "HealthSchedule" },
-  { code: "LABCONNECT", label: "LabConnect" },
-  { code: "PHARMADESK", label: "PharmaDesk" },
-];
+  REVIEW_CHECKLIST_ITEMS,
+  REVIEW_PRODUCTS,
+  REVIEW_REJECTION_REASONS,
+  REVIEW_VALIDATION_LIMITS,
+} from "~/features/organization-oversight/config/review-configuration";
 
 export function ReviewApplicationCard({
   application,
   staffIdentity,
-}: {
-  application: OrganizationApplication;
-  staffIdentity: StaffIdentity;
-}) {
-  const detailQuery = useOrganizationDetailQuery(staffIdentity, application.id);
-  const claimMutation = useClaimOrganizationMutation(staffIdentity);
-  const releaseMutation = useReleaseOrganizationMutation(staffIdentity);
-  const decisionMutation = useReviewDecisionMutation(staffIdentity);
-  const [checklist, setChecklist] = useState<
-    Record<keyof ReviewChecklist, boolean>
-  >({
-    cacVerified: false,
-    facilityLicenceVerified: false,
-    directorLicenceVerified: false,
-    addressPlausible: false,
-    duplicateChecked: false,
-  });
-  const [selectedProducts, setSelectedProducts] = useState<ProductCode[]>([]);
-  const [decisionError, setDecisionError] = useState("");
-
-  const canReview =
-    application.status === "UNDER_REVIEW" &&
-    application.reviewerId === staffIdentity.staffAccountId;
-  const isClaimedByAnotherReviewer =
-    application.status === "UNDER_REVIEW" && !canReview;
-
-  function handleApprove(formEvent: FormEvent<HTMLFormElement>) {
-    formEvent.preventDefault();
-    const detail = detailQuery.data;
-    if (!detail || !canReview) return;
-    const formData = new FormData(formEvent.currentTarget);
-    const result = approvalDecisionSchema.safeParse({
-      checklist,
-      products: selectedProducts,
-      note: formData.get("approvalNote"),
-    });
-    if (!result.success) {
-      setDecisionError(
-        result.error.issues[0]?.message ?? "Complete the approval checklist."
-      );
-      const invalidChecklistItem = result.error.issues.find(
-        (issue) => issue.path[0] === "checklist"
-      );
-      if (invalidChecklistItem?.path[1]) {
-        formEvent.currentTarget
-          .querySelector<HTMLInputElement>(
-            `[name="${String(invalidChecklistItem.path[1])}"]`
-          )
-          ?.focus();
-      } else if (result.error.issues[0]?.path[0] === "products") {
-        formEvent.currentTarget
-          .querySelector<HTMLInputElement>("[name=productCode]")
-          ?.focus();
-      }
-      return;
-    }
-    setDecisionError("");
-    decisionMutation.mutate({
-      organizationId: application.id,
-      decision: {
-        status: "APPROVED",
-        version: detail.version,
-        ...result.data,
-      },
-    });
-  }
-
-  function handleReject(formEvent: FormEvent<HTMLFormElement>) {
-    formEvent.preventDefault();
-    const detail = detailQuery.data;
-    if (!detail || !canReview) return;
-    const formElement = formEvent.currentTarget;
-    const formData = new FormData(formElement);
-    const result = rejectionDecisionSchema.safeParse({
-      reasonCode: formData.get("reasonCode"),
-      message: formData.get("rejectionMessage"),
-    });
-    if (!result.success) {
-      setDecisionError(
-        result.error.issues[0]?.message ?? "Add a reason for rejection."
-      );
-      const invalidFieldName =
-        result.error.issues[0]?.path[0] === "reasonCode"
-          ? "reasonCode"
-          : "rejectionMessage";
-      formElement
-        .querySelector<HTMLSelectElement | HTMLTextAreaElement>(
-          `[name="${invalidFieldName}"]`
-        )
-        ?.focus();
-      return;
-    }
-    setDecisionError("");
-    decisionMutation.mutate({
-      organizationId: application.id,
-      decision: {
-        status: "REJECTED",
-        version: detail.version,
-        ...result.data,
-      },
-    });
-  }
+}: ReviewApplicationProperties) {
+  const {
+    detailQuery,
+    claimMutation,
+    releaseMutation,
+    decisionMutation,
+    checklist,
+    selectedProducts,
+    decisionError,
+    canReview,
+    isClaimedByAnotherReviewer,
+    handleApprove,
+    handleReject,
+    updateChecklistItem,
+    updateSelectedProduct,
+    clearDecisionError,
+  } = useReviewApplication({ application, staffIdentity });
 
   const submittedAtLabel = application.submittedAt
     ? new Intl.DateTimeFormat("en", {
@@ -244,7 +133,7 @@ export function ReviewApplicationCard({
                 <legend className="mb-2 text-sm font-medium">
                   Verification checklist
                 </legend>
-                {reviewChecklistItems.map((checklistItem) => (
+                {REVIEW_CHECKLIST_ITEMS.map((checklistItem) => (
                   <label
                     key={checklistItem.name}
                     className="flex items-start gap-2 text-sm"
@@ -253,13 +142,12 @@ export function ReviewApplicationCard({
                       type="checkbox"
                       name={checklistItem.name}
                       checked={checklist[checklistItem.name]}
-                      onChange={(changeEvent) => {
-                        setDecisionError("");
-                        setChecklist((currentChecklist) => ({
-                          ...currentChecklist,
-                          [checklistItem.name]: changeEvent.target.checked,
-                        }));
-                      }}
+                      onChange={(changeEvent) =>
+                        updateChecklistItem(
+                          checklistItem.name,
+                          changeEvent.target.checked
+                        )
+                      }
                       className="mt-0.5 size-4 accent-primary"
                     />
                     <span>{checklistItem.label}</span>
@@ -270,7 +158,7 @@ export function ReviewApplicationCard({
                 <legend className="mb-2 text-sm font-medium">
                   Products to enable
                 </legend>
-                {availableProducts.map((product) => (
+                {REVIEW_PRODUCTS.map((product) => (
                   <label
                     key={product.code}
                     className="flex items-start gap-2 text-sm"
@@ -280,16 +168,12 @@ export function ReviewApplicationCard({
                       name="productCode"
                       value={product.code}
                       checked={selectedProducts.includes(product.code)}
-                      onChange={(changeEvent) => {
-                        setDecisionError("");
-                        setSelectedProducts((currentProducts) =>
+                      onChange={(changeEvent) =>
+                        updateSelectedProduct(
+                          product.code,
                           changeEvent.target.checked
-                            ? [...currentProducts, product.code]
-                            : currentProducts.filter(
-                                (productCode) => productCode !== product.code
-                              )
-                        );
-                      }}
+                        )
+                      }
                       className="mt-0.5 size-4 accent-primary"
                     />
                     <span>{product.label}</span>
@@ -304,8 +188,8 @@ export function ReviewApplicationCard({
                   id={`approval-note-${application.id}`}
                   name="approvalNote"
                   rows={3}
-                  maxLength={2000}
-                  onChange={() => setDecisionError("")}
+                  maxLength={REVIEW_VALIDATION_LIMITS.noteMaximumLength}
+                  onChange={clearDecisionError}
                 />
               </Field>
               <ActionButton
@@ -341,24 +225,14 @@ export function ReviewApplicationCard({
                   <option value="" disabled>
                     Choose a reason
                   </option>
-                  <option value="INCOMPLETE_INFORMATION">
-                    Incomplete information
-                  </option>
-                  <option value="INVALID_DOCUMENTS">Invalid documents</option>
-                  <option value="UNVERIFIABLE_LICENCE">
-                    Licence cannot be verified
-                  </option>
-                  <option value="DUPLICATE_ORGANIZATION">
-                    Duplicate organisation
-                  </option>
-                  <option value="OUT_OF_SERVICE_AREA">
-                    Outside service area
-                  </option>
-                  <option value="NOT_A_HEALTH_FACILITY">
-                    Not a health facility
-                  </option>
-                  <option value="FRAUD_SUSPECTED">Suspected fraud</option>
-                  <option value="OTHER">Other</option>
+                  {REVIEW_REJECTION_REASONS.map((rejectionReason) => (
+                    <option
+                      key={rejectionReason.code}
+                      value={rejectionReason.code}
+                    >
+                      {rejectionReason.label}
+                    </option>
+                  ))}
                 </select>
               </Field>
               <Field className="gap-1.5">
@@ -369,9 +243,11 @@ export function ReviewApplicationCard({
                   id={`rejection-message-${application.id}`}
                   name="rejectionMessage"
                   rows={5}
-                  minLength={10}
-                  maxLength={2000}
-                  onChange={() => setDecisionError("")}
+                  minLength={
+                    REVIEW_VALIDATION_LIMITS.rejectionMessageMinimumLength
+                  }
+                  maxLength={REVIEW_VALIDATION_LIMITS.noteMaximumLength}
+                  onChange={clearDecisionError}
                 />
               </Field>
               <ActionButton

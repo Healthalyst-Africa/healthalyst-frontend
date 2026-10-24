@@ -1,18 +1,18 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { StaffIdentity } from "~/features/staff-auth/api/staff-service";
+import type { StaffIdentity } from "~/features/staff-auth/types/staff-identity";
 import {
   claimOrganizationApplication,
   getOrganizationDetail,
-  getOrganizationDocumentViewUrl,
+  getOrganizationDocumentViewAddress,
   listOrganizationApplications,
   listReviewQueue,
   recordReviewDecision,
   releaseOrganizationApplication,
-  type ReviewDecision,
-} from "~/features/organization-oversight/api/organization-service";
-import { organizationQueryKeys } from "~/features/organization-oversight/api/organization-query-keys";
+} from "~/features/organization-oversight/services/organization-service";
+import type { ReviewDecision } from "~/features/organization-oversight/types/review-types";
+import { organizationQueryKeys } from "~/features/organization-oversight/services/organization-query-keys";
 
 export function useOrganizationsQuery(
   staffIdentity: StaffIdentity,
@@ -95,7 +95,7 @@ export function useReviewDecisionMutation(staffIdentity: StaffIdentity) {
   });
 }
 
-export function useOrganizationDocumentViewUrlMutation() {
+export function useOrganizationDocumentViewAddressMutation() {
   return useMutation({
     mutationFn: ({
       organizationId,
@@ -103,7 +103,7 @@ export function useOrganizationDocumentViewUrlMutation() {
     }: {
       organizationId: string;
       documentId: string;
-    }) => getOrganizationDocumentViewUrl(organizationId, documentId),
+    }) => getOrganizationDocumentViewAddress(organizationId, documentId),
   });
 }
 

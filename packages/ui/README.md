@@ -10,7 +10,7 @@ application content and semantic theme values.
 
 - `@healthalyst/ui/components/accordion`
 - `@healthalyst/ui/components/alert`
-- `@healthalyst/ui/components/button`
+- `@healthalyst/ui/components/action-button`
 - `@healthalyst/ui/components/card`
 - `@healthalyst/ui/components/field`
 - `@healthalyst/ui/components/input`
@@ -23,6 +23,23 @@ application content and semantic theme values.
 - `@healthalyst/ui/components/textarea`
 - `@healthalyst/ui/lib/utilities` exports the approved `cn` helper.
 - `@healthalyst/ui/styles.css` provides neutral theme variables.
+
+`ActionButton` is the only consumer of the underlying button primitive. Apps and
+other compositions must use it for loading, disabled and icon behaviour.
+
+## Internal organisation
+
+- `components/`: shadcn primitives and reusable visual compositions.
+- `components/forms/`: private field and label renderers.
+- `types/`: reusable form metadata and photograph contracts.
+- `forms/`: form-definition operations, exported independently of rendering.
+- `hooks/`: browser behaviour such as reduced-motion preference.
+- `config/`: neutral sidebar and photograph rotation defaults.
+- `lib/`: the existing class-name utility required by shadcn configuration.
+
+Import form contracts through `@healthalyst/ui/types/form-definition` and
+operations through `@healthalyst/ui/forms/form-definition`. Keep component-local
+properties beside the component; do not export every internal file.
 
 The input, textarea, and accordion sources were installed from the official
 `new-york` shadcn registry for Tailwind 3. Native select was installed from the

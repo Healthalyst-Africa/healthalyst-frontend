@@ -1,8 +1,7 @@
-import {
-  OrganizationRegistrationForm,
-  OnboardingHeroPanel,
-  readProductsFromQuery,
-} from "~/features/organization-onboarding";
+import { ORGANIZATION_ROUTES } from "~/config/routes";
+import { OrganizationRegistrationForm } from "~/features/organization-registration";
+import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
+import { readProductsFromQuery } from "~/features/organization-registration/utilities/read-products-from-query";
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 import Link from "next/link";
 import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
@@ -35,7 +34,7 @@ export default async function RegistrationPage({
             Already registered?{" "}
             <Link
               className="font-semibold text-primary underline underline-offset-4"
-              href="/sign-in"
+              href={ORGANIZATION_ROUTES.signIn}
             >
               Sign in
             </Link>

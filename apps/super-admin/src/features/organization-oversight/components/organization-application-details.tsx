@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import {
   Field,
@@ -9,113 +8,30 @@ import {
 } from "@healthalyst/ui/components/field";
 import { Input } from "@healthalyst/ui/components/input";
 import { Textarea } from "@healthalyst/ui/components/textarea";
-import type { StaffIdentity } from "~/features/staff-auth/api/staff-service";
-import type {
-  OrganizationApplication,
-  OrganizationDetail,
-} from "~/features/organization-oversight/api/organization-service";
+import type { OrganizationDetailsProperties } from "~/features/organization-oversight/types/organization-details";
+import { useOrganizationApplicationDetails } from "~/features/organization-oversight/hooks/use-organization-application-details";
 import {
-  useOrganizationDetailQuery,
-  useOrganizationDocumentViewUrlMutation,
-  useReviewDecisionMutation,
-} from "~/features/organization-oversight/hooks/use-organization-oversight";
-import { requestChangesSchema } from "~/features/organization-oversight/model/review-schemas";
+  getReadableProfileFields,
+  formatLabel,
+} from "~/features/organization-oversight/utilities/organization-display";
+import { DOCUMENT_VIEW_CONFIGURATION } from "~/features/organization-oversight/config/document-view-configuration";
+import { REVIEW_VALIDATION_LIMITS } from "~/features/organization-oversight/config/review-configuration";
 
 export function OrganizationApplicationDetails({
   application,
   staffIdentity,
   canReview,
-}: {
-  application: OrganizationApplication;
-  staffIdentity: StaffIdentity;
-  canReview: boolean;
-}) {
-  const detailQuery = useOrganizationDetailQuery(staffIdentity, application.id);
-  const decisionMutation = useReviewDecisionMutation(staffIdentity);
-  const documentViewUrlMutation = useOrganizationDocumentViewUrlMutation();
-  const [requestError, setRequestError] = useState("");
-  const [viewUrls, setViewUrls] = useState<
-    Record<string, { url: string; expiresAt: number }>
-  >({});
-
-  useEffect(() => {
-    const expiryTimes = Object.values(viewUrls).map(
-      (viewUrl) => viewUrl.expiresAt
-    );
-    if (expiryTimes.length === 0) return;
-
-    const nextExpiryTime = Math.min(...expiryTimes);
-    const expiryTimer = window.setTimeout(
-      () => {
-        const currentTime = Date.now();
-        setViewUrls((currentViewUrls) =>
-          Object.fromEntries(
-            Object.entries(currentViewUrls).filter(
-              ([, viewUrl]) => viewUrl.expiresAt > currentTime
-            )
-          )
-        );
-      },
-      Math.max(0, nextExpiryTime - Date.now())
-    );
-
-    return () => window.clearTimeout(expiryTimer);
-  }, [viewUrls]);
-
-  function handleRequestChanges(formEvent: FormEvent<HTMLFormElement>) {
-    formEvent.preventDefault();
-    const formElement = formEvent.currentTarget;
-    const formData = new FormData(formElement);
-    const result = requestChangesSchema.safeParse({
-      field: formData.get("field"),
-      message: formData.get("message"),
-    });
-    if (!result.success) {
-      setRequestError(
-        result.error.issues[0]?.message ?? "Check the requested changes."
-      );
-      const firstFieldName =
-        result.error.issues[0]?.path[0] === "message" ? "message" : "field";
-      formElement
-        .querySelector<HTMLInputElement | HTMLTextAreaElement>(
-          `[name="${firstFieldName}"]`
-        )
-        ?.focus();
-      return;
-    }
-    const detail = detailQuery.data;
-    if (!detail) return;
-    setRequestError("");
-    decisionMutation.mutate(
-      {
-        organizationId: application.id,
-        decision: {
-          status: "CHANGES_REQUESTED",
-          version: detail.version,
-          items: [result.data],
-        },
-      },
-      { onSuccess: () => formElement.reset() }
-    );
-  }
-
-  async function handleGetViewUrl(documentId: string) {
-    try {
-      const documentView = await documentViewUrlMutation.mutateAsync({
-        organizationId: application.id,
-        documentId,
-      });
-      setViewUrls((currentUrls) => ({
-        ...currentUrls,
-        [documentId]: {
-          url: documentView.url,
-          expiresAt: Date.now() + documentView.expiresIn * 1000,
-        },
-      }));
-    } catch {
-      // The request error is shown alongside the document list.
-    }
-  }
+}: OrganizationDetailsProperties) {
+  const {
+    detailQuery,
+    decisionMutation,
+    documentViewAddressMutation,
+    requestError,
+    documentViewAddresses,
+    handleRequestChanges,
+    handleGetDocumentViewAddress,
+    clearRequestError,
+  } = useOrganizationApplicationDetails({ application, staffIdentity });
 
   if (detailQuery.isPending) {
     return (
@@ -206,12 +122,16 @@ export function OrganizationApplicationDetails({
                   <p className="text-xs text-muted-foreground">
                     {formatLabel(documentRecord.type)} ·{" "}
                     {formatLabel(documentRecord.status)} ·{" "}
-                    {Math.ceil(documentRecord.sizeBytes / 1024)} KB
+                    {Math.ceil(
+                      documentRecord.sizeBytes /
+                        DOCUMENT_VIEW_CONFIGURATION.bytesPerKilobyte
+                    )}{" "}
+                    KB
                   </p>
                 </div>
-                {viewUrls[documentRecord.id] ? (
+                {documentViewAddresses[documentRecord.id] ? (
                   <a
-                    href={viewUrls[documentRecord.id].url}
+                    href={documentViewAddresses[documentRecord.id].url}
                     target="_blank"
                     rel="noreferrer"
                     className="text-sm font-medium text-primary underline underline-offset-4"
@@ -223,9 +143,11 @@ export function OrganizationApplicationDetails({
                     type="button"
                     size="small"
                     variant="outline"
-                    isLoading={documentViewUrlMutation.isPending}
+                    isLoading={documentViewAddressMutation.isPending}
                     loadingText="Getting link"
-                    onClick={() => void handleGetViewUrl(documentRecord.id)}
+                    onClick={() =>
+                      void handleGetDocumentViewAddress(documentRecord.id)
+                    }
                   >
                     Get secure view link
                   </ActionButton>
@@ -234,9 +156,9 @@ export function OrganizationApplicationDetails({
             ))}
           </ul>
         )}
-        {documentViewUrlMutation.error && (
+        {documentViewAddressMutation.error && (
           <FieldError role="alert">
-            {documentViewUrlMutation.error.message}
+            {documentViewAddressMutation.error.message}
           </FieldError>
         )}
       </div>
@@ -276,9 +198,9 @@ export function OrganizationApplicationDetails({
             <Input
               id={`change-field-${application.id}`}
               name="field"
-              maxLength={100}
+              maxLength={REVIEW_VALIDATION_LIMITS.changeFieldMaximumLength}
               placeholder="For example, facility licence"
-              onChange={() => setRequestError("")}
+              onChange={clearRequestError}
             />
           </Field>
           <Field className="gap-1.5" data-invalid={Boolean(requestError)}>
@@ -289,9 +211,9 @@ export function OrganizationApplicationDetails({
               id={`change-message-${application.id}`}
               name="message"
               rows={3}
-              maxLength={500}
+              maxLength={REVIEW_VALIDATION_LIMITS.changeMessageMaximumLength}
               placeholder="Explain what information or document is required."
-              onChange={() => setRequestError("")}
+              onChange={clearRequestError}
             />
           </Field>
           {requestError && <FieldError role="alert">{requestError}</FieldError>}
@@ -319,27 +241,4 @@ export function OrganizationApplicationDetails({
       )}
     </section>
   );
-}
-
-function getReadableProfileFields(
-  detail: OrganizationDetail
-): { label: string; value: string }[] {
-  return Object.entries(detail.profile).flatMap(([fieldName, fieldValue]) => {
-    if (
-      typeof fieldValue !== "string" &&
-      typeof fieldValue !== "number" &&
-      typeof fieldValue !== "boolean"
-    ) {
-      return [];
-    }
-    return [{ label: formatLabel(fieldName), value: String(fieldValue) }];
-  });
-}
-
-function formatLabel(value: string): string {
-  return value
-    .replace(/([a-z0-9])([A-Z])/g, "$1 $2")
-    .replaceAll("_", " ")
-    .toLocaleLowerCase()
-    .replace(/^./, (firstCharacter) => firstCharacter.toLocaleUpperCase());
 }

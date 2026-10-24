@@ -9,12 +9,13 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { PLATFORM_SESSION_SIGNALS } from "@healthalyst/platform-api/config";
 import { useQueryClient } from "@tanstack/react-query";
 import {
   restorePlatformSession,
   type PlatformSession,
-} from "~/features/organization-onboarding/api/platform-authentication-service";
-import { PlatformApiError } from "~/features/organization-onboarding/api/platform-api-error";
+} from "@healthalyst/platform-api/authentication-service";
+import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 
 type PlatformSessionContextValue = {
   platformSession: PlatformSession | null;
@@ -70,12 +71,12 @@ export function PlatformSessionProvider({ children }: { children: ReactNode }) {
     }
 
     window.addEventListener(
-      "healthalyst-platform-session-expired",
+      PLATFORM_SESSION_SIGNALS.expiredEvent,
       handleExpiredPlatformSession
     );
     return () => {
       window.removeEventListener(
-        "healthalyst-platform-session-expired",
+        PLATFORM_SESSION_SIGNALS.expiredEvent,
         handleExpiredPlatformSession
       );
     };

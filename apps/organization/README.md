@@ -50,15 +50,21 @@ deployed app origin; browser-to-Render CORS is no longer part of this request.
 
 ```text
 src/
-  app/                         Route entry points, root layout, styles
-  components/ui/               App-wide branded wrappers
+  app/                         Thin routes, root layout, styles and BFF entry
+  config/                      Routes and authentication showcase settings
+  components/ui/               Thin app-wide branded wrappers
   features/
-    organization-onboarding/
-      api/                     Platform API client, errors and services
-      components/              Registration, confirmation and sign-in screens
-      hooks/                   TanStack Query hooks
-      model/                   Options and Zod schemas
-      index.ts                 Screens exposed to routes
-  infrastructure/query/        App-wide TanStack Query client and provider
-  shared/forms/                Form helpers used by more than one workflow
+    authentication/            Sign-in, email/password recovery and MFA
+    organization-registration/ Registration form and reference data
+    organization-application/  Application status, documents and submission
+    organization-management/   Profile, branch and capability integration
+  infrastructure/auth/         Session provider and server BFF configuration
+  infrastructure/query/        Query provider and defaults
+  shared/forms/                Shared validation and focus helpers
+  shared/organization/         Reference types, schemas and values used by features
 ```
+
+Each feature separates components, workflow hooks, services, schemas, types,
+configuration and utilities where needed. Authentication requests and transport
+come directly from `@healthalyst/platform-api`. See
+[code organisation](../../docs/code-organization.md) for dependency rules.

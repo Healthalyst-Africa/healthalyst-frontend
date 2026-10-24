@@ -15,9 +15,13 @@ with `?product=healthschedule` so registration pre-selects HealthSchedule.
 src/
   app/                         Route entry points, root layout, styles
   components/ui/               App-wide branded wrappers
-  infrastructure/
-    organization-app/          Links into the organisation app
+  config/                      Organisation hub address and route configuration
+  features/
+    organization-access/
+      components/              Product entry composition
+      services/                Links into the organisation hub
 ```
 
 Keep product workflows in their own `features/<workflow>` folder, and use
 `packages` for stable, product-neutral capabilities shared across applications.
+See [code organisation](../../docs/code-organization.md) for the shared rules.

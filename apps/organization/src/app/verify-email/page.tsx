@@ -1,10 +1,9 @@
+import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Link from "next/link";
 import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
-import {
-  EmailVerification,
-  OnboardingHeroPanel,
-} from "~/features/organization-onboarding";
+import { EmailVerification } from "~/features/authentication";
+import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
 
 export default function VerifyEmailRoute() {
   return (
@@ -22,7 +21,7 @@ export default function VerifyEmailRoute() {
           Already confirmed?{" "}
           <Link
             className="font-semibold text-primary underline underline-offset-4"
-            href="/sign-in"
+            href={ORGANIZATION_ROUTES.signIn}
           >
             Sign in
           </Link>

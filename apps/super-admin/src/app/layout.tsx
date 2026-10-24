@@ -4,7 +4,7 @@ import { Inter, Young_Serif } from "next/font/google";
 import "@healthalyst/ui/styles.css";
 import "./globals.css";
 import { ApplicationQueryProvider } from "~/infrastructure/query/query-provider";
-import { StaffSessionProvider } from "~/features/staff-auth/context/staff-session-provider";
+import { StaffSessionProvider } from "~/infrastructure/auth/staff-session-provider";
 
 // Young Serif for headings. It has one weight, already heavy, so headings use
 // `font-normal`.

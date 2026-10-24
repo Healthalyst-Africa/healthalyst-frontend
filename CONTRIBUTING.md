@@ -32,21 +32,22 @@ pnpm --filter @healthalyst/organization --filter @healthalyst/health-schedule --
 
 The organisation app (`apps/organization`, port 5173) holds registration,
 email confirmation and sign-in for every HealthAlyst product. The organisation
-app and Super Admin (port 8080) currently call the NestJS Platform API directly
-through `NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL`. HealthSchedule (port 3000)
+app and Super Admin (port 8080) call their same-origin `/api/platform` BFF,
+which calls NestJS using the server-only `HEALTHALYST_PLATFORM_API_URL`.
+HealthSchedule (port 3000)
 links to the organisation hub through
 `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL` instead of building their own
 onboarding and does not yet make API calls. The NestJS Platform API is the
 shared authority for identity and organisation context across the frontend
-apps; documented product APIs can serve product-specific workflows. This API
-address is public configuration, not a credential. Never put secrets in
+apps; documented product APIs can serve product-specific workflows. Backend
+addresses and session credentials belong in server configuration. Never put secrets in
 `NEXT_PUBLIC_*` variables. The backend currently allows the local frontend
 origins on ports 3000, 5173 and 8080.
 
 ## Repository structure
 
 - `apps/organization`: shared registration, authentication and organisation hub.
-- `apps/health-schedule`: routes, onboarding flows, and product-specific theme.
+- `apps/health-schedule`: product entry and future scheduling workflows.
 - `apps/super-admin`: HealthAlyst staff sign-in and organisation review.
 - `packages/platform-api`: shared NestJS Platform API client and auth/session services.
 - `packages/ui`: shared shadcn primitives, neutral styles, and utilities.
@@ -56,6 +57,8 @@ origins on ports 3000, 5173 and 8080.
 
 Applications import reusable UI through `@healthalyst/ui` exports. Do not import
 source from another application or duplicate shared shadcn primitives.
+Use [code organisation](docs/code-organization.md) for feature ownership,
+configuration, contracts and dependency direction before adding folders.
 
 ## Product and interaction standards
 

@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
-import OnboardingHeroPanel from "~/features/organization-onboarding/components/onboarding-hero-panel";
+import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 
 type OrganizationSignInLayoutProperties = {

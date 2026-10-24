@@ -1,4 +1,4 @@
-import { SignIn } from "~/features/organization-onboarding";
+import { SignIn } from "~/features/authentication";
 
 export default function SignInPage() {
   return <SignIn />;

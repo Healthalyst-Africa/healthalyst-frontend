@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { SIDEBAR_CONFIGURATION } from "../config/sidebar";
 import { Slot } from "@radix-ui/react-slot";
 import {
   cva as createClassVariants,
@@ -31,13 +32,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@healthalyst/ui/components/tooltip";
-
-const SIDEBAR_COOKIE_NAME = "sidebar_state";
-const SIDEBAR_COOKIE_MAX_AGE = 60 * 60 * 24 * 7;
-const SIDEBAR_WIDTH = "16rem";
-const SIDEBAR_WIDTH_MOBILE = "18rem";
-const SIDEBAR_WIDTH_ICON = "3rem";
-const SIDEBAR_KEYBOARD_SHORTCUT = "b";
 
 type SidebarContextProperties = {
   state: "expanded" | "collapsed";
@@ -99,7 +93,7 @@ const SidebarProvider = React.forwardRef<
         }
 
         // This sets the cookie to keep the sidebar state.
-        document.cookie = `${SIDEBAR_COOKIE_NAME}=${openState}; path=/; max-age=${SIDEBAR_COOKIE_MAX_AGE}`;
+        document.cookie = `${SIDEBAR_CONFIGURATION.cookieName}=${openState}; path=/; max-age=${SIDEBAR_CONFIGURATION.cookieMaximumAgeSeconds}`;
       },
       [onOpenChange, open]
     );
@@ -113,12 +107,12 @@ const SidebarProvider = React.forwardRef<
 
     // Adds a keyboard shortcut to toggle the sidebar.
     React.useEffect(() => {
-      const handleKeyDown = (event: KeyboardEvent) => {
+      const handleKeyDown = (keyboardEvent: KeyboardEvent) => {
         if (
-          event.key === SIDEBAR_KEYBOARD_SHORTCUT &&
-          (event.metaKey || event.ctrlKey)
+          keyboardEvent.key === SIDEBAR_CONFIGURATION.keyboardShortcut &&
+          (keyboardEvent.metaKey || keyboardEvent.ctrlKey)
         ) {
-          event.preventDefault();
+          keyboardEvent.preventDefault();
           toggleSidebar();
         }
       };
@@ -150,8 +144,8 @@ const SidebarProvider = React.forwardRef<
           <div
             style={
               {
-                "--sidebar-width": SIDEBAR_WIDTH,
-                "--sidebar-width-icon": SIDEBAR_WIDTH_ICON,
+                "--sidebar-width": SIDEBAR_CONFIGURATION.width,
+                "--sidebar-width-icon": SIDEBAR_CONFIGURATION.iconWidth,
                 ...style,
               } as React.CSSProperties
             }
@@ -216,7 +210,7 @@ const Sidebar = React.forwardRef<
             className="w-[--sidebar-width] bg-sidebar p-0 text-sidebar-foreground [&>button]:hidden"
             style={
               {
-                "--sidebar-width": SIDEBAR_WIDTH_MOBILE,
+                "--sidebar-width": SIDEBAR_CONFIGURATION.mobileWidth,
               } as React.CSSProperties
             }
             side={side}

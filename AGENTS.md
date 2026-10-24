@@ -8,8 +8,8 @@ applications, shared packages, configuration, and documentation. Read any nearer
 precedence. More specific instructions may add requirements but must preserve the
 non-negotiable naming and shared component rules below.
 
-This repository owns HealthAlyst Africa's product web clients. The first app is
-HealthSchedule organisation onboarding. The parent
+This repository owns HealthAlyst Africa's organisation hub, product spokes and
+internal Super Admin client. The first product spoke is HealthSchedule. The parent
 `healthAlyst` directory is a workspace containing independent repositories. Keep
 application code and tooling inside this monorepo. Do not copy unrelated product
 code, repository policies, or branding into it.
@@ -105,18 +105,21 @@ code, repository policies, or branding into it.
 
 ## Repository structure and tooling
 
-| Location                                  | Responsibility                                                         |
-| ----------------------------------------- | ---------------------------------------------------------------------- |
-| `apps/health-schedule/src/app`            | Next.js routes, layouts, and metadata                                  |
-| `apps/health-schedule/src/features`       | Product workflows, including their UI, validation, hooks, and API code |
-| `apps/health-schedule/src/infrastructure` | Application-wide providers and runtime setup                           |
-| `apps/health-schedule/src/shared`         | App-local helpers used by multiple workflows                           |
-| `apps/health-schedule/src/components`     | App-wide branded wrappers                                              |
-| `apps/health-schedule/public`             | Files served directly by public paths                                  |
-| `packages/ui`                             | Shared shadcn primitives, neutral tokens, reusable interface utilities |
-| `packages/eslint-config`                  | Shared lint configuration                                              |
-| `packages/typescript-config`              | Shared strict compiler configuration                                   |
-| `packages/test-utilities`                 | Shared testing setup                                                   |
+| Location                                | Responsibility                                                              |
+| --------------------------------------- | --------------------------------------------------------------------------- |
+| `apps/<application>/src/app`            | Thin Next.js routes, layouts, metadata and server handlers                  |
+| `apps/<application>/src/features`       | Owned workflows with components, hooks, services, schemas, types and config |
+| `apps/<application>/src/config`         | App-wide routes and configuration                                           |
+| `apps/<application>/src/infrastructure` | Application-wide providers and runtime setup                                |
+| `apps/<application>/src/shared`         | App-local helpers used by multiple workflows                                |
+| `apps/<application>/src/components`     | Thin branded wrappers                                                       |
+| `apps/<application>/public`             | Files served directly by public paths                                       |
+| `packages/platform-api`                 | Shared browser transport, authentication contracts and server BFF           |
+| `packages/icons`                        | Semantic icon exports                                                       |
+| `packages/ui`                           | Shared shadcn primitives, neutral tokens, reusable interface utilities      |
+| `packages/eslint-config`                | Shared lint configuration                                                   |
+| `packages/typescript-config`            | Shared strict compiler configuration                                        |
+| `packages/test-utilities`               | Shared testing setup                                                        |
 
 - Read manifests rather than assuming versions. The current stack uses Next.js
   App Router, React, TypeScript, Tailwind 3, pnpm workspaces, and Turborepo.
@@ -133,6 +136,10 @@ code, repository policies, or branding into it.
   setup in `infrastructure`, and app-local helpers in `shared` only when more
   than one workflow uses them. Keep query hooks separate from HTTP clients and
   form definitions; do not use `lib` as a catch-all folder.
+- Follow `docs/code-organization.md`. Keep configurable rules beside their owner;
+  do not create a global constants dump. Contracts and configuration must not
+  depend on components, workflow hooks or request services. Create dedicated
+  folders only when they have a real responsibility and consumer.
 - Keep changes focused. Do not upgrade dependencies, replace the state system,
   add new services, or introduce new build tools without a task requirement.
 
@@ -179,9 +186,10 @@ code, repository policies, or branding into it.
   registration or other write automatically. Keep API errors recoverable in the
   relevant form or page.
 - Match credentials and token handling to each backend's actual contract. The
-  current accounts API uses bearer tokens for protected reads and does not allow
-  credentialed cross-origin browser requests. Do not add cookie credentials,
-  refresh flows, or global redirects without a matching backend capability.
+  NestJS Platform API uses bearer access and refresh credentials; the shared BFF
+  keeps them server-side and exposes opaque HttpOnly cookies to each app's browser.
+  Keep server modules out of browser imports. Do not introduce browser token
+  persistence, new refresh strategies or global redirects without a matching contract.
 - Review the backend contract before adding a call. Keep application-specific
   services and hooks inside their application; move code to a shared package only
   when multiple products genuinely share a stable, product-neutral contract.
