@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 
@@ -117,7 +119,11 @@ export default function ResetPassword() {
 
         <ContentPanel>
           {resetToken === undefined ? (
-            <FormMessage tone="status">Reading your reset link…</FormMessage>
+            <BrandLoader
+              markSource={BRAND_MARK_SOURCE}
+              label="Reading your reset link"
+              presentation="inline"
+            />
           ) : passwordResetMutation.isSuccess ? (
             <Link
               className="inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"

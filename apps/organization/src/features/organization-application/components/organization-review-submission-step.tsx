@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronLeftIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import Image from "next/image";
+import { ChevronLeftIcon } from "@healthalyst/icons";
+import { ApplicationLauncherDialog } from "@healthalyst/ui/components/application-launcher-dialog";
 import { FeedbackDialog } from "@healthalyst/ui/components/feedback-dialog";
 import {
   NoticeBanner,
@@ -38,6 +40,17 @@ import {
   organizationTypeOptions,
 } from "~/shared/organization/config/organization-reference";
 import type { OrganizationApplication } from "~/features/organization-application/types/organization-application";
+import { getHealthScheduleAddress } from "~/config/application-addresses";
+import {
+  ORGANIZATION_PRODUCTS,
+  type OrganizationProductCode,
+} from "~/shared/organization/config/organization-products";
+
+const PRODUCT_IMAGE_SOURCES: Record<OrganizationProductCode, string> = {
+  HEALTHSCHEDULE: "/images/module-hospital.webp",
+  LABCONNECT: "/images/module-laboratory.webp",
+  PHARMADESK: "/images/module-pharmacy.webp",
+};
 
 const SUBMISSION_DATE_FORMATTER = new Intl.DateTimeFormat("en-NG", {
   dateStyle: "long",
@@ -72,7 +85,40 @@ export function OrganizationReviewSubmissionStep({
   const [submissionFeedback, setSubmissionFeedback] = useState<
     "success" | "error" | null
   >(null);
+  const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const isAlreadySubmitted = !application.canEdit;
+  const chosenProductCodes = new Set(
+    application.products.map((product) => product.code)
+  );
+  const healthScheduleAddress = getHealthScheduleAddress();
+  const launcherApplications = ORGANIZATION_PRODUCTS.map((product) => {
+    const isChosen = chosenProductCodes.has(product.code);
+    // Only HealthSchedule has an application to open so far.
+    const href =
+      isChosen && product.code === "HEALTHSCHEDULE"
+        ? (healthScheduleAddress ?? undefined)
+        : undefined;
+    return {
+      key: product.code,
+      name: product.name,
+      description: product.description,
+      image: (
+        <Image
+          src={PRODUCT_IMAGE_SOURCES[product.code]}
+          alt=""
+          fill
+          sizes="(min-width: 640px) 240px, (min-width: 420px) 50vw, 100vw"
+        />
+      ),
+      href,
+      available: isChosen,
+      unavailableLabel: !isChosen
+        ? "Not selected"
+        : href
+          ? undefined
+          : "Coming soon",
+    };
+  });
 
   function submitApplication() {
     submitMutation.mutate(application.entityTag, {
@@ -164,7 +210,6 @@ export function OrganizationReviewSubmissionStep({
         file:
           latestDocument && statusPresentation
             ? {
-                fileName: latestDocument.fileName,
                 fileTypeLabel:
                   DOCUMENT_CONTENT_TYPE_LABELS[latestDocument.contentType],
                 status: {
@@ -211,6 +256,11 @@ export function OrganizationReviewSubmissionStep({
           tone="information"
           size="prominent"
           illustration={<EmptyReviewQueueIllustration />}
+          action={
+            <ActionButton type="button" onClick={() => setIsLauncherOpen(true)}>
+              Continue to dashboard
+            </ActionButton>
+          }
           title={
             ORGANIZATION_STATUS_LABELS[application.status] ?? application.status
           }
@@ -354,6 +404,13 @@ export function OrganizationReviewSubmissionStep({
         )}
       </div>
 
+      <ApplicationLauncherDialog
+        open={isLauncherOpen}
+        onOpenChange={setIsLauncherOpen}
+        title="Choose a product"
+        description="Open a product you selected when you registered. Products you did not select are shown for reference."
+        applications={launcherApplications}
+      />
       <FeedbackDialog
         open={submissionFeedback === "success"}
         onOpenChange={(open) => !open && setSubmissionFeedback(null)}

@@ -5,6 +5,8 @@ export const FRONTEND_ENVIRONMENT_VARIABLES = {
   organizationApplicationAddress:
     "NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL",
   superAdminApplicationAddress: "NEXT_PUBLIC_HEALTHALYST_SUPER_ADMIN_APP_URL",
+  healthScheduleApplicationAddress:
+    "NEXT_PUBLIC_HEALTHALYST_HEALTH_SCHEDULE_APP_URL",
   turnstileSiteKey: "NEXT_PUBLIC_TURNSTILE_SITE_KEY",
 } as const;
 
@@ -68,6 +70,13 @@ export function getSuperAdminApplicationAddress(): string | undefined {
   return parseOptionalApplicationOrigin(
     process.env.NEXT_PUBLIC_HEALTHALYST_SUPER_ADMIN_APP_URL,
     FRONTEND_ENVIRONMENT_VARIABLES.superAdminApplicationAddress
+  );
+}
+
+export function getHealthScheduleApplicationAddress(): string | undefined {
+  return parseOptionalApplicationOrigin(
+    process.env.NEXT_PUBLIC_HEALTHALYST_HEALTH_SCHEDULE_APP_URL,
+    FRONTEND_ENVIRONMENT_VARIABLES.healthScheduleApplicationAddress
   );
 }
 

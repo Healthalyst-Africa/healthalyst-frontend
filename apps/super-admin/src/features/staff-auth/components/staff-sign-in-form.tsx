@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import Link from "next/link";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
@@ -57,6 +59,16 @@ export function StaffSignInForm() {
       </div>
     ) : undefined;
 
+  // Restoring an existing session after a refresh shows the brand, not the form.
+  if (status === "loading") {
+    return (
+      <BrandLoader
+        markSource={BRAND_MARK_SOURCE}
+        label="Checking your staff session"
+      />
+    );
+  }
+
   return (
     <StaffAuthLayout
       title={stageTitle}
@@ -114,9 +126,7 @@ export function StaffSignInForm() {
             size="large"
             className="w-full"
             isLoading={
-              passwordMutation.isPending ||
-              authenticatorSetupMutation.isPending ||
-              status === "loading"
+              passwordMutation.isPending || authenticatorSetupMutation.isPending
             }
             loadingText="Signing in"
           >
@@ -187,9 +197,13 @@ export function StaffSignInForm() {
 
       {stage.kind === "enrollment-loading" && (
         <div className="flex flex-col items-center gap-4 text-center">
-          <FormMessage tone="status">
-            Preparing authenticator setup…
-          </FormMessage>
+          {!authenticatorSetupMutation.error && (
+            <BrandLoader
+              markSource={BRAND_MARK_SOURCE}
+              label="Preparing authenticator setup"
+              presentation="inline"
+            />
+          )}
           {authenticatorSetupMutation.error && (
             <FormMessage tone="error">
               {authenticatorSetupMutation.error.message}

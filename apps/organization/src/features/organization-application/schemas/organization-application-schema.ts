@@ -79,6 +79,16 @@ export const organizationApplicationSchema = z.object({
     })
   ),
   submittedAt: z.string().nullable(),
+  /** Products chosen at registration; older API versions omit the list. */
+  products: z
+    .array(
+      z.object({
+        code: z.string(),
+        name: z.string(),
+        status: z.string(),
+      })
+    )
+    .default([]),
 });
 
 export const applicationPatchSchema = z

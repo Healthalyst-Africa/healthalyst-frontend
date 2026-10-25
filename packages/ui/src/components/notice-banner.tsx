@@ -38,6 +38,8 @@ type NoticeBannerProperties = {
    * the icon, for prominent page-level notices.
    */
   illustration?: ReactNode;
+  /** A call to action shown on the right, or below the text on small screens. */
+  action?: ReactNode;
   /** `prominent` suits a page-level summary with more room and a larger title. */
   size?: "default" | "prominent";
   className?: string;
@@ -53,6 +55,7 @@ export function NoticeBanner({
   children,
   icon,
   illustration,
+  action,
   size = "default",
   className,
 }: NoticeBannerProperties) {
@@ -100,6 +103,7 @@ export function NoticeBanner({
           {illustration}
         </div>
         <div className="flex min-w-0 flex-1 flex-col sm:pt-1">{content}</div>
+        {action && <div className="shrink-0 sm:self-center">{action}</div>}
       </Alert>
     );
   }
@@ -116,7 +120,14 @@ export function NoticeBanner({
       )}
     >
       {shownIcon}
-      {content}
+      {action ? (
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+          <div className="min-w-0 flex-1">{content}</div>
+          <div className="shrink-0">{action}</div>
+        </div>
+      ) : (
+        content
+      )}
     </Alert>
   );
 }

@@ -1,17 +1,7 @@
-export const productOptions = [
-  {
-    value: "HEALTHSCHEDULE",
-    label: "HealthSchedule: scheduling and patient flow",
-    selectedLabel: "HealthSchedule",
-  },
-  {
-    value: "LABCONNECT",
-    label: "LabConnect: laboratory and diagnostics",
-    selectedLabel: "LabConnect",
-  },
-  {
-    value: "PHARMADESK",
-    label: "PharmaDesk: pharmacy and dispensing",
-    selectedLabel: "PharmaDesk",
-  },
-] as const;
+import { ORGANIZATION_PRODUCTS } from "~/shared/organization/config/organization-products";
+
+export const productOptions = ORGANIZATION_PRODUCTS.map((product) => ({
+  value: product.code,
+  label: `${product.name}: ${product.description.toLowerCase()}`,
+  selectedLabel: product.name,
+}));

@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 
@@ -123,9 +125,11 @@ export default function EmailVerification() {
 
   if (platformSession) {
     return (
-      <p className="text-sm text-muted-foreground" role="status">
-        Opening your organisation application…
-      </p>
+      <BrandLoader
+        markSource={BRAND_MARK_SOURCE}
+        label="Opening your organisation application"
+        presentation="inline"
+      />
     );
   }
 

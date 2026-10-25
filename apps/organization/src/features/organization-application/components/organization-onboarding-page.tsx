@@ -3,6 +3,8 @@
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 
 import { Suspense, useEffect } from "react";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { useRouter } from "next/navigation";
 import { StatusPanel } from "@healthalyst/ui/components/status-panel";
@@ -42,9 +44,10 @@ export default function OrganizationOnboardingPage() {
       // The workspace reads its step from the address.
       <Suspense
         fallback={
-          <OrganizationOnboardingLayout>
-            <StatusPanel tone="loading" message="Opening your application…" />
-          </OrganizationOnboardingLayout>
+          <BrandLoader
+            markSource={BRAND_MARK_SOURCE}
+            label="Opening your application"
+          />
         }
       >
         <OrganizationOnboardingWorkspace
@@ -52,6 +55,16 @@ export default function OrganizationOnboardingPage() {
           onSignedOut={handleSignedOut}
         />
       </Suspense>
+    );
+  }
+
+  // Restoring the session or opening sign-in: show the brand, not a message.
+  if (!isRedirecting && !redirectError && !restoreError) {
+    return (
+      <BrandLoader
+        markSource={BRAND_MARK_SOURCE}
+        label={isRestoring ? "Checking your sign-in" : "Opening sign in"}
+      />
     );
   }
 
@@ -84,12 +97,7 @@ export default function OrganizationOnboardingPage() {
             </ActionButton>
           }
         />
-      ) : (
-        <StatusPanel
-          tone="loading"
-          message={isRestoring ? "Checking your sign-in…" : "Opening sign in…"}
-        />
-      )}
+      ) : null}
     </OrganizationOnboardingLayout>
   );
 }

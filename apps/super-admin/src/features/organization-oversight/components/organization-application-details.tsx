@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
@@ -31,9 +33,11 @@ export function OrganizationApplicationDetails({
 
   if (detailQuery.isPending) {
     return (
-      <FormMessage tone="status">
-        Loading application details and uploaded documents…
-      </FormMessage>
+      <BrandLoader
+        markSource={BRAND_MARK_SOURCE}
+        label="Loading application details and uploaded documents"
+        presentation="inline"
+      />
     );
   }
 

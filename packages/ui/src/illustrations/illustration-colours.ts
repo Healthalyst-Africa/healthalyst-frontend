@@ -11,6 +11,13 @@ export const ILLUSTRATION_COLOURS = {
   accentStrong: "oklch(var(--brand-gold))",
   warning: "var(--alert-warning-border)",
   error: "var(--alert-error-border)",
+  /* Isometric artwork shades, mixed from theme colours. */
+  primary: "hsl(var(--primary))",
+  primaryShade: "color-mix(in srgb, hsl(var(--primary)) 72%, black)",
+  primaryTint: "color-mix(in srgb, hsl(var(--primary)) 82%, white)",
+  border: "oklch(var(--border))",
+  gold: "oklch(var(--brand-gold))",
+  goldShade: "color-mix(in srgb, oklch(var(--brand-gold)) 82%, black)",
 } as const;
 
 export const ILLUSTRATION_STROKE = {

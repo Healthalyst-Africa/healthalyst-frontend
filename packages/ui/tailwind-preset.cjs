@@ -88,9 +88,26 @@ module.exports = {
           "0%,70%,100%": { opacity: "1" },
           "20%,50%": { opacity: "0" },
         },
+        // Gold rises through the brand mark, holds, then drains upwards.
+        "brand-fill": {
+          "0%": { clipPath: "inset(100% 0 0 0)" },
+          "45%, 68%": { clipPath: "inset(0 0 0 0)" },
+          "100%": { clipPath: "inset(0 0 100% 0)" },
+        },
+        "brand-halo": {
+          "0%, 100%": { transform: "scale(0.85)", opacity: "0" },
+          "50%": { transform: "scale(1.15)", opacity: "0.55" },
+        },
+        "brand-appear": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
       },
       animation: {
         "caret-blink": "caret-blink 1.25s ease-out infinite",
+        "brand-fill": "brand-fill 2.4s cubic-bezier(0.65, 0, 0.35, 1) infinite",
+        "brand-halo": "brand-halo 2.4s ease-in-out infinite",
+        "brand-appear": "brand-appear 300ms ease-out 200ms both",
       },
     },
   },

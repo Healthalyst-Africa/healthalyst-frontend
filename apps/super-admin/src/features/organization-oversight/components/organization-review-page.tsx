@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import Link from "next/link";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
@@ -32,9 +34,11 @@ function ReviewQueue({ staffIdentity }: { staffIdentity: StaffIdentity }) {
         </p>
       </div>
       {reviewQueue.isPending && (
-        <p role="status" className="text-sm text-muted-foreground">
-          Loading review queue…
-        </p>
+        <BrandLoader
+          markSource={BRAND_MARK_SOURCE}
+          label="Loading review queue"
+          presentation="inline"
+        />
       )}
       {reviewQueue.isError && (
         <StatusPanel

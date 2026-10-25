@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import { Suspense } from "react";
 import { useStaffSession } from "~/infrastructure/auth/staff-session-provider";
@@ -13,9 +15,11 @@ export function OrganizationDirectoryPage() {
   return (
     <Suspense
       fallback={
-        <p role="status" className="text-sm text-muted-foreground">
-          Loading organisations…
-        </p>
+        <BrandLoader
+          markSource={BRAND_MARK_SOURCE}
+          label="Loading organisations"
+          presentation="inline"
+        />
       }
     >
       <OrganizationsList staffIdentity={staffIdentity} />

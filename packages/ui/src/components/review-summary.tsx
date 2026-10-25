@@ -147,7 +147,7 @@ export function SummaryDetailList({
   emptyValueLabel?: string;
 }) {
   return (
-    <dl className="grid gap-x-8 gap-y-4 sm:grid-cols-2">
+    <dl className="grid gap-x-8 gap-y-4 rounded-lg bg-secondary/50 px-4 py-4 sm:grid-cols-2">
       {details.map((detail) => (
         <div key={detail.label} className="flex min-w-0 flex-col gap-0.5">
           <dt className="text-xs text-muted-foreground">{detail.label}</dt>
@@ -177,9 +177,8 @@ export function SummaryChecks({ checks }: { checks: readonly SummaryCheck[] }) {
           <li
             key={check.key}
             className={cn(
-              "flex items-start gap-2 rounded-lg border px-3 py-3 text-sm",
-              !check.complete &&
-                "border-alert-warning-border bg-alert-warning-surface"
+              "flex items-start gap-2 rounded-lg px-3 py-3 text-sm",
+              check.complete ? "bg-secondary/50" : "bg-alert-warning-surface"
             )}
           >
             <CheckIcon
@@ -207,7 +206,6 @@ type SummaryFile = {
   label: string;
   /** The added file, or nothing when the item is still missing. */
   file?: {
-    fileName: string;
     fileTypeLabel?: string;
     previewUrl?: string;
     status?: { label: string; tone: StatusTone };
@@ -225,21 +223,19 @@ export function SummaryFiles({ files }: { files: readonly SummaryFile[] }) {
           key={summaryFile.key}
           className={cn(
             "flex min-w-0 items-center gap-3 rounded-lg px-3 py-3",
-            summaryFile.file
-              ? "border"
-              : "border border-dashed border-alert-warning-border bg-alert-warning-surface/50"
+            summaryFile.file ? "bg-secondary/50" : "bg-alert-warning-surface"
           )}
         >
           {summaryFile.file ? (
             <FileTile
-              className="size-12"
+              className="size-12 border-transparent bg-background"
               previewUrl={summaryFile.file.previewUrl}
               fileTypeLabel={summaryFile.file.fileTypeLabel}
             />
           ) : (
             <span
               aria-hidden="true"
-              className="flex size-12 shrink-0 items-center justify-center rounded-md bg-alert-warning-surface text-status-warning"
+              className="flex size-12 shrink-0 items-center justify-center rounded-md bg-background text-status-warning"
             >
               <DocumentIcon className="size-5" />
             </span>
@@ -248,9 +244,6 @@ export function SummaryFiles({ files }: { files: readonly SummaryFile[] }) {
             <p className="text-sm font-medium leading-5">{summaryFile.label}</p>
             {summaryFile.file ? (
               <>
-                <p className="truncate text-xs text-muted-foreground">
-                  {summaryFile.file.fileName}
-                </p>
                 {summaryFile.file.status && (
                   <span className="text-xs">
                     <FileStatusText

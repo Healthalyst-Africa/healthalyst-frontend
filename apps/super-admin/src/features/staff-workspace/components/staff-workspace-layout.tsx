@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -29,12 +31,10 @@ export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
 
   if (status === "loading") {
     return (
-      <main
-        className="flex min-h-screen items-center justify-center text-sm text-muted-foreground"
-        role="status"
-      >
-        Checking your staff session…
-      </main>
+      <BrandLoader
+        markSource={BRAND_MARK_SOURCE}
+        label="Checking your staff session"
+      />
     );
   }
 
@@ -57,12 +57,10 @@ export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
 
   if (status !== "authenticated" || !staffIdentity) {
     return (
-      <main
-        className="flex min-h-screen items-center justify-center text-sm text-muted-foreground"
-        role="status"
-      >
-        Opening staff sign in…
-      </main>
+      <BrandLoader
+        markSource={BRAND_MARK_SOURCE}
+        label="Opening staff sign in"
+      />
     );
   }
 

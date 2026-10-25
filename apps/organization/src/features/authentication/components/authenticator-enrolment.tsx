@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 
@@ -329,7 +331,11 @@ export default function AuthenticatorEnrolment({
             </ActionButton>
           </>
         ) : (
-          <FormMessage tone="status">Preparing your set-up…</FormMessage>
+          <BrandLoader
+            markSource={BRAND_MARK_SOURCE}
+            label="Preparing your set-up"
+            presentation="inline"
+          />
         )}
       </ContentPanel>
     </div>

@@ -15,9 +15,12 @@ Applications import only the dedicated compositions in
 | ------------------------------------------ | ------------------------------------------------ |
 | Buttons                                    | `action-button`                                  |
 | Surfaces for a task, with heading/footer   | `content-panel`                                  |
+| Branded page loading                       | `brand-loader`                                   |
+| Pages that cannot be found                 | `not-found-page`                                 |
 | Loading and failure page states            | `status-panel`, `loading-placeholder`            |
 | Empty lists, queues and no-result states   | `empty-state`                                    |
 | Outcome dialogs (success, error, warning)  | `feedback-dialog`                                |
+| Choosing an application to continue into   | `application-launcher-dialog`                    |
 | Notices and status labels                  | `notice-banner`, `status-badge`, `status-label`  |
 | File uploads with drag and drop            | `file-upload-field`                              |
 | Review pages before submitting a workflow  | `review-summary`                                 |

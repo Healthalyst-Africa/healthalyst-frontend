@@ -1,4 +1,6 @@
 "use client";
+import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
+import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 
@@ -8,7 +10,6 @@ import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { OneTimeCodeField } from "@healthalyst/ui/components/one-time-code-field";
-import { StatusPanel } from "@healthalyst/ui/components/status-panel";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import OrganizationSignInLayout from "~/components/ui/organization-sign-in-layout";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
@@ -96,9 +97,10 @@ export default function SignIn() {
 
   if (isRestoring) {
     return (
-      <OrganizationSignInLayout>
-        <StatusPanel tone="loading" message="Checking your sign-in…" />
-      </OrganizationSignInLayout>
+      <BrandLoader
+        markSource={BRAND_MARK_SOURCE}
+        label="Checking your sign-in"
+      />
     );
   }
 
