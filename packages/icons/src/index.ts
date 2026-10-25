@@ -31,4 +31,7 @@ export {
   IconAlertCircle as ErrorIcon,
   IconTrash as DeleteIcon,
   IconFileUpload as ReplaceFileIcon,
+  IconExternalLink as OpenDocumentIcon,
+  IconHourglassEmpty as UpcomingIcon,
+  IconLock as LockedIcon,
 } from "@tabler/icons-react";

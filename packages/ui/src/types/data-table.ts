@@ -46,4 +46,14 @@ export type DataTableProperties<RowData> = {
   state: DataTableState<RowData>;
   getRowIdentifier: (row: RowData) => string;
   emptyState: DataTableEmptyState;
+  /**
+   * Makes each row open something, such as a details panel. The whole row is
+   * clickable, and a labelled button at the end of the row serves keyboards
+   * and assistive technology.
+   */
+  rowAction?: {
+    /** The button's accessible name, such as "Review HealthAlyst". */
+    label: (row: RowData) => string;
+    onSelect: (row: RowData) => void;
+  };
 };

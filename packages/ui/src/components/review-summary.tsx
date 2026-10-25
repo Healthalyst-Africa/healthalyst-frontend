@@ -165,6 +165,45 @@ export function SummaryDetailList({
   );
 }
 
+type SummaryTile = {
+  key: string;
+  title: string;
+  description?: string;
+  /** Shown only when it adds information, such as "Active". */
+  status?: { label: string; tone: StatusTone };
+};
+
+/** Short named items side by side, such as the products an organisation chose. */
+export function SummaryTiles({ tiles }: { tiles: readonly SummaryTile[] }) {
+  return (
+    <ul className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-3">
+      {tiles.map((tile) => (
+        <li
+          key={tile.key}
+          className="flex min-w-0 flex-col gap-1 rounded-lg bg-secondary/50 px-4 py-3"
+        >
+          <span className="flex flex-wrap items-center justify-between gap-2">
+            <span className="text-sm font-medium">{tile.title}</span>
+            {tile.status && (
+              <span className="text-xs">
+                <FileStatusText
+                  label={tile.status.label}
+                  tone={tile.status.tone}
+                />
+              </span>
+            )}
+          </span>
+          {tile.description && (
+            <span className="text-xs font-light leading-5 text-muted-foreground">
+              {tile.description}
+            </span>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 type SummaryCheck = { key: string; label: string; complete: boolean };
 
 /** Checks shown side by side, each marked complete or not. */

@@ -26,6 +26,8 @@ type LauncherApplication = {
   available: boolean;
   /** Why an application cannot be opened, such as "Coming soon". */
   unavailableLabel?: string;
+  /** A decorative icon for that reason, such as a clock or a lock. */
+  unavailableIcon?: ReactNode;
 };
 
 type ApplicationLauncherDialogProperties = {
@@ -70,7 +72,8 @@ export function ApplicationLauncherDialog({
                   className={cn(
                     "absolute inset-0 [&_img]:object-cover [&_img]:transition-transform [&_img]:duration-300 motion-reduce:[&_img]:transition-none",
                     canOpen && "group-hover:[&_img]:scale-105",
-                    !application.available && "grayscale"
+                    // Anything that cannot be opened yet is shown in greyscale.
+                    !canOpen && "grayscale"
                   )}
                 >
                   {application.image}
@@ -80,11 +83,35 @@ export function ApplicationLauncherDialog({
                   className="absolute inset-0 bg-gradient-to-t from-foreground/90 via-foreground/35 to-transparent"
                 />
                 {!canOpen && application.unavailableLabel && (
-                  <span className="absolute right-3 top-3 rounded-md bg-background/90 px-2 py-1 text-xs font-medium text-foreground">
-                    {application.unavailableLabel}
-                  </span>
+                  <>
+                    {/* Always announced; shown on hover for pointer users. */}
+                    <span className="sr-only">
+                      {application.unavailableLabel}
+                    </span>
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-foreground/60 opacity-0 backdrop-blur-[3px] transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none"
+                    >
+                      {application.unavailableIcon && (
+                        <span className="flex size-12 items-center justify-center rounded-full bg-background/15 text-background ring-1 ring-background/35 [&_svg]:size-5">
+                          {application.unavailableIcon}
+                        </span>
+                      )}
+                      <span className="font-serif text-xl leading-tight text-background">
+                        {application.unavailableLabel}
+                      </span>
+                    </span>
+                  </>
                 )}
-                <span className="relative mt-auto flex items-end justify-between gap-3 p-4">
+                <span
+                  className={cn(
+                    "relative mt-auto flex items-end justify-between gap-3 p-4 transition-opacity duration-300 motion-reduce:transition-none",
+                    // Let the reason stand alone while it is shown.
+                    !canOpen &&
+                      application.unavailableLabel &&
+                      "group-hover:opacity-0"
+                  )}
+                >
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="text-base font-semibold text-background">
                       {application.name}
@@ -120,10 +147,7 @@ export function ApplicationLauncherDialog({
                 ) : (
                   <div
                     aria-disabled="true"
-                    className={cn(
-                      cardClassName,
-                      !application.available && "opacity-60"
-                    )}
+                    className={cn(cardClassName, "group")}
                   >
                     {content}
                   </div>

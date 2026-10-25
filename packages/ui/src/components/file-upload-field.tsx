@@ -1,18 +1,14 @@
 "use client";
 
 import { useId, useState, type ReactNode } from "react";
-import {
-  DeleteIcon,
-  InformationIcon,
-  LoaderIcon,
-  ReplaceFileIcon,
-} from "@healthalyst/icons";
+import { DeleteIcon, LoaderIcon, ReplaceFileIcon } from "@healthalyst/icons";
 import {
   FileStatusText,
   FileTile,
 } from "@healthalyst/ui/components/file-display/file-display";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
+import { HintText } from "@healthalyst/ui/components/hint-text";
 import {
   Dropzone,
   useDropzoneState,
@@ -246,16 +242,9 @@ export function FileUploadField({
       )}
 
       {hint && showsDropTarget && (
-        <p
-          id={hintIdentifier}
-          className="-mt-1.5 flex items-start gap-1.5 text-xs italic leading-5 text-muted-foreground"
-        >
-          <InformationIcon
-            aria-hidden="true"
-            className="mt-0.5 size-4 shrink-0"
-          />
-          <span>{hint}</span>
-        </p>
+        <HintText id={hintIdentifier} className="-mt-1.5">
+          {hint}
+        </HintText>
       )}
     </div>
   );

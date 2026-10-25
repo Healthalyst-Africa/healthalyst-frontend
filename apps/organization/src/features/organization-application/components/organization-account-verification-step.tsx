@@ -5,7 +5,10 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
-import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import {
+  NoticeBanner,
+  StateNotice,
+} from "@healthalyst/ui/components/notice-banner";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
@@ -131,9 +134,8 @@ export function OrganizationAccountVerificationStep({
             </NoticeBanner>
           )}
           {isPhoneVerified ? (
-            <NoticeBanner
+            <StateNotice
               tone="success"
-              size="prominent"
               illustration={<DocumentsCompleteIllustration />}
               title="Your phone number is verified"
             />

@@ -1,7 +1,19 @@
 export const REVIEW_PRODUCTS = [
-  { code: "HEALTHSCHEDULE", label: "HealthSchedule" },
-  { code: "LABCONNECT", label: "LabConnect" },
-  { code: "PHARMADESK", label: "PharmaDesk" },
+  {
+    code: "HEALTHSCHEDULE",
+    label: "HealthSchedule",
+    description: "Scheduling and patient flow",
+  },
+  {
+    code: "LABCONNECT",
+    label: "LabConnect",
+    description: "Laboratory and diagnostics",
+  },
+  {
+    code: "PHARMADESK",
+    label: "PharmaDesk",
+    description: "Pharmacy and dispensing",
+  },
 ] as const;
 
 export const REVIEW_PRODUCT_CODES = REVIEW_PRODUCTS.map(

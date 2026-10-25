@@ -5,7 +5,10 @@ import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
-import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import {
+  NoticeBanner,
+  StateNotice,
+} from "@healthalyst/ui/components/notice-banner";
 import { SelectField } from "@healthalyst/ui/components/select-field";
 import OrganizationOnboardingLayout from "~/components/ui/organization-onboarding-layout";
 import { useOrganizationOnboardingWorkspace } from "~/features/organization-application/hooks/use-organization-onboarding-workspace";
@@ -143,10 +146,7 @@ export function OrganizationOnboardingWorkspace({
             ]}
           />
         ) : queryError ? (
-          <NoticeBanner
-            tone="error"
-            title="We could not load your organisation"
-          >
+          <StateNotice tone="error" title="We could not load your organisation">
             <p>
               {queryError instanceof PlatformApiError &&
               queryError.code === "APPLICATION_NOT_FOUND"
@@ -161,13 +161,13 @@ export function OrganizationOnboardingWorkspace({
             >
               Try again
             </ActionButton>
-          </NoticeBanner>
+          </StateNotice>
         ) : application ? (
           <>
             {/* Reviewer requests appear only when an application is sent back. */}
             {application.status === "CHANGES_REQUESTED" &&
               application.messages.length > 0 && (
-                <NoticeBanner tone="warning" title="Changes requested">
+                <StateNotice tone="warning" title="Changes requested">
                   <ul className="flex flex-col gap-3">
                     {application.messages.map((reviewMessage) => (
                       <li
@@ -190,7 +190,7 @@ export function OrganizationOnboardingWorkspace({
                       </li>
                     ))}
                   </ul>
-                </NoticeBanner>
+                </StateNotice>
               )}
             {visibleStep === "details" ? (
               <OrganizationOnboardingForm

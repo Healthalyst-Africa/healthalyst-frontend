@@ -21,7 +21,12 @@ Applications import only the dedicated compositions in
 | Empty lists, queues and no-result states   | `empty-state`                                    |
 | Outcome dialogs (success, error, warning)  | `feedback-dialog`                                |
 | Choosing an application to continue into   | `application-launcher-dialog`                    |
-| Notices and status labels                  | `notice-banner`, `status-badge`, `status-label`  |
+| Showing and acting on one record           | `detail-sheet`                                   |
+| Short forms in a dialog                    | `form-dialog`                                    |
+| Files with an action each                  | `file-action-list`                               |
+| Short tips with an information icon        | `hint-text`                                      |
+| Page, step or panel states (illustrated)   | `StateNotice` in `notice-banner`                 |
+| Inline notices and status labels           | `notice-banner`, `status-badge`, `status-label`  |
 | File uploads with drag and drop            | `file-upload-field`                              |
 | Review pages before submitting a workflow  | `review-summary`                                 |
 | Form-level errors and confirmations        | `form-message`                                   |

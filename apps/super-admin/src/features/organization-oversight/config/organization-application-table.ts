@@ -8,7 +8,7 @@ import type {
   RegistrationStatus,
 } from "~/features/organization-oversight/types/organization-types";
 
-const APPLICATION_STATUS_PRESENTATION = {
+export const APPLICATION_STATUS_PRESENTATION = {
   DRAFT: { label: "Draft", tone: "highlight" },
   PENDING_VERIFICATION: { label: "Pending review", tone: "information" },
   UNDER_REVIEW: { label: "Under review", tone: "information" },
@@ -22,7 +22,7 @@ const APPLICATION_STATUS_PRESENTATION = {
   Omit<Extract<DataTableCell, { kind: "status" }>, "kind">
 >;
 
-const ORGANIZATION_TYPE_LABELS = {
+export const ORGANIZATION_TYPE_LABELS = {
   CLINIC: "Clinic",
   HOSPITAL: "Hospital",
   SPECIALIST_CLINIC: "Specialist clinic",
@@ -50,7 +50,7 @@ export const ORGANIZATION_TYPE_FILTER_OPTIONS = Object.entries(
   label,
 }));
 
-const APPLICATION_DATE_FORMATTER = new Intl.DateTimeFormat("en-NG", {
+export const APPLICATION_DATE_FORMATTER = new Intl.DateTimeFormat("en-NG", {
   dateStyle: "medium",
   timeZone: "Africa/Lagos",
 });

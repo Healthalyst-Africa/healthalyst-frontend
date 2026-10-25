@@ -4,7 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@healthalyst/icons";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FileUploadField } from "@healthalyst/ui/components/file-upload-field";
-import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import {
+  NoticeBanner,
+  StateNotice,
+} from "@healthalyst/ui/components/notice-banner";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { DocumentDropIllustration } from "@healthalyst/ui/illustrations/document-drop-illustration";
 import { formatFileSize } from "@healthalyst/ui/lib/file-size";
@@ -204,21 +207,23 @@ export function OrganizationSupportingDocumentsStep({
 
       <ContentPanel elevation="flat" spacing="compact" contentClassName="gap-6">
         {application.checklist.documentsComplete && (
-          <NoticeBanner
+          <StateNotice
             tone="success"
-            size="prominent"
             illustration={<DocumentsCompleteIllustration />}
             title="All required documents are in"
           >
             Add optional documents if you have them, or continue to review.
-          </NoticeBanner>
+          </StateNotice>
         )}
 
         {application.requiredDocuments.length === 0 ? (
           !application.checklist.documentsComplete && (
-            <NoticeBanner title="Document requirements are not available yet">
+            <StateNotice
+              tone="warning"
+              title="Document requirements are not available yet"
+            >
               Reload the page to get the current document requirements.
-            </NoticeBanner>
+            </StateNotice>
           )
         ) : (
           <ul className="flex flex-col gap-8">

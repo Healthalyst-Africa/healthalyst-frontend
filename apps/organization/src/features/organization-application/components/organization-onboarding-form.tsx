@@ -5,7 +5,10 @@ import { ChevronRightIcon } from "@healthalyst/icons";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { DynamicFormFields } from "@healthalyst/ui/components/dynamic-form-fields";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
-import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import {
+  NoticeBanner,
+  StateNotice,
+} from "@healthalyst/ui/components/notice-banner";
 import { createOrganizationOnboardingFormDefinition } from "~/features/organization-application/config/organization-onboarding-form";
 import { useOrganizationOnboardingForm } from "~/features/organization-application/hooks/use-organization-onboarding-form";
 import {
@@ -113,7 +116,7 @@ export function OrganizationOnboardingForm(properties: {
         }
       >
         {referenceError && (
-          <NoticeBanner tone="error" title="We could not load the form options">
+          <StateNotice tone="error" title="We could not load the form options">
             <p>{referenceError.message}</p>
             <ActionButton
               type="button"
@@ -125,7 +128,7 @@ export function OrganizationOnboardingForm(properties: {
             >
               Try again
             </ActionButton>
-          </NoticeBanner>
+          </StateNotice>
         )}
         <DynamicFormFields
           definition={definition}

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronRightIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { Card, CardContent } from "@healthalyst/ui/primitives/card";
 import { Skeleton } from "@healthalyst/ui/primitives/skeleton";
@@ -35,6 +36,7 @@ export function DataTable<RowData>({
   state,
   getRowIdentifier,
   emptyState,
+  rowAction,
 }: DataTableProperties<RowData>) {
   return (
     <Card className="min-w-0 overflow-hidden shadow-none">
@@ -87,6 +89,11 @@ export function DataTable<RowData>({
                       {column.label}
                     </TableHead>
                   ))}
+                  {rowAction && (
+                    <TableHead scope="col" className="w-14 px-3">
+                      <span className="sr-only">Actions</span>
+                    </TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -101,13 +108,20 @@ export function DataTable<RowData>({
                           <Skeleton className="h-4 w-3/4 motion-reduce:animate-none" />
                         </TableCell>
                       ))}
+                      {rowAction && <TableCell className="px-3" />}
                     </TableRow>
                   ))}
                 {state.status === "ready" &&
                   state.rows.map((row) => (
                     <TableRow
                       key={getRowIdentifier(row)}
-                      className="hover:bg-muted/25"
+                      className={cn(
+                        "hover:bg-muted/25",
+                        rowAction && "cursor-pointer hover:bg-secondary/50"
+                      )}
+                      onClick={
+                        rowAction ? () => rowAction.onSelect(row) : undefined
+                      }
                     >
                       {columns.map((column) => (
                         <TableCell
@@ -117,6 +131,26 @@ export function DataTable<RowData>({
                           <DataTableCellContent cell={column.getCell(row)} />
                         </TableCell>
                       ))}
+                      {rowAction && (
+                        <TableCell className="px-3 py-4 text-right">
+                          <ActionButton
+                            type="button"
+                            size="icon"
+                            variant="ghost"
+                            className="size-9 text-muted-foreground"
+                            aria-label={rowAction.label(row)}
+                            onClick={(clickEvent) => {
+                              clickEvent.stopPropagation();
+                              rowAction.onSelect(row);
+                            }}
+                          >
+                            <ChevronRightIcon
+                              aria-hidden="true"
+                              className="size-4"
+                            />
+                          </ActionButton>
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
               </TableBody>

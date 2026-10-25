@@ -3,12 +3,12 @@
 import { useState } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import Image from "next/image";
-import { ChevronLeftIcon } from "@healthalyst/icons";
+import { ChevronLeftIcon, LockedIcon, UpcomingIcon } from "@healthalyst/icons";
 import { ApplicationLauncherDialog } from "@healthalyst/ui/components/application-launcher-dialog";
 import { FeedbackDialog } from "@healthalyst/ui/components/feedback-dialog";
 import {
-  NoticeBanner,
   NoticeBannerLinks,
+  StateNotice,
 } from "@healthalyst/ui/components/notice-banner";
 import {
   ReviewSections,
@@ -117,6 +117,7 @@ export function OrganizationReviewSubmissionStep({
         : href
           ? undefined
           : "Coming soon",
+      unavailableIcon: !isChosen ? <LockedIcon /> : <UpcomingIcon />,
     };
   });
 
@@ -252,9 +253,8 @@ export function OrganizationReviewSubmissionStep({
   return (
     <div className="flex flex-col gap-6">
       {isAlreadySubmitted ? (
-        <NoticeBanner
+        <StateNotice
           tone="information"
-          size="prominent"
           illustration={<EmptyReviewQueueIllustration />}
           action={
             <ActionButton type="button" onClick={() => setIsLauncherOpen(true)}>
@@ -273,11 +273,10 @@ export function OrganizationReviewSubmissionStep({
                 new Date(application.submittedAt)
               )}.`}
           </p>
-        </NoticeBanner>
+        </StateNotice>
       ) : remainingCount === 0 ? (
-        <NoticeBanner
+        <StateNotice
           tone="success"
-          size="prominent"
           illustration={<DocumentsCompleteIllustration />}
           title="Your application is ready to submit"
         >
@@ -285,11 +284,10 @@ export function OrganizationReviewSubmissionStep({
             HealthAlyst will review your organisation details and documents,
             then let you know the outcome.
           </p>
-        </NoticeBanner>
+        </StateNotice>
       ) : (
-        <NoticeBanner
+        <StateNotice
           tone="warning"
-          size="prominent"
           illustration={<AttentionNeededIllustration />}
           title={`${remainingCount} ${remainingCount === 1 ? "thing" : "things"} left before you submit`}
         >
@@ -298,7 +296,7 @@ export function OrganizationReviewSubmissionStep({
             and may ask you for anything still missing.
           </p>
           <NoticeBannerLinks links={remainingItems} />
-        </NoticeBanner>
+        </StateNotice>
       )}
 
       <div className="flex flex-col gap-6">
