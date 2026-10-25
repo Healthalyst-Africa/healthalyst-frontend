@@ -3,6 +3,8 @@ import type React from "react";
 import { Inter, Young_Serif } from "next/font/google";
 import "@healthalyst/ui/styles.css";
 import "./globals.css";
+import { PlatformSessionProvider } from "~/infrastructure/auth/platform-session-provider";
+import { ApplicationQueryProvider } from "~/infrastructure/query/query-provider";
 
 // Young Serif for headings. It has one weight, already heavy, so headings use
 // `font-normal`.
@@ -36,7 +38,11 @@ export default function RootLayout({
       lang="en"
       className={`${serifFont.variable} ${sansSerifFont.variable}`}
     >
-      <body className={sansSerifFont.className}>{children}</body>
+      <body className={sansSerifFont.className}>
+        <ApplicationQueryProvider>
+          <PlatformSessionProvider>{children}</PlatformSessionProvider>
+        </ApplicationQueryProvider>
+      </body>
     </html>
   );
 }
