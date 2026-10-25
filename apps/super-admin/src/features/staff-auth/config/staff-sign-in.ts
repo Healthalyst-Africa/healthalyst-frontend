@@ -1,7 +1,5 @@
 export const STAFF_AUTHENTICATOR_CONFIGURATION = {
   codeLength: 6,
-  groupLength: 3,
-  slotIndices: [0, 1, 2, 3, 4, 5],
   recoveryCodeMinimumLength: 6,
   recoveryCodeMaximumLength: 32,
   imageSize: 176,

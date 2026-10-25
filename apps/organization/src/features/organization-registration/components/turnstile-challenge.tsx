@@ -8,12 +8,7 @@ import {
 } from "~/features/organization-registration/config/turnstile";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import Script from "next/script";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldTitle,
-} from "@healthalyst/ui/components/field";
+import { LabelledControlGroup } from "@healthalyst/ui/components/labelled-control-group";
 
 export default function TurnstileChallenge({
   onResponseTokenChange,
@@ -30,15 +25,19 @@ export default function TurnstileChallenge({
   const statusMessage = TURNSTILE_STATUS_MESSAGES[verificationStatus];
 
   return (
-    <Field
-      aria-describedby="registration-captcha-description"
-      aria-labelledby="registration-captcha-title"
-      role="group"
+    <LabelledControlGroup
+      id="registration-captcha"
+      title="Human verification"
+      message={
+        siteKey
+          ? statusMessage
+          : "The human check is unavailable. Please try again later."
+      }
+      messageTone={
+        !siteKey || verificationStatus === "error" ? "error" : "status"
+      }
     >
-      <FieldTitle id="registration-captcha-title">
-        Human verification
-      </FieldTitle>
-      {siteKey ? (
+      {siteKey && (
         <>
           <Script
             id="cloudflare-turnstile-script"
@@ -48,13 +47,6 @@ export default function TurnstileChallenge({
             onError={handleScriptError}
           />
           <div ref={containerReference} className="min-h-[65px]" />
-          <FieldDescription
-            id="registration-captcha-description"
-            role={verificationStatus === "error" ? "alert" : "status"}
-            aria-live={verificationStatus === "error" ? "assertive" : "polite"}
-          >
-            {statusMessage}
-          </FieldDescription>
           {canRestartChallenge && (
             <ActionButton
               className="w-fit"
@@ -67,11 +59,7 @@ export default function TurnstileChallenge({
             </ActionButton>
           )}
         </>
-      ) : (
-        <FieldError id="registration-captcha-description" role="alert">
-          The human check is unavailable. Please try again later.
-        </FieldError>
       )}
-    </Field>
+    </LabelledControlGroup>
   );
 }

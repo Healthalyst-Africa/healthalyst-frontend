@@ -1,5 +1,5 @@
 import { OnboardingProgress } from "@healthalyst/ui/components/onboarding-progress";
-import { Skeleton } from "@healthalyst/ui/components/skeleton";
+import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
 import type { OrganizationApplication } from "~/features/organization-application/types/organization-application";
 import {
   ORGANIZATION_ONBOARDING_STEPS,
@@ -15,12 +15,15 @@ export function OrganizationOnboardingProgress({
 }) {
   if (!application) {
     return (
-      <div className="flex flex-col gap-5" aria-hidden="true">
-        <Skeleton className="h-4 w-32" />
-        <Skeleton className="h-2 w-full" />
-        <Skeleton className="h-20 w-full" />
-        <Skeleton className="h-20 w-full" />
-      </div>
+      <LoadingPlaceholder
+        label="Loading your organisation setup progress"
+        rows={[
+          { shape: "text", width: "short" },
+          { shape: "rule" },
+          { shape: "card" },
+          { shape: "card" },
+        ]}
+      />
     );
   }
 

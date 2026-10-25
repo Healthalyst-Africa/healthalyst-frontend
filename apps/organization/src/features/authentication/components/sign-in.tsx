@@ -5,21 +5,11 @@ import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Link from "next/link";
 import { useSignInWorkflow } from "~/features/authentication/hooks/use-sign-in-workflow";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@healthalyst/ui/components/field";
-import { Input } from "@healthalyst/ui/components/input";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@healthalyst/ui/components/input-otp";
-import { PasswordInput } from "@healthalyst/ui/components/password-input";
-import { cn } from "@healthalyst/ui/lib/utilities";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { OneTimeCodeField } from "@healthalyst/ui/components/one-time-code-field";
+import { StatusPanel } from "@healthalyst/ui/components/status-panel";
+import { TextField } from "@healthalyst/ui/components/text-field";
 import OrganizationSignInLayout from "~/components/ui/organization-sign-in-layout";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import AuthenticatorEnrolment from "~/features/authentication/components/authenticator-enrolment";
@@ -29,9 +19,10 @@ import { AuthenticatedApplicationRedirectState } from "~/features/authentication
 
 function ApiErrorMessage({ error }: { error: Error }) {
   return (
-    <div role="alert" className="flex flex-col gap-1">
-      <FieldError>{error.message}</FieldError>
-      {error instanceof PlatformApiError &&
+    <FormMessage
+      tone="error"
+      details={
+        error instanceof PlatformApiError &&
         error.code === "EMAIL_NOT_VERIFIED" && (
           <p className="text-sm text-muted-foreground">
             <Link
@@ -41,8 +32,11 @@ function ApiErrorMessage({ error }: { error: Error }) {
               Request a new confirmation link
             </Link>
           </p>
-        )}
-    </div>
+        )
+      }
+    >
+      {error.message}
+    </FormMessage>
   );
 }
 
@@ -103,13 +97,7 @@ export default function SignIn() {
   if (isRestoring) {
     return (
       <OrganizationSignInLayout>
-        <Card className="border-border bg-card shadow-sm" aria-busy="true">
-          <CardContent className="px-5 py-6 sm:px-6 md:px-8 md:py-8">
-            <p className="text-sm text-muted-foreground" role="status">
-              Checking your sign-in…
-            </p>
-          </CardContent>
-        </Card>
+        <StatusPanel tone="loading" message="Checking your sign-in…" />
       </OrganizationSignInLayout>
     );
   }
@@ -168,232 +156,138 @@ export default function SignIn() {
           </p>
         </div>
 
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="flex flex-col gap-5 px-6 py-7 md:px-8 md:py-8">
-            {stageNotice && (
-              <p className="text-sm text-muted-foreground" role="status">
-                {stageNotice}
+        <ContentPanel>
+          {stageNotice && (
+            <FormMessage tone="status">{stageNotice}</FormMessage>
+          )}
+
+          {stage.kind === "password" && (
+            <form
+              className="flex flex-col gap-5"
+              onSubmit={handlePasswordSubmit}
+              noValidate
+            >
+              <TextField
+                autoComplete="username"
+                id="sign-in-identifier"
+                label="Work email address"
+                name="identifier"
+                type="email"
+                maxLength={SIGN_IN_LIMITS.identifierMaximum}
+                required
+                disabled={passwordMutation.isPending}
+                error={fieldErrors.identifier}
+                onChange={() =>
+                  setFieldErrors((currentErrors) =>
+                    clearFieldError(currentErrors, "identifier")
+                  )
+                }
+              />
+              <TextField
+                autoComplete="current-password"
+                id="sign-in-password"
+                label="Password"
+                name="password"
+                type="password"
+                maxLength={SIGN_IN_LIMITS.passwordMaximum}
+                required
+                disabled={passwordMutation.isPending}
+                error={fieldErrors.password}
+                onChange={() =>
+                  setFieldErrors((currentErrors) =>
+                    clearFieldError(currentErrors, "password")
+                  )
+                }
+              />
+              <p className="-mt-3 self-end text-sm">
+                <Link
+                  className="text-primary underline-offset-4 hover:underline"
+                  href={ORGANIZATION_ROUTES.forgotPassword}
+                >
+                  Forgot password?
+                </Link>
               </p>
-            )}
-
-            {stage.kind === "password" && (
-              <form
-                className="flex flex-col gap-5"
-                onSubmit={handlePasswordSubmit}
-                noValidate
+              {passwordMutation.error && (
+                <ApiErrorMessage error={passwordMutation.error} />
+              )}
+              <ActionButton
+                className="w-full"
+                size="large"
+                type="submit"
+                isLoading={passwordMutation.isPending}
+                loadingText="Signing in"
               >
-                <FieldGroup className="gap-5">
-                  <Field
-                    className="gap-1.5"
-                    data-invalid={Boolean(fieldErrors.identifier)}
-                  >
-                    <FieldLabel htmlFor="sign-in-identifier">
-                      Work email address
-                    </FieldLabel>
-                    <Input
-                      autoComplete="username"
-                      id="sign-in-identifier"
-                      name="identifier"
-                      type="email"
-                      maxLength={SIGN_IN_LIMITS.identifierMaximum}
-                      required
-                      disabled={passwordMutation.isPending}
-                      aria-invalid={
-                        Boolean(fieldErrors.identifier) || undefined
-                      }
-                      aria-describedby={
-                        fieldErrors.identifier
-                          ? "sign-in-identifier-error"
-                          : undefined
-                      }
-                      onChange={() =>
-                        setFieldErrors((currentErrors) =>
-                          clearFieldError(currentErrors, "identifier")
-                        )
-                      }
-                    />
-                    {fieldErrors.identifier && (
-                      <FieldError id="sign-in-identifier-error">
-                        {fieldErrors.identifier}
-                      </FieldError>
-                    )}
-                  </Field>
-                  <Field
-                    className="gap-1.5"
-                    data-invalid={Boolean(fieldErrors.password)}
-                  >
-                    <FieldLabel htmlFor="sign-in-password">Password</FieldLabel>
-                    <PasswordInput
-                      autoComplete="current-password"
-                      id="sign-in-password"
-                      name="password"
-                      maxLength={SIGN_IN_LIMITS.passwordMaximum}
-                      required
-                      visibilityLabel="Password"
-                      disabled={passwordMutation.isPending}
-                      aria-invalid={Boolean(fieldErrors.password) || undefined}
-                      aria-describedby={
-                        fieldErrors.password
-                          ? "sign-in-password-error"
-                          : undefined
-                      }
-                      onChange={() =>
-                        setFieldErrors((currentErrors) =>
-                          clearFieldError(currentErrors, "password")
-                        )
-                      }
-                    />
-                    {fieldErrors.password && (
-                      <FieldError id="sign-in-password-error">
-                        {fieldErrors.password}
-                      </FieldError>
-                    )}
-                  </Field>
-                </FieldGroup>
-                <p className="-mt-3 self-end text-sm">
-                  <Link
-                    className="text-primary underline-offset-4 hover:underline"
-                    href={ORGANIZATION_ROUTES.forgotPassword}
-                  >
-                    Forgot password?
-                  </Link>
-                </p>
-                {passwordMutation.error && (
-                  <ApiErrorMessage error={passwordMutation.error} />
-                )}
-                <ActionButton
-                  className="w-full"
-                  size="large"
-                  type="submit"
-                  isLoading={passwordMutation.isPending}
-                  loadingText="Signing in"
-                >
-                  Sign in
-                </ActionButton>
-              </form>
-            )}
+                Sign in
+              </ActionButton>
+            </form>
+          )}
 
-            {stage.kind === "code" && (
-              <form
-                className="flex flex-col gap-5"
-                onSubmit={handleCodeSubmit}
-                noValidate
+          {stage.kind === "code" && (
+            <form
+              className="flex flex-col gap-5"
+              onSubmit={handleCodeSubmit}
+              noValidate
+            >
+              {stage.method === "totp" ? (
+                <OneTimeCodeField
+                  autoFocus
+                  id="sign-in-code"
+                  label="Authenticator code"
+                  name="code"
+                  required
+                  disabled={codeMutation.isPending}
+                  error={fieldErrors.code}
+                  onChange={handleCodeChange}
+                />
+              ) : (
+                <TextField
+                  autoComplete="one-time-code"
+                  autoFocus
+                  id="sign-in-code"
+                  label="Recovery code"
+                  name="code"
+                  maxLength={SIGN_IN_LIMITS.recoveryCodeMaximum}
+                  required
+                  disabled={codeMutation.isPending}
+                  error={fieldErrors.code}
+                  onChange={handleCodeChange}
+                />
+              )}
+              {codeMutation.error && (
+                <ApiErrorMessage error={codeMutation.error} />
+              )}
+              <ActionButton
+                className="w-full"
+                size="large"
+                type="submit"
+                isLoading={codeMutation.isPending}
+                loadingText="Checking the code"
               >
-                <Field
-                  className={cn(
-                    "gap-1.5",
-                    stage.method === "totp" && "items-center gap-3"
-                  )}
-                  data-invalid={Boolean(fieldErrors.code)}
-                  data-disabled={codeMutation.isPending}
-                >
-                  <FieldLabel
-                    className={cn(stage.method === "totp" && "justify-center")}
-                    htmlFor="sign-in-code"
-                  >
-                    {stage.method === "totp"
-                      ? "Authenticator code"
-                      : "Recovery code"}
-                  </FieldLabel>
-                  {stage.method === "totp" ? (
-                    <InputOTP
-                      autoComplete="one-time-code"
-                      autoFocus
-                      id="sign-in-code"
-                      name="code"
-                      inputMode="numeric"
-                      maxLength={6}
-                      pattern="^[0-9]*$"
-                      pasteTransformer={(pastedCode) =>
-                        pastedCode.replace(/[\s-]/g, "")
-                      }
-                      required
-                      disabled={codeMutation.isPending}
-                      aria-invalid={Boolean(fieldErrors.code) || undefined}
-                      aria-describedby={
-                        fieldErrors.code ? "sign-in-code-error" : undefined
-                      }
-                      onChange={handleCodeChange}
-                      containerClassName="justify-center gap-3"
-                    >
-                      <InputOTPGroup>
-                        {[0, 1, 2].map((slotIndex) => (
-                          <InputOTPSlot
-                            key={slotIndex}
-                            index={slotIndex}
-                            className="h-12 w-9 bg-card text-lg font-medium tabular-nums sm:w-11"
-                          />
-                        ))}
-                      </InputOTPGroup>
-                      <InputOTPGroup>
-                        {[3, 4, 5].map((slotIndex) => (
-                          <InputOTPSlot
-                            key={slotIndex}
-                            index={slotIndex}
-                            className="h-12 w-9 bg-card text-lg font-medium tabular-nums sm:w-11"
-                          />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
-                  ) : (
-                    <Input
-                      autoComplete="one-time-code"
-                      autoFocus
-                      id="sign-in-code"
-                      name="code"
-                      type="text"
-                      maxLength={SIGN_IN_LIMITS.recoveryCodeMaximum}
-                      required
-                      disabled={codeMutation.isPending}
-                      aria-invalid={Boolean(fieldErrors.code) || undefined}
-                      aria-describedby={
-                        fieldErrors.code ? "sign-in-code-error" : undefined
-                      }
-                      onChange={handleCodeChange}
-                    />
-                  )}
-                  {fieldErrors.code && (
-                    <FieldError id="sign-in-code-error">
-                      {fieldErrors.code}
-                    </FieldError>
-                  )}
-                </Field>
-                {codeMutation.error && (
-                  <ApiErrorMessage error={codeMutation.error} />
-                )}
+                Continue
+              </ActionButton>
+              {stage.methods.length > 1 && (
                 <ActionButton
-                  className="w-full"
-                  size="large"
-                  type="submit"
-                  isLoading={codeMutation.isPending}
-                  loadingText="Checking the code"
+                  className="self-center font-normal"
+                  size="small"
+                  type="button"
+                  variant="link"
+                  disabled={codeMutation.isPending}
+                  onClick={() =>
+                    showStage({
+                      ...stage,
+                      method:
+                        stage.method === "totp" ? "recovery_code" : "totp",
+                    })
+                  }
                 >
-                  Continue
+                  {stage.method === "totp"
+                    ? "Use a recovery code instead"
+                    : "Use your authenticator app instead"}
                 </ActionButton>
-                {stage.methods.length > 1 && (
-                  <ActionButton
-                    className="self-center font-normal"
-                    size="small"
-                    type="button"
-                    variant="link"
-                    disabled={codeMutation.isPending}
-                    onClick={() =>
-                      showStage({
-                        ...stage,
-                        method:
-                          stage.method === "totp" ? "recovery_code" : "totp",
-                      })
-                    }
-                  >
-                    {stage.method === "totp"
-                      ? "Use a recovery code instead"
-                      : "Use your authenticator app instead"}
-                  </ActionButton>
-                )}
-              </form>
-            )}
-          </CardContent>
-        </Card>
+              )}
+            </form>
+          )}
+        </ContentPanel>
       </div>
     </OrganizationSignInLayout>
   );

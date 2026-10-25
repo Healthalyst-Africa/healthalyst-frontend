@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 
 export function DataTableMessage({
+  illustration,
   title,
   description,
   action,
   isError = false,
 }: {
+  illustration?: ReactNode;
   title: string;
   description?: string;
   action?: ReactNode;
@@ -17,6 +19,14 @@ export function DataTableMessage({
         role={isError ? "alert" : "status"}
         className="mx-auto flex max-w-md flex-col items-center gap-2"
       >
+        {illustration && (
+          <div
+            aria-hidden="true"
+            className="mb-2 w-28 max-w-full [&_svg]:h-auto [&_svg]:w-full"
+          >
+            {illustration}
+          </div>
+        )}
         <p className="text-sm text-foreground">{title}</p>
         {description && (
           <p className="text-sm leading-6 text-muted-foreground">

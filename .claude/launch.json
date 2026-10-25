@@ -5,13 +5,19 @@
       "name": "organization",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@healthalyst/organization", "dev"],
-      "port": 5173
+      "port": 3005
     },
     {
       "name": "health-schedule",
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@healthalyst/health-schedule", "dev"],
-      "port": 5174
+      "port": 3006
+    },
+    {
+      "name": "super-admin",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@healthalyst/super-admin", "dev"],
+      "port": 3007
     }
   ]
 }

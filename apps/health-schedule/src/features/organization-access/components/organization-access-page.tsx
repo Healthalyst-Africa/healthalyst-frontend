@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 import { getOrganizationAppLinks } from "~/features/organization-access/services/organization-app-links";
@@ -68,31 +68,29 @@ export function OrganizationAccessPage() {
             and signs in once for every HealthAlyst product.
           </p>
         </div>
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="flex flex-col gap-3 px-6 py-7 md:px-8 md:py-8">
-            {organizationAppLinks ? (
-              <>
-                <a
-                  className={PRIMARY_LINK_CLASS_NAME}
-                  href={organizationAppLinks.signIn}
-                >
-                  Sign in with HealthAlyst
-                </a>
-                <a
-                  className={SECONDARY_LINK_CLASS_NAME}
-                  href={organizationAppLinks.registration}
-                >
-                  Register your organisation
-                </a>
-              </>
-            ) : (
-              <p className="text-sm text-destructive" role="alert">
-                The HealthAlyst organisation app address is not configured. Set
-                NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL.
-              </p>
-            )}
-          </CardContent>
-        </Card>
+        <ContentPanel contentClassName="gap-3">
+          {organizationAppLinks ? (
+            <>
+              <a
+                className={PRIMARY_LINK_CLASS_NAME}
+                href={organizationAppLinks.signIn}
+              >
+                Sign in with HealthAlyst
+              </a>
+              <a
+                className={SECONDARY_LINK_CLASS_NAME}
+                href={organizationAppLinks.registration}
+              >
+                Register your organisation
+              </a>
+            </>
+          ) : (
+            <p className="text-sm text-destructive" role="alert">
+              The HealthAlyst organisation app address is not configured. Set
+              NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL.
+            </p>
+          )}
+        </ContentPanel>
       </div>
     </SplitPanelLayout>
   );

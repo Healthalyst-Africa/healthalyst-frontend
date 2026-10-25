@@ -3,9 +3,8 @@
 import { useEffect, useRef, useState } from "react";
 import { EmailSentIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import { FieldError } from "@healthalyst/ui/components/field";
-import { Separator } from "@healthalyst/ui/components/separator";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { useEmailVerificationResendMutation } from "~/features/authentication/hooks/use-email-verification";
 
@@ -84,82 +83,82 @@ export default function RegistrationConfirmation({
         </p>
       </div>
 
-      <Card className="border-border bg-card shadow-sm">
-        <CardContent className="flex flex-col gap-6 px-6 py-7 md:px-8 md:py-8">
-          <section aria-labelledby="registration-next-steps-heading">
-            <h3
-              id="registration-next-steps-heading"
-              className="text-sm font-semibold"
-            >
-              What happens next
-            </h3>
-            <ol className="mt-4 flex flex-col gap-4">
-              {NEXT_STEPS.map((step, stepIndex) => (
-                <li key={step.title} className="flex gap-3">
-                  <span
-                    aria-hidden="true"
-                    className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-primary"
-                  >
-                    {stepIndex + 1}
-                  </span>
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-sm font-medium">{step.title}</p>
-                    <p className="text-sm leading-6 text-muted-foreground">
-                      {step.description}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
-          </section>
-
-          <Separator />
-
-          <section
-            aria-labelledby="registration-resend-heading"
-            className="flex flex-col gap-3"
+      <ContentPanel contentClassName="gap-6">
+        <section aria-labelledby="registration-next-steps-heading">
+          <h3
+            id="registration-next-steps-heading"
+            className="text-sm font-semibold"
           >
-            <h3 id="registration-resend-heading" className="sr-only">
-              Resend the confirmation email
-            </h3>
-            <p className="text-sm leading-6 text-muted-foreground">
-              No email after a few minutes? Check your spam folder, or request a
-              new link.
-            </p>
-            <ActionButton
-              className="w-full"
-              size="large"
-              type="button"
-              variant="outline"
-              disabled={secondsUntilResend > 0}
-              isLoading={resendMutation.isPending}
-              loadingText="Requesting a new link"
-              onClick={requestNewLink}
+            What happens next
+          </h3>
+          <ol className="mt-4 flex flex-col gap-4">
+            {NEXT_STEPS.map((step, stepIndex) => (
+              <li key={step.title} className="flex gap-3">
+                <span
+                  aria-hidden="true"
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-primary"
+                >
+                  {stepIndex + 1}
+                </span>
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-sm font-medium">{step.title}</p>
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    {step.description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section
+          aria-labelledby="registration-resend-heading"
+          className="flex flex-col gap-3 border-t border-border pt-6"
+        >
+          <h3 id="registration-resend-heading" className="sr-only">
+            Resend the confirmation email
+          </h3>
+          <p className="text-sm leading-6 text-muted-foreground">
+            No email after a few minutes? Check your spam folder, or request a
+            new link.
+          </p>
+          <ActionButton
+            className="w-full"
+            size="large"
+            type="button"
+            variant="outline"
+            disabled={secondsUntilResend > 0}
+            isLoading={resendMutation.isPending}
+            loadingText="Requesting a new link"
+            onClick={requestNewLink}
+          >
+            {secondsUntilResend > 0
+              ? `Request again in ${secondsUntilResend} seconds`
+              : "Resend confirmation email"}
+          </ActionButton>
+          <p aria-live="polite" className="text-sm text-muted-foreground">
+            {resendMutation.isSuccess
+              ? "If an unconfirmed account uses that address, a new link is on its way."
+              : ""}
+          </p>
+          {resendError && (
+            <FormMessage
+              tone="error"
+              details={
+                resendError instanceof PlatformApiError &&
+                resendError.requestId && (
+                  <p className="text-xs text-muted-foreground">
+                    Reference for HealthAlyst support:{" "}
+                    <span className="font-mono">{resendError.requestId}</span>
+                  </p>
+                )
+              }
             >
-              {secondsUntilResend > 0
-                ? `Request again in ${secondsUntilResend} seconds`
-                : "Resend confirmation email"}
-            </ActionButton>
-            <p aria-live="polite" className="text-sm text-muted-foreground">
-              {resendMutation.isSuccess
-                ? "If an unconfirmed account uses that address, a new link is on its way."
-                : ""}
-            </p>
-            {resendError && (
-              <div role="alert" className="flex flex-col gap-1">
-                <FieldError>{resendError.message}</FieldError>
-                {resendError instanceof PlatformApiError &&
-                  resendError.requestId && (
-                    <p className="text-xs text-muted-foreground">
-                      Reference for HealthAlyst support:{" "}
-                      <span className="font-mono">{resendError.requestId}</span>
-                    </p>
-                  )}
-              </div>
-            )}
-          </section>
-        </CardContent>
-      </Card>
+              {resendError.message}
+            </FormMessage>
+          )}
+        </section>
+      </ContentPanel>
     </div>
   );
 }

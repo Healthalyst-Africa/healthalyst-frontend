@@ -6,7 +6,19 @@ export type DataTableCell =
   | {
       kind: "status";
       label: string;
-      tone: "neutral" | "positive" | "negative";
+      /**
+       * `neutral` for inactive or not-yet-started states, `information` for
+       * work in progress, `warning` for states that need someone to act,
+       * `highlight` for early states such as drafts that deserve attention,
+       * `positive` for success and `negative` for refusal or loss of access.
+       */
+      tone:
+        | "neutral"
+        | "information"
+        | "warning"
+        | "highlight"
+        | "positive"
+        | "negative";
     };
 
 export type DataTableColumn<RowData> = {
@@ -28,17 +40,21 @@ export type DataTableState<RowData> =
   | { status: "ready"; rows: readonly RowData[] };
 
 export type DataTableEmptyState = {
+  /**
+   * A decorative illustration from `@healthalyst/ui/illustrations/*`. It is
+   * hidden from assistive technology, so the title must carry the meaning.
+   */
+  illustration?: ReactNode;
   title: string;
   description?: string;
   action?: ReactNode;
 };
 
 export type DataTableProperties<RowData> = {
-  title: string;
-  description?: string;
+  /** Names the table for assistive technology; it is not displayed. */
+  accessibleLabel: string;
   columns: readonly DataTableColumn<RowData>[];
   state: DataTableState<RowData>;
   getRowIdentifier: (row: RowData) => string;
   emptyState: DataTableEmptyState;
-  summary?: string;
 };

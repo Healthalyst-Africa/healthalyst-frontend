@@ -5,14 +5,9 @@ import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@healthalyst/ui/components/field";
-import { Input } from "@healthalyst/ui/components/input";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { TextField } from "@healthalyst/ui/components/text-field";
 import OrganizationSignInLayout from "~/components/ui/organization-sign-in-layout";
 import { usePasswordResetRequestMutation } from "~/features/authentication/hooks/use-platform-authentication";
 import { emailVerificationRequestSchema } from "~/features/authentication/schemas/email-verification-schema";
@@ -88,78 +83,50 @@ export default function ForgotPassword() {
           </p>
         </div>
 
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="flex flex-col gap-5 px-6 py-7 md:px-8 md:py-8">
-            <form
-              className="flex flex-col gap-5"
-              onSubmit={handlePasswordResetRequest}
-              noValidate
+        <ContentPanel>
+          <form
+            className="flex flex-col gap-5"
+            onSubmit={handlePasswordResetRequest}
+            noValidate
+          >
+            <TextField
+              autoComplete="email"
+              id="password-reset-email-address"
+              label="Work email address"
+              name="emailAddress"
+              type="email"
+              maxLength={254}
+              required
+              disabled={passwordResetMutation.isPending}
+              error={fieldErrors.emailAddress}
+              onChange={clearEmailFeedback}
+            />
+
+            {passwordResetMutation.isSuccess && (
+              <FormMessage tone="status">
+                If an account matches that email address, password reset
+                instructions are on their way. Check your inbox and spam folder.
+              </FormMessage>
+            )}
+
+            {passwordResetMutation.error && (
+              <FormMessage tone="error">
+                {passwordResetMutation.error.message}
+              </FormMessage>
+            )}
+
+            <ActionButton
+              className="w-full"
+              size="large"
+              type="submit"
+              variant="default"
+              isLoading={passwordResetMutation.isPending}
+              loadingText="Sending instructions"
             >
-              <FieldGroup>
-                <Field
-                  className="gap-1.5"
-                  data-invalid={Boolean(fieldErrors.emailAddress)}
-                  data-disabled={passwordResetMutation.isPending || undefined}
-                >
-                  <FieldLabel htmlFor="password-reset-email-address">
-                    Work email address
-                  </FieldLabel>
-                  <Input
-                    autoComplete="email"
-                    id="password-reset-email-address"
-                    name="emailAddress"
-                    type="email"
-                    maxLength={254}
-                    required
-                    disabled={passwordResetMutation.isPending}
-                    aria-invalid={
-                      Boolean(fieldErrors.emailAddress) || undefined
-                    }
-                    aria-describedby={
-                      fieldErrors.emailAddress
-                        ? "password-reset-email-address-error"
-                        : undefined
-                    }
-                    onChange={clearEmailFeedback}
-                  />
-                  {fieldErrors.emailAddress && (
-                    <FieldError id="password-reset-email-address-error">
-                      {fieldErrors.emailAddress}
-                    </FieldError>
-                  )}
-                </Field>
-              </FieldGroup>
-
-              {passwordResetMutation.isSuccess && (
-                <p
-                  className="text-sm leading-6 text-muted-foreground"
-                  role="status"
-                >
-                  If an account matches that email address, password reset
-                  instructions are on their way. Check your inbox and spam
-                  folder.
-                </p>
-              )}
-
-              {passwordResetMutation.error && (
-                <FieldError role="alert">
-                  {passwordResetMutation.error.message}
-                </FieldError>
-              )}
-
-              <ActionButton
-                className="w-full"
-                size="large"
-                type="submit"
-                variant="default"
-                isLoading={passwordResetMutation.isPending}
-                loadingText="Sending instructions"
-              >
-                Send password reset instructions
-              </ActionButton>
-            </form>
-          </CardContent>
-        </Card>
+              Send password reset instructions
+            </ActionButton>
+          </form>
+        </ContentPanel>
       </div>
     </OrganizationSignInLayout>
   );

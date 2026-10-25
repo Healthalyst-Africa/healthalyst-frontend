@@ -3,20 +3,10 @@
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@healthalyst/ui/components/alert";
-import { Skeleton } from "@healthalyst/ui/components/skeleton";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@healthalyst/ui/components/select";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
+import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import { SelectField } from "@healthalyst/ui/components/select-field";
 import OrganizationOnboardingLayout from "~/components/ui/organization-onboarding-layout";
 import { useOrganizationOnboardingWorkspace } from "~/features/organization-application/hooks/use-organization-onboarding-workspace";
 import { OrganizationOnboardingProgress } from "~/features/organization-application/components/organization-onboarding-progress";
@@ -115,120 +105,107 @@ export function OrganizationOnboardingWorkspace({
           </p>
         </div>
         {signOutMutation.error && (
-          <Alert variant="destructive">
-            <AlertTitle>We could not sign you out</AlertTitle>
-            <AlertDescription>{signOutMutation.error.message}</AlertDescription>
-          </Alert>
+          <NoticeBanner tone="error" title="We could not sign you out">
+            {signOutMutation.error.message}
+          </NoticeBanner>
         )}
         {!organizationId ? (
-          <Alert>
-            <AlertTitle>
-              {session.memberships.length
+          <NoticeBanner
+            title={
+              session.memberships.length
                 ? "Choose your organisation"
-                : "No organisation is linked to this account"}
-            </AlertTitle>
-            <AlertDescription>
-              {session.memberships.length ? (
-                <Select
-                  disabled={contextMutation.isPending}
-                  onValueChange={selectOrganization}
-                >
-                  <SelectTrigger aria-label="Organisation to onboard">
-                    <SelectValue placeholder="Select your organisation" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectGroup>
-                      {session.memberships.map((membership) => (
-                        <SelectItem
-                          key={membership.membershipId}
-                          value={membership.organization.id}
-                        >
-                          {membership.organization.name}
-                        </SelectItem>
-                      ))}
-                    </SelectGroup>
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p>Contact HealthAlyst for help finding your organisation.</p>
-              )}
-              {contextMutation.error && (
-                <p role="alert">{contextMutation.error.message}</p>
-              )}
-            </AlertDescription>
-          </Alert>
-        ) : applicationQuery.isPending ? (
-          <div
-            className="flex flex-col gap-6 rounded-2xl border border-border p-8"
-            role="status"
+                : "No organisation is linked to this account"
+            }
           >
-            <span className="sr-only">Loading your organisation details</span>
-            <Skeleton className="h-6 w-48" />
-            <Skeleton className="h-12 w-full" />
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Skeleton className="h-12 w-full" />
-              <Skeleton className="h-12 w-full" />
-            </div>
-            <Skeleton className="h-12 w-full" />
-          </div>
+            {session.memberships.length ? (
+              <SelectField
+                className="w-full"
+                id="organization-to-onboard"
+                label="Organisation to onboard"
+                hideLabel
+                placeholder="Select your organisation"
+                disabled={contextMutation.isPending}
+                options={session.memberships.map((membership) => ({
+                  value: membership.organization.id,
+                  label: membership.organization.name,
+                }))}
+                onValueChange={selectOrganization}
+              />
+            ) : (
+              <p>Contact HealthAlyst for help finding your organisation.</p>
+            )}
+            {contextMutation.error && (
+              <FormMessage tone="error">
+                {contextMutation.error.message}
+              </FormMessage>
+            )}
+          </NoticeBanner>
+        ) : applicationQuery.isPending ? (
+          <LoadingPlaceholder
+            label="Loading your organisation details"
+            framed
+            rows={[
+              { shape: "heading", width: "medium" },
+              { shape: "field" },
+              { shape: "field", columns: 2 },
+              { shape: "field" },
+            ]}
+          />
         ) : queryError ? (
-          <Alert variant="destructive">
-            <AlertTitle>We could not load your organisation</AlertTitle>
-            <AlertDescription>
-              <p>
-                {queryError instanceof PlatformApiError &&
-                queryError.code === "APPLICATION_NOT_FOUND"
-                  ? "No onboarding application was found for this organisation. Contact HealthAlyst for help."
-                  : queryError.message}
-              </p>
-              <ActionButton
-                type="button"
-                variant="outline"
-                isLoading={applicationQuery.isRefetching}
-                onClick={() => void applicationQuery.refetch()}
-              >
-                Try again
-              </ActionButton>
-            </AlertDescription>
-          </Alert>
+          <NoticeBanner
+            tone="error"
+            title="We could not load your organisation"
+          >
+            <p>
+              {queryError instanceof PlatformApiError &&
+              queryError.code === "APPLICATION_NOT_FOUND"
+                ? "No onboarding application was found for this organisation. Contact HealthAlyst for help."
+                : queryError.message}
+            </p>
+            <ActionButton
+              type="button"
+              variant="outline"
+              isLoading={applicationQuery.isRefetching}
+              onClick={() => void applicationQuery.refetch()}
+            >
+              Try again
+            </ActionButton>
+          </NoticeBanner>
         ) : application ? (
           <>
             {(!application.canEdit ||
               application.status === "CHANGES_REQUESTED") && (
-              <Alert>
-                <AlertTitle>{statusLabel}</AlertTitle>
-                <AlertDescription>
-                  <p>
-                    {ORGANIZATION_STATUS_DESCRIPTIONS[application.status]}
-                    {!application.canEdit &&
-                      " Your onboarding details are read-only at this stage."}
-                  </p>
-                  {application.messages.length > 0 && (
-                    <ul className="flex flex-col gap-3">
-                      {application.messages.map((reviewMessage) => (
-                        <li
-                          key={`${reviewMessage.createdAt}-${reviewMessage.toStatus}`}
-                        >
-                          {reviewMessage.message && (
-                            <p>{reviewMessage.message}</p>
-                          )}
-                          {reviewMessage.items && (
-                            <ul className="flex list-inside list-disc flex-col gap-1">
-                              {reviewMessage.items.map((messageItem) => (
-                                <li
-                                  key={`${messageItem.field}-${messageItem.message}`}
-                                >
-                                  {messageItem.message}
-                                </li>
-                              ))}
-                            </ul>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </AlertDescription>
-              </Alert>
+              <NoticeBanner title={statusLabel}>
+                <p>
+                  {ORGANIZATION_STATUS_DESCRIPTIONS[application.status]}
+                  {!application.canEdit &&
+                    " Your onboarding details are read-only at this stage."}
+                </p>
+                {application.messages.length > 0 && (
+                  <ul className="flex flex-col gap-3">
+                    {application.messages.map((reviewMessage) => (
+                      <li
+                        key={`${reviewMessage.createdAt}-${reviewMessage.toStatus}`}
+                      >
+                        {reviewMessage.message && (
+                          <p>{reviewMessage.message}</p>
+                        )}
+                        {reviewMessage.items && (
+                          <ul className="flex list-inside list-disc flex-col gap-1">
+                            {reviewMessage.items.map((messageItem) => (
+                              <li
+                                key={`${messageItem.field}-${messageItem.message}`}
+                              >
+                                {messageItem.message}
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+              </NoticeBanner>
             )}
             {visibleStep === "details" ? (
               <OrganizationOnboardingForm

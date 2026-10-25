@@ -5,7 +5,7 @@ import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { useEffect } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { useRouter } from "next/navigation";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
+import { StatusPanel } from "@healthalyst/ui/components/status-panel";
 import OrganizationOnboardingLayout from "~/components/ui/organization-onboarding-layout";
 import { OrganizationOnboardingWorkspace } from "~/features/organization-application/components/organization-onboarding-workspace";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
@@ -55,18 +55,15 @@ export default function OrganizationOnboardingPage() {
           redirectError={redirectError}
         />
       ) : restoreError ? (
-        <Card className="border-border bg-card shadow-sm" role="alert">
-          <CardContent className="flex flex-col gap-4 px-5 py-6 sm:px-6 md:px-8 md:py-8">
-            <div className="flex flex-col gap-2">
-              <h2 className="font-semibold">
-                We could not restore your sign-in
-              </h2>
-              <p className="text-sm text-muted-foreground">
-                {restoreError.message === "We could not restore your sign-in."
-                  ? "Try again. If the problem continues, sign in again."
-                  : restoreError.message}
-              </p>
-            </div>
+        <StatusPanel
+          tone="error"
+          title="We could not restore your sign-in"
+          message={
+            restoreError.message === "We could not restore your sign-in."
+              ? "Try again. If the problem continues, sign in again."
+              : restoreError.message
+          }
+          action={
             <ActionButton
               type="button"
               variant="outline"
@@ -76,16 +73,13 @@ export default function OrganizationOnboardingPage() {
             >
               Try again
             </ActionButton>
-          </CardContent>
-        </Card>
+          }
+        />
       ) : (
-        <Card className="border-border bg-card shadow-sm" aria-busy="true">
-          <CardContent className="px-5 py-6 sm:px-6 md:px-8 md:py-8">
-            <p className="text-sm text-muted-foreground" role="status">
-              {isRestoring ? "Checking your sign-in…" : "Opening sign in…"}
-            </p>
-          </CardContent>
-        </Card>
+        <StatusPanel
+          tone="loading"
+          message={isRestoring ? "Checking your sign-in…" : "Opening sign in…"}
+        />
       )}
     </OrganizationOnboardingLayout>
   );

@@ -4,8 +4,8 @@ import { useOrganizationRegistrationWorkflow } from "~/features/organization-reg
 import { ChevronLeftIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { DynamicFormFields } from "@healthalyst/ui/components/dynamic-form-fields";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import { FieldError } from "@healthalyst/ui/components/field";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { getOrganizationRegistrationSiteKey } from "@healthalyst/config/environment";
@@ -99,91 +99,92 @@ export default function OrganizationRegistrationForm({
           </p>
         )}
       </div>
-      <Card
+      <ContentPanel
         ref={cardReference}
-        className="border-border bg-card shadow-sm lg:relative lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain"
+        className="lg:relative lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain"
+        contentClassName="gap-6"
       >
-        <CardContent className="flex flex-col gap-6 px-6 py-7 md:px-8 md:py-8">
-          <form
-            ref={formReference}
-            className="flex flex-col gap-6"
-            onSubmit={handleRegistrationSubmit}
-            noValidate
-          >
-            {registrationSteps.map((step, stepIndex) => {
-              const isCurrentStep = stepIndex === currentStepIndex;
-              const headingIdentifier = `organization-registration-${step.identifier}-heading`;
+        <form
+          ref={formReference}
+          className="flex flex-col gap-6"
+          onSubmit={handleRegistrationSubmit}
+          noValidate
+        >
+          {registrationSteps.map((step, stepIndex) => {
+            const isCurrentStep = stepIndex === currentStepIndex;
+            const headingIdentifier = `organization-registration-${step.identifier}-heading`;
 
-              return (
-                <section
-                  key={step.identifier}
-                  aria-labelledby={headingIdentifier}
-                  className={cn(
-                    isCurrentStep ? "flex flex-col gap-6" : "hidden"
-                  )}
-                  hidden={!isCurrentStep}
-                >
-                  {step.definitions.map((definition) => (
-                    <DynamicFormFields
-                      key={definition.sections
-                        .map((section) => section.identifier)
-                        .join(" ")}
-                      definition={definition}
-                      defaultSelections={{ products: initialProducts }}
-                      errors={fieldErrors}
-                      disabled={isSubmitting}
-                      onFieldChange={handleFieldChange}
-                    />
-                  ))}
-                </section>
-              );
-            })}
+            return (
+              <section
+                key={step.identifier}
+                aria-labelledby={headingIdentifier}
+                className={cn(isCurrentStep ? "flex flex-col gap-6" : "hidden")}
+                hidden={!isCurrentStep}
+              >
+                {step.definitions.map((definition) => (
+                  <DynamicFormFields
+                    key={definition.sections
+                      .map((section) => section.identifier)
+                      .join(" ")}
+                    definition={definition}
+                    defaultSelections={{ products: initialProducts }}
+                    errors={fieldErrors}
+                    disabled={isSubmitting}
+                    onFieldChange={handleFieldChange}
+                  />
+                ))}
+              </section>
+            );
+          })}
 
-            {registrationError && (
-              <div className="flex flex-col gap-1" role="alert">
-                <FieldError>{registrationError.message}</FieldError>
-                {registrationError instanceof PlatformApiError &&
-                  registrationError.requestId && (
-                    <p className="text-xs text-muted-foreground">
-                      Reference for HealthAlyst support:{" "}
-                      <span className="font-mono">
-                        {registrationError.requestId}
-                      </span>
-                    </p>
-                  )}
-              </div>
+          {registrationError && (
+            <FormMessage
+              tone="error"
+              details={
+                registrationError instanceof PlatformApiError &&
+                registrationError.requestId && (
+                  <p className="text-xs text-muted-foreground">
+                    Reference for HealthAlyst support:{" "}
+                    <span className="font-mono">
+                      {registrationError.requestId}
+                    </span>
+                  </p>
+                )
+              }
+            >
+              {registrationError.message}
+            </FormMessage>
+          )}
+
+          <div className="flex flex-col gap-4">
+            {isFinalStep && (
+              <TurnstileChallenge
+                key={captchaChallengeKey}
+                onResponseTokenChange={handleCaptchaTokenChange}
+                siteKey={getOrganizationRegistrationSiteKey()}
+              />
             )}
-
-            <div className="flex flex-col gap-4">
-              {isFinalStep && (
-                <TurnstileChallenge
-                  key={captchaChallengeKey}
-                  onResponseTokenChange={handleCaptchaTokenChange}
-                  siteKey={getOrganizationRegistrationSiteKey()}
-                />
-              )}
-              {isFinalStep && (
-                <p className="text-xs leading-5 text-muted-foreground">
-                  By registering, you confirm that you are authorised to act for
-                  this organisation.
-                </p>
-              )}
-              <div className="flex">
-                <ActionButton
-                  className="w-full"
-                  size="large"
-                  type="submit"
-                  isLoading={isSubmitting}
-                  loadingText="Registering organisation"
-                  disabled={isSubmitting || (isFinalStep && !captchaToken)}
-                >
-                  {currentStep?.actionLabel}
-                </ActionButton>
-              </div>
+            {isFinalStep && (
+              <p className="text-xs leading-5 text-muted-foreground">
+                By registering, you confirm that you are authorised to act for
+                this organisation.
+              </p>
+            )}
+            <div className="flex">
+              <ActionButton
+                className="w-full"
+                size="large"
+                type="submit"
+                isLoading={isSubmitting}
+                loadingText="Registering organisation"
+                disabled={isSubmitting || (isFinalStep && !captchaToken)}
+              >
+                {currentStep?.actionLabel}
+              </ActionButton>
             </div>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+        </form>
+      </ContentPanel>
     </div>
   );
 }

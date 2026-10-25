@@ -22,6 +22,17 @@
   /* Gold palette: base #C9A162 and subtle #F5DDBA, expressed as OKLCH. */
   --brand-gold: 0.732 0.094 77.837;
   --brand-gold-subtle: 0.908 0.053 77.253;
+  /*
+   * Status tones: text colours reach at least 5.5:1 on white, so status
+   * labels meet WCAG 2.2 AA. Positive and negative reuse the primary and
+   * destructive roles.
+   */
+  --status-neutral: #4a5552;
+  --status-information: #1e4e8c;
+  --status-warning: #8a4b08;
+  --status-highlight: #6b4e1f;
+  --status-positive: hsl(var(--primary));
+  --status-negative: hsl(var(--destructive));
   /* Border and input values use OKLCH channels. */
   --border: 0.88 0.021 156.771;
   --input: var(--border);

@@ -5,14 +5,9 @@ import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@healthalyst/ui/components/field";
-import { PasswordInput } from "@healthalyst/ui/components/password-input";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { TextField } from "@healthalyst/ui/components/text-field";
 import OrganizationSignInLayout from "~/components/ui/organization-sign-in-layout";
 import { usePasswordResetMutation } from "~/features/authentication/hooks/use-platform-authentication";
 import { PASSWORD_LIMITS } from "~/features/authentication/config/authentication-limits";
@@ -120,130 +115,87 @@ export default function ResetPassword() {
           </p>
         </div>
 
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="flex flex-col gap-5 px-6 py-7 md:px-8 md:py-8">
-            {resetToken === undefined ? (
-              <p className="text-sm text-muted-foreground" role="status">
-                Reading your reset link…
-              </p>
-            ) : passwordResetMutation.isSuccess ? (
-              <Link
-                className="inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                href={ORGANIZATION_ROUTES.signIn}
-              >
-                Go to sign in
-              </Link>
-            ) : resetToken === null ? (
-              <Link
-                className="text-center text-sm text-primary underline underline-offset-4"
-                href={ORGANIZATION_ROUTES.forgotPassword}
-              >
-                Request a new reset link
-              </Link>
-            ) : (
-              <form
-                className="flex flex-col gap-5"
-                onSubmit={handlePasswordReset}
-                noValidate
-              >
-                <FieldGroup className="gap-5">
-                  <Field
-                    className="gap-1.5"
-                    data-invalid={Boolean(fieldErrors.newPassword)}
-                    data-disabled={passwordResetMutation.isPending || undefined}
-                  >
-                    <FieldLabel htmlFor="new-password">New password</FieldLabel>
-                    <PasswordInput
-                      autoComplete="new-password"
-                      id="new-password"
-                      name="newPassword"
-                      maxLength={PASSWORD_LIMITS.maximum}
-                      required
-                      visibilityLabel="New password"
-                      disabled={passwordResetMutation.isPending}
-                      aria-invalid={
-                        Boolean(fieldErrors.newPassword) || undefined
-                      }
-                      aria-describedby={
-                        fieldErrors.newPassword
-                          ? "new-password-error"
-                          : undefined
-                      }
-                      onChange={clearPasswordFeedback}
-                    />
-                    {fieldErrors.newPassword && (
-                      <FieldError id="new-password-error">
-                        {fieldErrors.newPassword}
-                      </FieldError>
-                    )}
-                  </Field>
+        <ContentPanel>
+          {resetToken === undefined ? (
+            <FormMessage tone="status">Reading your reset link…</FormMessage>
+          ) : passwordResetMutation.isSuccess ? (
+            <Link
+              className="inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              href={ORGANIZATION_ROUTES.signIn}
+            >
+              Go to sign in
+            </Link>
+          ) : resetToken === null ? (
+            <Link
+              className="text-center text-sm text-primary underline underline-offset-4"
+              href={ORGANIZATION_ROUTES.forgotPassword}
+            >
+              Request a new reset link
+            </Link>
+          ) : (
+            <form
+              className="flex flex-col gap-5"
+              onSubmit={handlePasswordReset}
+              noValidate
+            >
+              <TextField
+                autoComplete="new-password"
+                id="new-password"
+                label="New password"
+                name="newPassword"
+                type="password"
+                maxLength={PASSWORD_LIMITS.maximum}
+                required
+                disabled={passwordResetMutation.isPending}
+                error={fieldErrors.newPassword}
+                onChange={clearPasswordFeedback}
+              />
+              <TextField
+                autoComplete="new-password"
+                id="confirm-new-password"
+                label="Confirm new password"
+                name="confirmPassword"
+                type="password"
+                maxLength={PASSWORD_LIMITS.maximum}
+                required
+                disabled={passwordResetMutation.isPending}
+                error={fieldErrors.confirmPassword}
+                onChange={clearPasswordFeedback}
+              />
 
-                  <Field
-                    className="gap-1.5"
-                    data-invalid={Boolean(fieldErrors.confirmPassword)}
-                    data-disabled={passwordResetMutation.isPending || undefined}
-                  >
-                    <FieldLabel htmlFor="confirm-new-password">
-                      Confirm new password
-                    </FieldLabel>
-                    <PasswordInput
-                      autoComplete="new-password"
-                      id="confirm-new-password"
-                      name="confirmPassword"
-                      maxLength={PASSWORD_LIMITS.maximum}
-                      required
-                      visibilityLabel="Confirm new password"
-                      disabled={passwordResetMutation.isPending}
-                      aria-invalid={
-                        Boolean(fieldErrors.confirmPassword) || undefined
-                      }
-                      aria-describedby={
-                        fieldErrors.confirmPassword
-                          ? "confirm-new-password-error"
-                          : undefined
-                      }
-                      onChange={clearPasswordFeedback}
-                    />
-                    {fieldErrors.confirmPassword && (
-                      <FieldError id="confirm-new-password-error">
-                        {fieldErrors.confirmPassword}
-                      </FieldError>
-                    )}
-                  </Field>
-                </FieldGroup>
-
-                {passwordResetMutation.error && (
-                  <div className="flex flex-col gap-2" role="alert">
-                    <FieldError>
-                      {passwordResetMutation.error.message}
-                    </FieldError>
+              {passwordResetMutation.error && (
+                <FormMessage
+                  tone="error"
+                  details={
                     <Link
                       className="text-sm text-primary underline underline-offset-4"
                       href={ORGANIZATION_ROUTES.forgotPassword}
                     >
                       Request another reset link
                     </Link>
-                  </div>
-                )}
-
-                <p className="text-xs text-muted-foreground">
-                  Use at least {PASSWORD_LIMITS.minimum} characters.
-                </p>
-
-                <ActionButton
-                  className="w-full"
-                  size="large"
-                  type="submit"
-                  variant="default"
-                  isLoading={passwordResetMutation.isPending}
-                  loadingText="Updating password"
+                  }
                 >
-                  Reset password
-                </ActionButton>
-              </form>
-            )}
-          </CardContent>
-        </Card>
+                  {passwordResetMutation.error.message}
+                </FormMessage>
+              )}
+
+              <p className="text-xs text-muted-foreground">
+                Use at least {PASSWORD_LIMITS.minimum} characters.
+              </p>
+
+              <ActionButton
+                className="w-full"
+                size="large"
+                type="submit"
+                variant="default"
+                isLoading={passwordResetMutation.isPending}
+                loadingText="Updating password"
+              >
+                Reset password
+              </ActionButton>
+            </form>
+          )}
+        </ContentPanel>
       </div>
     </OrganizationSignInLayout>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
+import { StatusPanel } from "@healthalyst/ui/components/status-panel";
 import { ReviewApplicationCard } from "~/features/organization-oversight/components/review-application-card";
 import { useReviewQueueQuery } from "~/features/organization-oversight/hooks/use-organization-oversight";
 import { useStaffSession } from "~/infrastructure/auth/staff-session-provider";
@@ -33,27 +33,26 @@ function ReviewQueue({ staffIdentity }: { staffIdentity: StaffIdentity }) {
         </p>
       )}
       {reviewQueue.isError && (
-        <Card>
-          <CardContent className="flex flex-col items-start gap-3 p-6">
-            <p role="alert" className="text-sm text-destructive">
-              {reviewQueue.error.message}
-            </p>
+        <StatusPanel
+          tone="error"
+          message={reviewQueue.error.message}
+          action={
             <ActionButton
               type="button"
               variant="outline"
+              className="self-start"
               onClick={() => void reviewQueue.refetch()}
             >
               Retry loading queue
             </ActionButton>
-          </CardContent>
-        </Card>
+          }
+        />
       )}
       {reviewQueue.isSuccess && reviewQueue.data.length === 0 && (
-        <Card>
-          <CardContent className="p-6 text-sm text-muted-foreground">
-            No submitted applications are awaiting review.
-          </CardContent>
-        </Card>
+        <StatusPanel
+          tone="information"
+          message="No submitted applications are awaiting review."
+        />
       )}
       {reviewQueue.data?.map((application) => (
         <ReviewApplicationCard

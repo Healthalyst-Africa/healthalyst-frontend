@@ -8,19 +8,34 @@ application content and semantic theme values.
 
 ## Public imports
 
-- `@healthalyst/ui/components/accordion`
-- `@healthalyst/ui/components/alert`
-- `@healthalyst/ui/components/action-button`
-- `@healthalyst/ui/components/card`
-- `@healthalyst/ui/components/field`
-- `@healthalyst/ui/components/input`
-- `@healthalyst/ui/components/label`
-- `@healthalyst/ui/components/native-select`
-- `@healthalyst/ui/components/radio-group`
-- `@healthalyst/ui/components/separator`
-- `@healthalyst/ui/components/sheet`
-- `@healthalyst/ui/components/tabs`
-- `@healthalyst/ui/components/textarea`
+Applications import only the dedicated compositions in
+`@healthalyst/ui/components/<name>`:
+
+| Need                                       | Component                                        |
+| ------------------------------------------ | ------------------------------------------------ |
+| Buttons                                    | `action-button`                                  |
+| Surfaces for a task, with heading/footer   | `content-panel`                                  |
+| Loading, failure and empty page states     | `status-panel`, `loading-placeholder`            |
+| Notices and status labels                  | `notice-banner`, `status-badge`                  |
+| Form-level errors and confirmations        | `form-message`                                   |
+| Labelled controls with validation messages | `text-field`, `text-area-field`, `select-field`, |
+|                                            | `checkbox-field`, `one-time-code-field`          |
+| Custom or embedded controls                | `labelled-control-group`                         |
+| Metadata-driven forms                      | `dynamic-form-fields`                            |
+| Optional help                              | `expandable-section`                             |
+| Page and workspace layouts                 | `split-panel-layout`, `onboarding-layout`,       |
+|                                            | `dashboard-shell`, `account-menu`,               |
+|                                            | `notification-panel`                             |
+| Other compositions                         | `data-table`, `filter-bar`, `metric-summary`,    |
+|                                            | `onboarding-progress`,                           |
+|                                            | `qr-code`, `rotating-photograph-panel`,          |
+|                                            | `search-field`, `section-heading`,               |
+|                                            | `workflow-heading`                               |
+
+The shadcn primitives in `@healthalyst/ui/primitives/<name>` are building
+blocks for those compositions only. Applications must not import them; when an
+application needs something new, add or extend a composition here.
+
 - `@healthalyst/ui/lib/utilities` exports the approved `cn` helper.
 - `@healthalyst/ui/styles.css` provides neutral theme variables.
 
@@ -29,8 +44,11 @@ other compositions must use it for loading, disabled and icon behaviour.
 
 ## Internal organisation
 
-- `components/`: shadcn primitives and reusable visual compositions.
-- `components/forms/`: private field and label renderers.
+- `primitives/`: shadcn registry primitives, adapted only for naming,
+  Tailwind 3 and shared icons.
+- `components/`: dedicated HealthAlyst compositions built from the primitives.
+- `components/forms/` and `components/data-table/`: private renderers used by
+  their compositions.
 - `types/`: reusable form metadata and photograph contracts.
 - `forms/`: form-definition operations, exported independently of rendering.
 - `hooks/`: browser behaviour such as reduced-motion preference.
@@ -58,7 +76,8 @@ pnpm dlx shadcn@latest add <component-name> --cwd apps/health-schedule --dry-run
 pnpm dlx shadcn@latest add <component-name> --cwd apps/health-schedule
 ```
 
-Application aliases direct primitives and the class utility into this package.
+Application aliases direct primitives into `src/primitives` and the class
+utility into this package.
 Both `components.json` files must retain aligned styles and destinations. Review
 new dependencies, generated configuration changes, and compatibility with the
 installed Tailwind version. Never overwrite customized source blindly. Generated
@@ -85,3 +104,21 @@ exports rather than relative paths into another workspace.
 primitive. An application overrides the semantic roles it needs in its own global
 stylesheet, loaded after this one, and supplies any brand aliases its Tailwind
 configuration consumes.
+
+## Illustrations
+
+`@healthalyst/ui/illustrations/<name>` exports decorative illustrations as
+React components. Every illustration used by an application lives here, never
+in an application's `public` folder.
+
+- Source: [GitLab SVGs](https://gitlab.com/gitlab-org/gitlab-svgs) (the
+  `@gitlab/svgs` package), under the MIT licence. Keep its copyright and
+  permission notice, which lives in `illustrations/illustration-colours.ts`.
+  Keep to this one geometric style so illustrations look consistent.
+- Record each illustration's original GitLab name in a comment in its file.
+- Convert artwork to a `.tsx` component with no scripts, external references or
+  embedded raster images. Replace GitLab's colour variables with
+  `ILLUSTRATION_COLOURS` from `illustrations/illustration-colours.ts`, so illustrations follow
+  each application's palette and stay product-neutral.
+- Illustrations are decorative: consumers hide them from assistive technology
+  and put the meaning in nearby text.

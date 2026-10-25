@@ -13,32 +13,14 @@ import { useAuthenticatorConfirmation } from "~/features/authentication/hooks/us
 import { useRecoveryCodeExport } from "~/features/authentication/hooks/use-recovery-code-export";
 import { useAuthenticatorEnrolmentWorkflow } from "~/features/authentication/hooks/use-authenticator-enrolment-workflow";
 import { CopyIcon, DownloadIcon, InformationIcon } from "@healthalyst/icons";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@healthalyst/ui/components/accordion";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@healthalyst/ui/components/alert";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import { Checkbox } from "@healthalyst/ui/components/checkbox";
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@healthalyst/ui/components/field";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@healthalyst/ui/components/input-otp";
+import { CheckboxField } from "@healthalyst/ui/components/checkbox-field";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { ExpandableSection } from "@healthalyst/ui/components/expandable-section";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import { OneTimeCodeField } from "@healthalyst/ui/components/one-time-code-field";
 import { QrCode } from "@healthalyst/ui/components/qr-code";
-import { cn } from "@healthalyst/ui/lib/utilities";
 import type {
   AuthenticatorConfirmation,
   AuthenticatorSetup,
@@ -47,20 +29,6 @@ import type { useAuthenticatorConfirmationMutation } from "~/features/authentica
 
 const PRIMARY_LINK_CLASS_NAME =
   "inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2";
-
-function ApiErrorMessage({
-  error,
-  className,
-}: {
-  error: Error;
-  className?: string;
-}) {
-  return (
-    <div role="alert" className={cn("flex flex-col gap-1", className)}>
-      <FieldError>{error.message}</FieldError>
-    </div>
-  );
-}
 
 function ScanAndConfirm({
   setup,
@@ -89,162 +57,107 @@ function ScanAndConfirm({
         stepNumber={1}
         totalSteps={TOTAL_STEPS}
       />
-      <Card className="overflow-hidden border-border bg-card shadow-sm">
-        <CardContent className="flex flex-col p-0">
-          <div className="grid gap-6 px-6 py-7 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start md:px-8 md:py-8">
-            <div className="flex flex-col items-center gap-3">
-              <QrCode
-                value={setup.otpauthUrl}
-                size={148}
-                label="QR code for adding HealthAlyst to your authenticator app"
-              />
-              <a
-                className={`${PRIMARY_LINK_CLASS_NAME} sm:hidden`}
-                href={setup.otpauthUrl}
-              >
-                Open in your authenticator app
-              </a>
-            </div>
-            <ol className="flex flex-col gap-4">
-              {SET_UP_STEPS.map((step, stepIndex) => (
-                <li key={step.title} className="flex gap-3">
-                  <span
-                    aria-hidden="true"
-                    className="flex size-6 shrink-0 items-center justify-center rounded-full border border-gold-subtle bg-gold-subtle text-xs font-semibold text-muted-foreground"
-                  >
-                    {stepIndex + 1}
-                  </span>
-                  <div className="flex flex-col gap-0.5">
-                    <p className="text-xs font-medium">{step.title}</p>
-                    <p className="text-xs leading-5 text-muted-foreground">
-                      {step.description}
-                    </p>
-                  </div>
-                </li>
-              ))}
-            </ol>
+      <ContentPanel className="overflow-hidden" spacing="flush">
+        <div className="grid gap-6 px-6 py-7 sm:grid-cols-[auto_minmax(0,1fr)] sm:items-start md:px-8 md:py-8">
+          <div className="flex flex-col items-center gap-3">
+            <QrCode
+              value={setup.otpauthUrl}
+              size={148}
+              label="QR code for adding HealthAlyst to your authenticator app"
+            />
+            <a
+              className={`${PRIMARY_LINK_CLASS_NAME} sm:hidden`}
+              href={setup.otpauthUrl}
+            >
+              Open in your authenticator app
+            </a>
           </div>
-
-          <Accordion
-            type="single"
-            collapsible
-            className="border-t border-border px-6 md:px-8"
-          >
-            <AccordionItem value="setup-key" className="border-b-0">
-              <AccordionTrigger className="py-4 text-sm font-medium hover:no-underline">
-                Cannot scan the code?
-              </AccordionTrigger>
-              <AccordionContent className="flex flex-col gap-3">
-                <p className="text-sm leading-6 text-muted-foreground">
-                  Choose to enter a setup key in your app, name the account
-                  HealthAlyst, and type this key:
-                </p>
-                <div className="flex items-center justify-between gap-3 rounded-lg bg-secondary px-4 py-3">
-                  <p
-                    aria-label={`Setup key: ${setup.secret.split("").join(" ")}`}
-                    className="flex flex-wrap gap-x-3 gap-y-1 text-sm font-medium tabular-nums tracking-[0.12em] text-foreground"
-                  >
-                    {setupKeyGroups.map((group, groupIndex) => (
-                      <span key={`${group}-${groupIndex}`}>{group}</span>
-                    ))}
-                  </p>
-                  <ActionButton
-                    className="shrink-0"
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    aria-label="Copy setup key"
-                    onClick={copySetupKey}
-                  >
-                    <CopyIcon aria-hidden="true" className="size-4" />
-                  </ActionButton>
-                </div>
-                <p aria-live="polite" className="sr-only">
-                  {keyCopyStatus}
-                </p>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-
-          <form
-            className="flex flex-col gap-5 border-t border-border bg-gold-subtle px-6 py-7 md:px-8 md:py-8"
-            onSubmit={handleSubmit}
-            noValidate
-          >
-            <Field
-              className="items-center gap-3"
-              data-invalid={Boolean(codeError)}
-            >
-              <FieldLabel
-                className="justify-center"
-                htmlFor="authenticator-enrolment-code"
-              >
-                Code from your authenticator app
-              </FieldLabel>
-              <InputOTP
-                ref={codeInputReference}
-                id="authenticator-enrolment-code"
-                name="code"
-                maxLength={CODE_LENGTH}
-                inputMode="numeric"
-                pattern="^[0-9]*$"
-                autoComplete="one-time-code"
-                value={code}
-                disabled={confirmationMutation.isPending}
-                aria-invalid={Boolean(codeError) || undefined}
-                aria-describedby={
-                  codeError ? "authenticator-enrolment-code-error" : undefined
-                }
-                onChange={handleCodeChange}
-                onComplete={confirmCode}
-                containerClassName="justify-center gap-3"
-              >
-                <InputOTPGroup>
-                  {[0, 1, 2].map((slotIndex) => (
-                    <InputOTPSlot
-                      key={slotIndex}
-                      index={slotIndex}
-                      className="h-12 w-11 bg-card text-lg font-medium tabular-nums"
-                    />
-                  ))}
-                </InputOTPGroup>
-                <InputOTPGroup>
-                  {[3, 4, 5].map((slotIndex) => (
-                    <InputOTPSlot
-                      key={slotIndex}
-                      index={slotIndex}
-                      className="h-12 w-11 bg-card text-lg font-medium tabular-nums"
-                    />
-                  ))}
-                </InputOTPGroup>
-              </InputOTP>
-              {codeError && (
-                <FieldError
-                  id="authenticator-enrolment-code-error"
-                  className="text-center"
+          <ol className="flex flex-col gap-4">
+            {SET_UP_STEPS.map((step, stepIndex) => (
+              <li key={step.title} className="flex gap-3">
+                <span
+                  aria-hidden="true"
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full border border-gold-subtle bg-gold-subtle text-xs font-semibold text-muted-foreground"
                 >
-                  {codeError}
-                </FieldError>
-              )}
-            </Field>
-            {confirmationMutation.error && (
-              <ApiErrorMessage
-                className="items-center text-center"
-                error={confirmationMutation.error}
-              />
-            )}
-            <ActionButton
-              className="w-full"
-              size="large"
-              type="submit"
-              isLoading={confirmationMutation.isPending}
-              loadingText="Checking the code"
+                  {stepIndex + 1}
+                </span>
+                <div className="flex flex-col gap-0.5">
+                  <p className="text-xs font-medium">{step.title}</p>
+                  <p className="text-xs leading-5 text-muted-foreground">
+                    {step.description}
+                  </p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        <ExpandableSection
+          title="Cannot scan the code?"
+          className="border-t border-border px-6 md:px-8"
+        >
+          <p className="text-sm leading-6 text-muted-foreground">
+            Choose to enter a setup key in your app, name the account
+            HealthAlyst, and type this key:
+          </p>
+          <div className="flex items-center justify-between gap-3 rounded-lg bg-secondary px-4 py-3">
+            <p
+              aria-label={`Setup key: ${setup.secret.split("").join(" ")}`}
+              className="flex flex-wrap gap-x-3 gap-y-1 text-sm font-medium tabular-nums tracking-[0.12em] text-foreground"
             >
-              Verify and continue
+              {setupKeyGroups.map((group, groupIndex) => (
+                <span key={`${group}-${groupIndex}`}>{group}</span>
+              ))}
+            </p>
+            <ActionButton
+              className="shrink-0"
+              type="button"
+              variant="ghost"
+              size="icon"
+              aria-label="Copy setup key"
+              onClick={copySetupKey}
+            >
+              <CopyIcon aria-hidden="true" className="size-4" />
             </ActionButton>
-          </form>
-        </CardContent>
-      </Card>
+          </div>
+          <p aria-live="polite" className="sr-only">
+            {keyCopyStatus}
+          </p>
+        </ExpandableSection>
+
+        <form
+          className="flex flex-col gap-5 border-t border-border bg-gold-subtle px-6 py-7 md:px-8 md:py-8"
+          onSubmit={handleSubmit}
+          noValidate
+        >
+          <OneTimeCodeField
+            ref={codeInputReference}
+            id="authenticator-enrolment-code"
+            label="Code from your authenticator app"
+            name="code"
+            length={CODE_LENGTH}
+            value={code}
+            disabled={confirmationMutation.isPending}
+            error={codeError ?? undefined}
+            onChange={handleCodeChange}
+            onComplete={confirmCode}
+          />
+          {confirmationMutation.error && (
+            <FormMessage tone="error" align="center">
+              {confirmationMutation.error.message}
+            </FormMessage>
+          )}
+          <ActionButton
+            className="w-full"
+            size="large"
+            type="submit"
+            isLoading={confirmationMutation.isPending}
+            loadingText="Checking the code"
+          >
+            Verify and continue
+          </ActionButton>
+        </form>
+      </ContentPanel>
     </div>
   );
 }
@@ -272,80 +185,66 @@ function RecoveryCodes({
         stepNumber={2}
         totalSteps={TOTAL_STEPS}
       />
-      <Card className="border-border bg-card shadow-sm">
-        <CardContent className="flex flex-col gap-5 px-6 py-7 md:px-8 md:py-8">
-          <Alert>
-            <InformationIcon aria-hidden="true" className="size-4" />
-            <AlertTitle>You will only see these once</AlertTitle>
-            <AlertDescription className="text-muted-foreground">
-              Each code works one time. Keep them somewhere safe and away from
-              your phone, such as a password manager.
-            </AlertDescription>
-          </Alert>
-          <ul
-            aria-label="Recovery codes"
-            className="grid h-48 grid-cols-1 gap-2 overflow-y-auto overscroll-contain pr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            tabIndex={0}
-          >
-            {recoveryCodes.map((recoveryCode) => (
-              <li
-                key={recoveryCode}
-                className="rounded-md bg-secondary px-3 py-2.5 text-center text-sm font-medium tabular-nums tracking-[0.08em]"
-              >
-                {recoveryCode}
-              </li>
-            ))}
-          </ul>
-          <div className="grid gap-2 sm:grid-cols-2">
-            <ActionButton
-              type="button"
-              variant="outline"
-              leadingIcon={<DownloadIcon />}
-              onClick={downloadRecoveryCodes}
+      <ContentPanel>
+        <NoticeBanner
+          title="You will only see these once"
+          icon={<InformationIcon aria-hidden="true" />}
+        >
+          Each code works one time. Keep them somewhere safe and away from your
+          phone, such as a password manager.
+        </NoticeBanner>
+        <ul
+          aria-label="Recovery codes"
+          className="grid h-48 grid-cols-1 gap-2 overflow-y-auto overscroll-contain pr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          tabIndex={0}
+        >
+          {recoveryCodes.map((recoveryCode) => (
+            <li
+              key={recoveryCode}
+              className="rounded-md bg-secondary px-3 py-2.5 text-center text-sm font-medium tabular-nums tracking-[0.08em]"
             >
-              Download codes
-            </ActionButton>
-            <ActionButton
-              type="button"
-              variant="outline"
-              leadingIcon={<CopyIcon />}
-              onClick={copyRecoveryCodes}
-            >
-              Copy codes
-            </ActionButton>
-          </div>
-          <p aria-live="polite" className="-mt-2 text-xs text-muted-foreground">
-            {saveStatus}
-          </p>
-          <Field className="gap-1.5 border-t border-border pt-5">
-            <div className="flex items-start gap-3">
-              <Checkbox
-                id="recovery-codes-saved"
-                className="mt-0.5"
-                checked={hasSavedCodes}
-                onCheckedChange={(checked) =>
-                  setHasSavedCodes(checked === true)
-                }
-              />
-              <FieldLabel
-                htmlFor="recovery-codes-saved"
-                className="font-normal leading-5"
-              >
-                I have saved my recovery codes somewhere safe.
-              </FieldLabel>
-            </div>
-          </Field>
+              {recoveryCode}
+            </li>
+          ))}
+        </ul>
+        <div className="grid gap-2 sm:grid-cols-2">
           <ActionButton
-            className="w-full"
-            size="large"
             type="button"
-            disabled={!hasSavedCodes}
-            onClick={onContinue}
+            variant="outline"
+            leadingIcon={<DownloadIcon />}
+            onClick={downloadRecoveryCodes}
           >
-            Continue to HealthAlyst
+            Download codes
           </ActionButton>
-        </CardContent>
-      </Card>
+          <ActionButton
+            type="button"
+            variant="outline"
+            leadingIcon={<CopyIcon />}
+            onClick={copyRecoveryCodes}
+          >
+            Copy codes
+          </ActionButton>
+        </div>
+        <p aria-live="polite" className="-mt-2 text-xs text-muted-foreground">
+          {saveStatus}
+        </p>
+        <CheckboxField
+          id="recovery-codes-saved"
+          className="border-t border-border pt-5"
+          label="I have saved my recovery codes somewhere safe."
+          checked={hasSavedCodes}
+          onCheckedChange={setHasSavedCodes}
+        />
+        <ActionButton
+          className="w-full"
+          size="large"
+          type="button"
+          disabled={!hasSavedCodes}
+          onClick={onContinue}
+        >
+          Continue to HealthAlyst
+        </ActionButton>
+      </ContentPanel>
     </div>
   );
 }
@@ -384,20 +283,18 @@ export default function AuthenticatorEnrolment({
           heading="Set-up timed out"
           introduction="Setting up the authenticator app took too long, or it is already set up."
         />
-        <Card className="border-border bg-card shadow-sm">
-          <CardContent className="flex flex-col gap-4 px-6 py-7 md:px-8 md:py-8">
-            <p className="text-sm leading-6 text-muted-foreground">
-              Sign in with your email address and password. If the account still
-              needs an authenticator app, you can set it up straight after.
-            </p>
-            <Link
-              className={PRIMARY_LINK_CLASS_NAME}
-              href={ORGANIZATION_ROUTES.signIn}
-            >
-              Go to sign in
-            </Link>
-          </CardContent>
-        </Card>
+        <ContentPanel contentClassName="gap-4">
+          <p className="text-sm leading-6 text-muted-foreground">
+            Sign in with your email address and password. If the account still
+            needs an authenticator app, you can set it up straight after.
+          </p>
+          <Link
+            className={PRIMARY_LINK_CLASS_NAME}
+            href={ORGANIZATION_ROUTES.signIn}
+          >
+            Go to sign in
+          </Link>
+        </ContentPanel>
       </div>
     );
   }
@@ -417,26 +314,24 @@ export default function AuthenticatorEnrolment({
         heading="Protect your account"
         introduction="Add HealthAlyst to an authenticator app on your phone. You will enter a code from it each time you sign in."
       />
-      <Card className="border-border bg-card shadow-sm">
-        <CardContent className="flex flex-col gap-4 px-6 py-7 md:px-8 md:py-8">
-          {setupMutation.error ? (
-            <>
-              <ApiErrorMessage error={setupMutation.error} />
-              <ActionButton
-                type="button"
-                variant="outline"
-                onClick={() => setupMutation.mutate()}
-              >
-                Try again
-              </ActionButton>
-            </>
-          ) : (
-            <p className="text-sm text-muted-foreground" role="status">
-              Preparing your set-up…
-            </p>
-          )}
-        </CardContent>
-      </Card>
+      <ContentPanel contentClassName="gap-4">
+        {setupMutation.error ? (
+          <>
+            <FormMessage tone="error">
+              {setupMutation.error.message}
+            </FormMessage>
+            <ActionButton
+              type="button"
+              variant="outline"
+              onClick={() => setupMutation.mutate()}
+            >
+              Try again
+            </ActionButton>
+          </>
+        ) : (
+          <FormMessage tone="status">Preparing your set-up…</FormMessage>
+        )}
+      </ContentPanel>
     </div>
   );
 }

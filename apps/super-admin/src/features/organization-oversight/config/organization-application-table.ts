@@ -1,3 +1,4 @@
+import type { FilterBarOption } from "@healthalyst/ui/types/filter-bar";
 import type {
   DataTableCell,
   DataTableColumn,
@@ -8,10 +9,10 @@ import type {
 } from "~/features/organization-oversight/types/organization-types";
 
 const APPLICATION_STATUS_PRESENTATION = {
-  DRAFT: { label: "Draft", tone: "neutral" },
-  PENDING_VERIFICATION: { label: "Pending review", tone: "neutral" },
-  UNDER_REVIEW: { label: "Under review", tone: "neutral" },
-  CHANGES_REQUESTED: { label: "Changes requested", tone: "neutral" },
+  DRAFT: { label: "Draft", tone: "highlight" },
+  PENDING_VERIFICATION: { label: "Pending review", tone: "information" },
+  UNDER_REVIEW: { label: "Under review", tone: "information" },
+  CHANGES_REQUESTED: { label: "Changes requested", tone: "warning" },
   ACTIVE: { label: "Active", tone: "positive" },
   SUSPENDED: { label: "Suspended", tone: "negative" },
   REJECTED: { label: "Rejected", tone: "negative" },
@@ -34,6 +35,20 @@ const ORGANIZATION_TYPE_LABELS = {
   NonNullable<OrganizationApplication["type"]>,
   string
 >;
+
+export const APPLICATION_STATUS_FILTER_OPTIONS = Object.entries(
+  APPLICATION_STATUS_PRESENTATION
+).map(([status, presentation]): FilterBarOption => ({
+  value: status,
+  label: presentation.label,
+}));
+
+export const ORGANIZATION_TYPE_FILTER_OPTIONS = Object.entries(
+  ORGANIZATION_TYPE_LABELS
+).map(([organizationType, label]): FilterBarOption => ({
+  value: organizationType,
+  label,
+}));
 
 const APPLICATION_DATE_FORMATTER = new Intl.DateTimeFormat("en-NG", {
   dateStyle: "medium",

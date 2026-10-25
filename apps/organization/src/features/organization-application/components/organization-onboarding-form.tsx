@@ -2,13 +2,10 @@
 
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ChevronRightIcon } from "@healthalyst/icons";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@healthalyst/ui/components/alert";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { DynamicFormFields } from "@healthalyst/ui/components/dynamic-form-fields";
-import { Card, CardContent, CardFooter } from "@healthalyst/ui/components/card";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { createOrganizationOnboardingFormDefinition } from "~/features/organization-application/config/organization-onboarding-form";
 import { useOrganizationOnboardingForm } from "~/features/organization-application/hooks/use-organization-onboarding-form";
 import {
@@ -49,86 +46,16 @@ export function OrganizationOnboardingForm(properties: {
     })) ?? []
   );
 
+  const formIdentifier = `organization-onboarding-form-${application.id}`;
+
   return (
-    <Card className="overflow-hidden rounded-2xl shadow-none">
-      <form
-        ref={form.formReference}
-        onSubmit={form.handleSubmit}
-        noValidate
-        aria-busy={
-          isLoadingReferences ||
-          form.updateMutation.isPending ||
-          form.isReloading
-        }
-      >
-        <CardContent className="flex flex-col gap-8 p-5 sm:p-8">
-          {referenceError && (
-            <Alert variant="destructive">
-              <AlertTitle>We could not load the form options</AlertTitle>
-              <AlertDescription>
-                <p>{referenceError.message}</p>
-                <ActionButton
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    void organizationTypesQuery.refetch();
-                    void statesQuery.refetch();
-                  }}
-                >
-                  Try again
-                </ActionButton>
-              </AlertDescription>
-            </Alert>
-          )}
-          <DynamicFormFields
-            definition={definition}
-            values={form.values}
-            onValueChange={form.changeValue}
-            errors={form.fieldErrors}
-            disabled={
-              !application.canEdit ||
-              form.updateMutation.isPending ||
-              isLoadingReferences ||
-              Boolean(referenceError) ||
-              form.isReloading
-            }
-            fieldGroupClassName="sm:gap-x-6"
-            sectionHeadingSize="large"
-          />
-          {form.updateMutation.error && (
-            <Alert variant="destructive">
-              <AlertTitle>
-                {form.hasConflict
-                  ? "These details changed elsewhere"
-                  : "Your details could not be saved"}
-              </AlertTitle>
-              <AlertDescription>
-                <p>
-                  {form.hasConflict
-                    ? "Load the latest saved details. Your edits will be kept so you can review them before saving again."
-                    : form.updateMutation.error.message}
-                </p>
-                {form.hasConflict && (
-                  <ActionButton
-                    type="button"
-                    variant="outline"
-                    isLoading={form.isReloading}
-                    onClick={() => void form.reloadLatestDetails()}
-                  >
-                    Load latest details
-                  </ActionButton>
-                )}
-              </AlertDescription>
-            </Alert>
-          )}
-          {form.reloadError && (
-            <p role="alert" className="text-sm text-destructive">
-              {form.reloadError}
-            </p>
-          )}
-        </CardContent>
-        {application.canEdit && (
-          <CardFooter className="flex flex-col gap-4 border-t border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+    <ContentPanel
+      className="overflow-hidden rounded-2xl"
+      elevation="flat"
+      spacing="compact"
+      footer={
+        application.canEdit && (
+          <>
             <p
               role="status"
               className="max-w-sm text-sm leading-6 text-muted-foreground"
@@ -172,6 +99,7 @@ export function OrganizationOnboardingForm(properties: {
               ) : (
                 <ActionButton
                   type="submit"
+                  form={formIdentifier}
                   isLoading={form.updateMutation.isPending}
                   loadingText="Saving and continuing"
                   disabled={
@@ -189,9 +117,82 @@ export function OrganizationOnboardingForm(properties: {
                 </ActionButton>
               )}
             </div>
-          </CardFooter>
+          </>
+        )
+      }
+    >
+      <form
+        id={formIdentifier}
+        ref={form.formReference}
+        className="flex flex-col gap-8"
+        onSubmit={form.handleSubmit}
+        noValidate
+        aria-busy={
+          isLoadingReferences ||
+          form.updateMutation.isPending ||
+          form.isReloading
+        }
+      >
+        {referenceError && (
+          <NoticeBanner tone="error" title="We could not load the form options">
+            <p>{referenceError.message}</p>
+            <ActionButton
+              type="button"
+              variant="outline"
+              onClick={() => {
+                void organizationTypesQuery.refetch();
+                void statesQuery.refetch();
+              }}
+            >
+              Try again
+            </ActionButton>
+          </NoticeBanner>
+        )}
+        <DynamicFormFields
+          definition={definition}
+          values={form.values}
+          onValueChange={form.changeValue}
+          errors={form.fieldErrors}
+          disabled={
+            !application.canEdit ||
+            form.updateMutation.isPending ||
+            isLoadingReferences ||
+            Boolean(referenceError) ||
+            form.isReloading
+          }
+          fieldGroupClassName="sm:gap-x-6"
+          sectionHeadingSize="large"
+        />
+        {form.updateMutation.error && (
+          <NoticeBanner
+            tone="error"
+            title={
+              form.hasConflict
+                ? "These details changed elsewhere"
+                : "Your details could not be saved"
+            }
+          >
+            <p>
+              {form.hasConflict
+                ? "Load the latest saved details. Your edits will be kept so you can review them before saving again."
+                : form.updateMutation.error.message}
+            </p>
+            {form.hasConflict && (
+              <ActionButton
+                type="button"
+                variant="outline"
+                isLoading={form.isReloading}
+                onClick={() => void form.reloadLatestDetails()}
+              >
+                Load latest details
+              </ActionButton>
+            )}
+          </NoticeBanner>
+        )}
+        {form.reloadError && (
+          <FormMessage tone="error">{form.reloadError}</FormMessage>
         )}
       </form>
-    </Card>
+    </ContentPanel>
   );
 }

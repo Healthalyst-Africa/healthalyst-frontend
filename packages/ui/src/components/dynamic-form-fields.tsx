@@ -7,7 +7,7 @@ import {
   FieldGroup,
   FieldLegend,
   FieldSet,
-} from "@healthalyst/ui/components/field";
+} from "@healthalyst/ui/primitives/field";
 import { DynamicFormField } from "./forms/dynamic-form-field";
 
 type DynamicFormFieldsProperties = {

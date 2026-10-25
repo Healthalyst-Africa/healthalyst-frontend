@@ -1,24 +1,49 @@
 "use client";
 
-import { useEffect, type ReactNode } from "react";
+import {
+  useEffect,
+  type AnchorHTMLAttributes,
+  type ComponentType,
+  type ElementType,
+  type ReactNode,
+} from "react";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarHeader,
   SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarProvider,
   SidebarRail,
   SidebarTrigger,
   useSidebar,
-} from "@healthalyst/ui/components/sidebar";
+} from "@healthalyst/ui/primitives/sidebar";
 import { cn } from "@healthalyst/ui/lib/utilities";
+
+type DashboardNavigationItem = {
+  label: string;
+  href: string;
+  /** A decorative icon component, rendered hidden from assistive technology. */
+  icon: ComponentType<{ "aria-hidden"?: boolean | "true" }>;
+};
+
+type DashboardNavigationLinkProperties =
+  AnchorHTMLAttributes<HTMLAnchorElement> & { href: string };
 
 type DashboardShellProperties = {
   brand: ReactNode;
-  navigation: ReactNode;
+  navigationLabel: string;
+  navigationItems: readonly DashboardNavigationItem[];
+  /** The current location; the matching item is marked as the current page. */
   navigationLocation: string;
+  /** The application's link component, such as the framework's client-side link. */
+  linkComponent?: ElementType<DashboardNavigationLinkProperties>;
   footer?: ReactNode;
   toolbar: ReactNode;
   actions?: ReactNode;
@@ -27,10 +52,59 @@ type DashboardShellProperties = {
   contentClassName?: string;
 };
 
+function DashboardNavigation({
+  navigationLabel,
+  navigationItems,
+  navigationLocation,
+  linkComponent: NavigationLink = "a",
+}: Pick<
+  DashboardShellProperties,
+  "navigationLabel" | "navigationItems" | "navigationLocation" | "linkComponent"
+>) {
+  return (
+    <>
+      <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+        {navigationLabel}
+      </SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+          {navigationItems.map((navigationItem) => {
+            const NavigationIcon = navigationItem.icon;
+            const isCurrentPage = navigationLocation === navigationItem.href;
+
+            return (
+              <SidebarMenuItem key={navigationItem.href}>
+                <SidebarMenuButton
+                  asChild
+                  isActive={isCurrentPage}
+                  tooltip={navigationItem.label}
+                  className="min-h-10 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2"
+                >
+                  <NavigationLink
+                    href={navigationItem.href}
+                    aria-current={isCurrentPage ? "page" : undefined}
+                  >
+                    <NavigationIcon aria-hidden="true" />
+                    <span className="group-data-[collapsible=icon]:hidden">
+                      {navigationItem.label}
+                    </span>
+                  </NavigationLink>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+            );
+          })}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </>
+  );
+}
+
 function DashboardShellContent({
   brand,
-  navigation,
+  navigationLabel,
+  navigationItems,
   navigationLocation,
+  linkComponent,
   footer,
   toolbar,
   actions,
@@ -51,7 +125,12 @@ function DashboardShellContent({
         </SidebarHeader>
         <SidebarContent className="px-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
           <SidebarGroup className="p-0 group-data-[collapsible=icon]:items-center">
-            {navigation}
+            <DashboardNavigation
+              navigationLabel={navigationLabel}
+              navigationItems={navigationItems}
+              navigationLocation={navigationLocation}
+              linkComponent={linkComponent}
+            />
           </SidebarGroup>
         </SidebarContent>
         {footer && (
@@ -101,3 +180,5 @@ export function DashboardShell({
     </SidebarProvider>
   );
 }
+
+export type { DashboardNavigationItem };

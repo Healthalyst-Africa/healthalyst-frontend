@@ -9,8 +9,8 @@ import {
 } from "class-variance-authority";
 
 import { cn } from "@healthalyst/ui/lib/utilities";
-import { Label } from "@healthalyst/ui/components/label";
-import { Separator } from "@healthalyst/ui/components/separator";
+import { Label } from "@healthalyst/ui/primitives/label";
+import { Separator } from "@healthalyst/ui/primitives/separator";
 
 function FieldSet({
   className,

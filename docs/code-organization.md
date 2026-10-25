@@ -122,7 +122,10 @@ use. It creates no frontend session and does not store credentials on the server
 Product API clients share their app's Platform credential lifecycle and send
 bearer tokens without cookies. See [authentication](authentication.md).
 
-`ui/src/components` retains shadcn primitive entry points. Private form rendering
+`ui/src/primitives` holds the shadcn registry primitives, exported as
+`@healthalyst/ui/primitives/*`. `ui/src/components` holds the dedicated
+compositions built from them, exported as `@healthalyst/ui/components/*`.
+Private form rendering
 helpers live in `components/forms`, reusable form metadata in `types`, and form
 operations in `forms`. Motion behaviour lives in a hook, with rotation defaults
 in `config`. Components receive content and theme values from their apps.

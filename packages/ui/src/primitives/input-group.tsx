@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef, type ComponentProps } from "react";
-import { Input } from "@healthalyst/ui/components/input";
+import { Input } from "@healthalyst/ui/primitives/input";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 function InputGroup({ className, ...properties }: ComponentProps<"div">) {

@@ -7,13 +7,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { EmailSentIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@healthalyst/ui/components/field";
-import { Input } from "@healthalyst/ui/components/input";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { TextField } from "@healthalyst/ui/components/text-field";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import AuthenticatorEnrolment from "~/features/authentication/components/authenticator-enrolment";
 import {
@@ -54,29 +50,15 @@ function ResendConfirmationForm() {
       onSubmit={handleResendRequest}
       noValidate
     >
-      <Field data-invalid={Boolean(fieldErrors.emailAddress)}>
-        <FieldLabel htmlFor="verification-email-address">
-          Work email address
-        </FieldLabel>
-        <Input
-          autoComplete="email"
-          id="verification-email-address"
-          name="emailAddress"
-          type="email"
-          aria-invalid={Boolean(fieldErrors.emailAddress) || undefined}
-          aria-describedby={
-            fieldErrors.emailAddress
-              ? "verification-email-address-error"
-              : undefined
-          }
-          onChange={() => setFieldErrors({})}
-        />
-        {fieldErrors.emailAddress && (
-          <FieldError id="verification-email-address-error">
-            {fieldErrors.emailAddress}
-          </FieldError>
-        )}
-      </Field>
+      <TextField
+        autoComplete="email"
+        id="verification-email-address"
+        label="Work email address"
+        name="emailAddress"
+        type="email"
+        error={fieldErrors.emailAddress}
+        onChange={() => setFieldErrors({})}
+      />
       <ActionButton
         className="w-full"
         size="large"
@@ -93,7 +75,7 @@ function ResendConfirmationForm() {
           : ""}
       </p>
       {resendMutation.error && (
-        <FieldError role="alert">{resendMutation.error.message}</FieldError>
+        <FormMessage tone="error">{resendMutation.error.message}</FormMessage>
       )}
     </form>
   );
@@ -197,47 +179,45 @@ export default function EmailVerification() {
         </p>
       </div>
 
-      <Card className="border-border bg-card shadow-sm">
-        <CardContent className="flex flex-col gap-5 px-6 py-7 md:px-8 md:py-8">
-          {verificationToken === undefined ? (
-            <p className="text-sm text-muted-foreground" role="status">
-              Reading your confirmation link…
+      <ContentPanel>
+        {verificationToken === undefined ? (
+          <FormMessage tone="status">
+            Reading your confirmation link…
+          </FormMessage>
+        ) : verificationMutation.isSuccess ? (
+          <div className="flex flex-col gap-3">
+            <p className="text-sm leading-6 text-muted-foreground">
+              Sign in with your email address and password to continue.
             </p>
-          ) : verificationMutation.isSuccess ? (
-            <div className="flex flex-col gap-3">
-              <p className="text-sm leading-6 text-muted-foreground">
-                Sign in with your email address and password to continue.
-              </p>
-              <Link
-                className="inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                href={ORGANIZATION_ROUTES.signIn}
-              >
-                Go to sign in
-              </Link>
-            </div>
-          ) : isLinkExpired || verificationToken === null ? (
-            <ResendConfirmationForm />
-          ) : (
-            <>
-              <ActionButton
-                className="w-full"
-                size="large"
-                type="button"
-                isLoading={verificationMutation.isPending}
-                loadingText="Confirming your email address"
-                onClick={() => verificationMutation.mutate(verificationToken)}
-              >
-                Confirm email address
-              </ActionButton>
-              {verificationError && (
-                <div role="alert" className="flex flex-col gap-1">
-                  <FieldError>{verificationError.message}</FieldError>
-                </div>
-              )}
-            </>
-          )}
-        </CardContent>
-      </Card>
+            <Link
+              className="inline-flex h-11 w-full items-center justify-center rounded-full bg-primary px-8 text-sm font-semibold text-primary-foreground transition-colors hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              href={ORGANIZATION_ROUTES.signIn}
+            >
+              Go to sign in
+            </Link>
+          </div>
+        ) : isLinkExpired || verificationToken === null ? (
+          <ResendConfirmationForm />
+        ) : (
+          <>
+            <ActionButton
+              className="w-full"
+              size="large"
+              type="button"
+              isLoading={verificationMutation.isPending}
+              loadingText="Confirming your email address"
+              onClick={() => verificationMutation.mutate(verificationToken)}
+            >
+              Confirm email address
+            </ActionButton>
+            {verificationError && (
+              <FormMessage tone="error">
+                {verificationError.message}
+              </FormMessage>
+            )}
+          </>
+        )}
+      </ContentPanel>
     </div>
   );
 }

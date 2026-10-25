@@ -47,8 +47,9 @@ code, repository policies, or branding into it.
 ## Non-negotiable shared shadcn rules
 
 - Use shadcn components as the standard foundation for interactive interface
-  primitives. All installed primitives belong in `packages/ui/src/components`,
-  even when only one application currently uses them.
+  primitives. All installed primitives belong in `packages/ui/src/primitives`,
+  even when only one application currently uses them. Dedicated HealthAlyst
+  compositions built from them belong in `packages/ui/src/components`.
 - **Applications must never import or render shadcn primitives directly.**
   Primitives such as `Table`, `Card`, `Badge`, `Input`, `Alert`, and `Dialog`
   are implementation details of `packages/ui`. Compose them inside dedicated,
@@ -112,6 +113,57 @@ code, repository policies, or branding into it.
   needed. The package owns the chosen third-party icon dependency, keeping
   applications independent of that vendor's package API. When adding shadcn
   components, route generated vendor imports through the shared icon package.
+
+## Icons and illustrations
+
+### Choosing between an icon and an illustration
+
+| Need                                                                                       | Use                               |
+| ------------------------------------------------------------------------------------------ | --------------------------------- |
+| Inside text, buttons, navigation, menus, form fields, table cells, metric tiles (16–24 px) | `@healthalyst/icons`              |
+| A focal image for a state or section: empty, success, error, onboarding (48 px and larger) | `@healthalyst/ui/illustrations/*` |
+
+- Never use an illustration as an interface icon. Illustrations have fixed
+  multi-colour fills, a background disc and detail drawn for about 144 px; at
+  icon size they blur and cannot follow `currentColor`, hover, active, focus or
+  disabled states.
+- Never scale an icon up to stand in for an illustration.
+
+### Icon semantics
+
+- Each icon must describe the meaning of the thing it labels, not merely look
+  related. For example, use a clock or hourglass for "Pending review", a
+  pencil or flagged message for "Changes requested" and a checked circle for
+  "Approved".
+- Do not reuse one icon for different concepts on the same screen or in the
+  same navigation. A metric, navigation item and status that mean different
+  things need visibly different icons.
+- A tick or check means complete or approved; never use it for waiting or
+  in-progress states.
+- Export icons from `@healthalyst/icons` under semantic names that describe
+  their purpose, such as `PendingIcon` or `ApprovedIcon`, rather than the
+  vendor's drawing name. Keep to the single icon family the package wraps;
+  do not mix in a second icon set.
+- Decorative icons beside visible text are `aria-hidden`. Icon-only controls
+  need an accessible name.
+
+### Illustration sourcing and storage
+
+- Illustrations come from GitLab SVGs (`@gitlab/svgs`, MIT licence). Keep to
+  that one geometric style; do not mix in other illustration libraries.
+- The full raw download, when present, is a local catalogue in the hidden
+  `.illustration-library/` folder at the repository root. It is excluded
+  through `.git/info/exclude`, is never committed and is never imported by
+  application or package code.
+- Take only what a change needs. Convert each chosen illustration into a React
+  component in `packages/ui/src/illustrations/`, using the theme colours in
+  `illustration-colours.ts`, `aria-hidden="true"` and `focusable="false"`.
+  Record the original GitLab name in a comment and keep the MIT notice in
+  `illustration-colours.ts`.
+- Never commit raw SVG downloads, and never copy GitLab's logo or mascot, or
+  any third-party brand logo; those are trademarks outside the MIT licence.
+- Applications import illustrations only through
+  `@healthalyst/ui/illustrations/<name>` and put the meaning in nearby text.
 
 ## Repository structure and tooling
 

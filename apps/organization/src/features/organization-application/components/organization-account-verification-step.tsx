@@ -3,20 +3,10 @@
 import { useState, type FormEvent } from "react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import {
-  Alert,
-  AlertDescription,
-  AlertTitle,
-} from "@healthalyst/ui/components/alert";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import {
-  Field,
-  FieldError,
-  FieldLegend,
-  FieldSet,
-  FieldLabel,
-} from "@healthalyst/ui/components/field";
-import { Input } from "@healthalyst/ui/components/input";
+import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import { TextField } from "@healthalyst/ui/components/text-field";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
 import {
   usePhoneVerificationCodeMutation,
@@ -106,218 +96,187 @@ export function OrganizationAccountVerificationStep({
   }
 
   return (
-    <Card className="shadow-none">
-      <CardContent className="flex flex-col gap-5 p-5 sm:p-8">
-        <FieldSet className="gap-0">
-          <FieldLegend
-            className="mb-0 font-sans font-semibold leading-tight"
-            variant="legend"
-          >
-            Phone number verification
-          </FieldLegend>
-          <div className="mt-6">
-            {!emailIsVerified || !authenticatorIsEnrolled ? (
-              <Alert variant="destructive">
-                <AlertTitle>Finish securing your account first</AlertTitle>
-                <AlertDescription>
-                  {!emailIsVerified && !authenticatorIsEnrolled ? (
-                    <ul className="list-inside list-disc">
-                      <li>
-                        Open the confirmation link sent to your administrator
-                        email.
-                      </li>
-                      <li>
-                        Finish authenticator setup during sign-in, then return
-                        here.
-                      </li>
-                    </ul>
-                  ) : emailIsVerified ? (
-                    "Finish authenticator setup during sign-in, then return here."
-                  ) : (
-                    "Open the confirmation link sent to your administrator email, then return here."
+    <ContentPanel elevation="flat" spacing="compact">
+      <section
+        aria-labelledby="phone-verification-heading"
+        className="flex flex-col gap-6"
+      >
+        <h2
+          id="phone-verification-heading"
+          className="font-semibold leading-tight"
+        >
+          Phone number verification
+        </h2>
+        <div>
+          {!emailIsVerified || !authenticatorIsEnrolled ? (
+            <NoticeBanner
+              tone="error"
+              title="Finish securing your account first"
+            >
+              {!emailIsVerified && !authenticatorIsEnrolled ? (
+                <ul className="list-inside list-disc">
+                  <li>
+                    Open the confirmation link sent to your administrator email.
+                  </li>
+                  <li>
+                    Finish authenticator setup during sign-in, then return here.
+                  </li>
+                </ul>
+              ) : emailIsVerified ? (
+                "Finish authenticator setup during sign-in, then return here."
+              ) : (
+                "Open the confirmation link sent to your administrator email, then return here."
+              )}
+            </NoticeBanner>
+          ) : isPhoneVerified ? (
+            <NoticeBanner title="Account verification is complete" />
+          ) : (
+            <div className="flex flex-col gap-4">
+              {!sentToPhoneNumber ? (
+                <form
+                  className="flex flex-col gap-4"
+                  onSubmit={handleSendCode}
+                  noValidate
+                >
+                  <TextField
+                    autoComplete="tel"
+                    id="administrator-phone-number"
+                    label="Phone number"
+                    inputMode="tel"
+                    required
+                    type="tel"
+                    value={phoneNumber}
+                    error={phoneError}
+                    onChange={(changeEvent) =>
+                      handlePhoneChange(changeEvent.currentTarget.value)
+                    }
+                  />
+                  {sendCodeMutation.error && (
+                    <FormMessage tone="error">
+                      {sendCodeMutation.error.message}
+                    </FormMessage>
                   )}
-                </AlertDescription>
-              </Alert>
-            ) : isPhoneVerified ? (
-              <Alert>
-                <AlertTitle>Account verification is complete</AlertTitle>
-              </Alert>
-            ) : (
-              <div className="flex flex-col gap-4">
-                {!sentToPhoneNumber ? (
-                  <form
-                    className="flex flex-col gap-4"
-                    onSubmit={handleSendCode}
-                    noValidate
+                  <ActionButton
+                    type="submit"
+                    isLoading={sendCodeMutation.isPending}
+                    loadingText="Sending verification code"
+                    disabled={!phoneNumber.trim()}
                   >
-                    <Field data-invalid={Boolean(phoneError)}>
-                      <FieldLabel htmlFor="administrator-phone-number">
-                        Phone number
-                      </FieldLabel>
-                      <Input
-                        autoComplete="tel"
-                        id="administrator-phone-number"
-                        inputMode="tel"
-                        required
-                        type="tel"
-                        value={phoneNumber}
-                        aria-invalid={Boolean(phoneError) || undefined}
-                        aria-describedby={
-                          phoneError
-                            ? "administrator-phone-number-error"
-                            : undefined
-                        }
-                        onChange={(changeEvent) =>
-                          handlePhoneChange(changeEvent.currentTarget.value)
-                        }
-                      />
-                      {phoneError && (
-                        <FieldError id="administrator-phone-number-error">
-                          {phoneError}
-                        </FieldError>
-                      )}
-                    </Field>
-                    {sendCodeMutation.error && (
-                      <p className="text-sm text-destructive" role="alert">
-                        {sendCodeMutation.error.message}
-                      </p>
-                    )}
+                    Send verification code
+                  </ActionButton>
+                </form>
+              ) : (
+                <form
+                  className="flex flex-col gap-4"
+                  onSubmit={handleVerifyPhone}
+                  noValidate
+                >
+                  <p className="text-sm leading-6 text-muted-foreground">
+                    Enter the 6-digit code sent to {sentToPhoneNumber}.
+                  </p>
+                  <TextField
+                    autoComplete="one-time-code"
+                    id="administrator-phone-verification-code"
+                    label="Verification code"
+                    inputMode="numeric"
+                    maxLength={6}
+                    pattern="[0-9]{6}"
+                    required
+                    value={verificationCode}
+                    error={codeError}
+                    onChange={(changeEvent) => {
+                      setVerificationCode(
+                        changeEvent.currentTarget.value.replace(/\D/g, "")
+                      );
+                      setCodeError("");
+                    }}
+                  />
+                  {sendCodeMutation.error && (
+                    <FormMessage tone="error">
+                      {sendCodeMutation.error.message}
+                    </FormMessage>
+                  )}
+                  {verifyPhoneMutation.error && (
+                    <FormMessage tone="error">
+                      {verifyPhoneMutation.error.message}
+                    </FormMessage>
+                  )}
+                  <div className="flex flex-col gap-3">
                     <ActionButton
+                      className="min-h-11 w-full"
                       type="submit"
-                      isLoading={sendCodeMutation.isPending}
-                      loadingText="Sending verification code"
-                      disabled={!phoneNumber.trim()}
+                      isLoading={verifyPhoneMutation.isPending}
+                      loadingText="Verifying phone number"
+                      disabled={verificationCode.length !== 6}
                     >
-                      Send verification code
+                      Verify phone number
                     </ActionButton>
-                  </form>
-                ) : (
-                  <form
-                    className="flex flex-col gap-4"
-                    onSubmit={handleVerifyPhone}
-                    noValidate
-                  >
-                    <p className="text-sm leading-6 text-muted-foreground">
-                      Enter the 6-digit code sent to {sentToPhoneNumber}.
-                    </p>
-                    <Field data-invalid={Boolean(codeError)}>
-                      <FieldLabel htmlFor="administrator-phone-verification-code">
-                        Verification code
-                      </FieldLabel>
-                      <Input
-                        autoComplete="one-time-code"
-                        id="administrator-phone-verification-code"
-                        inputMode="numeric"
-                        maxLength={6}
-                        pattern="[0-9]{6}"
-                        required
-                        value={verificationCode}
-                        aria-invalid={Boolean(codeError) || undefined}
-                        aria-describedby={
-                          codeError
-                            ? "administrator-phone-verification-code-error"
-                            : undefined
-                        }
-                        onChange={(changeEvent) => {
-                          setVerificationCode(
-                            changeEvent.currentTarget.value.replace(/\D/g, "")
-                          );
-                          setCodeError("");
-                        }}
-                      />
-                      {codeError && (
-                        <FieldError id="administrator-phone-verification-code-error">
-                          {codeError}
-                        </FieldError>
-                      )}
-                    </Field>
-                    {sendCodeMutation.error && (
-                      <p className="text-sm text-destructive" role="alert">
-                        {sendCodeMutation.error.message}
-                      </p>
-                    )}
-                    {verifyPhoneMutation.error && (
-                      <p className="text-sm text-destructive" role="alert">
-                        {verifyPhoneMutation.error.message}
-                      </p>
-                    )}
-                    <div className="flex flex-col gap-3">
+                    <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
                       <ActionButton
-                        className="min-h-11 w-full"
-                        type="submit"
-                        isLoading={verifyPhoneMutation.isPending}
-                        loadingText="Verifying phone number"
-                        disabled={verificationCode.length !== 6}
+                        className="min-h-11 w-full justify-start px-0 sm:w-auto"
+                        size="small"
+                        type="button"
+                        variant="link"
+                        isLoading={sendCodeMutation.isPending}
+                        loadingText="Sending another code"
+                        onClick={() =>
+                          sendCodeMutation.mutate({
+                            phoneNumber: sentToPhoneNumber,
+                          })
+                        }
                       >
-                        Verify phone number
+                        Send another code
                       </ActionButton>
-                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
-                        <ActionButton
-                          className="min-h-11 w-full justify-start px-0 sm:w-auto"
-                          size="small"
-                          type="button"
-                          variant="link"
-                          isLoading={sendCodeMutation.isPending}
-                          loadingText="Sending another code"
-                          onClick={() =>
-                            sendCodeMutation.mutate({
-                              phoneNumber: sentToPhoneNumber,
-                            })
-                          }
-                        >
-                          Send another code
-                        </ActionButton>
-                        <ActionButton
-                          className="min-h-11 w-full justify-start px-0 sm:w-auto"
-                          size="small"
-                          type="button"
-                          variant="link"
-                          onClick={handleChangePhoneNumber}
-                        >
-                          Change number
-                        </ActionButton>
-                      </div>
+                      <ActionButton
+                        className="min-h-11 w-full justify-start px-0 sm:w-auto"
+                        size="small"
+                        type="button"
+                        variant="link"
+                        onClick={handleChangePhoneNumber}
+                      >
+                        Change number
+                      </ActionButton>
                     </div>
-                  </form>
-                )}
-              </div>
-            )}
-          </div>
-        </FieldSet>
-
-        <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-between">
-          <a
-            href="#onboarding-content"
-            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            onClick={onBack}
-          >
-            <ChevronLeftIcon aria-hidden="true" className="size-4 shrink-0" />
-            Back to organisation details
-          </a>
-          <a
-            href="#onboarding-content"
-            aria-disabled={
-              !emailIsVerified || !authenticatorIsEnrolled || !isPhoneVerified
-            }
-            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-disabled:text-muted-foreground"
-            onClick={(clickEvent) => {
-              if (
-                !emailIsVerified ||
-                !authenticatorIsEnrolled ||
-                !isPhoneVerified
-              ) {
-                clickEvent.preventDefault();
-                return;
-              }
-
-              onContinue();
-            }}
-          >
-            Continue to supporting documents
-            <ChevronRightIcon aria-hidden="true" className="size-4 shrink-0" />
-          </a>
+                  </div>
+                </form>
+              )}
+            </div>
+          )}
         </div>
-      </CardContent>
-    </Card>
+      </section>
+
+      <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-between">
+        <a
+          href="#onboarding-content"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          onClick={onBack}
+        >
+          <ChevronLeftIcon aria-hidden="true" className="size-4 shrink-0" />
+          Back to organisation details
+        </a>
+        <a
+          href="#onboarding-content"
+          aria-disabled={
+            !emailIsVerified || !authenticatorIsEnrolled || !isPhoneVerified
+          }
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-disabled:text-muted-foreground"
+          onClick={(clickEvent) => {
+            if (
+              !emailIsVerified ||
+              !authenticatorIsEnrolled ||
+              !isPhoneVerified
+            ) {
+              clickEvent.preventDefault();
+              return;
+            }
+
+            onContinue();
+          }}
+        >
+          Continue to supporting documents
+          <ChevronRightIcon aria-hidden="true" className="size-4 shrink-0" />
+        </a>
+      </div>
+    </ContentPanel>
   );
 }

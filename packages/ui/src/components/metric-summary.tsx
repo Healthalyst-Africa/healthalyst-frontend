@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
-import { Card, CardContent } from "@healthalyst/ui/components/card";
-import { Skeleton } from "@healthalyst/ui/components/skeleton";
+import { Card, CardContent } from "@healthalyst/ui/primitives/card";
+import { Skeleton } from "@healthalyst/ui/primitives/skeleton";
 
 type MetricSummaryItem = {
   label: string;

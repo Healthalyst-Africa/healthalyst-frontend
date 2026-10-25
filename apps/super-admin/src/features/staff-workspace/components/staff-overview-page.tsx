@@ -1,6 +1,7 @@
 "use client";
 
 import { MetricSummary } from "@healthalyst/ui/components/metric-summary";
+import { SectionHeading } from "@healthalyst/ui/components/section-heading";
 import { useStaffSession } from "~/infrastructure/auth/staff-session-provider";
 import { useStaffOverview } from "~/features/staff-workspace/hooks/use-staff-overview";
 import { WORKSPACE_OVERVIEW_CONFIGURATION } from "~/features/staff-workspace/config/workspace-overview";
@@ -49,15 +50,25 @@ function DashboardOverview({
           })}
         />
       )}
-      <OrganizationApplicationsTable
-        applications={applications}
-        isLoading={organizationsQuery.isPending}
-        errorMessage={organizationsQuery.error?.message}
-        onRetry={() => void organizationsQuery.refetch()}
-        recentApplicationLimit={
-          WORKSPACE_OVERVIEW_CONFIGURATION.recentApplicationLimit
-        }
-      />
+      <section
+        aria-labelledby="overview-organizations-heading"
+        className="flex flex-col gap-4"
+      >
+        <SectionHeading
+          heading="Organisations"
+          description="Latest registrations and their current status."
+          headingIdentifier="overview-organizations-heading"
+        />
+        <OrganizationApplicationsTable
+          applications={applications}
+          isLoading={organizationsQuery.isPending}
+          errorMessage={organizationsQuery.error?.message}
+          onRetry={() => void organizationsQuery.refetch()}
+          recentApplicationLimit={
+            WORKSPACE_OVERVIEW_CONFIGURATION.recentApplicationLimit
+          }
+        />
+      </section>
     </>
   );
 }

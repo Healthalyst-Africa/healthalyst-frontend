@@ -7,10 +7,12 @@
     "./styles.css": "./src/styles.css",
     "./tailwind-preset": "./tailwind-preset.cjs",
     "./components/*": "./src/components/*.tsx",
+    "./primitives/*": "./src/primitives/*.tsx",
     "./lib/*": "./src/lib/*.ts",
     "./hooks/*": "./src/hooks/*.ts",
     "./types/*": "./src/types/*.ts",
-    "./forms/*": "./src/forms/*.ts"
+    "./forms/*": "./src/forms/*.ts",
+    "./illustrations/*": "./src/illustrations/*.tsx"
   },
   "scripts": {
     "lint": "eslint . --max-warnings=0",

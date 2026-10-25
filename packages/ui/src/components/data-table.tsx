@@ -1,15 +1,8 @@
 "use client";
 
-import { useId } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@healthalyst/ui/components/card";
-import { Skeleton } from "@healthalyst/ui/components/skeleton";
+import { Card, CardContent } from "@healthalyst/ui/primitives/card";
+import { Skeleton } from "@healthalyst/ui/primitives/skeleton";
 import {
   Table,
   TableBody,
@@ -17,7 +10,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@healthalyst/ui/components/table";
+} from "@healthalyst/ui/primitives/table";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import type { DataTableProperties } from "@healthalyst/ui/types/data-table";
 import { DataTableCellContent } from "./data-table/data-table-cell-content";
@@ -31,31 +24,20 @@ const COLUMN_SIZES = {
 
 const LOADING_ROW_IDENTIFIERS = ["first", "second", "third"] as const;
 
-/** A complete tabular data surface; applications supply records and column content. */
+/**
+ * A complete, standalone tabular data surface; applications supply records and
+ * column content. It has no visible title: place any page or section heading
+ * outside the table, and name the table with `accessibleLabel`.
+ */
 export function DataTable<RowData>({
-  title,
-  description,
+  accessibleLabel,
   columns,
   state,
   getRowIdentifier,
   emptyState,
-  summary,
 }: DataTableProperties<RowData>) {
-  const headingIdentifier = useId();
-  const descriptionIdentifier = useId();
-
   return (
     <Card className="min-w-0 overflow-hidden shadow-none">
-      <CardHeader className="gap-1.5 px-5 py-5 sm:px-6">
-        <CardTitle className="text-base leading-6">
-          <h2 id={headingIdentifier}>{title}</h2>
-        </CardTitle>
-        {description && (
-          <CardDescription id={descriptionIdentifier} className="leading-6">
-            {description}
-          </CardDescription>
-        )}
-      </CardHeader>
       <CardContent className="p-0">
         {state.status === "error" && (
           <DataTableMessage
@@ -80,8 +62,7 @@ export function DataTable<RowData>({
           (state.status === "ready" && state.rows.length > 0)) && (
           <div
             role="region"
-            aria-labelledby={headingIdentifier}
-            aria-describedby={description ? descriptionIdentifier : undefined}
+            aria-label={accessibleLabel}
             aria-busy={state.status === "loading" || undefined}
             tabIndex={0}
             className="overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&>div]:overflow-visible"
@@ -91,7 +72,7 @@ export function DataTable<RowData>({
                 {state.label}
               </p>
             )}
-            <Table aria-labelledby={headingIdentifier}>
+            <Table aria-label={accessibleLabel}>
               <TableHeader className="bg-muted/50">
                 <TableRow className="hover:bg-transparent">
                   {columns.map((column) => (
@@ -143,11 +124,6 @@ export function DataTable<RowData>({
           </div>
         )}
       </CardContent>
-      {summary && state.status === "ready" && state.rows.length > 0 && (
-        <div className="border-t bg-muted/20 px-5 py-3 text-xs leading-5 text-muted-foreground sm:px-6">
-          {summary}
-        </div>
-      )}
     </Card>
   );
 }

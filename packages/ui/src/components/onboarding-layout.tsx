@@ -4,7 +4,7 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@healthalyst/ui/components/accordion";
+} from "@healthalyst/ui/primitives/accordion";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 type OnboardingLayoutProperties = {

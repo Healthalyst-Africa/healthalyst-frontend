@@ -13,9 +13,9 @@ import {
   FieldLabel,
   FieldLegend,
   FieldSet,
-} from "@healthalyst/ui/components/field";
-import { Checkbox } from "@healthalyst/ui/components/checkbox";
-import { Input } from "@healthalyst/ui/components/input";
+} from "@healthalyst/ui/primitives/field";
+import { Checkbox } from "@healthalyst/ui/primitives/checkbox";
+import { Input } from "@healthalyst/ui/primitives/input";
 import { MultiSelect } from "@healthalyst/ui/components/multi-select";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import {
@@ -25,8 +25,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@healthalyst/ui/components/select";
-import { Textarea } from "@healthalyst/ui/components/textarea";
+} from "@healthalyst/ui/primitives/select";
+import { Textarea } from "@healthalyst/ui/primitives/textarea";
 import { FieldLabelText } from "./field-label-text";
 
 export function DynamicFormField({

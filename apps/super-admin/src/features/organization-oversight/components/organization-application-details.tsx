@@ -1,13 +1,9 @@
 "use client";
 
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@healthalyst/ui/components/field";
-import { Input } from "@healthalyst/ui/components/input";
-import { Textarea } from "@healthalyst/ui/components/textarea";
+import { FormMessage } from "@healthalyst/ui/components/form-message";
+import { TextAreaField } from "@healthalyst/ui/components/text-area-field";
+import { TextField } from "@healthalyst/ui/components/text-field";
 import type { OrganizationDetailsProperties } from "~/features/organization-oversight/types/organization-details";
 import { useOrganizationApplicationDetails } from "~/features/organization-oversight/hooks/use-organization-application-details";
 import {
@@ -35,16 +31,16 @@ export function OrganizationApplicationDetails({
 
   if (detailQuery.isPending) {
     return (
-      <p role="status" className="text-sm text-muted-foreground">
+      <FormMessage tone="status">
         Loading application details and uploaded documents…
-      </p>
+      </FormMessage>
     );
   }
 
   if (detailQuery.isError) {
     return (
       <div className="flex flex-col items-start gap-2">
-        <FieldError role="alert">{detailQuery.error.message}</FieldError>
+        <FormMessage tone="error">{detailQuery.error.message}</FormMessage>
         <ActionButton
           type="button"
           variant="outline"
@@ -157,9 +153,9 @@ export function OrganizationApplicationDetails({
           </ul>
         )}
         {documentViewAddressMutation.error && (
-          <FieldError role="alert">
+          <FormMessage tone="error">
             {documentViewAddressMutation.error.message}
-          </FieldError>
+          </FormMessage>
         )}
       </div>
 
@@ -191,41 +187,35 @@ export function OrganizationApplicationDetails({
               Send an itemised correction request to the applicant.
             </p>
           </div>
-          <Field className="gap-1.5" data-invalid={Boolean(requestError)}>
-            <FieldLabel htmlFor={`change-field-${application.id}`}>
-              Application field
-            </FieldLabel>
-            <Input
-              id={`change-field-${application.id}`}
-              name="field"
-              maxLength={REVIEW_VALIDATION_LIMITS.changeFieldMaximumLength}
-              placeholder="For example, facility licence"
-              onChange={clearRequestError}
-            />
-          </Field>
-          <Field className="gap-1.5" data-invalid={Boolean(requestError)}>
-            <FieldLabel htmlFor={`change-message-${application.id}`}>
-              What needs to change?
-            </FieldLabel>
-            <Textarea
-              id={`change-message-${application.id}`}
-              name="message"
-              rows={3}
-              maxLength={REVIEW_VALIDATION_LIMITS.changeMessageMaximumLength}
-              placeholder="Explain what information or document is required."
-              onChange={clearRequestError}
-            />
-          </Field>
-          {requestError && <FieldError role="alert">{requestError}</FieldError>}
+          <TextField
+            id={`change-field-${application.id}`}
+            label="Application field"
+            name="field"
+            maxLength={REVIEW_VALIDATION_LIMITS.changeFieldMaximumLength}
+            placeholder="For example, facility licence"
+            onChange={clearRequestError}
+          />
+          <TextAreaField
+            id={`change-message-${application.id}`}
+            label="What needs to change?"
+            name="message"
+            rows={3}
+            maxLength={REVIEW_VALIDATION_LIMITS.changeMessageMaximumLength}
+            placeholder="Explain what information or document is required."
+            onChange={clearRequestError}
+          />
+          {requestError && (
+            <FormMessage tone="error">{requestError}</FormMessage>
+          )}
           {decisionMutation.error && (
-            <FieldError role="alert">
+            <FormMessage tone="error">
               {decisionMutation.error.message}
-            </FieldError>
+            </FormMessage>
           )}
           {decisionMutation.isSuccess && (
-            <p role="status" className="text-sm text-primary">
+            <FormMessage tone="success">
               Change request sent to the applicant.
-            </p>
+            </FormMessage>
           )}
           <div>
             <ActionButton

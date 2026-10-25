@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { CheckIcon, ChevronDownIcon } from "@healthalyst/icons";
-import { Badge } from "@healthalyst/ui/components/badge";
+import { Badge } from "@healthalyst/ui/primitives/badge";
 import {
   Command,
   CommandEmpty,
@@ -10,12 +10,12 @@ import {
   CommandInput,
   CommandItem,
   CommandList,
-} from "@healthalyst/ui/components/command";
+} from "@healthalyst/ui/primitives/command";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@healthalyst/ui/components/popover";
+} from "@healthalyst/ui/primitives/popover";
 import type { FormOption } from "@healthalyst/ui/types/form-definition";
 import { cn } from "@healthalyst/ui/lib/utilities";
 

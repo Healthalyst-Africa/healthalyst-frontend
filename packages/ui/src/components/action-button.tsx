@@ -5,7 +5,7 @@ import { LoaderIcon } from "@healthalyst/icons";
 import {
   Button as ShadcnButton,
   type ButtonProperties as ShadcnButtonProperties,
-} from "@healthalyst/ui/components/button";
+} from "@healthalyst/ui/primitives/button";
 
 type ActionButtonProperties = Omit<ShadcnButtonProperties, "asChild"> & {
   isLoading?: boolean;

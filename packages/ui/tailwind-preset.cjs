@@ -41,6 +41,14 @@ module.exports = {
           DEFAULT: "oklch(var(--brand-gold) / <alpha-value>)",
           subtle: "oklch(var(--brand-gold-subtle) / <alpha-value>)",
         },
+        status: {
+          neutral: "var(--status-neutral)",
+          information: "var(--status-information)",
+          warning: "var(--status-warning)",
+          highlight: "var(--status-highlight)",
+          positive: "var(--status-positive)",
+          negative: "var(--status-negative)",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

@@ -2,7 +2,7 @@
 
 import { forwardRef, type ComponentPropsWithoutRef } from "react";
 import { SearchIcon } from "@healthalyst/icons";
-import { Input } from "@healthalyst/ui/components/input";
+import { Input } from "@healthalyst/ui/primitives/input";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 type SearchFieldProperties = Omit<

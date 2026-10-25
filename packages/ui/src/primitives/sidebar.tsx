@@ -16,22 +16,22 @@ import {
 import { useIsMobile } from "@healthalyst/ui/hooks/use-mobile";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { Input } from "@healthalyst/ui/components/input";
-import { Separator } from "@healthalyst/ui/components/separator";
+import { Input } from "@healthalyst/ui/primitives/input";
+import { Separator } from "@healthalyst/ui/primitives/separator";
 import {
   Sheet,
   SheetContent,
   SheetDescription,
   SheetHeader,
   SheetTitle,
-} from "@healthalyst/ui/components/sheet";
-import { Skeleton } from "@healthalyst/ui/components/skeleton";
+} from "@healthalyst/ui/primitives/sheet";
+import { Skeleton } from "@healthalyst/ui/primitives/skeleton";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@healthalyst/ui/components/tooltip";
+} from "@healthalyst/ui/primitives/tooltip";
 
 type SidebarContextProperties = {
   state: "expanded" | "collapsed";
