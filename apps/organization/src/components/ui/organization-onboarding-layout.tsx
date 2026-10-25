@@ -29,12 +29,7 @@ export default function OrganizationOnboardingLayout({
             className="size-11 object-contain"
             alt=""
           />
-          <span className="flex flex-col gap-0.5">
-            <span className="text-sm font-semibold">HealthAlyst Africa</span>
-            <span className="text-xs text-muted-foreground">
-              Organisation onboarding
-            </span>
-          </span>
+          <span className="text-sm font-semibold">HealthAlyst</span>
         </Link>
       }
       progress={progress}

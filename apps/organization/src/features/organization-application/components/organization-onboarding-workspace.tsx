@@ -2,6 +2,8 @@
 
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
+import { SignOutIcon } from "@healthalyst/icons";
+import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
@@ -56,27 +58,22 @@ export function OrganizationOnboardingWorkspace({
         ) : undefined
       }
       actions={
-        <div className="flex items-center gap-4">
-          <div className="hidden text-right sm:block">
-            <p className="text-sm font-medium">
-              {session.user.firstName} {session.user.lastName}
-            </p>
-            <p className="text-xs text-muted-foreground">
-              {session.user.email}
-            </p>
-          </div>
-          <ActionButton
-            type="button"
-            variant="ghost"
-            isLoading={signOutMutation.isPending}
-            loadingText="Signing out"
-            onClick={() =>
-              signOutMutation.mutate(undefined, { onSuccess: onSignedOut })
-            }
-          >
-            Sign out
-          </ActionButton>
-        </div>
+        <AccountMenu
+          fullName={`${session.user.firstName} ${session.user.lastName}`}
+          emailAddress={session.user.email ?? ""}
+          error={signOutMutation.error?.message}
+          actions={[
+            {
+              label: "Sign out",
+              pendingLabel: "Signing out…",
+              isPending: signOutMutation.isPending,
+              icon: <SignOutIcon aria-hidden="true" />,
+              tone: "destructive",
+              onSelect: () =>
+                signOutMutation.mutate(undefined, { onSuccess: onSignedOut }),
+            },
+          ]}
+        />
       }
     >
       <div className="flex flex-col gap-7">
@@ -98,11 +95,6 @@ export function OrganizationOnboardingWorkspace({
                     : "Check that each step is complete, then submit your application for review."}
           </p>
         </div>
-        {signOutMutation.error && (
-          <NoticeBanner tone="error" title="We could not sign you out">
-            {signOutMutation.error.message}
-          </NoticeBanner>
-        )}
         {!organizationId ? (
           <NoticeBanner
             title={
