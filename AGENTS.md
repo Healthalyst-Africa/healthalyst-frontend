@@ -49,6 +49,16 @@ code, repository policies, or branding into it.
 - Use shadcn components as the standard foundation for interactive interface
   primitives. All installed primitives belong in `packages/ui/src/components`,
   even when only one application currently uses them.
+- **Applications must never import or render shadcn primitives directly.**
+  Primitives such as `Table`, `Card`, `Badge`, `Input`, `Alert`, and `Dialog`
+  are implementation details of `packages/ui`. Compose them inside dedicated,
+  reusable shared components with a clear purpose, consistent presentation,
+  accessible semantics, and the required loading, empty, error, and interaction
+  states. Applications consume those components through `@healthalyst/ui`
+  exports and supply their content, data, business rules, and callbacks.
+  Renaming or re-exporting a primitive, or adding a wrapper that merely forwards
+  its properties, does not satisfy this rule. Review application imports and
+  component boundaries before completing every interface change.
 - Every new or reworked reusable visual component, including page compositions,
   navigation, form layouts and presentation controls, belongs in `packages/ui`
   and is consumed through `@healthalyst/ui` exports. Compose the shared shadcn
@@ -66,8 +76,8 @@ code, repository policies, or branding into it.
   disabled, and icon behavior. Use links for navigation rather than wrapping a
   button in an anchor.
 - Application-specific branded wrappers may live in
-  `apps/health-schedule/src/components/ui`, but must compose the shared
-  primitives. Keep HealthAlyst colours, typography, copy, layout, and business
+  `apps/health-schedule/src/components/ui`, but must consume the dedicated shared
+  components rather than shadcn primitives. Keep HealthAlyst colours, typography, copy, layout, and business
   behavior in the application. Shared components and tokens remain product-neutral.
 - Branded wrappers are thin adapters supplying content and theme values to shared
   components. Reusable visual structure belongs in the shared package.

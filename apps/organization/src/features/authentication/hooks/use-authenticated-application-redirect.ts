@@ -48,7 +48,7 @@ export function useAuthenticatedApplicationRedirect({
 
     setRedirectError(null);
     if (redirectOrganizationSession) {
-      router.replace(ORGANIZATION_ROUTES.application);
+      router.replace(ORGANIZATION_ROUTES.onboarding);
     }
   }, [
     hasPlatformRoles,

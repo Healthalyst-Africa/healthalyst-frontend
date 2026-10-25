@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { Card, CardContent } from "@healthalyst/ui/components/card";
 import {
@@ -17,12 +16,19 @@ import {
 import { Input } from "@healthalyst/ui/components/input";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import { QrCode } from "@healthalyst/ui/components/qr-code";
+import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
+import { cn } from "@healthalyst/ui/lib/utilities";
 import { useStaffSignInFlow } from "~/features/staff-auth/hooks/use-staff-sign-in-flow";
 import { STAFF_AUTHENTICATOR_CONFIGURATION } from "~/features/staff-auth/config/staff-sign-in";
+import {
+  StaffAuthBrand,
+  StaffAuthShowcase,
+} from "~/features/staff-auth/components/staff-auth-showcase";
 
 export function StaffSignInForm() {
   const {
     stage,
+    headingReference,
     status,
     sessionError,
     fieldErrors,
@@ -38,6 +44,7 @@ export function StaffSignInForm() {
     authenticatorConfirmationMutation,
     handlePasswordSubmit,
     handleVerificationSubmit,
+    handleVerificationCodeChange,
     handleEnrollmentSubmit,
     returnToPasswordStep,
     finishAuthenticatorEnrollment,
@@ -45,33 +52,49 @@ export function StaffSignInForm() {
     stageDescription,
   } = useStaffSignInFlow();
 
+  const footerContent =
+    stage.kind === "verification" ? (
+      <div className="flex flex-col items-center gap-3">
+        <p className="text-sm text-muted-foreground">
+          <ActionButton
+            className="h-auto px-0 text-sm font-semibold text-primary underline underline-offset-4 hover:no-underline"
+            size="unstyled"
+            type="button"
+            variant="link"
+            disabled={verificationMutation.isPending}
+            onClick={returnToPasswordStep}
+          >
+            Sign in with a different account
+          </ActionButton>
+        </p>
+      </div>
+    ) : undefined;
+
   return (
-    <main className="flex min-h-screen items-center justify-center px-5 py-12">
-      <div className="flex w-full max-w-md flex-col gap-7">
-        <div className="flex items-center gap-3">
-          <Image
-            src="/logo.jpg"
-            alt="HealthAlyst Africa"
-            width={52}
-            height={52}
-          />
-          <div>
-            <p className="font-serif text-xl font-normal">HealthAlyst</p>
-            <p className="text-xs uppercase tracking-[0.14em] text-muted-foreground">
-              Super Admin
-            </p>
-          </div>
-        </div>
+    <SplitPanelLayout
+      className="bg-card"
+      title={stageTitle}
+      showcase={<StaffAuthShowcase />}
+      showcaseClassName="bg-primary text-primary-foreground"
+      showcaseLabel="HealthAlyst company workspace"
+      compactHeader={<StaffAuthBrand />}
+      footer={footerContent}
+    >
+      <div className="flex flex-col gap-6">
         <header className="flex flex-col items-center gap-2 text-center">
-          <h1 className="font-serif text-3xl font-normal leading-tight">
+          <h2
+            ref={headingReference}
+            className="font-serif text-3xl font-normal leading-tight outline-none"
+            tabIndex={-1}
+          >
             {stageTitle}
-          </h1>
-          <p className="text-sm leading-6 text-muted-foreground">
+          </h2>
+          <p className="max-w-sm text-sm leading-6 text-muted-foreground">
             {stageDescription}
           </p>
         </header>
         <Card className="border-border bg-card shadow-sm">
-          <CardContent className="px-7 py-8">
+          <CardContent className="flex flex-col gap-5 px-6 py-7 md:px-8 md:py-8">
             {stage.kind === "password" && (
               <form
                 className="flex flex-col gap-5"
@@ -163,11 +186,25 @@ export function StaffSignInForm() {
 
             {stage.kind === "verification" && (
               <form
-                className="flex flex-col items-center gap-6"
+                className="flex flex-col gap-5"
                 onSubmit={handleVerificationSubmit}
+                noValidate
               >
-                <Field className="items-center gap-2">
-                  <FieldLabel htmlFor="staff-authenticator-code">
+                <Field
+                  className={cn(
+                    "gap-1.5",
+                    stage.method === "totp" && "items-center gap-3"
+                  )}
+                  data-invalid={
+                    Boolean(fieldErrors.code) ||
+                    Boolean(verificationMutation.error)
+                  }
+                  data-disabled={verificationMutation.isPending}
+                >
+                  <FieldLabel
+                    className={cn(stage.method === "totp" && "justify-center")}
+                    htmlFor="staff-authenticator-code"
+                  >
                     {stage.method === "totp"
                       ? "Authenticator code"
                       : "Recovery code"}
@@ -175,13 +212,28 @@ export function StaffSignInForm() {
                   {stage.method === "totp" ? (
                     <InputOTP
                       id="staff-authenticator-code"
-                      aria-label="Six-digit authenticator code"
                       autoComplete="one-time-code"
                       inputMode="numeric"
                       maxLength={STAFF_AUTHENTICATOR_CONFIGURATION.codeLength}
+                      pattern="^[0-9]*$"
+                      pasteTransformer={(pastedCode) =>
+                        pastedCode.replace(/[\s-]/g, "")
+                      }
+                      required
                       value={verificationCode}
-                      onChange={setVerificationCode}
+                      onChange={handleVerificationCodeChange}
                       disabled={verificationMutation.isPending}
+                      aria-invalid={
+                        Boolean(
+                          fieldErrors.code || verificationMutation.error
+                        ) || undefined
+                      }
+                      aria-describedby={
+                        fieldErrors.code || verificationMutation.error
+                          ? "staff-authenticator-code-error"
+                          : undefined
+                      }
+                      containerClassName="justify-center gap-3"
                     >
                       <InputOTPGroup>
                         {STAFF_AUTHENTICATOR_CONFIGURATION.slotIndices
@@ -193,6 +245,7 @@ export function StaffSignInForm() {
                             <InputOTPSlot
                               key={oneTimePasswordSlotIndex}
                               index={oneTimePasswordSlotIndex}
+                              className="h-12 w-9 bg-card text-lg font-medium tabular-nums sm:w-11"
                             />
                           ))}
                       </InputOTPGroup>
@@ -203,6 +256,7 @@ export function StaffSignInForm() {
                             <InputOTPSlot
                               key={oneTimePasswordSlotIndex}
                               index={oneTimePasswordSlotIndex}
+                              className="h-12 w-9 bg-card text-lg font-medium tabular-nums sm:w-11"
                             />
                           ))}
                       </InputOTPGroup>
@@ -212,38 +266,48 @@ export function StaffSignInForm() {
                       id="staff-authenticator-code"
                       autoComplete="one-time-code"
                       value={verificationCode}
-                      onChange={(changeEvent) =>
-                        setVerificationCode(changeEvent.target.value)
+                      maxLength={
+                        STAFF_AUTHENTICATOR_CONFIGURATION.recoveryCodeMaximumLength
                       }
+                      onChange={(changeEvent) =>
+                        handleVerificationCodeChange(changeEvent.target.value)
+                      }
+                      required
                       disabled={verificationMutation.isPending}
+                      aria-invalid={
+                        Boolean(
+                          fieldErrors.code || verificationMutation.error
+                        ) || undefined
+                      }
+                      aria-describedby={
+                        fieldErrors.code || verificationMutation.error
+                          ? "staff-authenticator-code-error"
+                          : undefined
+                      }
                     />
                   )}
+                  {(fieldErrors.code || verificationMutation.error) && (
+                    <FieldError id="staff-authenticator-code-error">
+                      {fieldErrors.code || verificationMutation.error?.message}
+                    </FieldError>
+                  )}
                 </Field>
-                {verificationMutation.error && (
-                  <FieldError role="alert">
-                    {verificationMutation.error.message}
-                  </FieldError>
-                )}
                 <ActionButton
                   type="submit"
                   size="large"
                   className="w-full"
                   isLoading={verificationMutation.isPending}
                   loadingText="Checking code"
-                  disabled={
-                    stage.method === "totp"
-                      ? verificationCode.length !==
-                        STAFF_AUTHENTICATOR_CONFIGURATION.codeLength
-                      : verificationCode.trim().length <
-                        STAFF_AUTHENTICATOR_CONFIGURATION.recoveryCodeMinimumLength
-                  }
                 >
                   Continue
                 </ActionButton>
                 {stage.methods.length > 1 && (
                   <ActionButton
+                    className="self-center font-normal"
+                    size="small"
                     type="button"
                     variant="link"
+                    disabled={verificationMutation.isPending}
                     onClick={toggleVerificationMethod}
                   >
                     {stage.method === "totp"
@@ -251,13 +315,6 @@ export function StaffSignInForm() {
                       : "Use an authenticator code instead"}
                   </ActionButton>
                 )}
-                <ActionButton
-                  type="button"
-                  variant="link"
-                  onClick={returnToPasswordStep}
-                >
-                  Sign in with a different account
-                </ActionButton>
               </form>
             )}
 
@@ -396,6 +453,6 @@ export function StaffSignInForm() {
           </CardContent>
         </Card>
       </div>
-    </main>
+    </SplitPanelLayout>
   );
 }

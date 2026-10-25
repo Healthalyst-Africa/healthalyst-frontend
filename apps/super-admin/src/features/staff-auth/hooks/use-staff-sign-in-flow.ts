@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import {
@@ -13,7 +13,11 @@ import {
   verifyStaffSignInCode,
 } from "~/features/staff-auth/services/staff-service";
 import { useStaffSession } from "~/infrastructure/auth/staff-session-provider";
-import { staffSignInSchema } from "~/features/staff-auth/schemas/staff-sign-in-schema";
+import {
+  staffAuthenticatorCodeSchema,
+  staffRecoveryCodeSchema,
+  staffSignInSchema,
+} from "~/features/staff-auth/schemas/staff-sign-in-schema";
 import type { StaffSignInStage } from "~/features/staff-auth/types/staff-sign-in";
 import { APPLICATION_ROUTES } from "~/config/application-routes";
 import { STAFF_SIGN_IN_HEADINGS } from "~/features/staff-auth/config/staff-sign-in";
@@ -23,6 +27,8 @@ export function useStaffSignInFlow() {
   const { setStaffIdentity, staffIdentity, status, sessionError } =
     useStaffSession();
   const [stage, setStage] = useState<StaffSignInStage>({ kind: "password" });
+  const headingReference = useRef<HTMLHeadingElement>(null);
+  const hasChangedStageReference = useRef(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [verificationCode, setVerificationCode] = useState("");
   const [hasSavedRecoveryCodes, setHasSavedRecoveryCodes] = useState(false);
@@ -92,6 +98,14 @@ export function useStaffSignInFlow() {
     if (staffIdentity) router.replace(APPLICATION_ROUTES.dashboard);
   }, [router, staffIdentity]);
 
+  useEffect(() => {
+    if (!hasChangedStageReference.current) {
+      hasChangedStageReference.current = true;
+      return;
+    }
+    headingReference.current?.focus();
+  }, [stage.kind]);
+
   function handlePasswordSubmit(formEvent: FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
     const formElement = formEvent.currentTarget;
@@ -119,11 +133,35 @@ export function useStaffSignInFlow() {
   function handleVerificationSubmit(formEvent: FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
     if (stage.kind !== "verification") return;
+    const verificationSchema =
+      stage.method === "totp"
+        ? staffAuthenticatorCodeSchema
+        : staffRecoveryCodeSchema;
+    const validationResult = verificationSchema.safeParse({
+      code: verificationCode,
+    });
+    if (!validationResult.success) {
+      setFieldErrors({
+        code:
+          validationResult.error.issues[0]?.message ?? "Enter a valid code.",
+      });
+      formEvent.currentTarget
+        .querySelector<HTMLInputElement>("#staff-authenticator-code")
+        ?.focus();
+      return;
+    }
+    setFieldErrors({});
     verificationMutation.mutate({
       mfaToken: stage.mfaToken,
       method: stage.method,
-      code: verificationCode,
+      code: validationResult.data.code,
     });
+  }
+
+  function handleVerificationCodeChange(codeValue: string) {
+    setVerificationCode(codeValue);
+    setFieldErrors((currentErrors) => ({ ...currentErrors, code: "" }));
+    verificationMutation.reset();
   }
 
   function handleEnrollmentSubmit(formEvent: FormEvent<HTMLFormElement>) {
@@ -159,6 +197,8 @@ export function useStaffSignInFlow() {
   function toggleVerificationMethod() {
     if (stage.kind !== "verification") return;
     setVerificationCode("");
+    setFieldErrors({});
+    verificationMutation.reset();
     setStage({
       ...stage,
       method: stage.method === "totp" ? "recovery_code" : "totp",
@@ -168,6 +208,7 @@ export function useStaffSignInFlow() {
   const stageHeading = STAFF_SIGN_IN_HEADINGS[stage.kind];
   return {
     stage,
+    headingReference,
     status,
     sessionError,
     fieldErrors,
@@ -183,6 +224,7 @@ export function useStaffSignInFlow() {
     authenticatorConfirmationMutation,
     handlePasswordSubmit,
     handleVerificationSubmit,
+    handleVerificationCodeChange,
     handleEnrollmentSubmit,
     returnToPasswordStep,
     finishAuthenticatorEnrollment,

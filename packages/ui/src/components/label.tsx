@@ -10,7 +10,7 @@ import {
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 const labelVariants = createClassVariants(
-  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  "text-sm font-normal leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 );
 
 const Label = React.forwardRef<

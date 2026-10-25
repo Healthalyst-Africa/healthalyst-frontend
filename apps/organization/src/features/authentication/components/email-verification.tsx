@@ -135,7 +135,7 @@ export default function EmailVerification() {
 
   useEffect(() => {
     if (platformSession) {
-      router.replace(ORGANIZATION_ROUTES.application);
+      router.replace(ORGANIZATION_ROUTES.onboarding);
     }
   }, [platformSession, router]);
 
@@ -232,15 +232,6 @@ export default function EmailVerification() {
               {verificationError && (
                 <div role="alert" className="flex flex-col gap-1">
                   <FieldError>{verificationError.message}</FieldError>
-                  {verificationError instanceof PlatformApiError &&
-                    verificationError.requestId && (
-                      <p className="text-xs text-muted-foreground">
-                        Reference for HealthAlyst support:{" "}
-                        <span className="font-mono">
-                          {verificationError.requestId}
-                        </span>
-                      </p>
-                    )}
                 </div>
               )}
             </>

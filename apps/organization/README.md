@@ -8,14 +8,15 @@ onboarding. This app runs on port 3005 for both `dev` and `start`.
 | ------------------ | ------------------------------------------------------------------------------------------ |
 | `/`                | Registration; `?product=healthschedule`, `labconnect`, or `pharmadesk` preselects products |
 | `/sign-in`         | Password, authenticator/recovery code, and initial MFA enrolment                           |
-| `/application`     | Signed-in organisation application and checklist                                           |
+| `/onboarding`      | Signed-in organisation details, saved progress and onboarding requirements                 |
+| `/application`     | Redirects older links to `/onboarding`                                                     |
 | `/verify-email`    | One-time email confirmation and optional MFA enrolment                                     |
 | `/forgot-password` | Request a password reset link                                                              |
 | `/reset-password`  | Set a password from a one-time email link                                                  |
 
 The shared Platform transport keeps the short-lived access token in private
 browser memory. The API owns the HttpOnly refresh cookie. On reload it refreshes
-and reads `/v1/me`; sign-in routes then open `/application`. The application
+and reads `/v1/me`; sign-in routes then open `/onboarding`. The application
 provider owns identity state and clears cached data on identity/context changes.
 MFA challenges stay in workflow state and are sent in the backend request body.
 
@@ -40,4 +41,6 @@ src/
 ```
 
 See [code organisation](../../docs/code-organization.md) for dependency rules.
+See [organisation onboarding](../../docs/organization-onboarding.md) for the
+implemented organisation-details step and remaining onboarding screens.
 Service coverage does not imply every operation has a connected screen.

@@ -37,30 +37,9 @@ module.exports = {
           DEFAULT: "hsl(var(--popover))",
           foreground: "hsl(var(--popover-foreground))",
         },
-        forest: {
-          DEFAULT: "oklch(var(--brand-forest) / <alpha-value>)",
-          mid: "oklch(var(--brand-forest-mid) / <alpha-value>)",
-          deep: "oklch(var(--brand-forest-deep) / <alpha-value>)",
-        },
         gold: {
           DEFAULT: "oklch(var(--brand-gold) / <alpha-value>)",
-          light: "oklch(var(--brand-gold-light) / <alpha-value>)",
           subtle: "oklch(var(--brand-gold-subtle) / <alpha-value>)",
-        },
-        "accent-on-primary":
-          "oklch(var(--brand-accent-on-primary) / <alpha-value>)",
-        cream: {
-          DEFAULT: "oklch(var(--brand-cream) / <alpha-value>)",
-          dark: "oklch(var(--brand-cream-dark) / <alpha-value>)",
-          light: "oklch(var(--brand-cream-light) / <alpha-value>)",
-        },
-        sand: {
-          DEFAULT: "oklch(var(--brand-sand) / <alpha-value>)",
-          dark: "oklch(var(--brand-sand-dark) / <alpha-value>)",
-        },
-        ink: {
-          DEFAULT: "oklch(var(--brand-ink) / <alpha-value>)",
-          soft: "oklch(var(--brand-ink-soft) / <alpha-value>)",
         },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
@@ -72,6 +51,9 @@ module.exports = {
           border: "oklch(var(--sidebar-border) / <alpha-value>)",
           ring: "hsl(var(--sidebar-ring))",
         },
+      },
+      borderColor: {
+        DEFAULT: "oklch(var(--border))",
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

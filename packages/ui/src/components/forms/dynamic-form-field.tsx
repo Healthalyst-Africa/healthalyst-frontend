@@ -1,5 +1,6 @@
 "use client";
 
+import type { ChangeEvent } from "react";
 import type {
   FormFieldDefinition,
   FormDefinition,
@@ -35,6 +36,8 @@ export function DynamicFormField({
   defaultSelection,
   disabled,
   onFieldChange,
+  value,
+  onValueChange,
 }: {
   definition: FormDefinition;
   field: FormFieldDefinition;
@@ -42,6 +45,8 @@ export function DynamicFormField({
   defaultSelection?: readonly string[];
   disabled: boolean;
   onFieldChange?: (fieldName: string) => void;
+  value?: string;
+  onValueChange?: (fieldName: string, value: string) => void;
 }) {
   const fieldIdentifier = `${definition.identifier}-${field.name}`;
   const descriptionIdentifier = field.description
@@ -127,7 +132,7 @@ export function DynamicFormField({
                   aria-invalid={Boolean(error) || undefined}
                   onCheckedChange={() => onFieldChange?.(field.name)}
                 />
-                <FieldLabel className="font-light" htmlFor={optionIdentifier}>
+                <FieldLabel className="font-normal" htmlFor={optionIdentifier}>
                   {option.label}
                 </FieldLabel>
               </div>
@@ -144,9 +149,15 @@ export function DynamicFormField({
     name: field.name,
     required: field.required,
     disabled,
+    value,
     "aria-invalid": Boolean(error) || undefined,
     "aria-describedby": describedBy,
-    onChange: () => onFieldChange?.(field.name),
+    onChange: (
+      changeEvent: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+      onFieldChange?.(field.name);
+      onValueChange?.(field.name, changeEvent.currentTarget.value);
+    },
   };
 
   return (
@@ -156,7 +167,7 @@ export function DynamicFormField({
       data-disabled={disabled}
     >
       <FieldLabel
-        className={field.hideLabel ? "sr-only" : undefined}
+        className={cn(field.hideLabel && "sr-only")}
         htmlFor={fieldIdentifier}
       >
         <FieldLabelText
@@ -170,7 +181,11 @@ export function DynamicFormField({
           name={field.name}
           required={field.required}
           disabled={disabled}
-          onValueChange={() => onFieldChange?.(field.name)}
+          value={value}
+          onValueChange={(selectedValue) => {
+            onFieldChange?.(field.name);
+            onValueChange?.(field.name, selectedValue);
+          }}
         >
           <SelectTrigger
             id={fieldIdentifier}

@@ -39,7 +39,6 @@ import {
 } from "@healthalyst/ui/components/input-otp";
 import { QrCode } from "@healthalyst/ui/components/qr-code";
 import { cn } from "@healthalyst/ui/lib/utilities";
-import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import type {
   AuthenticatorConfirmation,
   AuthenticatorSetup,
@@ -59,12 +58,6 @@ function ApiErrorMessage({
   return (
     <div role="alert" className={cn("flex flex-col gap-1", className)}>
       <FieldError>{error.message}</FieldError>
-      {error instanceof PlatformApiError && error.requestId && (
-        <p className="text-xs text-muted-foreground">
-          Reference for HealthAlyst support:{" "}
-          <span className="font-mono">{error.requestId}</span>
-        </p>
-      )}
     </div>
   );
 }
@@ -117,7 +110,7 @@ function ScanAndConfirm({
                 <li key={step.title} className="flex gap-3">
                   <span
                     aria-hidden="true"
-                    className="flex size-6 shrink-0 items-center justify-center rounded-full border border-gold-light bg-gold-subtle text-xs font-semibold text-ink-soft"
+                    className="flex size-6 shrink-0 items-center justify-center rounded-full border border-gold-subtle bg-gold-subtle text-xs font-semibold text-muted-foreground"
                   >
                     {stepIndex + 1}
                   </span>

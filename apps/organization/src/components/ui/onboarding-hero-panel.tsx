@@ -36,7 +36,7 @@ export default function OnboardingHeroPanel({ lede }: { lede: string }) {
       stillWord={HERO_STILL_WORD}
       slides={photographSlides}
       lede={<p>{lede}</p>}
-      wordClassName="text-accent-on-primary"
+      wordClassName="text-gold-subtle"
     />
   );
 }

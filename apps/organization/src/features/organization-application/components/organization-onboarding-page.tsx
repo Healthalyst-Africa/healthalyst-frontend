@@ -6,13 +6,13 @@ import { useEffect } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { useRouter } from "next/navigation";
 import { Card, CardContent } from "@healthalyst/ui/components/card";
-import OrganizationApplicationLayout from "~/components/ui/organization-application-layout";
-import OrganizationApplicationSummary from "~/features/organization-application/components/organization-application-summary";
+import OrganizationOnboardingLayout from "~/components/ui/organization-onboarding-layout";
+import { OrganizationOnboardingWorkspace } from "~/features/organization-application/components/organization-onboarding-workspace";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
 import { useAuthenticatedApplicationRedirect } from "~/features/authentication/hooks/use-authenticated-application-redirect";
 import { AuthenticatedApplicationRedirectState } from "~/features/authentication/components/authenticated-application-redirect-state";
 
-export default function OrganizationApplicationPage() {
+export default function OrganizationOnboardingPage() {
   const router = useRouter();
   const {
     platformSession,
@@ -37,18 +37,22 @@ export default function OrganizationApplicationPage() {
     clearPlatformSession();
   }
 
+  if (platformSession && !isRedirecting && !redirectError) {
+    return (
+      <OrganizationOnboardingWorkspace
+        session={platformSession}
+        onSignedOut={handleSignedOut}
+      />
+    );
+  }
+
   return (
-    <OrganizationApplicationLayout>
+    <OrganizationOnboardingLayout>
       {isRedirecting || redirectError ? (
         <AuthenticatedApplicationRedirectState
           platformSession={platformSession}
           isRedirecting={isRedirecting}
           redirectError={redirectError}
-        />
-      ) : platformSession ? (
-        <OrganizationApplicationSummary
-          session={platformSession}
-          onSignedOut={handleSignedOut}
         />
       ) : restoreError ? (
         <Card className="border-border bg-card shadow-sm" role="alert">
@@ -83,6 +87,6 @@ export default function OrganizationApplicationPage() {
           </CardContent>
         </Card>
       )}
-    </OrganizationApplicationLayout>
+    </OrganizationOnboardingLayout>
   );
 }

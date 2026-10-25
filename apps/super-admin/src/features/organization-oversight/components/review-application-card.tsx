@@ -130,7 +130,7 @@ export function ReviewApplicationCard({
                 </p>
               </div>
               <fieldset className="flex flex-col gap-3">
-                <legend className="mb-2 text-sm font-medium">
+                <legend className="mb-2 text-sm font-normal">
                   Verification checklist
                 </legend>
                 {REVIEW_CHECKLIST_ITEMS.map((checklistItem) => (
@@ -155,7 +155,7 @@ export function ReviewApplicationCard({
                 ))}
               </fieldset>
               <fieldset className="flex flex-col gap-3">
-                <legend className="mb-2 text-sm font-medium">
+                <legend className="mb-2 text-sm font-normal">
                   Products to enable
                 </legend>
                 {REVIEW_PRODUCTS.map((product) => (

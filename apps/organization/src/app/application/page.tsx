@@ -1,5 +1,6 @@
-import OrganizationApplicationPage from "~/features/organization-application/components/organization-application-page";
+import { permanentRedirect } from "next/navigation";
+import { ORGANIZATION_ROUTES } from "~/config/routes";
 
 export default function ApplicationRoute() {
-  return <OrganizationApplicationPage />;
+  permanentRedirect(ORGANIZATION_ROUTES.onboarding);
 }

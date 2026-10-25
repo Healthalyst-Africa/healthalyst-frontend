@@ -17,6 +17,10 @@ type DynamicFormFieldsProperties = {
   errors?: Readonly<Record<string, string>>;
   disabled?: boolean;
   onFieldChange?: (fieldName: string) => void;
+  values?: Readonly<Record<string, string>>;
+  onValueChange?: (fieldName: string, value: string) => void;
+  fieldGroupClassName?: string;
+  sectionHeadingSize?: "default" | "large";
 };
 
 export function DynamicFormFields({
@@ -25,16 +29,26 @@ export function DynamicFormFields({
   errors = {},
   disabled = false,
   onFieldChange,
+  values,
+  onValueChange,
+  fieldGroupClassName,
+  sectionHeadingSize = "default",
 }: DynamicFormFieldsProperties) {
   return (
-    <div className="flex flex-col gap-5">
+    <div
+      className={cn(
+        "flex flex-col",
+        sectionHeadingSize === "large" ? "gap-12" : "gap-5"
+      )}
+    >
       {definition.sections.map((section) => {
         const fields = (
           <FieldGroup
             className={cn(
               "gap-y-5",
               section.columns === 2 &&
-                "grid sm:grid-cols-2 sm:gap-x-2 sm:gap-y-5"
+                "grid sm:grid-cols-2 sm:gap-x-2 sm:gap-y-5",
+              fieldGroupClassName
             )}
           >
             {section.fields.map((field) => (
@@ -46,6 +60,8 @@ export function DynamicFormFields({
                 defaultSelection={defaultSelections[field.name]}
                 disabled={disabled}
                 onFieldChange={onFieldChange}
+                value={values?.[field.name]}
+                onValueChange={onValueChange}
               />
             ))}
           </FieldGroup>
@@ -61,8 +77,8 @@ export function DynamicFormFields({
           >
             <FieldSet className="gap-0">
               <FieldLegend
-                className="mb-0 font-serif text-xl font-normal leading-tight"
-                variant="label"
+                className="mb-0 font-sans font-semibold leading-tight"
+                variant={sectionHeadingSize === "large" ? "legend" : "label"}
               >
                 {section.title}
               </FieldLegend>
@@ -71,7 +87,9 @@ export function DynamicFormFields({
                   <FieldDescription>{section.description}</FieldDescription>
                 </div>
               )}
-              <div className="mt-4">{fields}</div>
+              <div className={sectionHeadingSize === "large" ? "mt-6" : "mt-4"}>
+                {fields}
+              </div>
             </FieldSet>
           </div>
         ) : (

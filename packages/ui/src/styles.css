@@ -4,48 +4,37 @@
   --radius: 0.5rem;
   --background: 0 0% 100%;
   --foreground: 160 44.26% 11.96%;
-  --card: 0 0% 100%;
-  --card-foreground: 160 44.26% 11.96%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 160 44.26% 11.96%;
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
   --primary: 162.86 63.64% 21.57%;
-  --primary-foreground: 0 0% 100%;
+  --primary-foreground: var(--background);
   --secondary: 135 23.53% 93.33%;
-  --secondary-foreground: 162.86 63.64% 21.57%;
-  --muted: 135 23.53% 93.33%;
+  --secondary-foreground: var(--primary);
+  --muted: var(--secondary);
   --muted-foreground: 155 15.79% 29.8%;
   /* shadcn's accent is the green hover tint; brand gold stays separate. */
-  --accent: 135 23.53% 93.33%;
-  --accent-foreground: 162.86 63.64% 21.57%;
+  --accent: var(--secondary);
+  --accent-foreground: var(--primary);
   --destructive: 4.23 76.47% 40%;
-  --destructive-foreground: 0 0% 100%;
-  --brand-forest: 0.42 0.075 169.253;
-  --brand-forest-mid: 0.355 0.062 170.533;
-  --brand-forest-deep: 0.269 0.037 169.313;
-  --brand-gold: 0.729 0.093 77.45;
-  --brand-gold-light: 0.866 0.047 78.802;
-  --brand-gold-subtle: 0.888 0.025 83.415;
-  --brand-accent-on-primary: 0.866 0.047 78.802;
-  --brand-cream: 0.976 0.011 89.721;
-  --brand-cream-dark: 0.953 0.012 153.669;
-  --brand-cream-light: 0.986 0.008 56.317;
-  --brand-sand: 0.88 0.021 156.771;
-  --brand-sand-dark: 0.76 0.038 162.895;
-  --brand-ink: 0.269 0.037 169.313;
-  --brand-ink-soft: 0.438 0.034 167.279;
-  /* Border values are OKLCH channels, matching the sand brand tokens. */
-  --border: var(--brand-sand);
+  --destructive-foreground: var(--background);
+  /* Gold palette: base #C9A162 and subtle #F5DDBA, expressed as OKLCH. */
+  --brand-gold: 0.732 0.094 77.837;
+  --brand-gold-subtle: 0.908 0.053 77.253;
+  /* Border and input values use OKLCH channels. */
+  --border: 0.88 0.021 156.771;
   --input: var(--border);
-  --ring: 162.86 63.64% 21.57%;
-  /* Shared app surfaces stay white; cream is an explicit band color. */
-  --sidebar-background: 0 0% 100%;
-  --sidebar-foreground: 160 44.26% 11.96%;
-  --sidebar-primary: 162.86 63.64% 21.57%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 135 23.53% 93.33%;
-  --sidebar-accent-foreground: 162.86 63.64% 21.57%;
-  --sidebar-border: var(--brand-sand);
-  --sidebar-ring: 162.86 63.64% 21.57%;
+  --ring: var(--primary);
+  /* Sidebar roles share the same app palette. */
+  --sidebar-background: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 * {

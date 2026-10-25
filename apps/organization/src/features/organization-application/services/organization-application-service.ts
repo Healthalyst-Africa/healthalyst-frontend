@@ -11,7 +11,10 @@ import type {
   OrganizationApplicationStatusChange,
 } from "~/features/organization-application/types/organization-application";
 
-import { ORGANIZATION_APPLICATION_ENDPOINTS } from "~/features/organization-application/config/organization-application";
+import {
+  ORGANIZATION_APPLICATION_ENDPOINTS,
+  ORGANIZATION_APPLICATION_FIELD_NAMES_BY_PATH,
+} from "~/features/organization-application/config/organization-application";
 
 function readApplicationEntityTag(
   responseEntityTag: string | undefined,
@@ -84,7 +87,8 @@ export async function updateOrganizationApplication(
   } catch (error) {
     throw toPlatformApiError(
       error,
-      "We could not save your organisation application. Try again."
+      "We could not save your organisation application. Try again.",
+      ORGANIZATION_APPLICATION_FIELD_NAMES_BY_PATH
     );
   }
 }

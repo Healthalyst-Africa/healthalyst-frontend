@@ -97,7 +97,7 @@ unchanged; use descriptive names for project-authored identifiers.
 | Public app origins, Platform API origin and validation              | `packages/config`                                          |
 | Platform API fixed proxy target and rewrite                         | `packages/platform-api/next-config.mjs`                    |
 | App route paths                                                     | Owning app `src/config/`                                   |
-| Brand colours and interaction tokens                                | App stylesheet and Tailwind map                            |
+| Shared colours and interaction tokens                               | `packages/ui/src/styles.css` and its Tailwind preset       |
 | Neutral reusable visual behaviour                                   | UI package `config/`                                       |
 | One-off labels and local rendering choices                          | Owning view, unless several views share a presentation map |
 
@@ -127,6 +127,19 @@ helpers live in `components/forms`, reusable form metadata in `types`, and form
 operations in `forms`. Motion behaviour lives in a hook, with rotation defaults
 in `config`. Components receive content and theme values from their apps.
 The `ActionButton` remains the only consumer of the underlying button primitive.
+
+Application code must consume dedicated shared compositions, never the shadcn
+primitives directly. A composition owns its complete visual structure,
+accessibility, and interaction states; an application supplies content, data,
+business rules, and callbacks. Renamed primitive exports and pass-through wrappers
+do not satisfy this boundary. `DataTable` owns table presentation and states,
+while Super Admin supplies organisation column definitions and status labels.
+`MetricSummary` owns the repeated metric presentation.
+
+The shared stylesheet owns the palette for every app. Standard shadcn roles
+reference the same surface, text, green, border and error values. The only extra
+brand colours are `gold` and `gold-subtle`; use them directly rather than adding
+alternate names or unused shade families.
 
 The icon and tooling packages remain compact: they already have one focused
 responsibility. Adding empty folder layers would make them harder to navigate.

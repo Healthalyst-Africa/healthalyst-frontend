@@ -16,9 +16,17 @@ export function useAuthenticatorConfirmation(
   const [codeError, setCodeError] = useState<string | null>(null);
   const [keyCopyStatus, setKeyCopyStatus] = useState("");
   const codeInputReference = useRef<HTMLInputElement>(null);
+  const isConfirmationInFlightReference = useRef(false);
   const setupKeyGroups = groupSetupKey(setup.secret);
 
   function confirmCode(enteredCode: string) {
+    if (
+      isConfirmationInFlightReference.current ||
+      confirmationMutation.isPending
+    ) {
+      return;
+    }
+
     const validationResult = authenticatorCodeSchema.safeParse({
       code: enteredCode,
     });
@@ -31,6 +39,7 @@ export function useAuthenticatorConfirmation(
       return;
     }
     setCodeError(null);
+    isConfirmationInFlightReference.current = true;
     confirmationMutation.mutate(
       {
         factorId: setup.factorId,
@@ -44,6 +53,9 @@ export function useAuthenticatorConfirmation(
           window.requestAnimationFrame(() =>
             codeInputReference.current?.focus()
           );
+        },
+        onSettled: () => {
+          isConfirmationInFlightReference.current = false;
         },
       }
     );
