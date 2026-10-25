@@ -30,4 +30,5 @@ export {
   IconAlertTriangle as WarningIcon,
   IconAlertCircle as ErrorIcon,
   IconTrash as DeleteIcon,
+  IconFileUpload as ReplaceFileIcon,
 } from "@tabler/icons-react";

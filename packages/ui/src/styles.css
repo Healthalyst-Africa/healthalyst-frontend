@@ -33,6 +33,19 @@
   --status-highlight: #6b4e1f;
   --status-positive: hsl(var(--primary));
   --status-negative: hsl(var(--destructive));
+  /*
+   * Alert surfaces and borders. Text on every surface stays at least 5.5:1;
+   * warning is amber, deliberately distinct from the brand gold.
+   */
+  --alert-information-surface: #edf3fb;
+  --alert-information-border: #b9cfec;
+  /* One subtle green: success surfaces use the brand green tint. */
+  --alert-success-surface: hsl(var(--secondary));
+  --alert-success-border: #a8cfb6;
+  --alert-warning-surface: #fdf8ec;
+  --alert-warning-border: #e8d3a2;
+  --alert-error-surface: #fdedeb;
+  --alert-error-border: #f0b4ad;
   /* Border and input values use OKLCH channels. */
   --border: 0.88 0.021 156.771;
   --input: var(--border);

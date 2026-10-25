@@ -3,18 +3,20 @@
 import { useId, useState, type ReactNode } from "react";
 import {
   DeleteIcon,
-  DocumentIcon,
-  ErrorIcon,
   InformationIcon,
   LoaderIcon,
-  SuccessIcon,
-  WarningIcon,
+  ReplaceFileIcon,
 } from "@healthalyst/icons";
+import {
+  FileStatusText,
+  FileTile,
+} from "@healthalyst/ui/components/file-display/file-display";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import {
   Dropzone,
   useDropzoneState,
+  useFilePicker,
   type FileRejection,
 } from "@healthalyst/ui/primitives/dropzone";
 import { formatFileSize } from "@healthalyst/ui/lib/file-size";
@@ -113,6 +115,43 @@ export function FileUploadField({
     return "This file could not be added. Choose another file.";
   }
 
+  const dropzoneAccept = Object.fromEntries(
+    Object.entries(accept).map(([mediaType, extensions]) => [
+      mediaType,
+      [...extensions],
+    ])
+  );
+
+  function handleFilesAccepted(acceptedFiles: File[]) {
+    const acceptedFile = acceptedFiles[0];
+    if (!acceptedFile) return;
+    setRejectionMessage("");
+    onFileAccepted(acceptedFile);
+  }
+
+  function handleFilesRejected(fileRejections: FileRejection[]) {
+    const message = describeRejection(fileRejections);
+    setRejectionMessage(message);
+    onFileRejected?.(message);
+  }
+
+  // Once a file is added, it is replaced from its row rather than a second
+  // drop target.
+  const {
+    openFilePicker,
+    getInputProperties,
+    getRootProperties,
+    isDragActive: isReplacementDragActive,
+  } = useFilePicker({
+    accept: dropzoneAccept,
+    maxSize: maximumSizeBytes,
+    disabled,
+    onFilesAccepted: handleFilesAccepted,
+    onFilesRejected: handleFilesRejected,
+  });
+  const hasFiles = files.length > 0;
+  const showsDropTarget = canAddFile && !hasFiles && !uploadingFileName;
+
   return (
     <div className={cn("flex flex-col gap-3", className)}>
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -132,18 +171,41 @@ export function FileUploadField({
         )}
       </div>
 
-      {files.length > 0 && (
-        <ul className="flex flex-col gap-2" aria-label={`${label} files`}>
-          {files.map((file) => (
-            <FileUploadFieldRow key={file.identifier} file={file} />
-          ))}
-        </ul>
+      {hasFiles && (
+        <div
+          {...(canAddFile && !uploadingFileName ? getRootProperties() : {})}
+          className="relative rounded-lg"
+        >
+          <ul className="flex flex-col gap-2" aria-label={`${label} files`}>
+            {files.map((file) => (
+              <FileUploadFieldRow
+                key={file.identifier}
+                file={file}
+                onReplace={
+                  canAddFile && !uploadingFileName ? openFilePicker : undefined
+                }
+              />
+            ))}
+          </ul>
+          {isReplacementDragActive && (
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-lg border border-primary bg-secondary/90 text-sm font-medium text-primary">
+              Drop to replace
+            </div>
+          )}
+        </div>
       )}
 
-      {uploadingFileName ? (
+      {hasFiles && canAddFile && <input {...getInputProperties()} />}
+
+      {uploadingFileName && (
         <div
           role="status"
-          className="flex min-h-44 flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-primary/40 bg-secondary/40 px-6 py-8 text-center text-sm"
+          className={cn(
+            "flex items-center gap-3 rounded-lg border border-dashed border-primary/40 bg-secondary/40 text-sm",
+            hasFiles
+              ? "px-4 py-3"
+              : "min-h-44 flex-col justify-center px-6 py-8 text-center"
+          )}
         >
           <LoaderIcon
             aria-hidden="true"
@@ -153,51 +215,37 @@ export function FileUploadField({
             Uploading {uploadingFileName}
           </span>
         </div>
-      ) : (
-        canAddFile && (
-          <Dropzone
-            accept={Object.fromEntries(
-              Object.entries(accept).map(([mediaType, extensions]) => [
-                mediaType,
-                [...extensions],
-              ])
-            )}
-            maxSize={maximumSizeBytes}
-            maxFiles={1}
-            disabled={disabled}
-            aria-labelledby={labelIdentifier}
-            aria-describedby={[
-              formatsIdentifier,
-              hint ? hintIdentifier : "",
-              shownError ? errorIdentifier : "",
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            onFilesAccepted={(acceptedFiles) => {
-              const acceptedFile = acceptedFiles[0];
-              if (!acceptedFile) return;
-              setRejectionMessage("");
-              onFileAccepted(acceptedFile);
-            }}
-            onFilesRejected={(fileRejections) => {
-              const message = describeRejection(fileRejections);
-              setRejectionMessage(message);
-              onFileRejected?.(message);
-            }}
-            className="rounded-lg"
-          >
-            <FileUploadDropTarget
-              illustration={illustration}
-              hasFiles={files.length > 0}
-              hasError={Boolean(shownError)}
-              formatsIdentifier={formatsIdentifier}
-              formatsLabel={`${formatsDescription}, up to ${maximumSizeLabel}`}
-            />
-          </Dropzone>
-        )
       )}
 
-      {hint && canAddFile && !uploadingFileName && (
+      {showsDropTarget && (
+        <Dropzone
+          accept={dropzoneAccept}
+          maxSize={maximumSizeBytes}
+          maxFiles={1}
+          disabled={disabled}
+          aria-labelledby={labelIdentifier}
+          aria-describedby={[
+            formatsIdentifier,
+            hint ? hintIdentifier : "",
+            shownError ? errorIdentifier : "",
+          ]
+            .filter(Boolean)
+            .join(" ")}
+          onFilesAccepted={handleFilesAccepted}
+          onFilesRejected={handleFilesRejected}
+          className="rounded-lg"
+        >
+          <FileUploadDropTarget
+            illustration={illustration}
+            hasFiles={hasFiles}
+            hasError={Boolean(shownError)}
+            formatsIdentifier={formatsIdentifier}
+            formatsLabel={`${formatsDescription}, up to ${maximumSizeLabel}`}
+          />
+        </Dropzone>
+      )}
+
+      {hint && showsDropTarget && (
         <p
           id={hintIdentifier}
           className="-mt-1.5 flex items-start gap-1.5 text-xs italic leading-5 text-muted-foreground"
@@ -268,49 +316,21 @@ function FileUploadDropTarget({
   );
 }
 
-const FILE_STATUS_PRESENTATION: Record<
-  StatusTone,
-  { className: string; icon: typeof SuccessIcon }
-> = {
-  neutral: { className: "text-muted-foreground", icon: InformationIcon },
-  information: { className: "text-status-information", icon: LoaderIcon },
-  warning: { className: "text-status-warning", icon: WarningIcon },
-  highlight: { className: "text-status-highlight", icon: InformationIcon },
-  positive: { className: "text-status-positive", icon: SuccessIcon },
-  negative: { className: "text-status-negative", icon: ErrorIcon },
-};
-
-function FileUploadFieldRow({ file }: { file: FileUploadFieldItem }) {
-  const statusPresentation = file.status
-    ? FILE_STATUS_PRESENTATION[file.status.tone]
-    : undefined;
-  const StatusIcon = statusPresentation?.icon;
+function FileUploadFieldRow({
+  file,
+  onReplace,
+}: {
+  file: FileUploadFieldItem;
+  onReplace?: () => void;
+}) {
   const isNegative = file.status?.tone === "negative";
 
   return (
     <li className="flex items-center gap-3 rounded-lg border bg-card px-3 py-3 sm:px-4">
-      <span
-        aria-hidden="true"
-        className="flex size-16 shrink-0 flex-col items-center justify-center gap-1 overflow-hidden rounded-md border bg-secondary text-primary"
-      >
-        {file.previewUrl ? (
-          // An uploaded file's own preview; it is never optimised or cached.
-          <img
-            src={file.previewUrl}
-            alt=""
-            className="size-full object-cover"
-          />
-        ) : (
-          <>
-            <DocumentIcon className="size-6" />
-            {file.fileTypeLabel && (
-              <span className="text-[0.625rem] font-semibold leading-none tracking-wide">
-                {file.fileTypeLabel}
-              </span>
-            )}
-          </>
-        )}
-      </span>
+      <FileTile
+        previewUrl={file.previewUrl}
+        fileTypeLabel={file.fileTypeLabel}
+      />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <p className="text-sm font-medium leading-5 [overflow-wrap:anywhere]">
           {file.fileName}
@@ -319,23 +339,8 @@ function FileUploadFieldRow({ file }: { file: FileUploadFieldItem }) {
           {file.details && (
             <span className="text-muted-foreground">{file.details}</span>
           )}
-          {file.status && statusPresentation && StatusIcon && (
-            <span
-              className={cn(
-                "inline-flex items-center gap-1",
-                statusPresentation.className
-              )}
-            >
-              <StatusIcon
-                aria-hidden="true"
-                className={cn(
-                  "size-3.5 shrink-0",
-                  file.status.tone === "information" &&
-                    "animate-spin motion-reduce:animate-none"
-                )}
-              />
-              {file.status.label}
-            </span>
+          {file.status && (
+            <FileStatusText label={file.status.label} tone={file.status.tone} />
           )}
         </div>
         {file.message && (
@@ -349,6 +354,19 @@ function FileUploadFieldRow({ file }: { file: FileUploadFieldItem }) {
           </p>
         )}
       </div>
+      {onReplace && (
+        <ActionButton
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="size-9 shrink-0 text-primary"
+          onClick={onReplace}
+          aria-label={`Replace ${file.fileName}`}
+          title="Replace file"
+        >
+          <ReplaceFileIcon aria-hidden="true" className="size-4" />
+        </ActionButton>
+      )}
       {file.onRemove && (
         <ActionButton
           type="button"
@@ -358,6 +376,7 @@ function FileUploadFieldRow({ file }: { file: FileUploadFieldItem }) {
           isLoading={file.isRemoving}
           onClick={file.onRemove}
           aria-label={`Remove ${file.fileName}`}
+          title="Remove file"
         >
           {!file.isRemoving && (
             <DeleteIcon aria-hidden="true" className="size-4" />

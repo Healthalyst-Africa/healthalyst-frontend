@@ -12,8 +12,14 @@ const alertVariants = createClassVariants(
     variants: {
       variant: {
         default: "bg-background text-foreground",
+        information:
+          "border-alert-information-border bg-alert-information-surface text-foreground [&>svg]:text-status-information",
+        success:
+          "border-alert-success-border bg-alert-success-surface text-foreground [&>svg]:text-status-positive",
+        warning:
+          "border-alert-warning-border bg-alert-warning-surface text-foreground [&>svg]:text-status-warning",
         destructive:
-          "border-destructive/50 text-destructive [&>svg]:text-destructive",
+          "border-alert-error-border bg-alert-error-surface text-foreground [&>svg]:text-destructive",
       },
     },
     defaultVariants: {

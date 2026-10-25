@@ -5,8 +5,8 @@ import { ChevronLeftIcon, ChevronRightIcon } from "@healthalyst/icons";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FileUploadField } from "@healthalyst/ui/components/file-upload-field";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
-import { DocumentDropIllustration } from "@healthalyst/ui/illustrations/document-drop-illustration";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
+import { DocumentDropIllustration } from "@healthalyst/ui/illustrations/document-drop-illustration";
 import { formatFileSize } from "@healthalyst/ui/lib/file-size";
 import {
   useOrganizationDocumentDeleteMutation,
@@ -56,8 +56,12 @@ export function OrganizationSupportingDocumentsStep({
     organizationId,
     userId,
   });
-  const isWorking = uploadMutation.isPending || deleteMutation.isPending;
-  const canContinue = application.checklist.documentsComplete && !isWorking;
+  // Tracked per document so several uploads and removals can run at once.
+  const [uploadingFileNames, setUploadingFileNames] = useState<
+    Partial<Record<OrganizationDocumentType, string>>
+  >({});
+  const [removingDocumentIdentifiers, setRemovingDocumentIdentifiers] =
+    useState<string[]>([]);
   const hasPendingDocuments = application.documents.some((document) =>
     PENDING_DOCUMENT_STATUSES.includes(document.status)
   );
@@ -110,12 +114,30 @@ export function OrganizationSupportingDocumentsStep({
     documentFile: File
   ) {
     setDocumentError(documentType, "");
-    uploadMutation.reset();
+    setUploadingFileNames((currentFileNames) => ({
+      ...currentFileNames,
+      [documentType]: documentFile.name,
+    }));
     try {
+      const replacedDocumentIdentifiers = application.documents
+        .filter((document) => document.type === documentType)
+        .map((document) => document.id);
       const uploadedDocument = await uploadMutation.mutateAsync({
         type: documentType,
         documentFile,
       });
+      // A new file for a document replaces the earlier ones.
+      for (const replacedDocumentIdentifier of replacedDocumentIdentifiers) {
+        await deleteMutation.mutateAsync(replacedDocumentIdentifier);
+        setPreviewUrls((currentPreviewUrls) => {
+          const {
+            [replacedDocumentIdentifier]: replacedPreviewUrl,
+            ...remainingPreviewUrls
+          } = currentPreviewUrls;
+          if (replacedPreviewUrl) URL.revokeObjectURL(replacedPreviewUrl);
+          return remainingPreviewUrls;
+        });
+      }
       if (documentFile.type.startsWith("image/")) {
         const previewUrl = URL.createObjectURL(documentFile);
         setPreviewUrls((currentPreviewUrls) => ({
@@ -130,6 +152,14 @@ export function OrganizationSupportingDocumentsStep({
           ? error.message
           : "We could not upload that document. Try again."
       );
+    } finally {
+      setUploadingFileNames((currentFileNames) => {
+        const { [documentType]: finishedFileName, ...remainingFileNames } =
+          currentFileNames;
+        return finishedFileName === undefined
+          ? currentFileNames
+          : remainingFileNames;
+      });
     }
   }
 
@@ -138,7 +168,10 @@ export function OrganizationSupportingDocumentsStep({
     documentId: string
   ) {
     setDocumentError(documentType, "");
-    deleteMutation.reset();
+    setRemovingDocumentIdentifiers((currentIdentifiers) => [
+      ...currentIdentifiers,
+      documentId,
+    ]);
     try {
       await deleteMutation.mutateAsync(documentId);
       setPreviewUrls((currentPreviewUrls) => {
@@ -154,6 +187,10 @@ export function OrganizationSupportingDocumentsStep({
           ? error.message
           : "We could not remove that document. Try again."
       );
+    } finally {
+      setRemovingDocumentIdentifiers((currentIdentifiers) =>
+        currentIdentifiers.filter((identifier) => identifier !== documentId)
+      );
     }
   }
 
@@ -167,19 +204,14 @@ export function OrganizationSupportingDocumentsStep({
 
       <ContentPanel elevation="flat" spacing="compact" contentClassName="gap-6">
         {application.checklist.documentsComplete && (
-          <div className="flex items-center gap-4 rounded-lg bg-secondary/60 px-4 py-4">
-            <div aria-hidden="true" className="w-12 shrink-0">
-              <DocumentsCompleteIllustration className="h-auto w-full" />
-            </div>
-            <div className="flex flex-col gap-0.5">
-              <p className="text-sm font-medium">
-                All required documents are in
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Add optional documents if you have them, or continue to review.
-              </p>
-            </div>
-          </div>
+          <NoticeBanner
+            tone="success"
+            size="prominent"
+            illustration={<DocumentsCompleteIllustration />}
+            title="All required documents are in"
+          >
+            Add optional documents if you have them, or continue to review.
+          </NoticeBanner>
         )}
 
         {application.requiredDocuments.length === 0 ? (
@@ -192,9 +224,6 @@ export function OrganizationSupportingDocumentsStep({
           <ul className="flex flex-col gap-8">
             {application.requiredDocuments.map((requirement) => {
               const documentTypeLabel = DOCUMENT_TYPE_LABELS[requirement.type];
-              const isUploadingThisType =
-                uploadMutation.isPending &&
-                uploadMutation.variables?.type === requirement.type;
 
               return (
                 <li key={requirement.type}>
@@ -228,26 +257,20 @@ export function OrganizationSupportingDocumentsStep({
                             tone: statusPresentation.tone,
                           },
                           message: statusPresentation.message,
-                          onRemove:
-                            application.canEdit && !isWorking
-                              ? () =>
-                                  void removeDocument(
-                                    requirement.type,
-                                    document.id
-                                  )
-                              : undefined,
-                          isRemoving:
-                            deleteMutation.isPending &&
-                            deleteMutation.variables === document.id,
+                          onRemove: application.canEdit
+                            ? () =>
+                                void removeDocument(
+                                  requirement.type,
+                                  document.id
+                                )
+                            : undefined,
+                          isRemoving: removingDocumentIdentifiers.includes(
+                            document.id
+                          ),
                         };
                       })}
-                    canAddFile={application.canEdit && !requirement.satisfied}
-                    uploadingFileName={
-                      isUploadingThisType
-                        ? uploadMutation.variables?.documentFile.name
-                        : undefined
-                    }
-                    disabled={isWorking}
+                    canAddFile={application.canEdit}
+                    uploadingFileName={uploadingFileNames[requirement.type]}
                     error={documentErrors[requirement.type]}
                     onFileAccepted={(documentFile) =>
                       void uploadDocument(requirement.type, documentFile)
@@ -273,16 +296,9 @@ export function OrganizationSupportingDocumentsStep({
           </a>
           <a
             href="#onboarding-content"
-            aria-disabled={!canContinue}
-            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-disabled:text-muted-foreground aria-disabled:no-underline"
+            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             onClick={(clickEvent) => {
-              if (!canContinue) {
-                clickEvent.preventDefault();
-                return;
-              }
-
               clickEvent.preventDefault();
-
               onContinue();
             }}
           >

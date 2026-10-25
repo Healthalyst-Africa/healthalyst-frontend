@@ -29,11 +29,6 @@ export function OrganizationOnboardingForm(properties: {
   const referenceError = organizationTypesQuery.error ?? statesQuery.error;
   const isLoadingReferences =
     organizationTypesQuery.isPending || statesQuery.isPending;
-  const isContinueLinkDisabled =
-    form.hasConflict ||
-    isLoadingReferences ||
-    Boolean(referenceError) ||
-    form.isReloading;
   const definition = createOrganizationOnboardingFormDefinition(
     organizationTypeOptions.filter((option) =>
       organizationTypesQuery.data?.some(
@@ -70,25 +65,17 @@ export function OrganizationOnboardingForm(properties: {
                 <ActionButton
                   type="button"
                   variant="ghost"
-                  disabled={form.updateMutation.isPending || form.isReloading}
                   onClick={form.discardChanges}
                 >
                   Discard changes
                 </ActionButton>
               )}
-              {!form.hasChanges && application.checklist.profileComplete ? (
+              {!form.hasChanges ? (
                 <a
                   href="#onboarding-content"
-                  aria-disabled={isContinueLinkDisabled}
-                  className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-disabled:text-muted-foreground"
+                  className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                   onClick={(clickEvent) => {
-                    if (isContinueLinkDisabled) {
-                      clickEvent.preventDefault();
-                      return;
-                    }
-
                     clickEvent.preventDefault();
-
                     properties.onContinue();
                   }}
                 >
@@ -104,18 +91,8 @@ export function OrganizationOnboardingForm(properties: {
                   form={formIdentifier}
                   isLoading={form.updateMutation.isPending}
                   loadingText="Saving and continuing"
-                  disabled={
-                    (!form.hasChanges &&
-                      !application.checklist.profileComplete) ||
-                    form.hasConflict ||
-                    isLoadingReferences ||
-                    Boolean(referenceError) ||
-                    form.isReloading
-                  }
                 >
-                  {form.hasChanges
-                    ? "Save and continue"
-                    : "Complete organisation details"}
+                  Save and continue
                 </ActionButton>
               )}
             </div>

@@ -13,10 +13,6 @@ import { OrganizationOnboardingProgress } from "~/features/organization-applicat
 import { OrganizationAccountVerificationStep } from "~/features/organization-application/components/organization-account-verification-step";
 import { OrganizationSupportingDocumentsStep } from "~/features/organization-application/components/organization-supporting-documents-step";
 import { OrganizationReviewSubmissionStep } from "~/features/organization-application/components/organization-review-submission-step";
-import {
-  ORGANIZATION_STATUS_DESCRIPTIONS,
-  ORGANIZATION_STATUS_LABELS,
-} from "~/features/organization-application/config/application-presentation";
 import { OrganizationOnboardingForm } from "~/features/organization-application/components/organization-onboarding-form";
 import { useOnboardingStep } from "~/features/organization-application/hooks/use-onboarding-step";
 
@@ -37,9 +33,6 @@ export function OrganizationOnboardingWorkspace({
   } = useOrganizationOnboardingWorkspace(session);
   const application = applicationQuery.data;
   const queryError = applicationQuery.error;
-  const statusLabel = application
-    ? (ORGANIZATION_STATUS_LABELS[application.status] ?? application.status)
-    : "Onboarding";
   const visibleStep =
     application && !application.canEdit ? "review" : currentStep;
 
@@ -171,15 +164,10 @@ export function OrganizationOnboardingWorkspace({
           </NoticeBanner>
         ) : application ? (
           <>
-            {(!application.canEdit ||
-              application.status === "CHANGES_REQUESTED") && (
-              <NoticeBanner title={statusLabel}>
-                <p>
-                  {ORGANIZATION_STATUS_DESCRIPTIONS[application.status]}
-                  {!application.canEdit &&
-                    " Your onboarding details are read-only at this stage."}
-                </p>
-                {application.messages.length > 0 && (
+            {/* Reviewer requests appear only when an application is sent back. */}
+            {application.status === "CHANGES_REQUESTED" &&
+              application.messages.length > 0 && (
+                <NoticeBanner tone="warning" title="Changes requested">
                   <ul className="flex flex-col gap-3">
                     {application.messages.map((reviewMessage) => (
                       <li
@@ -202,9 +190,8 @@ export function OrganizationOnboardingWorkspace({
                       </li>
                     ))}
                   </ul>
-                )}
-              </NoticeBanner>
-            )}
+                </NoticeBanner>
+              )}
             {visibleStep === "details" ? (
               <OrganizationOnboardingForm
                 key={application.id}
@@ -237,6 +224,7 @@ export function OrganizationOnboardingWorkspace({
                 organizationId={organizationId}
                 userId={session.user.id}
                 onBack={() => goToStep("documents")}
+                onEditStep={goToStep}
               />
             )}
           </>

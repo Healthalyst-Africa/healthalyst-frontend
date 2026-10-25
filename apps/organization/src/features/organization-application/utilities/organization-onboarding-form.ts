@@ -26,7 +26,7 @@ export function toOrganizationOnboardingFormValues(
 
 export function getOrganizationOnboardingChanges(
   profile: OrganizationApplication["profile"],
-  values: OrganizationOnboardingProfile,
+  values: Partial<OrganizationOnboardingProfile>,
   changedFieldNames: readonly (typeof ORGANIZATION_PROFILE_FIELD_NAMES)[number][]
 ) {
   const changedFields = changedFieldNames

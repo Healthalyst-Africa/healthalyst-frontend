@@ -24,13 +24,21 @@ const AccordionTrigger = React.forwardRef<
   React.ElementRef<typeof AccordionPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Trigger> & {
     showIndicator?: boolean;
+    /** Classes for the heading element that wraps the trigger. */
+    headerClassName?: string;
   }
 >(
   (
-    { className, children, showIndicator = true, ...properties },
+    {
+      className,
+      children,
+      showIndicator = true,
+      headerClassName,
+      ...properties
+    },
     elementReference
   ) => (
-    <AccordionPrimitive.Header className="flex">
+    <AccordionPrimitive.Header className={cn("flex", headerClassName)}>
       <AccordionPrimitive.Trigger
         ref={elementReference}
         className={cn(

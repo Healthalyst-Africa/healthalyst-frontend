@@ -123,6 +123,12 @@ code, repository policies, or branding into it.
 | Inside text, buttons, navigation, menus, form fields, table cells, metric tiles (16–24 px) | `@healthalyst/icons`              |
 | A focal image for a state or section: empty, success, error, onboarding (48 px and larger) | `@healthalyst/ui/illustrations/*` |
 
+- `NoticeBanner` follows the same rule. A notice that states the result of a
+  whole step or page, such as "All required documents are in" or "1 thing
+  left before you submit", uses `size="prominent"` with an `illustration`.
+  Inline guidance, field-level feedback and transient errors, such as "We
+  could not submit your application", keep the default size and the tone's
+  icon.
 - Never use an illustration as an interface icon. Illustrations have fixed
   multi-colour fills, a background disc and detail drawn for about 144 px; at
   icon size they blur and cannot follow `currentColor`, hover, active, focus or

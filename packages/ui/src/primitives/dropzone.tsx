@@ -96,6 +96,42 @@ function Dropzone({
   );
 }
 
+/**
+ * Opens the file picker from another control, for actions such as "Replace".
+ * Spread `getRootProperties` on a surface to also accept dropped files there.
+ * Files go through the same `accept`, `maxSize` and `maxFiles` checks.
+ */
+function useFilePicker({
+  maxFiles = 1,
+  onFilesAccepted,
+  onFilesRejected,
+  ...dropzoneOptions
+}: Omit<
+  DropzoneProperties,
+  "className" | "aria-labelledby" | "aria-describedby" | "children"
+>) {
+  const { getInputProps, getRootProps, open, isDragActive } = useDropzone({
+    maxFiles,
+    multiple: maxFiles !== 1,
+    noClick: true,
+    noKeyboard: true,
+    onDrop: (acceptedFiles, fileRejections, event) => {
+      if (fileRejections.length > 0) {
+        onFilesRejected?.(fileRejections, event);
+        return;
+      }
+      if (acceptedFiles.length > 0) onFilesAccepted?.(acceptedFiles, event);
+    },
+    ...dropzoneOptions,
+  });
+  return {
+    openFilePicker: open,
+    getInputProperties: getInputProps,
+    getRootProperties: getRootProps,
+    isDragActive,
+  };
+}
+
 /** The drag state of the surrounding `Dropzone`, for custom content. */
 function useDropzoneState(): DropzoneContextValue {
   const context = useContext(DropzoneContext);
@@ -103,5 +139,5 @@ function useDropzoneState(): DropzoneContextValue {
   return context;
 }
 
-export { Dropzone, useDropzoneState };
+export { Dropzone, useDropzoneState, useFilePicker };
 export type { DropzoneProperties, FileRejection };

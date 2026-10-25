@@ -97,7 +97,14 @@ export function useOrganizationApplicationSubmitMutation({
 }) {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (entityTag: string) => submitOrganizationApplication(entityTag),
+    mutationFn: (entityTag: string | null | undefined) => {
+      if (!entityTag) {
+        throw new Error(
+          "We could not confirm the latest version of your application. Reload the page and try again."
+        );
+      }
+      return submitOrganizationApplication(entityTag);
+    },
     onSuccess: () =>
       queryClient.invalidateQueries({
         queryKey: [ORGANIZATION_APPLICATION_QUERY_KEY, userId, organizationId],

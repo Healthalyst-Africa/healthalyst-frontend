@@ -17,8 +17,10 @@ Applications import only the dedicated compositions in
 | Surfaces for a task, with heading/footer   | `content-panel`                                  |
 | Loading and failure page states            | `status-panel`, `loading-placeholder`            |
 | Empty lists, queues and no-result states   | `empty-state`                                    |
+| Outcome dialogs (success, error, warning)  | `feedback-dialog`                                |
 | Notices and status labels                  | `notice-banner`, `status-badge`, `status-label`  |
 | File uploads with drag and drop            | `file-upload-field`                              |
+| Review pages before submitting a workflow  | `review-summary`                                 |
 | Form-level errors and confirmations        | `form-message`                                   |
 | Labelled controls with validation messages | `text-field`, `text-area-field`, `select-field`, |
 |                                            | `checkbox-field`, `one-time-code-field`          |

@@ -49,6 +49,16 @@ module.exports = {
           positive: "var(--status-positive)",
           negative: "var(--status-negative)",
         },
+        alert: {
+          "information-surface": "var(--alert-information-surface)",
+          "information-border": "var(--alert-information-border)",
+          "success-surface": "var(--alert-success-surface)",
+          "success-border": "var(--alert-success-border)",
+          "warning-surface": "var(--alert-warning-surface)",
+          "warning-border": "var(--alert-warning-border)",
+          "error-surface": "var(--alert-error-surface)",
+          "error-border": "var(--alert-error-border)",
+        },
         sidebar: {
           DEFAULT: "hsl(var(--sidebar-background))",
           foreground: "hsl(var(--sidebar-foreground))",

@@ -4,10 +4,13 @@
  */
 export const ILLUSTRATION_COLOURS = {
   stroke: "hsl(var(--foreground))",
-  base: "hsl(var(--secondary))",
+  /** The background disc; containers can override `--illustration-base`. */
+  base: "var(--illustration-base, hsl(var(--secondary)))",
   surface: "hsl(var(--background))",
   accentSubtle: "oklch(var(--brand-gold-subtle))",
   accentStrong: "oklch(var(--brand-gold))",
+  warning: "var(--alert-warning-border)",
+  error: "var(--alert-error-border)",
 } as const;
 
 export const ILLUSTRATION_STROKE = {

@@ -6,6 +6,7 @@ import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
 import {
@@ -46,13 +47,6 @@ export function OrganizationAccountVerificationStep({
     Boolean(session.user.emailVerifiedAt);
   const authenticatorIsEnrolled =
     application.checklist.mfaEnrolled || session.user.mfa.totp;
-  // TEMPORARY: lets local development continue to supporting documents
-  // without phone verification. Production builds still require it.
-  const isPhoneVerificationBypassed = process.env.NODE_ENV === "development";
-  const canContinue =
-    emailIsVerified &&
-    authenticatorIsEnrolled &&
-    (isPhoneVerified || isPhoneVerificationBypassed);
 
   function handleSendCode(formEvent: FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -114,11 +108,11 @@ export function OrganizationAccountVerificationStep({
         >
           Phone number verification
         </h2>
-        <div>
-          {!emailIsVerified || !authenticatorIsEnrolled ? (
+        <div className="flex flex-col gap-4">
+          {(!emailIsVerified || !authenticatorIsEnrolled) && (
             <NoticeBanner
-              tone="error"
-              title="Finish securing your account first"
+              tone="warning"
+              title="Also finish securing your account"
             >
               {!emailIsVerified && !authenticatorIsEnrolled ? (
                 <ul className="list-inside list-disc">
@@ -135,8 +129,14 @@ export function OrganizationAccountVerificationStep({
                 "Open the confirmation link sent to your administrator email, then return here."
               )}
             </NoticeBanner>
-          ) : isPhoneVerified ? (
-            <NoticeBanner title="Account verification is complete" />
+          )}
+          {isPhoneVerified ? (
+            <NoticeBanner
+              tone="success"
+              size="prominent"
+              illustration={<DocumentsCompleteIllustration />}
+              title="Your phone number is verified"
+            />
           ) : (
             <div className="flex flex-col gap-4">
               {!sentToPhoneNumber ? (
@@ -166,9 +166,9 @@ export function OrganizationAccountVerificationStep({
                   <ActionButton
                     className="w-full sm:w-auto sm:self-start"
                     type="submit"
+                    disabled={!phoneNumber.trim()}
                     isLoading={sendCodeMutation.isPending}
                     loadingText="Sending verification code"
-                    disabled={!phoneNumber.trim()}
                   >
                     Send verification code
                   </ActionButton>
@@ -267,16 +267,9 @@ export function OrganizationAccountVerificationStep({
         </a>
         <a
           href="#onboarding-content"
-          aria-disabled={!canContinue}
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-disabled:text-muted-foreground"
+          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           onClick={(clickEvent) => {
-            if (!canContinue) {
-              clickEvent.preventDefault();
-              return;
-            }
-
             clickEvent.preventDefault();
-
             onContinue();
           }}
         >

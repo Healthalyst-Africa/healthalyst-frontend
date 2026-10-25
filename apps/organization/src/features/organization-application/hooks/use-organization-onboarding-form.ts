@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
-import { ORGANIZATION_PROFILE_FIELD_NAMES } from "~/features/organization-application/config/organization-application";
+import {
+  ORGANIZATION_PROFILE_FIELD_NAMES,
+  ORGANIZATION_PROFILE_REQUIRED_FIELD_NAMES,
+} from "~/features/organization-application/config/organization-application";
 import { organizationOnboardingFormSchema } from "~/features/organization-application/schemas/organization-onboarding-form-schema";
 import { useOrganizationApplicationUpdateMutation } from "~/features/organization-application/hooks/use-organization-application";
 import {
@@ -80,7 +83,23 @@ export function useOrganizationOnboardingForm({
       hasConflict
     )
       return;
-    const validatedValues = organizationOnboardingFormSchema.safeParse(values);
+    // Empty required fields are left out rather than blocking the save;
+    // anything entered must still be valid.
+    const emptyRequiredFieldNames =
+      ORGANIZATION_PROFILE_REQUIRED_FIELD_NAMES.filter(
+        (fieldName) => !values[fieldName].trim()
+      );
+    const draftValues = Object.fromEntries(
+      Object.entries(values).filter(
+        ([fieldName]) =>
+          !emptyRequiredFieldNames.some(
+            (emptyFieldName) => emptyFieldName === fieldName
+          )
+      )
+    );
+    const validatedValues = organizationOnboardingFormSchema
+      .partial()
+      .safeParse(draftValues);
     if (!validatedValues.success) {
       setFieldErrors(
         Object.fromEntries(
@@ -94,7 +113,11 @@ export function useOrganizationOnboardingForm({
       return;
     }
     const changedFieldNames = ORGANIZATION_PROFILE_FIELD_NAMES.filter(
-      (fieldName) => values[fieldName] !== savedValues[fieldName]
+      (fieldName) =>
+        values[fieldName] !== savedValues[fieldName] &&
+        !emptyRequiredFieldNames.some(
+          (emptyFieldName) => emptyFieldName === fieldName
+        )
     );
     const changes = getOrganizationOnboardingChanges(
       savedApplication.profile,
@@ -103,7 +126,7 @@ export function useOrganizationOnboardingForm({
     );
     if (!changes) {
       setValues(savedValues);
-      setSaveMessage("Your organisation details are already up to date.");
+      onContinue();
       return;
     }
     if (!savedApplication.entityTag) {
@@ -125,9 +148,9 @@ export function useOrganizationOnboardingForm({
           setSaveMessage(
             updatedApplication.checklist.profileComplete
               ? "Organisation details saved."
-              : "Details saved. Complete the required organisation details to continue."
+              : "Details saved. Some required details are still missing."
           );
-          if (updatedApplication.checklist.profileComplete) onContinue();
+          onContinue();
         },
         onError: (error) => {
           if (error instanceof PlatformApiError) {

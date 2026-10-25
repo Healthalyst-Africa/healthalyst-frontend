@@ -1,4 +1,4 @@
-import { CheckIcon } from "@healthalyst/icons";
+import { SuccessIcon } from "@healthalyst/icons";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 export type OnboardingProgressStep = {
@@ -24,7 +24,13 @@ export function OnboardingProgress({
       <div className="flex flex-col gap-3">
         <p className="text-sm font-medium">{label}</p>
         <progress
-          className="h-1.5 w-full overflow-hidden rounded-full bg-muted-foreground/10 [&::-moz-progress-bar]:bg-gold [&::-webkit-progress-bar]:bg-muted-foreground/10 [&::-webkit-progress-value]:rounded-full [&::-webkit-progress-value]:bg-gold"
+          className={cn(
+            "h-1.5 w-full overflow-hidden rounded-full bg-muted-foreground/10 [&::-webkit-progress-bar]:bg-muted-foreground/10 [&::-webkit-progress-value]:rounded-full",
+            // Gold while steps remain; green once every step is complete.
+            completedCount === steps.length
+              ? "[&::-moz-progress-bar]:bg-primary [&::-webkit-progress-value]:bg-primary"
+              : "[&::-moz-progress-bar]:bg-gold [&::-webkit-progress-value]:bg-gold"
+          )}
           value={completedCount}
           max={steps.length}
           aria-label={`${completedCount} of ${steps.length} onboarding steps complete`}
@@ -40,21 +46,34 @@ export function OnboardingProgress({
             aria-current={step.current ? "step" : undefined}
             className={cn(
               "flex items-start gap-3 rounded-xl border border-transparent px-3 py-4",
-              step.current && "border-gold-subtle bg-gold-subtle/30"
+              step.current &&
+                (step.complete
+                  ? "border-alert-success-border bg-alert-success-surface"
+                  : "border-gold-subtle bg-gold-subtle/30")
             )}
           >
             <span
               aria-hidden="true"
               className={cn(
-                "flex size-7 shrink-0 items-center justify-center rounded-full text-xs text-primary-foreground",
-                step.complete || step.current
-                  ? "bg-gold"
-                  : "bg-muted-foreground/50"
+                "flex size-9 shrink-0 items-center justify-center rounded-full text-sm",
+                step.complete
+                  ? // White on the green current-step card, so the circle stays visible.
+                    step.current
+                    ? "bg-background text-primary"
+                    : "bg-secondary text-primary"
+                  : step.current
+                    ? "bg-gold text-primary-foreground"
+                    : "bg-muted-foreground/50 text-primary-foreground"
               )}
             >
-              {step.complete ? <CheckIcon className="size-4" /> : stepIndex + 1}
+              {step.complete ? (
+                // Matches the completed-section mark in ReviewSections.
+                <SuccessIcon className="size-5" />
+              ) : (
+                stepIndex + 1
+              )}
             </span>
-            <div className="flex min-w-0 flex-col gap-1">
+            <div className="flex min-w-0 flex-col gap-1 pt-2">
               <p
                 className={cn(
                   "text-sm font-medium",
