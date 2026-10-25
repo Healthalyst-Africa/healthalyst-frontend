@@ -15,8 +15,10 @@ Applications import only the dedicated compositions in
 | ------------------------------------------ | ------------------------------------------------ |
 | Buttons                                    | `action-button`                                  |
 | Surfaces for a task, with heading/footer   | `content-panel`                                  |
-| Loading, failure and empty page states     | `status-panel`, `loading-placeholder`            |
-| Notices and status labels                  | `notice-banner`, `status-badge`                  |
+| Loading and failure page states            | `status-panel`, `loading-placeholder`            |
+| Empty lists, queues and no-result states   | `empty-state`                                    |
+| Notices and status labels                  | `notice-banner`, `status-badge`, `status-label`  |
+| File uploads with drag and drop            | `file-upload-field`                              |
 | Form-level errors and confirmations        | `form-message`                                   |
 | Labelled controls with validation messages | `text-field`, `text-area-field`, `select-field`, |
 |                                            | `checkbox-field`, `one-time-code-field`          |
@@ -45,7 +47,8 @@ other compositions must use it for loading, disabled and icon behaviour.
 ## Internal organisation
 
 - `primitives/`: shadcn registry primitives, adapted only for naming,
-  Tailwind 3 and shared icons.
+  Tailwind 3 and shared icons. `dropzone` comes from the Kibo UI registry
+  (`@kibo-ui/dropzone`) and uses react-dropzone for drag and drop.
 - `components/`: dedicated HealthAlyst compositions built from the primitives.
 - `components/forms/` and `components/data-table/`: private renderers used by
   their compositions.

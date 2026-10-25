@@ -1,7 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { EmptyState } from "@healthalyst/ui/components/empty-state";
+import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
 import { StatusPanel } from "@healthalyst/ui/components/status-panel";
+import { APPLICATION_ROUTES } from "~/config/application-routes";
 import { ReviewApplicationCard } from "~/features/organization-oversight/components/review-application-card";
 import { useReviewQueueQuery } from "~/features/organization-oversight/hooks/use-organization-oversight";
 import { useStaffSession } from "~/infrastructure/auth/staff-session-provider";
@@ -49,9 +53,15 @@ function ReviewQueue({ staffIdentity }: { staffIdentity: StaffIdentity }) {
         />
       )}
       {reviewQueue.isSuccess && reviewQueue.data.length === 0 && (
-        <StatusPanel
-          tone="information"
-          message="No submitted applications are awaiting review."
+        <EmptyState
+          illustration={<EmptyReviewQueueIllustration />}
+          title="No applications awaiting review"
+          description="Submitted organisation applications will appear here for you to claim and review."
+          action={
+            <Link href={APPLICATION_ROUTES.organizations}>
+              View all organisations
+            </Link>
+          }
         />
       )}
       {reviewQueue.data?.map((application) => (

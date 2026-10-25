@@ -1,31 +1,29 @@
 "use client";
 
-import { useState } from "react";
-import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { useEffect, useRef, useState } from "react";
+import { ChevronLeftIcon, ChevronRightIcon } from "@healthalyst/icons";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FileUploadField } from "@healthalyst/ui/components/file-upload-field";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
-import { StatusBadge } from "@healthalyst/ui/components/status-badge";
-import { TextField } from "@healthalyst/ui/components/text-field";
+import { DocumentDropIllustration } from "@healthalyst/ui/illustrations/document-drop-illustration";
+import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
+import { formatFileSize } from "@healthalyst/ui/lib/file-size";
 import {
   useOrganizationDocumentDeleteMutation,
   useOrganizationDocumentUploadMutation,
 } from "~/features/organization-application/hooks/use-organization-application";
 import { DOCUMENT_UPLOAD_CONFIGURATION } from "~/features/organization-application/config/document-upload";
+import {
+  DOCUMENT_CONTENT_TYPE_LABELS,
+  DOCUMENT_STATUS_PRESENTATION,
+  DOCUMENT_TYPE_HINTS,
+  DOCUMENT_TYPE_LABELS,
+  PENDING_DOCUMENT_STATUSES,
+} from "~/features/organization-application/config/document-presentation";
 import type {
   OrganizationApplication,
   OrganizationDocumentType,
 } from "~/features/organization-application/types/organization-application";
-
-const DOCUMENT_TYPE_LABELS: Record<OrganizationDocumentType, string> = {
-  CAC_CERTIFICATE: "CAC certificate",
-  FACILITY_LICENCE: "Facility licence",
-  MEDICAL_DIRECTOR_LICENCE: "Medical director licence",
-  MLSCN_LICENCE: "Medical laboratory licence",
-  PCN_PREMISES_LICENCE: "Pharmacy premises licence",
-  NHIA_ACCREDITATION: "NHIA accreditation",
-  PROOF_OF_ADDRESS: "Proof of address",
-  OTHER: "Other supporting document",
-};
 
 export function OrganizationSupportingDocumentsStep({
   application,
@@ -42,7 +40,14 @@ export function OrganizationSupportingDocumentsStep({
   onBack: () => void;
   onContinue: () => void;
 }) {
-  const [actionError, setActionError] = useState("");
+  const [documentErrors, setDocumentErrors] = useState<
+    Partial<Record<OrganizationDocumentType, string>>
+  >({});
+  const [refreshError, setRefreshError] = useState("");
+  // Thumbnails for images uploaded in this visit, by document; the Platform
+  // API does not offer applicants a view link, so these end with the visit.
+  const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+  const previewUrlsReference = useRef(previewUrls);
   const uploadMutation = useOrganizationDocumentUploadMutation({
     organizationId,
     userId,
@@ -52,20 +57,75 @@ export function OrganizationSupportingDocumentsStep({
     userId,
   });
   const isWorking = uploadMutation.isPending || deleteMutation.isPending;
+  const canContinue = application.checklist.documentsComplete && !isWorking;
+  const hasPendingDocuments = application.documents.some((document) =>
+    PENDING_DOCUMENT_STATUSES.includes(document.status)
+  );
+
+  useEffect(() => {
+    previewUrlsReference.current = previewUrls;
+  }, [previewUrls]);
+
+  useEffect(
+    () => () => {
+      Object.values(previewUrlsReference.current).forEach((previewUrl) =>
+        URL.revokeObjectURL(previewUrl)
+      );
+    },
+    []
+  );
+
+  const reloadApplicationReference = useRef(reloadApplication);
+  useEffect(() => {
+    reloadApplicationReference.current = reloadApplication;
+  }, [reloadApplication]);
+
+  // Uploads are scanned on the server; keep checking until each one settles.
+  useEffect(() => {
+    if (!hasPendingDocuments) return;
+    const refreshTimer = window.setInterval(() => {
+      reloadApplicationReference.current().then(
+        () => setRefreshError(""),
+        () =>
+          setRefreshError(
+            "We could not check your document status. We will try again shortly."
+          )
+      );
+    }, DOCUMENT_UPLOAD_CONFIGURATION.statusRefreshIntervalMilliseconds);
+    return () => window.clearInterval(refreshTimer);
+  }, [hasPendingDocuments]);
+
+  function setDocumentError(
+    documentType: OrganizationDocumentType,
+    message: string
+  ) {
+    setDocumentErrors((currentErrors) => ({
+      ...currentErrors,
+      [documentType]: message,
+    }));
+  }
 
   async function uploadDocument(
     documentType: OrganizationDocumentType,
     documentFile: File
   ) {
-    setActionError("");
+    setDocumentError(documentType, "");
     uploadMutation.reset();
     try {
-      await uploadMutation.mutateAsync({
+      const uploadedDocument = await uploadMutation.mutateAsync({
         type: documentType,
         documentFile,
       });
+      if (documentFile.type.startsWith("image/")) {
+        const previewUrl = URL.createObjectURL(documentFile);
+        setPreviewUrls((currentPreviewUrls) => ({
+          ...currentPreviewUrls,
+          [uploadedDocument.id]: previewUrl,
+        }));
+      }
     } catch (error) {
-      setActionError(
+      setDocumentError(
+        documentType,
         error instanceof Error
           ? error.message
           : "We could not upload that document. Try again."
@@ -73,13 +133,23 @@ export function OrganizationSupportingDocumentsStep({
     }
   }
 
-  async function removeDocument(documentId: string) {
-    setActionError("");
+  async function removeDocument(
+    documentType: OrganizationDocumentType,
+    documentId: string
+  ) {
+    setDocumentError(documentType, "");
     deleteMutation.reset();
     try {
       await deleteMutation.mutateAsync(documentId);
+      setPreviewUrls((currentPreviewUrls) => {
+        const { [documentId]: removedPreviewUrl, ...remainingPreviewUrls } =
+          currentPreviewUrls;
+        if (removedPreviewUrl) URL.revokeObjectURL(removedPreviewUrl);
+        return remainingPreviewUrls;
+      });
     } catch (error) {
-      setActionError(
+      setDocumentError(
+        documentType,
         error instanceof Error
           ? error.message
           : "We could not remove that document. Try again."
@@ -89,177 +159,138 @@ export function OrganizationSupportingDocumentsStep({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        <h2 className="text-lg font-normal">Supporting documents</h2>
-        <p className="text-sm leading-6 text-muted-foreground">
-          Upload the registration and facility documents requested for your
-          organisation.
-        </p>
-      </div>
-
-      <NoticeBanner title="Upload organisation documents only">
-        Do not upload patient records or medical information. Accepted files are
-        PDF, JPEG or PNG, up to 10 MB each.
-      </NoticeBanner>
-
-      {actionError && (
-        <NoticeBanner tone="error" title="Document update failed">
-          {actionError}
+      {refreshError && (
+        <NoticeBanner tone="error" title="Document status not updated">
+          {refreshError}
         </NoticeBanner>
       )}
 
       <ContentPanel elevation="flat" spacing="compact" contentClassName="gap-6">
+        {application.checklist.documentsComplete && (
+          <div className="flex items-center gap-4 rounded-lg bg-secondary/60 px-4 py-4">
+            <div aria-hidden="true" className="w-12 shrink-0">
+              <DocumentsCompleteIllustration className="h-auto w-full" />
+            </div>
+            <div className="flex flex-col gap-0.5">
+              <p className="text-sm font-medium">
+                All required documents are in
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Add optional documents if you have them, or continue to review.
+              </p>
+            </div>
+          </div>
+        )}
+
         {application.requiredDocuments.length === 0 ? (
-          <NoticeBanner
-            title={
-              application.checklist.documentsComplete
-                ? "No supporting documents are required"
-                : "Document requirements are not available yet"
-            }
-          >
-            {application.checklist.documentsComplete
-              ? "You can continue to the final review."
-              : "Reload the application to get the current document requirements."}
-          </NoticeBanner>
+          !application.checklist.documentsComplete && (
+            <NoticeBanner title="Document requirements are not available yet">
+              Reload the page to get the current document requirements.
+            </NoticeBanner>
+          )
         ) : (
-          <ul className="flex flex-col gap-5">
+          <ul className="flex flex-col gap-8">
             {application.requiredDocuments.map((requirement) => {
-              const relatedDocuments = application.documents.filter(
-                (document) => document.type === requirement.type
-              );
               const documentTypeLabel = DOCUMENT_TYPE_LABELS[requirement.type];
+              const isUploadingThisType =
+                uploadMutation.isPending &&
+                uploadMutation.variables?.type === requirement.type;
 
               return (
-                <li
-                  key={requirement.type}
-                  className="flex flex-col gap-3 border-b border-border pb-5 last:border-b-0 last:pb-0"
-                >
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <h3 className="text-sm font-normal">{documentTypeLabel}</h3>
-                    <StatusBadge>
-                      {requirement.satisfied
-                        ? "Received"
-                        : requirement.required
-                          ? "Required"
-                          : "Optional"}
-                    </StatusBadge>
-                  </div>
-
-                  {relatedDocuments.length > 0 && (
-                    <ul className="flex flex-col gap-2">
-                      {relatedDocuments.map((document) => (
-                        <li
-                          key={document.id}
-                          className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-secondary/50 px-3 py-3"
-                        >
-                          <div className="flex min-w-0 flex-col gap-1">
-                            <p className="break-all text-sm">
-                              {document.fileName}
-                            </p>
-                            <p className="text-xs text-muted-foreground">
-                              {describeDocumentStatus(document.status)}
-                            </p>
-                          </div>
-                          {application.canEdit && (
-                            <ActionButton
-                              type="button"
-                              size="small"
-                              variant="outline"
-                              isLoading={
-                                deleteMutation.isPending &&
-                                deleteMutation.variables === document.id
-                              }
-                              loadingText="Removing document"
-                              disabled={isWorking}
-                              onClick={() => void removeDocument(document.id)}
-                            >
-                              Remove
-                            </ActionButton>
-                          )}
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-
-                  {application.canEdit && !requirement.satisfied && (
-                    <TextField
-                      label={
-                        relatedDocuments.length > 0
-                          ? `Replace ${documentTypeLabel.toLowerCase()}`
-                          : `Choose ${documentTypeLabel.toLowerCase()}`
-                      }
-                      accept={DOCUMENT_UPLOAD_CONFIGURATION.contentTypes.join(
-                        ","
-                      )}
-                      disabled={isWorking}
-                      id={`document-${requirement.type}`}
-                      type="file"
-                      onChange={(changeEvent) => {
-                        const documentFile =
-                          changeEvent.currentTarget.files?.[0];
-                        changeEvent.currentTarget.value = "";
-                        if (documentFile) {
-                          void uploadDocument(requirement.type, documentFile);
-                        }
-                      }}
-                    />
-                  )}
+                <li key={requirement.type}>
+                  <FileUploadField
+                    identifier={`document-${requirement.type}`}
+                    label={documentTypeLabel}
+                    required={requirement.required}
+                    hint={DOCUMENT_TYPE_HINTS[requirement.type]}
+                    accept={DOCUMENT_UPLOAD_CONFIGURATION.acceptedFileTypes}
+                    maximumSizeBytes={
+                      DOCUMENT_UPLOAD_CONFIGURATION.maximumSizeBytes
+                    }
+                    formatsDescription={
+                      DOCUMENT_UPLOAD_CONFIGURATION.formatsDescription
+                    }
+                    illustration={<DocumentDropIllustration />}
+                    files={application.documents
+                      .filter((document) => document.type === requirement.type)
+                      .map((document) => {
+                        const statusPresentation =
+                          DOCUMENT_STATUS_PRESENTATION[document.status];
+                        return {
+                          identifier: document.id,
+                          fileName: document.fileName,
+                          fileTypeLabel:
+                            DOCUMENT_CONTENT_TYPE_LABELS[document.contentType],
+                          details: formatFileSize(document.sizeBytes),
+                          previewUrl: previewUrls[document.id],
+                          status: {
+                            label: statusPresentation.label,
+                            tone: statusPresentation.tone,
+                          },
+                          message: statusPresentation.message,
+                          onRemove:
+                            application.canEdit && !isWorking
+                              ? () =>
+                                  void removeDocument(
+                                    requirement.type,
+                                    document.id
+                                  )
+                              : undefined,
+                          isRemoving:
+                            deleteMutation.isPending &&
+                            deleteMutation.variables === document.id,
+                        };
+                      })}
+                    canAddFile={application.canEdit && !requirement.satisfied}
+                    uploadingFileName={
+                      isUploadingThisType
+                        ? uploadMutation.variables?.documentFile.name
+                        : undefined
+                    }
+                    disabled={isWorking}
+                    error={documentErrors[requirement.type]}
+                    onFileAccepted={(documentFile) =>
+                      void uploadDocument(requirement.type, documentFile)
+                    }
+                  />
                 </li>
               );
             })}
           </ul>
         )}
 
-        {!application.checklist.documentsComplete && application.canEdit && (
-          <ActionButton
-            type="button"
-            variant="outline"
-            isLoading={isWorking}
-            onClick={async () => {
-              setActionError("");
-              try {
-                await reloadApplication();
-              } catch (error) {
-                setActionError(
-                  error instanceof Error
-                    ? error.message
-                    : "We could not refresh your document status. Try again."
-                );
-              }
-            }}
-          >
-            Refresh document status
-          </ActionButton>
-        )}
-
         <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-between">
           <a
             href="#onboarding-content"
-            className="inline-flex min-h-11 items-center text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            onClick={onBack}
+            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            onClick={(clickEvent) => {
+              clickEvent.preventDefault();
+              onBack();
+            }}
           >
+            <ChevronLeftIcon aria-hidden="true" className="size-4 shrink-0" />
             Back to account verification
           </a>
-          <ActionButton
-            type="button"
-            disabled={!application.checklist.documentsComplete || isWorking}
-            onClick={onContinue}
+          <a
+            href="#onboarding-content"
+            aria-disabled={!canContinue}
+            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-disabled:text-muted-foreground aria-disabled:no-underline"
+            onClick={(clickEvent) => {
+              if (!canContinue) {
+                clickEvent.preventDefault();
+                return;
+              }
+
+              clickEvent.preventDefault();
+
+              onContinue();
+            }}
           >
             Continue to review
-          </ActionButton>
+            <ChevronRightIcon aria-hidden="true" className="size-4 shrink-0" />
+          </a>
         </div>
       </ContentPanel>
     </div>
   );
-}
-
-function describeDocumentStatus(status: string): string {
-  if (status === "UPLOADING") return "Upload is in progress";
-  if (status === "SCANNING") return "Security scan in progress";
-  if (status === "INFECTED")
-    return "This file could not be accepted. Remove it and upload a new file.";
-  if (status === "REJECTED")
-    return "This document was rejected. Remove it and upload a corrected file.";
-  if (status === "ACCEPTED") return "Accepted for this application";
-  return "Uploaded and ready for review";
 }

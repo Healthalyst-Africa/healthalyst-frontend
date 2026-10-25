@@ -123,10 +123,19 @@ export async function uploadOrganizationDocument({
     contentType: contentType.data,
     sizeBytes: documentFile.size,
   });
-  await uploadOrganizationDocumentFile(
-    uploadRequest.uploadUrl,
-    uploadRequest.headers,
-    documentFile
-  );
+  try {
+    await uploadOrganizationDocumentFile(
+      uploadRequest.uploadUrl,
+      uploadRequest.headers,
+      documentFile
+    );
+  } catch (error) {
+    // The Platform API created the document before the transfer; remove it so a
+    // failed upload does not remain as an unfinished document.
+    await deleteOrganizationDocument(uploadRequest.documentId).catch(
+      () => undefined
+    );
+    throw error;
+  }
   return confirmOrganizationDocumentUpload(uploadRequest.documentId, expiresOn);
 }

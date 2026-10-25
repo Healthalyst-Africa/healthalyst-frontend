@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { EmptyState } from "@healthalyst/ui/components/empty-state";
 
 export function DataTableMessage({
   illustration,
@@ -14,31 +15,14 @@ export function DataTableMessage({
   isError?: boolean;
 }) {
   return (
-    <div className="flex min-h-48 items-center justify-center border-t px-6 py-8 text-center">
-      <div
-        role={isError ? "alert" : "status"}
-        className="mx-auto flex max-w-md flex-col items-center gap-2"
-      >
-        {illustration && (
-          <div
-            aria-hidden="true"
-            className="mb-2 w-28 max-w-full [&_svg]:h-auto [&_svg]:w-full"
-          >
-            {illustration}
-          </div>
-        )}
-        <p className="text-sm text-foreground">{title}</p>
-        {description && (
-          <p className="text-sm leading-6 text-muted-foreground">
-            {description}
-          </p>
-        )}
-        {action && (
-          <div className="mt-2 [&_a]:inline-flex [&_a]:min-h-10 [&_a]:items-center [&_a]:rounded-sm [&_a]:text-primary [&_a]:underline [&_a]:underline-offset-4 [&_a]:focus-visible:outline-none [&_a]:focus-visible:ring-2 [&_a]:focus-visible:ring-ring [&_a]:focus-visible:ring-offset-2">
-            {action}
-          </div>
-        )}
-      </div>
-    </div>
+    <EmptyState
+      illustration={illustration}
+      title={title}
+      description={description}
+      action={action}
+      tone={isError ? "error" : "empty"}
+      surface="plain"
+      className="border-t"
+    />
   );
 }

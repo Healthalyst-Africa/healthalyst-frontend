@@ -101,7 +101,7 @@ export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
             aria-label="Search organisations"
             value={organizationSearch}
             onChange={(event) => setOrganizationSearch(event.target.value)}
-            placeholder="Search organisations by name"
+            placeholder="Search"
           />
         </form>
       }

@@ -1,3 +1,6 @@
+/** The address query parameter that holds the current onboarding step. */
+export const ONBOARDING_STEP_QUERY_PARAMETER = "step";
+
 export const ORGANIZATION_ONBOARDING_STEPS = [
   {
     identifier: "details",

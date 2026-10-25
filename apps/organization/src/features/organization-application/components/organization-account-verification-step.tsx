@@ -46,6 +46,13 @@ export function OrganizationAccountVerificationStep({
     Boolean(session.user.emailVerifiedAt);
   const authenticatorIsEnrolled =
     application.checklist.mfaEnrolled || session.user.mfa.totp;
+  // TEMPORARY: lets local development continue to supporting documents
+  // without phone verification. Production builds still require it.
+  const isPhoneVerificationBypassed = process.env.NODE_ENV === "development";
+  const canContinue =
+    emailIsVerified &&
+    authenticatorIsEnrolled &&
+    (isPhoneVerified || isPhoneVerificationBypassed);
 
   function handleSendCode(formEvent: FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -157,6 +164,7 @@ export function OrganizationAccountVerificationStep({
                     </FormMessage>
                   )}
                   <ActionButton
+                    className="w-full sm:w-auto sm:self-start"
                     type="submit"
                     isLoading={sendCodeMutation.isPending}
                     loadingText="Sending verification code"
@@ -203,7 +211,7 @@ export function OrganizationAccountVerificationStep({
                   )}
                   <div className="flex flex-col gap-3">
                     <ActionButton
-                      className="min-h-11 w-full"
+                      className="min-h-11 w-full sm:w-auto sm:self-start"
                       type="submit"
                       isLoading={verifyPhoneMutation.isPending}
                       loadingText="Verifying phone number"
@@ -249,26 +257,25 @@ export function OrganizationAccountVerificationStep({
         <a
           href="#onboarding-content"
           className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          onClick={onBack}
+          onClick={(clickEvent) => {
+            clickEvent.preventDefault();
+            onBack();
+          }}
         >
           <ChevronLeftIcon aria-hidden="true" className="size-4 shrink-0" />
           Back to organisation details
         </a>
         <a
           href="#onboarding-content"
-          aria-disabled={
-            !emailIsVerified || !authenticatorIsEnrolled || !isPhoneVerified
-          }
+          aria-disabled={!canContinue}
           className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-disabled:text-muted-foreground"
           onClick={(clickEvent) => {
-            if (
-              !emailIsVerified ||
-              !authenticatorIsEnrolled ||
-              !isPhoneVerified
-            ) {
+            if (!canContinue) {
               clickEvent.preventDefault();
               return;
             }
+
+            clickEvent.preventDefault();
 
             onContinue();
           }}

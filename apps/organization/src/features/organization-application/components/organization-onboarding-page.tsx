@@ -2,7 +2,7 @@
 
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { useRouter } from "next/navigation";
 import { StatusPanel } from "@healthalyst/ui/components/status-panel";
@@ -39,10 +39,19 @@ export default function OrganizationOnboardingPage() {
 
   if (platformSession && !isRedirecting && !redirectError) {
     return (
-      <OrganizationOnboardingWorkspace
-        session={platformSession}
-        onSignedOut={handleSignedOut}
-      />
+      // The workspace reads its step from the address.
+      <Suspense
+        fallback={
+          <OrganizationOnboardingLayout>
+            <StatusPanel tone="loading" message="Opening your application…" />
+          </OrganizationOnboardingLayout>
+        }
+      >
+        <OrganizationOnboardingWorkspace
+          session={platformSession}
+          onSignedOut={handleSignedOut}
+        />
+      </Suspense>
     );
   }
 

@@ -26,9 +26,6 @@ function DashboardOverview({
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <p className="mb-4 text-xs text-muted-foreground">
-            Workspace / Overview
-          </p>
           <h1 className="font-serif text-3xl font-normal tracking-tight">
             Company overview
           </h1>

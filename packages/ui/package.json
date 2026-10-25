@@ -39,6 +39,7 @@
     "embla-carousel-react": "^8.6.0",
     "input-otp": "^1.5.0",
     "qrcode.react": "^4.2.0",
+    "react-dropzone": "20.1.2",
     "tailwind-merge": "^2.6.1"
   },
   "peerDependencies": {

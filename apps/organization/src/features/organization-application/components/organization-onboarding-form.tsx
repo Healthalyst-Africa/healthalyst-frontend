@@ -58,7 +58,7 @@ export function OrganizationOnboardingForm(properties: {
           <>
             <p
               role="status"
-              className="max-w-sm text-sm leading-6 text-muted-foreground"
+              className="max-w-sm text-xs leading-5 text-muted-foreground"
             >
               {form.saveMessage ||
                 (form.hasChanges
@@ -86,6 +86,8 @@ export function OrganizationOnboardingForm(properties: {
                       clickEvent.preventDefault();
                       return;
                     }
+
+                    clickEvent.preventDefault();
 
                     properties.onContinue();
                   }}

@@ -1,5 +1,6 @@
 "use client";
 
+import { ChevronLeftIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
@@ -102,9 +103,13 @@ export function OrganizationReviewSubmissionStep({
           {!isAlreadySubmitted && (
             <a
               href="#onboarding-content"
-              className="inline-flex min-h-11 items-center text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              onClick={onBack}
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              onClick={(clickEvent) => {
+                clickEvent.preventDefault();
+                onBack();
+              }}
             >
+              <ChevronLeftIcon aria-hidden="true" className="size-4 shrink-0" />
               Back to supporting documents
             </a>
           )}

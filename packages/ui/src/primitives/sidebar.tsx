@@ -8,8 +8,8 @@ import {
   type VariantProps as VariantProperties,
 } from "class-variance-authority";
 import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
+  CollapseSidebarIcon,
+  ExpandSidebarIcon,
   MenuIcon,
 } from "@healthalyst/icons";
 
@@ -286,7 +286,7 @@ const SidebarTrigger = React.forwardRef<
       variant="ghost"
       size="icon"
       className={cn(
-        "rounded-full bg-muted/60 text-muted-foreground hover:bg-muted hover:text-foreground",
+        "rounded-md text-muted-foreground hover:bg-muted hover:text-foreground",
         className
       )}
       onClick={(event) => {
@@ -298,9 +298,9 @@ const SidebarTrigger = React.forwardRef<
       {isMobile ? (
         <MenuIcon aria-hidden="true" className="size-4" />
       ) : open ? (
-        <ChevronLeftIcon aria-hidden="true" className="size-4" />
+        <CollapseSidebarIcon aria-hidden="true" className="size-5" />
       ) : (
-        <ChevronRightIcon aria-hidden="true" className="size-4" />
+        <ExpandSidebarIcon aria-hidden="true" className="size-5" />
       )}
       <span className="sr-only">
         {isMobile

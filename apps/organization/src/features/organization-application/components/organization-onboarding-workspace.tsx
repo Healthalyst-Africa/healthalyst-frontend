@@ -18,8 +18,7 @@ import {
   ORGANIZATION_STATUS_LABELS,
 } from "~/features/organization-application/config/application-presentation";
 import { OrganizationOnboardingForm } from "~/features/organization-application/components/organization-onboarding-form";
-import { type OrganizationOnboardingStepIdentifier } from "~/features/organization-application/config/organization-onboarding-steps";
-import { useState } from "react";
+import { useOnboardingStep } from "~/features/organization-application/hooks/use-onboarding-step";
 
 export function OrganizationOnboardingWorkspace({
   session,
@@ -28,8 +27,7 @@ export function OrganizationOnboardingWorkspace({
   session: PlatformSession;
   onSignedOut: () => void;
 }) {
-  const [currentStep, setCurrentStep] =
-    useState<OrganizationOnboardingStepIdentifier>("details");
+  const { currentStep, goToStep } = useOnboardingStep();
   const {
     organizationId,
     applicationQuery,
@@ -214,14 +212,14 @@ export function OrganizationOnboardingWorkspace({
                 organizationId={organizationId}
                 userId={session.user.id}
                 reloadApplication={reloadApplication}
-                onContinue={() => setCurrentStep("verification")}
+                onContinue={() => goToStep("verification")}
               />
             ) : visibleStep === "verification" ? (
               <OrganizationAccountVerificationStep
                 application={application}
                 session={session}
-                onBack={() => setCurrentStep("details")}
-                onContinue={() => setCurrentStep("documents")}
+                onBack={() => goToStep("details")}
+                onContinue={() => goToStep("documents")}
                 onPhoneVerified={() => void applicationQuery.refetch()}
               />
             ) : visibleStep === "documents" ? (
@@ -230,15 +228,15 @@ export function OrganizationOnboardingWorkspace({
                 organizationId={organizationId}
                 userId={session.user.id}
                 reloadApplication={reloadApplication}
-                onBack={() => setCurrentStep("verification")}
-                onContinue={() => setCurrentStep("review")}
+                onBack={() => goToStep("verification")}
+                onContinue={() => goToStep("review")}
               />
             ) : (
               <OrganizationReviewSubmissionStep
                 application={application}
                 organizationId={organizationId}
                 userId={session.user.id}
-                onBack={() => setCurrentStep("documents")}
+                onBack={() => goToStep("documents")}
               />
             )}
           </>

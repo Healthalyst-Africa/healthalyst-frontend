@@ -23,4 +23,11 @@ export {
   IconSearch as SearchIcon,
   IconBell as NotificationIcon,
   IconX as CloseIcon,
+  IconLayoutSidebarLeftCollapse as CollapseSidebarIcon,
+  IconLayoutSidebarLeftExpand as ExpandSidebarIcon,
+  IconFileText as DocumentIcon,
+  IconCircleCheck as SuccessIcon,
+  IconAlertTriangle as WarningIcon,
+  IconAlertCircle as ErrorIcon,
+  IconTrash as DeleteIcon,
 } from "@tabler/icons-react";

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { StatusTone } from "@healthalyst/ui/types/status-tone";
 
 export type DataTableCell =
   | { kind: "text"; primary: string; secondary?: string }
@@ -6,19 +7,7 @@ export type DataTableCell =
   | {
       kind: "status";
       label: string;
-      /**
-       * `neutral` for inactive or not-yet-started states, `information` for
-       * work in progress, `warning` for states that need someone to act,
-       * `highlight` for early states such as drafts that deserve attention,
-       * `positive` for success and `negative` for refusal or loss of access.
-       */
-      tone:
-        | "neutral"
-        | "information"
-        | "warning"
-        | "highlight"
-        | "positive"
-        | "negative";
+      tone: StatusTone;
     };
 
 export type DataTableColumn<RowData> = {
