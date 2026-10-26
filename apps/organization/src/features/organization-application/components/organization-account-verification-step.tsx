@@ -109,7 +109,7 @@ export function OrganizationAccountVerificationStep({
           id="phone-verification-heading"
           className="font-semibold leading-tight"
         >
-          Phone number verification
+          Phone number verification (optional)
         </h2>
         <div className="flex flex-col gap-4">
           {(!emailIsVerified || !authenticatorIsEnrolled) && (

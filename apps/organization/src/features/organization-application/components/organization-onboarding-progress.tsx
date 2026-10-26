@@ -37,8 +37,8 @@ export function OrganizationOnboardingProgress({
             step.identifier === "details"
               ? application.checklist.profileComplete
               : step.identifier === "verification"
-                ? application.checklist.emailVerified &&
-                  application.checklist.phoneVerified &&
+                ? // Phone verification is optional.
+                  application.checklist.emailVerified &&
                   application.checklist.mfaEnrolled
                 : step.identifier === "documents"
                   ? application.checklist.documentsComplete
