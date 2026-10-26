@@ -89,7 +89,7 @@ export function OrganizationOnboardingWorkspace({
               : visibleStep === "details"
                 ? "Review your organisation details and complete anything that is missing. The information you gave during registration is already filled in."
                 : visibleStep === "verification"
-                  ? "Verify your phone number to continue."
+                  ? "Verify your phone number if you want HealthAlyst to reach you by text. It is optional."
                   : visibleStep === "documents"
                     ? "Upload the registration and facility documents requested for your organisation."
                     : "Check that each step is complete, then submit your application for review."}
@@ -215,6 +215,12 @@ export function OrganizationOnboardingWorkspace({
                 application={application}
                 organizationId={organizationId}
                 userId={session.user.id}
+                enabledProductCodes={
+                  session.memberships.find(
+                    (membership) =>
+                      membership.organization.id === organizationId
+                  )?.products ?? []
+                }
                 onBack={() => goToStep("documents")}
                 onEditStep={goToStep}
               />
