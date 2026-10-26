@@ -23,11 +23,12 @@ export default function OrganizationOnboardingPage() {
     restoreSession,
     clearPlatformSession,
   } = usePlatformSession();
-  const { isRedirecting, redirectError } = useAuthenticatedApplicationRedirect({
-    platformSession,
-    isRestoring,
-    redirectOrganizationSession: false,
-  });
+  const { isRedirecting, redirectError, redirectMessage } =
+    useAuthenticatedApplicationRedirect({
+      platformSession,
+      isRestoring,
+      redirectOrganizationSession: false,
+    });
 
   useEffect(() => {
     if (!isRestoring && !restoreError && !platformSession) {
@@ -72,9 +73,9 @@ export default function OrganizationOnboardingPage() {
     <OrganizationOnboardingLayout>
       {isRedirecting || redirectError ? (
         <AuthenticatedApplicationRedirectState
-          platformSession={platformSession}
           isRedirecting={isRedirecting}
           redirectError={redirectError}
+          redirectMessage={redirectMessage}
         />
       ) : restoreError ? (
         <StatusPanel
