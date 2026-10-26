@@ -17,6 +17,7 @@ import AuthenticatorEnrolment from "~/features/authentication/components/authent
 import { SIGN_IN_LIMITS } from "~/features/authentication/config/authentication-limits";
 import { clearFieldError } from "~/shared/forms/form-validation";
 import { AuthenticatedApplicationRedirectState } from "~/features/authentication/components/authenticated-application-redirect-state";
+import type { OrganizationProductCode } from "~/shared/organization/config/organization-products";
 
 function ApiErrorMessage({ error }: { error: Error }) {
   return (
@@ -45,7 +46,12 @@ function ApiErrorMessage({ error }: { error: Error }) {
  * Complete the Platform API password/MFA contract. Challenges stay in the
  * current workflow and access credentials stay in the browser transport.
  */
-export default function SignIn() {
+export default function SignIn({
+  requestedProductCodes,
+}: {
+  /** Products named by the product app that sent the person here. */
+  requestedProductCodes: readonly OrganizationProductCode[];
+}) {
   const {
     stage,
     fieldErrors,
@@ -58,12 +64,13 @@ export default function SignIn() {
     isRestoring,
     isRedirecting,
     redirectError,
+    redirectMessage,
     showStage,
     completeSignIn,
     handlePasswordSubmit,
     handleCodeSubmit,
     handleCodeChange,
-  } = useSignInWorkflow();
+  } = useSignInWorkflow({ requestedProductCodes });
 
   if (stage.kind === "enrolment-required") {
     return (
@@ -87,9 +94,9 @@ export default function SignIn() {
     return (
       <OrganizationSignInLayout>
         <AuthenticatedApplicationRedirectState
-          platformSession={platformSession}
           isRedirecting={isRedirecting}
           redirectError={redirectError}
+          redirectMessage={redirectMessage}
         />
       </OrganizationSignInLayout>
     );

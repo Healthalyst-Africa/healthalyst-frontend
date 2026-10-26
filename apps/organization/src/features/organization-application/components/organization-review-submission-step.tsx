@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import Image from "next/image";
-import { ChevronLeftIcon, LockedIcon, UpcomingIcon } from "@healthalyst/icons";
+import { ChevronLeftIcon } from "@healthalyst/icons";
 import { ApplicationLauncherDialog } from "@healthalyst/ui/components/application-launcher-dialog";
 import { FeedbackDialog } from "@healthalyst/ui/components/feedback-dialog";
 import {
@@ -22,8 +21,8 @@ import { AttentionNeededIllustration } from "@healthalyst/ui/illustrations/atten
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
 import { useOrganizationApplicationSubmitMutation } from "~/features/organization-application/hooks/use-organization-application";
+import { APPROVED_ORGANIZATION_STATUS } from "~/shared/organization/config/organization-status";
 import {
-  APPROVED_ORGANIZATION_STATUS,
   ORGANIZATION_STATUS_DESCRIPTIONS,
   ORGANIZATION_STATUS_LABELS,
 } from "~/features/organization-application/config/application-presentation";
@@ -41,17 +40,7 @@ import {
   organizationTypeOptions,
 } from "~/shared/organization/config/organization-reference";
 import type { OrganizationApplication } from "~/features/organization-application/types/organization-application";
-import { getHealthScheduleAddress } from "~/config/application-addresses";
-import {
-  ORGANIZATION_PRODUCTS,
-  type OrganizationProductCode,
-} from "~/shared/organization/config/organization-products";
-
-const PRODUCT_IMAGE_SOURCES: Record<OrganizationProductCode, string> = {
-  HEALTHSCHEDULE: "/images/module-hospital.webp",
-  LABCONNECT: "/images/module-laboratory.webp",
-  PHARMADESK: "/images/module-pharmacy.webp",
-};
+import { buildProductLauncherApplications } from "~/shared/organization/components/product-launcher-applications";
 
 const SUBMISSION_DATE_FORMATTER = new Intl.DateTimeFormat("en-NG", {
   dateStyle: "long",
@@ -91,41 +80,10 @@ export function OrganizationReviewSubmissionStep({
   >(null);
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const isAlreadySubmitted = !application.canEdit;
-  const healthScheduleAddress = getHealthScheduleAddress();
   const isApproved = application.status === APPROVED_ORGANIZATION_STATUS;
-  // The session lists only products HealthAlyst has activated.
-  const enabledProducts = new Set(enabledProductCodes);
-  const launcherApplications = ORGANIZATION_PRODUCTS.map((product) => {
-    const isEnabled = isApproved && enabledProducts.has(product.code);
-    // Only HealthSchedule has an application to open so far.
-    const href =
-      isEnabled && product.code === "HEALTHSCHEDULE"
-        ? (healthScheduleAddress ?? undefined)
-        : undefined;
-    return {
-      key: product.code,
-      name: product.name,
-      description: product.description,
-      image: (
-        <Image
-          src={PRODUCT_IMAGE_SOURCES[product.code]}
-          alt=""
-          fill
-          sizes="(min-width: 640px) 240px, (min-width: 420px) 50vw, 100vw"
-        />
-      ),
-      href,
-      available: isEnabled,
-      unavailableLabel: !isApproved
-        ? "Pending approval"
-        : !isEnabled
-          ? "Not enabled"
-          : href
-            ? undefined
-            : "Coming soon",
-      unavailableIcon:
-        isApproved && !isEnabled ? <LockedIcon /> : <UpcomingIcon />,
-    };
+  const launcherApplications = buildProductLauncherApplications({
+    isApproved,
+    enabledProductCodes,
   });
 
   function submitApplication() {

@@ -1,6 +1,3 @@
-/** The Platform API name for an approved organisation; products open only then. */
-export const APPROVED_ORGANIZATION_STATUS = "ACTIVE";
-
 export const ORGANIZATION_STATUS_LABELS: Record<string, string> = {
   DRAFT: "Draft",
   PENDING_VERIFICATION: "Waiting for verification",
