@@ -1,20 +1,25 @@
 # Product form system
 
-HealthSchedule uses code-owned form definitions for repeatable field layouts. The
+The shared form system uses code-owned definitions for repeatable field layouts. The
 first consumer is organisation registration.
 
-- `packages/ui/src/lib/form-definition.ts` defines supported field metadata.
+- `packages/ui/src/types/form-definition.ts` defines supported field metadata.
   It accepts data, never executable schema code.
 - `packages/ui/src/components/dynamic-form-fields.tsx` renders those fields with
   shared shadcn controls, labels, descriptions, and inline errors.
 - Each application owns its field definitions, copy, request mapping, API calls,
   submission state, and success or failure experience. See
-  `apps/health-schedule/src/features/organization-onboarding/components/organization-registration-form-definition.ts`.
+  `apps/organization/src/features/organization-registration/config/organization-registration-form-definition.ts`.
 
-HealthSchedule keeps the matching Zod schema in
-`apps/health-schedule/src/features/organization-onboarding/model/organization-registration-schema.ts`.
+The organisation hub keeps the matching Zod schema in
+`apps/organization/src/features/organization-registration/schemas/organization-registration-schema.ts`.
 The app-local helper in `src/shared/forms/form-validation.ts` turns schema
 errors into field messages and focuses the first invalid control.
+
+Import metadata from `@healthalyst/ui/types/form-definition`, and shared field
+name operations from `@healthalyst/ui/forms/form-definition`. The public
+`DynamicFormFields` composition delegates to private field and label renderers;
+validation, limits, options and workflow state remain in the app.
 
 To add a form, declare its sections and fields in the owning application, render
 `DynamicFormFields` inside a real HTML form, and parse submitted `FormData` with

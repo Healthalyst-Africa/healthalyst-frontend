@@ -7,7 +7,7 @@ import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@healthalyst/ui/components/input-group";
+} from "@healthalyst/ui/primitives/input-group";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 type PasswordInputProperties = Omit<

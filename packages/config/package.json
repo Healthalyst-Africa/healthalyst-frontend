@@ -1,0 +1,27 @@
+{
+  "name": "@healthalyst/config",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./environment": "./src/environment.ts",
+    "./platform-api-environment": {
+      "types": "./src/platform-api-environment.d.mts",
+      "import": "./src/platform-api-environment.mjs"
+    }
+  },
+  "scripts": {
+    "lint": "eslint ./src --max-warnings=0",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@healthalyst/eslint-config": "workspace:*",
+    "@healthalyst/typescript-config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "eslint": "^10.12.0",
+    "typescript": "^5.9.3"
+  }
+}

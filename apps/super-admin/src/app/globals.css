@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.super-admin-dashboard :is(h1, h2, h3) {
+  font-family: var(--font-serif);
+  font-synthesis-weight: none;
+  font-weight: 400;
+}

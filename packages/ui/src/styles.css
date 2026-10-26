@@ -1,44 +1,96 @@
+/* HealthAlyst's shared visual tokens are owned here for every frontend app. */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 0 0% 4%;
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 4%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 4%;
-  --primary: 0 0% 9%;
-  --primary-foreground: 0 0% 98%;
-  --secondary: 0 0% 96%;
-  --secondary-foreground: 0 0% 9%;
-  --muted: 0 0% 96%;
-  --muted-foreground: 0 0% 45%;
-  --accent: 0 0% 96%;
-  --accent-foreground: 0 0% 9%;
-  --destructive: 0 84% 60%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
-  --ring: 0 0% 4%;
+  color-scheme: light;
   --radius: 0.5rem;
+  --background: 0 0% 100%;
+  --foreground: 160 44.26% 11.96%;
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: 162.86 63.64% 21.57%;
+  --primary-foreground: var(--background);
+  --secondary: 135 23.53% 93.33%;
+  --secondary-foreground: var(--primary);
+  --muted: var(--secondary);
+  --muted-foreground: 155 15.79% 29.8%;
+  /* shadcn's accent is the green hover tint; brand gold stays separate. */
+  --accent: var(--secondary);
+  --accent-foreground: var(--primary);
+  --destructive: 4.23 76.47% 40%;
+  --destructive-foreground: var(--background);
+  /* Gold palette: base #C9A162 and subtle #F5DDBA, expressed as OKLCH. */
+  --brand-gold: 0.732 0.094 77.837;
+  --brand-gold-subtle: 0.908 0.053 77.253;
+  /*
+   * Status tones: text colours reach at least 5.5:1 on white, so status
+   * labels meet WCAG 2.2 AA. Positive and negative reuse the primary and
+   * destructive roles.
+   */
+  --status-neutral: #4a5552;
+  --status-information: #1e4e8c;
+  --status-warning: #8a4b08;
+  --status-highlight: #6b4e1f;
+  --status-positive: hsl(var(--primary));
+  --status-negative: hsl(var(--destructive));
+  /*
+   * Alert surfaces and borders. Text on every surface stays at least 5.5:1;
+   * warning is amber, deliberately distinct from the brand gold.
+   */
+  --alert-information-surface: #edf3fb;
+  --alert-information-border: #b9cfec;
+  /* One subtle green: success surfaces use the brand green tint. */
+  --alert-success-surface: hsl(var(--secondary));
+  --alert-success-border: #a8cfb6;
+  --alert-warning-surface: #fdf8ec;
+  --alert-warning-border: #e8d3a2;
+  --alert-error-surface: #fdedeb;
+  --alert-error-border: #f0b4ad;
+  /* Border and input values use OKLCH channels. */
+  --border: 0.88 0.021 156.771;
+  --input: var(--border);
+  --ring: var(--primary);
+  /* Sidebar roles share the same app palette. */
+  --sidebar-background: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
-.dark {
-  --background: 0 0% 4%;
-  --foreground: 0 0% 98%;
-  --card: 0 0% 4%;
-  --card-foreground: 0 0% 98%;
-  --popover: 0 0% 4%;
-  --popover-foreground: 0 0% 98%;
-  --primary: 0 0% 98%;
-  --primary-foreground: 0 0% 9%;
-  --secondary: 0 0% 15%;
-  --secondary-foreground: 0 0% 98%;
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 64%;
-  --accent: 0 0% 15%;
-  --accent-foreground: 0 0% 98%;
-  --destructive: 0 63% 31%;
-  --destructive-foreground: 0 0% 98%;
-  --border: 0 0% 15%;
-  --input: 0 0% 15%;
-  --ring: 0 0% 83%;
+* {
+  border-color: oklch(var(--border));
+  scrollbar-color: hsl(var(--primary)) transparent;
+  scrollbar-width: thin;
+}
+
+*::-webkit-scrollbar {
+  width: 0.375rem;
+  height: 0.375rem;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--primary));
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background-clip: padding-box;
+}
+
+body {
+  background-color: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Young Serif has one already-heavy weight; do not synthesize another. */
+.font-serif {
+  font-synthesis-weight: none;
 }
