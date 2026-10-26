@@ -16,6 +16,6 @@
     "utils": "@healthalyst/ui/lib/utilities",
     "hooks": "@healthalyst/ui/hooks",
     "lib": "@healthalyst/ui/lib",
-    "ui": "@healthalyst/ui/components"
+    "ui": "@healthalyst/ui/primitives"
   }
 }

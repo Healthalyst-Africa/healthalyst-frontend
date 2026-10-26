@@ -2,54 +2,8 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    color-scheme: light;
-    --radius: 0.5rem;
-    --background: 43.64 52.38% 95.88%;
-    --foreground: 160 44.26% 11.96%;
-    --card: 0 0% 100%;
-    --card-foreground: 160 44.26% 11.96%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 160 44.26% 11.96%;
-    --primary: 162.86 63.64% 21.57%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 135 23.53% 93.33%;
-    --secondary-foreground: 162.86 63.64% 21.57%;
-    --muted: 135 23.53% 93.33%;
-    --muted-foreground: 155 15.79% 29.8%;
-    --accent: 11.25 75.68% 70.98%;
-    --accent-foreground: 160 44.26% 11.96%;
-    --destructive: 4.23 76.47% 40%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 140 17.65% 83.33%;
-    --input: 151.3 9.02% 50%;
-    --ring: 162.86 63.64% 21.57%;
-    --brand-forest: 20 90 70;
-    --brand-forest-mid: 15 70 55;
-    --brand-forest-deep: 17 44 35;
-    --brand-gold: 237 146 125;
-    --brand-gold-light: 245 182 166;
-    --brand-accent-on-primary: 245 182 166;
-    --brand-cream: 250 247 239;
-    --brand-cream-dark: 234 242 236;
-    --brand-cream-light: 255 249 245;
-    --brand-sand: 205 220 210;
-    --brand-sand-dark: 156 185 170;
-    --brand-ink: 17 44 35;
-    --brand-ink-soft: 64 88 78;
-  }
-
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-background font-sans text-foreground antialiased;
-  }
-}
-
-.super-admin-dashboard {
-  --background: 0 0% 98%;
-  --sidebar-background: 43.64 52.38% 95.88%;
+.super-admin-dashboard :is(h1, h2, h3) {
+  font-family: var(--font-serif);
+  font-synthesis-weight: none;
+  font-weight: 400;
 }

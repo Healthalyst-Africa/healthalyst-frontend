@@ -1,28 +1,32 @@
 import type { Metadata } from "next";
 import type React from "react";
-import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
+import { Inter, Young_Serif } from "next/font/google";
 import "@healthalyst/ui/styles.css";
 import "./globals.css";
+import { PlatformSessionProvider } from "~/infrastructure/auth/platform-session-provider";
 import { ApplicationQueryProvider } from "~/infrastructure/query/query-provider";
 
-const serifFont = Source_Serif_4({
+// Young Serif for headings. It has one weight, already heavy, so headings use
+// `font-normal`.
+const serifFont = Young_Serif({
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  style: ["normal", "italic"],
+  weight: "400",
   variable: "--font-serif",
   display: "swap",
 });
 
-const sansSerifFont = Source_Sans_3({
+// Inter for all other text; its optical-size axis tightens larger sizes.
+const sansSerifFont = Inter({
   subsets: ["latin"],
+  axes: ["opsz"],
   variable: "--font-sans",
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "HealthAlyst | Organisation onboarding",
+  title: "HealthSchedule | HealthAlyst",
   description:
-    "Register your healthcare organisation and request access to HealthSchedule.",
+    "Patient scheduling and clinical operations for hospitals and clinics, part of HealthAlyst.",
   robots: { index: false, follow: false },
 };
 
@@ -35,7 +39,9 @@ export default function RootLayout({
       className={`${serifFont.variable} ${sansSerifFont.variable}`}
     >
       <body className={sansSerifFont.className}>
-        <ApplicationQueryProvider>{children}</ApplicationQueryProvider>
+        <ApplicationQueryProvider>
+          <PlatformSessionProvider>{children}</PlatformSessionProvider>
+        </ApplicationQueryProvider>
       </body>
     </html>
   );

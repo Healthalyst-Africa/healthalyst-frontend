@@ -37,3 +37,8 @@ jobs:
 
       - name: Verify workspace
         run: pnpm test-all
+        # Public build configuration, matching each app's .env.example.
+        # The Next.js config refuses to build without a Platform API address.
+        env:
+          NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL: /
+          HEALTHALYST_PLATFORM_API_URL: https://healthalyst-platform-api-dev.onrender.com

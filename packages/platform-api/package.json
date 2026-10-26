@@ -1,0 +1,34 @@
+{
+  "name": "@healthalyst/platform-api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./api-error": "./src/browser/errors/index.ts",
+    "./authentication-service": "./src/authentication/index.ts",
+    "./http-client": "./src/browser/index.ts",
+    "./config": "./src/config/browser-config.ts",
+    "./next-config": {
+      "types": "./next-config.d.mts",
+      "default": "./next-config.mjs"
+    }
+  },
+  "scripts": {
+    "lint": "eslint ./src --max-warnings=0",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@healthalyst/config": "workspace:*",
+    "axios": "^1.20.0",
+    "zod": "^4.6.5"
+  },
+  "devDependencies": {
+    "@healthalyst/eslint-config": "workspace:*",
+    "@healthalyst/typescript-config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "eslint": "^10.12.0",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

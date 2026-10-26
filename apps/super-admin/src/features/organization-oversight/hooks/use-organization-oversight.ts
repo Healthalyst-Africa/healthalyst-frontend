@@ -1,23 +1,29 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { StaffIdentity } from "~/features/staff-auth/api/staff-service";
+import type { StaffIdentity } from "~/features/staff-auth/types/staff-identity";
 import {
-  createEvidenceRequest,
-  downloadEvidenceDocument,
-  listEvidenceRequests,
+  claimOrganizationApplication,
+  getOrganizationDetail,
+  getOrganizationDocumentViewAddress,
   listOrganizationApplications,
   listReviewQueue,
   recordReviewDecision,
-  reviewEvidenceRequest,
-  type RegistrationStatus,
-} from "~/features/organization-oversight/api/organization-service";
-import { organizationQueryKeys } from "~/features/organization-oversight/api/organization-query-keys";
+  releaseOrganizationApplication,
+} from "~/features/organization-oversight/services/organization-service";
+import type { ReviewDecision } from "~/features/organization-oversight/types/review-types";
+import { organizationQueryKeys } from "~/features/organization-oversight/services/organization-query-keys";
 
-export function useOrganizationsQuery(staffIdentity: StaffIdentity) {
+export function useOrganizationsQuery(
+  staffIdentity: StaffIdentity,
+  searchTerm: string
+) {
   return useQuery({
-    queryKey: organizationQueryKeys.all(staffIdentity.staffAccountId),
-    queryFn: () => listOrganizationApplications(),
+    queryKey: organizationQueryKeys.search(
+      staffIdentity.staffAccountId,
+      searchTerm
+    ),
+    queryFn: () => listOrganizationApplications(searchTerm),
   });
 }
 
@@ -28,16 +34,44 @@ export function useReviewQueueQuery(staffIdentity: StaffIdentity) {
   });
 }
 
-export function useEvidenceQuery(
+export function useOrganizationDetailQuery(
   staffIdentity: StaffIdentity,
-  applicationId: string
+  organizationId: string
 ) {
   return useQuery({
-    queryKey: organizationQueryKeys.evidence(
+    queryKey: organizationQueryKeys.detail(
       staffIdentity.staffAccountId,
-      applicationId
+      organizationId
     ),
-    queryFn: () => listEvidenceRequests(applicationId),
+    queryFn: () => getOrganizationDetail(organizationId),
+  });
+}
+
+export function useClaimOrganizationMutation(staffIdentity: StaffIdentity) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: claimOrganizationApplication,
+    onSuccess: async (_result, organizationId) => {
+      await invalidateOrganizationReviewData(
+        queryClient,
+        staffIdentity,
+        organizationId
+      );
+    },
+  });
+}
+
+export function useReleaseOrganizationMutation(staffIdentity: StaffIdentity) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: releaseOrganizationApplication,
+    onSuccess: async (_result, organizationId) => {
+      await invalidateOrganizationReviewData(
+        queryClient,
+        staffIdentity,
+        organizationId
+      );
+    },
   });
 }
 
@@ -45,107 +79,51 @@ export function useReviewDecisionMutation(staffIdentity: StaffIdentity) {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({
-      applicationId,
-      status,
-      note,
+      organizationId,
+      decision,
     }: {
-      applicationId: string;
-      status: Exclude<RegistrationStatus, "PENDING_REVIEW">;
-      note: string;
-    }) => recordReviewDecision(applicationId, status, note),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: organizationQueryKeys.all(staffIdentity.staffAccountId),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: organizationQueryKeys.reviewQueue(
-            staffIdentity.staffAccountId
-          ),
-        }),
-      ]);
+      organizationId: string;
+      decision: ReviewDecision;
+    }) => recordReviewDecision(organizationId, decision),
+    onSuccess: async (_result, variables) => {
+      await invalidateOrganizationReviewData(
+        queryClient,
+        staffIdentity,
+        variables.organizationId
+      );
     },
   });
 }
 
-export function useCreateEvidenceMutation(
-  staffIdentity: StaffIdentity,
-  applicationId: string
-) {
-  const queryClient = useQueryClient();
+export function useOrganizationDocumentViewAddressMutation() {
   return useMutation({
     mutationFn: ({
-      title,
-      instructions,
-    }: {
-      title: string;
-      instructions: string;
-    }) => createEvidenceRequest(applicationId, title, instructions),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: organizationQueryKeys.evidence(
-            staffIdentity.staffAccountId,
-            applicationId
-          ),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: organizationQueryKeys.reviewQueue(
-            staffIdentity.staffAccountId
-          ),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: organizationQueryKeys.all(staffIdentity.staffAccountId),
-        }),
-      ]);
-    },
-  });
-}
-
-export function useReviewEvidenceMutation(
-  staffIdentity: StaffIdentity,
-  applicationId: string
-) {
-  const queryClient = useQueryClient();
-  return useMutation({
-    mutationFn: ({
-      requestId,
-      accepted,
-      note,
-    }: {
-      requestId: string;
-      accepted: boolean;
-      note: string;
-    }) => reviewEvidenceRequest(requestId, accepted, note),
-    onSuccess: async () => {
-      await Promise.all([
-        queryClient.invalidateQueries({
-          queryKey: organizationQueryKeys.evidence(
-            staffIdentity.staffAccountId,
-            applicationId
-          ),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: organizationQueryKeys.reviewQueue(
-            staffIdentity.staffAccountId
-          ),
-        }),
-        queryClient.invalidateQueries({
-          queryKey: organizationQueryKeys.all(staffIdentity.staffAccountId),
-        }),
-      ]);
-    },
-  });
-}
-
-export function useDownloadEvidenceMutation() {
-  return useMutation({
-    mutationFn: ({
-      applicationId,
+      organizationId,
       documentId,
     }: {
-      applicationId: string;
+      organizationId: string;
       documentId: string;
-    }) => downloadEvidenceDocument(applicationId, documentId),
+    }) => getOrganizationDocumentViewAddress(organizationId, documentId),
   });
+}
+
+async function invalidateOrganizationReviewData(
+  queryClient: ReturnType<typeof useQueryClient>,
+  staffIdentity: StaffIdentity,
+  organizationId: string
+) {
+  await Promise.all([
+    queryClient.invalidateQueries({
+      queryKey: organizationQueryKeys.all(staffIdentity.staffAccountId),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: organizationQueryKeys.reviewQueue(staffIdentity.staffAccountId),
+    }),
+    queryClient.invalidateQueries({
+      queryKey: organizationQueryKeys.detail(
+        staffIdentity.staffAccountId,
+        organizationId
+      ),
+    }),
+  ]);
 }

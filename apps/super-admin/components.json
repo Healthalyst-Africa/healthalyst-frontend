@@ -15,7 +15,7 @@
     "utils": "@healthalyst/ui/lib/utilities",
     "hooks": "~/hooks",
     "lib": "~/lib",
-    "ui": "@healthalyst/ui/components"
+    "ui": "@healthalyst/ui/primitives"
   },
   "iconLibrary": "tabler"
 }

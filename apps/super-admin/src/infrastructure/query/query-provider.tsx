@@ -3,6 +3,8 @@
 import { useState, type ReactNode } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+import { QUERY_CONFIGURATION } from "~/infrastructure/query/query-configuration";
+
 export function ApplicationQueryProvider({
   children,
 }: {
@@ -11,7 +13,10 @@ export function ApplicationQueryProvider({
   const [queryClient] = useState(
     () =>
       new QueryClient({
-        defaultOptions: { queries: { retry: false, staleTime: 30000 } },
+        defaultOptions: {
+          queries: QUERY_CONFIGURATION,
+          mutations: { retry: false, gcTime: 0 },
+        },
       })
   );
   return (

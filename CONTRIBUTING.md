@@ -1,19 +1,19 @@
 # Contributing to HealthAlyst Frontend
 
-This repository contains the HealthSchedule web application and neutral shared
-UI foundations. The Java API lives in the separate `healthalyst-backend-java`
-repository. Keep client and server source in their own repositories.
+This repository contains HealthAlyst's frontend applications and neutral shared
+UI foundations. Their primary backend is the NestJS Platform API in the separate
+`healthalyst-backend` repository.
 
 Read [AGENTS.md](./AGENTS.md) before changing code. It defines naming, shared
 component ownership, security, accessibility, and validation rules.
 
 ## Product scope
 
-The first application is `apps/health-schedule`, package
-`@healthalyst/health-schedule`. It starts with organisation registration,
-administrator sign-in, application review status, and later staff and module
-setup. HealthSchedule patient workflows are outside this first onboarding slice.
-Do not collect patient records or clinical data in organisation registration.
+The first product spoke is `apps/health-schedule`, package
+`@healthalyst/health-schedule`. Shared registration, administrator sign-in and
+application status live in `apps/organization`; HealthSchedule patient
+workflows are outside this onboarding slice. Do not collect patient records or
+clinical data in organisation registration.
 
 The public HealthAlyst marketing site is maintained in the separate
 `marketing-module` repository. Do not add product onboarding routes to that site.
@@ -24,17 +24,26 @@ Requirements: Node.js 22.13 or newer and pnpm 10.27.0. From the repository root:
 
 ```sh
 pnpm install --frozen-lockfile
+cp -n apps/organization/.env.example apps/organization/.env.local
 cp -n apps/health-schedule/.env.example apps/health-schedule/.env.local
-pnpm --filter @healthalyst/health-schedule dev
+cp -n apps/super-admin/.env.example apps/super-admin/.env.local
+pnpm --filter @healthalyst/organization --filter @healthalyst/health-schedule --filter @healthalyst/super-admin dev
 ```
 
-The portal reads `NEXT_PUBLIC_HEALTHALYST_API_URL` to contact the standalone API.
-This value is public configuration, not a credential. Never put secrets in
-`NEXT_PUBLIC_*` variables. The backend must separately allow the frontend origin.
+The organisation hub runs on port 3005, HealthSchedule on 3006, and Super Admin
+on 3007. Each app uses its own environment file. Local `/v1` calls can use a
+Next.js transport rewrite to Render; deployed direct requests require a same-site
+API origin and an allowed browser origin. The backend owns the refresh cookie,
+and the shared browser transport keeps access tokens in memory. Follow
+[authentication](docs/authentication.md) for setup and migration requirements.
+Keep all credentials out of public environment variables and browser persistence.
 
 ## Repository structure
 
-- `apps/health-schedule`: routes, onboarding flows, and product-specific theme.
+- `apps/organization`: shared registration, authentication and organisation hub.
+- `apps/health-schedule`: product entry and future scheduling workflows.
+- `apps/super-admin`: HealthAlyst staff sign-in and organisation review.
+- `packages/platform-api`: shared NestJS Platform API client and auth/session services.
 - `packages/ui`: shared shadcn primitives, neutral styles, and utilities.
 - `packages/eslint-config`: shared lint rules.
 - `packages/typescript-config`: strict TypeScript presets.
@@ -42,6 +51,8 @@ This value is public configuration, not a credential. Never put secrets in
 
 Applications import reusable UI through `@healthalyst/ui` exports. Do not import
 source from another application or duplicate shared shadcn primitives.
+Use [code organisation](docs/code-organization.md) for feature ownership,
+configuration, contracts and dependency direction before adding folders.
 
 ## Product and interaction standards
 

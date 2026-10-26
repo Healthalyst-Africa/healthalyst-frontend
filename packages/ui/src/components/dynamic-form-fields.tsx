@@ -1,161 +1,54 @@
 "use client";
 
-import type {
-  FormFieldDefinition,
-  FormDefinition,
-} from "@healthalyst/ui/lib/form-definition";
+import type { FormDefinition } from "@healthalyst/ui/types/form-definition";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import {
-  Field,
   FieldDescription,
-  FieldError,
   FieldGroup,
-  FieldLabel,
   FieldLegend,
   FieldSet,
-} from "@healthalyst/ui/components/field";
-import { Input } from "@healthalyst/ui/components/input";
-import { PasswordInput } from "@healthalyst/ui/components/password-input";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@healthalyst/ui/components/select";
-import { Textarea } from "@healthalyst/ui/components/textarea";
+} from "@healthalyst/ui/primitives/field";
+import { DynamicFormField } from "./forms/dynamic-form-field";
 
 type DynamicFormFieldsProperties = {
   definition: FormDefinition;
+  /** Choices already made in multi-select fields, by field name. */
+  defaultSelections?: Readonly<Record<string, readonly string[]>>;
   errors?: Readonly<Record<string, string>>;
   disabled?: boolean;
   onFieldChange?: (fieldName: string) => void;
+  values?: Readonly<Record<string, string>>;
+  onValueChange?: (fieldName: string, value: string) => void;
+  fieldGroupClassName?: string;
+  sectionHeadingSize?: "default" | "large";
 };
-
-function DynamicFormField({
-  definition,
-  field,
-  error,
-  disabled,
-  onFieldChange,
-}: {
-  definition: FormDefinition;
-  field: FormFieldDefinition;
-  error?: string;
-  disabled: boolean;
-  onFieldChange?: (fieldName: string) => void;
-}) {
-  const fieldIdentifier = `${definition.identifier}-${field.name}`;
-  const descriptionIdentifier = field.description
-    ? `${fieldIdentifier}-description`
-    : undefined;
-  const errorIdentifier = error ? `${fieldIdentifier}-error` : undefined;
-  const describedBy =
-    [descriptionIdentifier, errorIdentifier].filter(Boolean).join(" ") ||
-    undefined;
-
-  const controlProperties = {
-    id: fieldIdentifier,
-    name: field.name,
-    required: field.required,
-    disabled,
-    "aria-invalid": Boolean(error) || undefined,
-    "aria-describedby": describedBy,
-    onChange: () => onFieldChange?.(field.name),
-  };
-
-  return (
-    <Field
-      className={cn("gap-1.5", field.columnSpan === 2 && "sm:col-span-2")}
-      data-invalid={Boolean(error)}
-      data-disabled={disabled}
-    >
-      <FieldLabel
-        className={field.hideLabel ? "sr-only" : undefined}
-        htmlFor={fieldIdentifier}
-      >
-        {field.label}
-      </FieldLabel>
-      {field.kind === "select" ? (
-        <Select
-          name={field.name}
-          required={field.required}
-          disabled={disabled}
-          onValueChange={() => onFieldChange?.(field.name)}
-        >
-          <SelectTrigger
-            id={fieldIdentifier}
-            aria-invalid={Boolean(error) || undefined}
-            aria-describedby={describedBy}
-          >
-            <SelectValue placeholder={field.placeholder} />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {field.options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
-      ) : field.kind === "textarea" ? (
-        <Textarea
-          {...controlProperties}
-          autoComplete={field.autoComplete}
-          placeholder={field.placeholder}
-          minLength={field.minLength}
-          maxLength={field.maxLength}
-          rows={field.rows}
-        />
-      ) : field.kind === "password" ? (
-        <PasswordInput
-          {...controlProperties}
-          visibilityLabel={field.label}
-          borderless={field.borderless}
-          autoComplete={field.autoComplete}
-          placeholder={field.placeholder}
-          minLength={field.minLength}
-          maxLength={field.maxLength}
-        />
-      ) : (
-        <Input
-          {...controlProperties}
-          className={field.borderless ? "border-0" : undefined}
-          type={field.kind}
-          autoComplete={field.autoComplete}
-          placeholder={field.placeholder}
-          minLength={field.minLength}
-          maxLength={field.maxLength}
-        />
-      )}
-      {field.description && (
-        <FieldDescription id={descriptionIdentifier}>
-          {field.description}
-        </FieldDescription>
-      )}
-      {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
-    </Field>
-  );
-}
 
 export function DynamicFormFields({
   definition,
+  defaultSelections = {},
   errors = {},
   disabled = false,
   onFieldChange,
+  values,
+  onValueChange,
+  fieldGroupClassName,
+  sectionHeadingSize = "default",
 }: DynamicFormFieldsProperties) {
   return (
-    <div className="flex flex-col gap-5">
+    <div
+      className={cn(
+        "flex flex-col",
+        sectionHeadingSize === "large" ? "gap-12" : "gap-5"
+      )}
+    >
       {definition.sections.map((section) => {
         const fields = (
           <FieldGroup
             className={cn(
               "gap-y-5",
               section.columns === 2 &&
-                "grid sm:grid-cols-2 sm:gap-x-2 sm:gap-y-5"
+                "grid sm:grid-cols-2 sm:gap-x-2 sm:gap-y-5",
+              fieldGroupClassName
             )}
           >
             {section.fields.map((field) => (
@@ -164,8 +57,11 @@ export function DynamicFormFields({
                 definition={definition}
                 field={field}
                 error={errors[field.name]}
+                defaultSelection={defaultSelections[field.name]}
                 disabled={disabled}
                 onFieldChange={onFieldChange}
+                value={values?.[field.name]}
+                onValueChange={onValueChange}
               />
             ))}
           </FieldGroup>
@@ -181,8 +77,8 @@ export function DynamicFormFields({
           >
             <FieldSet className="gap-0">
               <FieldLegend
-                className="mb-0 font-serif text-xl font-semibold leading-tight"
-                variant="label"
+                className="mb-0 font-sans font-semibold leading-tight"
+                variant={sectionHeadingSize === "large" ? "legend" : "label"}
               >
                 {section.title}
               </FieldLegend>
@@ -191,7 +87,9 @@ export function DynamicFormFields({
                   <FieldDescription>{section.description}</FieldDescription>
                 </div>
               )}
-              <div className="mt-4">{fields}</div>
+              <div className={sectionHeadingSize === "large" ? "mt-6" : "mt-4"}>
+                {fields}
+              </div>
             </FieldSet>
           </div>
         ) : (
