@@ -23,6 +23,7 @@ import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/doc
 import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
 import { useOrganizationApplicationSubmitMutation } from "~/features/organization-application/hooks/use-organization-application";
 import {
+  APPROVED_ORGANIZATION_STATUS,
   ORGANIZATION_STATUS_DESCRIPTIONS,
   ORGANIZATION_STATUS_LABELS,
 } from "~/features/organization-application/config/application-presentation";
@@ -69,12 +70,15 @@ export function OrganizationReviewSubmissionStep({
   application,
   organizationId,
   userId,
+  enabledProductCodes,
   onBack,
   onEditStep,
 }: {
   application: OrganizationApplication;
   organizationId: string;
   userId: string;
+  /** Products active for the organisation, from the signed-in session. */
+  enabledProductCodes: readonly string[];
   onBack: () => void;
   onEditStep: (step: OrganizationOnboardingStepIdentifier) => void;
 }) {
@@ -87,15 +91,15 @@ export function OrganizationReviewSubmissionStep({
   >(null);
   const [isLauncherOpen, setIsLauncherOpen] = useState(false);
   const isAlreadySubmitted = !application.canEdit;
-  const chosenProductCodes = new Set(
-    application.products.map((product) => product.code)
-  );
   const healthScheduleAddress = getHealthScheduleAddress();
+  const isApproved = application.status === APPROVED_ORGANIZATION_STATUS;
+  // The session lists only products HealthAlyst has activated.
+  const enabledProducts = new Set(enabledProductCodes);
   const launcherApplications = ORGANIZATION_PRODUCTS.map((product) => {
-    const isChosen = chosenProductCodes.has(product.code);
+    const isEnabled = isApproved && enabledProducts.has(product.code);
     // Only HealthSchedule has an application to open so far.
     const href =
-      isChosen && product.code === "HEALTHSCHEDULE"
+      isEnabled && product.code === "HEALTHSCHEDULE"
         ? (healthScheduleAddress ?? undefined)
         : undefined;
     return {
@@ -111,13 +115,16 @@ export function OrganizationReviewSubmissionStep({
         />
       ),
       href,
-      available: isChosen,
-      unavailableLabel: !isChosen
-        ? "Not selected"
-        : href
-          ? undefined
-          : "Coming soon",
-      unavailableIcon: !isChosen ? <LockedIcon /> : <UpcomingIcon />,
+      available: isEnabled,
+      unavailableLabel: !isApproved
+        ? "Pending approval"
+        : !isEnabled
+          ? "Not enabled"
+          : href
+            ? undefined
+            : "Coming soon",
+      unavailableIcon:
+        isApproved && !isEnabled ? <LockedIcon /> : <UpcomingIcon />,
     };
   });
 
@@ -169,10 +176,11 @@ export function OrganizationReviewSubmissionStep({
     },
     {
       key: "phone",
+      // Phone verification is optional, so it never holds the step back.
       label: checklist.phoneVerified
         ? "Phone number verified"
-        : "Phone number not verified",
-      complete: checklist.phoneVerified,
+        : "Phone number optional",
+      complete: true,
       remainingLabel: "Verify your phone number",
     },
   ];
@@ -406,7 +414,11 @@ export function OrganizationReviewSubmissionStep({
         open={isLauncherOpen}
         onOpenChange={setIsLauncherOpen}
         title="Choose a product"
-        description="Open a product you selected when you registered. Products you did not select are shown for reference."
+        description={
+          isApproved
+            ? "Open a product enabled for your organisation. Other products are shown for reference."
+            : "Your products open once HealthAlyst approves your organisation."
+        }
         applications={launcherApplications}
       />
       <FeedbackDialog
