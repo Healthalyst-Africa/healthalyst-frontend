@@ -1,18 +1,17 @@
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
-import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
 import { StatusPanel } from "@healthalyst/ui/components/status-panel";
 
 type AuthenticatedApplicationRedirectStateProperties = {
-  platformSession: PlatformSession | null;
   isRedirecting: boolean;
   redirectError: string | null;
+  redirectMessage: string;
 };
 
 export function AuthenticatedApplicationRedirectState({
-  platformSession,
   isRedirecting,
   redirectError,
+  redirectMessage,
 }: AuthenticatedApplicationRedirectStateProperties) {
   if (redirectError) {
     return (
@@ -25,10 +24,6 @@ export function AuthenticatedApplicationRedirectState({
   }
 
   if (!isRedirecting) return null;
-
-  const redirectMessage = platformSession?.platformRoles.length
-    ? "Opening the HealthAlyst staff workspace"
-    : "Opening your organisation application";
 
   return (
     <BrandLoader

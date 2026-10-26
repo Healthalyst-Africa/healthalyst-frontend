@@ -1,7 +1,7 @@
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { OrganizationRegistrationForm } from "~/features/organization-registration";
 import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
-import { readProductsFromQuery } from "~/features/organization-registration/utilities/read-products-from-query";
+import { readProductsFromQuery } from "~/shared/organization/utilities/read-products-from-query";
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 import Link from "next/link";
 import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";

@@ -16,19 +16,26 @@ import {
   recoveryCodeSchema,
 } from "~/features/authentication/schemas/sign-in-schema";
 import type { SignInStage } from "~/features/authentication/types/sign-in";
+import type { OrganizationProductCode } from "~/shared/organization/config/organization-products";
 import {
   usePasswordSignInMutation,
   useSignInCodeMutation,
 } from "~/features/authentication/hooks/use-sign-in";
 
-export function useSignInWorkflow() {
+export function useSignInWorkflow({
+  requestedProductCodes,
+}: {
+  requestedProductCodes: readonly OrganizationProductCode[];
+}) {
   const { platformSession, isRestoring, setPlatformSession } =
     usePlatformSession();
-  const { isRedirecting, redirectError } = useAuthenticatedApplicationRedirect({
-    platformSession,
-    isRestoring,
-    redirectOrganizationSession: true,
-  });
+  const { isRedirecting, redirectError, redirectMessage } =
+    useAuthenticatedApplicationRedirect({
+      platformSession,
+      isRestoring,
+      redirectOrganizationSession: true,
+      requestedProductCodes,
+    });
   const [stage, setStage] = useState<SignInStage>({ kind: "password" });
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [stageNotice, setStageNotice] = useState<string | null>(null);
@@ -154,6 +161,7 @@ export function useSignInWorkflow() {
     isRestoring,
     isRedirecting,
     redirectError,
+    redirectMessage,
     showStage,
     completeSignIn,
     handlePasswordSubmit,
