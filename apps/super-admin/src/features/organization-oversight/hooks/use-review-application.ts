@@ -14,13 +14,25 @@ import {
   requestChangesSchema,
 } from "~/features/organization-oversight/schemas/review-schemas";
 import { REVIEW_PRODUCT_CODES } from "~/features/organization-oversight/config/review-configuration";
-import type { ProductCode } from "~/features/organization-oversight/types/review-types";
+import type {
+  ProductCode,
+  ReviewDecision,
+} from "~/features/organization-oversight/types/review-types";
+import {
+  isStepUpRequiredError,
+  useStepUpVerification,
+} from "~/features/staff-auth/hooks/use-step-up-verification";
 import type {
   ReviewChecklistState,
   ReviewApplicationProperties,
 } from "~/features/organization-oversight/types/review-controller";
 
 export type ReviewDecisionKind = "approve" | "reject" | "changes";
+
+type PendingDecision = {
+  kind: ReviewDecisionKind;
+  decision: ReviewDecision;
+};
 
 const DECISION_CONFIRMATIONS: Record<
   ReviewDecisionKind,
@@ -41,6 +53,12 @@ const DECISION_CONFIRMATIONS: Record<
     description:
       "The applicant can now update their application and submit it again.",
   },
+};
+
+const STEP_UP_ACTION_DESCRIPTIONS: Record<ReviewDecisionKind, string> = {
+  approve: "approve this organisation",
+  reject: "reject this application",
+  changes: "request changes",
 };
 
 const EMPTY_CHECKLIST: ReviewChecklistState = {
@@ -76,6 +94,10 @@ export function useReviewApplication({
   const [openingDocumentIdentifier, setOpeningDocumentIdentifier] = useState<
     string | null
   >(null);
+  // A decision the API refused until the reviewer confirms with a fresh code.
+  const [decisionAwaitingStepUp, setDecisionAwaitingStepUp] =
+    useState<PendingDecision | null>(null);
+  const stepUpVerification = useStepUpVerification();
 
   const canReview =
     application.status === "UNDER_REVIEW" &&
@@ -106,19 +128,42 @@ export function useReviewApplication({
     setDecisionError("");
   }
 
-  function recordDecision(
-    decisionKind: ReviewDecisionKind,
-    decision: Parameters<typeof decisionMutation.mutate>[0]["decision"]
-  ) {
+  function recordDecision({ kind, decision }: PendingDecision) {
     decisionMutation.mutate(
       { organizationId: application.id, decision },
       {
         onSuccess: () => {
+          setDecisionAwaitingStepUp(null);
+          stepUpVerification.reset();
           setOpenDecision(null);
-          setCompletedDecision(decisionKind);
+          setCompletedDecision(kind);
+        },
+        onError: (error) => {
+          if (isStepUpRequiredError(error)) {
+            stepUpVerification.reset();
+            setDecisionAwaitingStepUp({ kind, decision });
+            return;
+          }
+          // The decision dialog shows any other failure.
+          setDecisionAwaitingStepUp(null);
         },
       }
     );
+  }
+
+  /** Checks the code, then sends the refused decision again. */
+  async function confirmStepUp() {
+    if (!decisionAwaitingStepUp) return;
+    if (await stepUpVerification.verify()) {
+      recordDecision(decisionAwaitingStepUp);
+    }
+  }
+
+  function cancelStepUp() {
+    if (decisionMutation.isPending) return;
+    setDecisionAwaitingStepUp(null);
+    stepUpVerification.reset();
+    decisionMutation.reset();
   }
 
   function handleApprove(formEvent: FormEvent<HTMLFormElement>) {
@@ -138,10 +183,9 @@ export function useReviewApplication({
       return;
     }
     setDecisionError("");
-    recordDecision("approve", {
-      status: "APPROVED",
-      version: detail.version,
-      ...result.data,
+    recordDecision({
+      kind: "approve",
+      decision: { status: "APPROVED", version: detail.version, ...result.data },
     });
   }
 
@@ -169,10 +213,9 @@ export function useReviewApplication({
       return;
     }
     setDecisionError("");
-    recordDecision("reject", {
-      status: "REJECTED",
-      version: detail.version,
-      ...result.data,
+    recordDecision({
+      kind: "reject",
+      decision: { status: "REJECTED", version: detail.version, ...result.data },
     });
   }
 
@@ -198,10 +241,13 @@ export function useReviewApplication({
       return;
     }
     setDecisionError("");
-    recordDecision("changes", {
-      status: "CHANGES_REQUESTED",
-      version: detail.version,
-      items: [result.data],
+    recordDecision({
+      kind: "changes",
+      decision: {
+        status: "CHANGES_REQUESTED",
+        version: detail.version,
+        items: [result.data],
+      },
     });
   }
 
@@ -268,7 +314,20 @@ export function useReviewApplication({
       : null,
     checklist,
     selectedProducts,
-    decisionError: decisionError || decisionMutation.error?.message || "",
+    // A step-up request is answered in its own dialog, not as an error.
+    decisionError:
+      decisionError ||
+      (isStepUpRequiredError(decisionMutation.error)
+        ? ""
+        : decisionMutation.error?.message) ||
+      "",
+    stepUpVerification,
+    isAwaitingStepUp: decisionAwaitingStepUp !== null,
+    stepUpActionDescription: decisionAwaitingStepUp
+      ? STEP_UP_ACTION_DESCRIPTIONS[decisionAwaitingStepUp.kind]
+      : "",
+    confirmStepUp,
+    cancelStepUp,
     openingDocumentIdentifier,
     canReview,
     canClaim,

@@ -44,6 +44,7 @@ import {
   REVIEW_VALIDATION_LIMITS,
 } from "~/features/organization-oversight/config/review-configuration";
 import { useReviewApplication } from "~/features/organization-oversight/hooks/use-review-application";
+import { StepUpDialog } from "~/features/staff-auth/components/step-up-dialog";
 import type { OrganizationDetail } from "~/features/organization-oversight/types/organization-types";
 import type { ReviewApplicationProperties } from "~/features/organization-oversight/types/review-controller";
 
@@ -493,6 +494,15 @@ export function ReviewApplicationSheet({
           maxLength={REVIEW_VALIDATION_LIMITS.noteMaximumLength}
         />
       </FormDialog>
+
+      <StepUpDialog
+        open={review.isAwaitingStepUp}
+        actionDescription={review.stepUpActionDescription}
+        verification={review.stepUpVerification}
+        isCompletingAction={review.decisionMutation.isPending}
+        onCancel={review.cancelStepUp}
+        onSubmit={() => void review.confirmStepUp()}
+      />
 
       {review.completedConfirmation && (
         <FeedbackDialog
