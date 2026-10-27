@@ -1,8 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import type { FieldStatus } from "@healthalyst/ui/components/dynamic-form-fields";
-import { describeNewPassword } from "~/features/authentication/utilities/describe-new-password";
+import {
+  describeNewPassword,
+  type PasswordLengthLimits,
+} from "@healthalyst/ui/forms/new-password-feedback";
+import type { FieldStatus } from "@healthalyst/ui/types/field-status";
 
 type NewPasswordFieldNames = {
   password: string;
@@ -13,7 +16,13 @@ type NewPasswordFieldNames = {
  * Tracks a new password and its confirmation as they are typed, and returns
  * live errors and statuses keyed by field name for the form to show.
  */
-export function useNewPasswordFeedback(fieldNames: NewPasswordFieldNames) {
+export function useNewPasswordFeedback({
+  fieldNames,
+  limits,
+}: {
+  fieldNames: NewPasswordFieldNames;
+  limits: PasswordLengthLimits;
+}) {
   const [values, setValues] = useState({ password: "", confirmation: "" });
   const [visitedFields, setVisitedFields] = useState({
     password: false,
@@ -31,9 +40,13 @@ export function useNewPasswordFeedback(fieldNames: NewPasswordFieldNames) {
     if (key) setValues((currentValues) => ({ ...currentValues, [key]: value }));
   }
 
+  /**
+   * Marks a field as left; call it when focus leaves the whole field. Passing
+   * through an empty field does not count, so its errors wait for typing.
+   */
   function handleFieldBlur(fieldName: string) {
     const key = fieldKey(fieldName);
-    if (key) {
+    if (key && values[key] !== "") {
       setVisitedFields((currentFields) => ({ ...currentFields, [key]: true }));
     }
   }
@@ -43,6 +56,7 @@ export function useNewPasswordFeedback(fieldNames: NewPasswordFieldNames) {
     confirmation: values.confirmation,
     passwordVisited: visitedFields.password,
     confirmationVisited: visitedFields.confirmation,
+    limits,
   });
   const errors: Record<string, string> = {};
   const statuses: Record<string, FieldStatus> = {};

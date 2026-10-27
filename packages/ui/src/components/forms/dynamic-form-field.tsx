@@ -1,10 +1,11 @@
 "use client";
 
-import type { ChangeEvent, FocusEvent } from "react";
+import type { ChangeEvent } from "react";
 import type {
   FormFieldDefinition,
   FormDefinition,
 } from "@healthalyst/ui/types/form-definition";
+import { isFocusLeaving } from "@healthalyst/ui/lib/focus";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import {
   Field,
@@ -169,19 +170,6 @@ export function DynamicFormField({
       onFieldChange?.(field.name);
       onValueChange?.(field.name, changeEvent.currentTarget.value);
     },
-    onBlur: (
-      focusEvent: FocusEvent<HTMLInputElement | HTMLTextAreaElement>
-    ) => {
-      // Moving to a control inside the same field, such as "Show password",
-      // is not leaving it.
-      const fieldElement =
-        focusEvent.currentTarget.closest("[data-slot=field]");
-      const nextFocus = focusEvent.relatedTarget;
-      if (nextFocus instanceof Node && fieldElement?.contains(nextFocus)) {
-        return;
-      }
-      onFieldBlur?.(field.name);
-    },
   };
 
   return (
@@ -189,6 +177,10 @@ export function DynamicFormField({
       className={cn("gap-1.5", field.columnSpan === 2 && "sm:col-span-2")}
       data-invalid={Boolean(error)}
       data-disabled={disabled}
+      // Leaving the whole field, not moving to its "Show password" button.
+      onBlur={(focusEvent) => {
+        if (isFocusLeaving(focusEvent)) onFieldBlur?.(field.name);
+      }}
     >
       <FieldLabel
         className={cn(field.hideLabel && "sr-only")}

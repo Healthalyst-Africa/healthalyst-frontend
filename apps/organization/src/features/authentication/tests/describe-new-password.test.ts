@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { describeNewPassword } from "~/features/authentication/utilities/describe-new-password";
+import { describeNewPassword } from "@healthalyst/ui/forms/new-password-feedback";
+import { PASSWORD_LIMITS } from "~/features/authentication/config/authentication-limits";
 
 const LONG_PASSWORD = "correct horse battery";
 
@@ -8,12 +9,13 @@ function describeValues({
   confirmation = "",
   passwordVisited = false,
   confirmationVisited = false,
-}: Partial<Parameters<typeof describeNewPassword>[0]>) {
+}: Partial<Omit<Parameters<typeof describeNewPassword>[0], "limits">>) {
   return describeNewPassword({
     password,
     confirmation,
     passwordVisited,
     confirmationVisited,
+    limits: PASSWORD_LIMITS,
   });
 }
 

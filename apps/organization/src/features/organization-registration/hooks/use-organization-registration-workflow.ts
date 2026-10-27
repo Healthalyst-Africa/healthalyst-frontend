@@ -8,7 +8,8 @@ import {
   type FormEvent,
 } from "react";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
-import { useNewPasswordFeedback } from "~/features/authentication/hooks/use-new-password-feedback";
+import { useNewPasswordFeedback } from "@healthalyst/ui/hooks/use-new-password-feedback";
+import { PASSWORD_LIMITS } from "~/features/authentication/config/authentication-limits";
 import { registrationSteps } from "~/features/organization-registration/config/organization-registration-form-definition";
 import { useOrganizationRegistrationMutation } from "~/features/organization-registration/hooks/use-organization-registration";
 import { registrationSchema } from "~/features/organization-registration/schemas/organization-registration-schema";
@@ -32,8 +33,8 @@ export function useOrganizationRegistrationWorkflow() {
   const pendingStepFocusReference = useRef<PendingStepFocus | null>(null);
   const registrationMutation = useOrganizationRegistrationMutation();
   const passwordFeedback = useNewPasswordFeedback({
-    password: "password",
-    confirmation: "confirmPassword",
+    fieldNames: { password: "password", confirmation: "confirmPassword" },
+    limits: PASSWORD_LIMITS,
   });
   const registrationError = registrationMutation.error;
   const isSubmitting = registrationMutation.isPending;

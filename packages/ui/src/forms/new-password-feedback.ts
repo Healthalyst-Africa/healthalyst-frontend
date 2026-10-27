@@ -1,5 +1,10 @@
-import type { FieldStatus } from "@healthalyst/ui/components/dynamic-form-fields";
-import { PASSWORD_LIMITS } from "~/features/authentication/config/authentication-limits";
+import type { FieldStatus } from "@healthalyst/ui/types/field-status";
+
+/** The shortest and longest password the service accepts. */
+export type PasswordLengthLimits = {
+  minimum: number;
+  maximum: number;
+};
 
 type NewPasswordValues = {
   password: string;
@@ -8,9 +13,10 @@ type NewPasswordValues = {
   passwordVisited: boolean;
   /** Whether the person has left the confirmation field at least once. */
   confirmationVisited: boolean;
+  limits: PasswordLengthLimits;
 };
 
-type NewPasswordFeedback = {
+export type NewPasswordFeedback = {
   passwordError?: string;
   passwordStatus?: FieldStatus;
   confirmationError?: string;
@@ -27,23 +33,24 @@ export function describeNewPassword({
   confirmation,
   passwordVisited,
   confirmationVisited,
+  limits,
 }: NewPasswordValues): NewPasswordFeedback {
   const feedback: NewPasswordFeedback = {};
   const passwordLength = [...password].length;
-  const isLongEnough = passwordLength >= PASSWORD_LIMITS.minimum;
+  const isLongEnough = passwordLength >= limits.minimum;
 
-  if (passwordLength > PASSWORD_LIMITS.maximum) {
-    feedback.passwordError = `Password must be no more than ${PASSWORD_LIMITS.maximum} characters.`;
+  if (passwordLength > limits.maximum) {
+    feedback.passwordError = `Password must be no more than ${limits.maximum} characters.`;
   } else if (isLongEnough) {
     feedback.passwordStatus = {
       tone: "success",
-      message: `At least ${PASSWORD_LIMITS.minimum} characters`,
+      message: `At least ${limits.minimum} characters`,
     };
   } else if (passwordLength > 0 && passwordVisited) {
-    feedback.passwordError = `Password must be at least ${PASSWORD_LIMITS.minimum} characters.`;
+    feedback.passwordError = `Password must be at least ${limits.minimum} characters.`;
   } else if (passwordLength > 0) {
     // An empty field already shows the minimum in its placeholder.
-    const remainingCount = PASSWORD_LIMITS.minimum - passwordLength;
+    const remainingCount = limits.minimum - passwordLength;
     feedback.passwordStatus = {
       tone: "neutral",
       message: `${remainingCount} more ${remainingCount === 1 ? "character" : "characters"} needed.`,

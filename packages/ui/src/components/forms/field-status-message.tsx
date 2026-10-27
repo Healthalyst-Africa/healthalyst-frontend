@@ -3,11 +3,9 @@
 import { SuccessIcon } from "@healthalyst/icons";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
-/** Live feedback about a field's value that is not an error. */
-export type FieldStatus = {
-  tone: "neutral" | "success";
-  message: string;
-};
+import type { FieldStatus } from "@healthalyst/ui/types/field-status";
+
+export type { FieldStatus };
 
 /**
  * Feedback shown under a field while someone types, such as how many more

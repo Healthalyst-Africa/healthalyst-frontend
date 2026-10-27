@@ -7,6 +7,7 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { TextField } from "@healthalyst/ui/components/text-field";
+import { useNewPasswordFeedback } from "@healthalyst/ui/hooks/use-new-password-feedback";
 import { APPLICATION_ROUTES } from "~/config/application-routes";
 import { StaffAuthLayout } from "~/features/staff-auth/components/staff-auth-layout";
 import { StaffSignInLink } from "~/features/staff-auth/components/staff-sign-in-link";
@@ -30,6 +31,10 @@ export function StaffResetPasswordForm() {
   const hasReadTokenReference = useRef(false);
   const { clearSession } = useStaffSession();
   const passwordResetMutation = useStaffPasswordResetMutation();
+  const passwordFeedback = useNewPasswordFeedback({
+    fieldNames: { password: "newPassword", confirmation: "confirmPassword" },
+    limits: STAFF_PASSWORD_LIMITS,
+  });
 
   useEffect(() => {
     if (hasReadTokenReference.current) return;
@@ -141,14 +146,25 @@ export function StaffResetPasswordForm() {
             autoComplete="new-password"
             id="staff-new-password"
             label="New password"
-            description={`Use at least ${STAFF_PASSWORD_LIMITS.minimum} characters. Avoid passwords you use elsewhere.`}
+            placeholder={`At least ${STAFF_PASSWORD_LIMITS.minimum} characters`}
             name="newPassword"
             type="password"
             maxLength={STAFF_PASSWORD_LIMITS.maximum}
             required
             disabled={passwordResetMutation.isPending}
-            error={fieldErrors.newPassword}
-            onChange={() => clearPasswordFeedback("newPassword")}
+            // Live feedback shows over an older error for the same field.
+            error={
+              passwordFeedback.errors.newPassword ?? fieldErrors.newPassword
+            }
+            status={passwordFeedback.statuses.newPassword}
+            onChange={(changeEvent) => {
+              clearPasswordFeedback("newPassword");
+              passwordFeedback.handleValueChange(
+                "newPassword",
+                changeEvent.currentTarget.value
+              );
+            }}
+            onFieldLeave={() => passwordFeedback.handleFieldBlur("newPassword")}
           />
           <TextField
             autoComplete="new-password"
@@ -159,8 +175,21 @@ export function StaffResetPasswordForm() {
             maxLength={STAFF_PASSWORD_LIMITS.maximum}
             required
             disabled={passwordResetMutation.isPending}
-            error={fieldErrors.confirmPassword}
-            onChange={() => clearPasswordFeedback("confirmPassword")}
+            error={
+              passwordFeedback.errors.confirmPassword ??
+              fieldErrors.confirmPassword
+            }
+            status={passwordFeedback.statuses.confirmPassword}
+            onChange={(changeEvent) => {
+              clearPasswordFeedback("confirmPassword");
+              passwordFeedback.handleValueChange(
+                "confirmPassword",
+                changeEvent.currentTarget.value
+              );
+            }}
+            onFieldLeave={() =>
+              passwordFeedback.handleFieldBlur("confirmPassword")
+            }
           />
 
           {passwordResetMutation.error && (
