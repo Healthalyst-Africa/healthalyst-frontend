@@ -9,14 +9,20 @@ import {
   FieldSet,
 } from "@healthalyst/ui/primitives/field";
 import { DynamicFormField } from "./forms/dynamic-form-field";
+import type { FieldStatus } from "./forms/field-status-message";
+
+export type { FieldStatus };
 
 type DynamicFormFieldsProperties = {
   definition: FormDefinition;
   /** Choices already made in multi-select fields, by field name. */
   defaultSelections?: Readonly<Record<string, readonly string[]>>;
   errors?: Readonly<Record<string, string>>;
+  /** Live feedback by field name, shown while a field has no error. */
+  statuses?: Readonly<Record<string, FieldStatus>>;
   disabled?: boolean;
   onFieldChange?: (fieldName: string) => void;
+  onFieldBlur?: (fieldName: string) => void;
   values?: Readonly<Record<string, string>>;
   onValueChange?: (fieldName: string, value: string) => void;
   fieldGroupClassName?: string;
@@ -27,8 +33,10 @@ export function DynamicFormFields({
   definition,
   defaultSelections = {},
   errors = {},
+  statuses = {},
   disabled = false,
   onFieldChange,
+  onFieldBlur,
   values,
   onValueChange,
   fieldGroupClassName,
@@ -38,14 +46,14 @@ export function DynamicFormFields({
     <div
       className={cn(
         "flex flex-col",
-        sectionHeadingSize === "large" ? "gap-12" : "gap-5"
+        sectionHeadingSize === "large" ? "gap-8 sm:gap-12" : "gap-5"
       )}
     >
       {definition.sections.map((section) => {
         const fields = (
           <FieldGroup
             className={cn(
-              "gap-y-5",
+              "gap-y-4 sm:gap-y-5",
               section.columns === 2 &&
                 "grid sm:grid-cols-2 sm:gap-x-2 sm:gap-y-5",
               fieldGroupClassName
@@ -57,9 +65,11 @@ export function DynamicFormFields({
                 definition={definition}
                 field={field}
                 error={errors[field.name]}
+                status={statuses[field.name]}
                 defaultSelection={defaultSelections[field.name]}
                 disabled={disabled}
                 onFieldChange={onFieldChange}
+                onFieldBlur={onFieldBlur}
                 value={values?.[field.name]}
                 onValueChange={onValueChange}
               />
@@ -87,7 +97,11 @@ export function DynamicFormFields({
                   <FieldDescription>{section.description}</FieldDescription>
                 </div>
               )}
-              <div className={sectionHeadingSize === "large" ? "mt-6" : "mt-4"}>
+              <div
+                className={
+                  sectionHeadingSize === "large" ? "mt-4 sm:mt-6" : "mt-4"
+                }
+              >
                 {fields}
               </div>
             </FieldSet>

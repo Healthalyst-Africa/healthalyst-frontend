@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@healthalyst/icons";
+import { StepNavigation } from "@healthalyst/ui/components/step-navigation";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FileUploadField } from "@healthalyst/ui/components/file-upload-field";
 import {
@@ -205,7 +205,12 @@ export function OrganizationSupportingDocumentsStep({
         </NoticeBanner>
       )}
 
-      <ContentPanel elevation="flat" spacing="compact" contentClassName="gap-6">
+      <ContentPanel
+        frame="wide-screens"
+        elevation="flat"
+        spacing="compact"
+        contentClassName="gap-6"
+      >
         {application.checklist.documentsComplete && (
           <StateNotice
             tone="success"
@@ -287,30 +292,18 @@ export function OrganizationSupportingDocumentsStep({
           </ul>
         )}
 
-        <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-between">
-          <a
-            href="#onboarding-content"
-            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            onClick={(clickEvent) => {
-              clickEvent.preventDefault();
-              onBack();
-            }}
-          >
-            <ChevronLeftIcon aria-hidden="true" className="size-4 shrink-0" />
-            Back to account verification
-          </a>
-          <a
-            href="#onboarding-content"
-            className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            onClick={(clickEvent) => {
-              clickEvent.preventDefault();
-              onContinue();
-            }}
-          >
-            Continue to review
-            <ChevronRightIcon aria-hidden="true" className="size-4 shrink-0" />
-          </a>
-        </div>
+        <StepNavigation
+          previous={{
+            destination: "account verification",
+            href: "#onboarding-content",
+            onSelect: onBack,
+          }}
+          next={{
+            destination: "review",
+            href: "#onboarding-content",
+            onSelect: onContinue,
+          }}
+        />
       </ContentPanel>
     </div>
   );

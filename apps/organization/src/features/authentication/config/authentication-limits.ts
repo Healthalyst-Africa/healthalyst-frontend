@@ -1,5 +1,9 @@
+/**
+ * The Platform API asks privileged accounts, which include organisation
+ * owners, for at least 12 characters at registration and password reset.
+ */
 export const PASSWORD_LIMITS = {
-  minimum: 10,
+  minimum: 12,
   maximum: 128,
 } as const;
 

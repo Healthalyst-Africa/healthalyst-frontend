@@ -19,7 +19,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={elementReference}
     className={cn(
-      "flex h-11 w-full items-center justify-between whitespace-nowrap rounded-md border border-border bg-transparent transition-colors hover:border-border px-3 py-2 text-sm data-[placeholder]:text-xs data-[placeholder]:font-light data-[placeholder]:text-muted-foreground/50 focus:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring aria-invalid:border-destructive aria-invalid:ring-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      "flex h-11 w-full items-center justify-between whitespace-nowrap rounded-md border border-border bg-transparent transition-colors hover:border-border px-3 py-2 text-sm data-[placeholder]:text-xs data-[placeholder]:font-light data-[placeholder]:text-muted-foreground focus:outline-none focus-visible:border-ring focus-visible:ring-1 focus-visible:ring-ring aria-invalid:border-destructive aria-invalid:ring-destructive/20 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
       className
     )}
     {...properties}
@@ -123,7 +123,8 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={elementReference}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      // A clear highlight for pointer, keyboard and touch, and a heavier chosen option.
+      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 pl-2 pr-8 text-sm outline-none transition-colors hover:bg-secondary hover:text-primary focus:bg-secondary focus:text-primary data-[highlighted]:bg-secondary data-[highlighted]:text-primary data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...properties}

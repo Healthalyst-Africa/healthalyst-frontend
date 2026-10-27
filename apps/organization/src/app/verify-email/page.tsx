@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Link from "next/link";
 import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 import { EmailVerification } from "~/features/authentication";
 import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
+
+export const metadata: Metadata = { title: "Confirm your email address" };
 
 export default function VerifyEmailRoute() {
   return (

@@ -71,10 +71,10 @@ export function HealthScheduleHome({
     >
       <div className="flex flex-col gap-6">
         <div>
-          <h1 className="font-serif text-3xl font-normal tracking-tight">
+          <h1 className="font-serif text-title font-normal tracking-tight">
             Welcome, {user.firstName}
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-lede text-muted-foreground">
             {organizationName} is set up for HealthSchedule.
           </p>
         </div>

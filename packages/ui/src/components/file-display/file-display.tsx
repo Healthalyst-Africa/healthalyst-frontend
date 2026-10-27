@@ -57,6 +57,37 @@ export function FileTile({
 }
 
 /** A small status icon and label, such as "Uploaded" or "Rejected". */
+/** Characters kept visible before a file's extension when its name is cut short. */
+const VISIBLE_NAME_ENDING_LENGTH = 7;
+
+/**
+ * A file name on one line. A long name is shortened in the middle, so its
+ * ending and extension stay visible; the full name remains in the text.
+ */
+export function FileName({
+  fileName,
+  className,
+}: {
+  fileName: string;
+  className?: string;
+}) {
+  const extensionStart = fileName.lastIndexOf(".");
+  const endingStart = Math.max(
+    0,
+    (extensionStart > 0 ? extensionStart : fileName.length) -
+      VISIBLE_NAME_ENDING_LENGTH
+  );
+  const beginning = fileName.slice(0, endingStart);
+  const ending = fileName.slice(endingStart);
+
+  return (
+    <span className={cn("flex min-w-0", className)} title={fileName}>
+      <span className="truncate">{beginning}</span>
+      <span className="shrink-0">{ending}</span>
+    </span>
+  );
+}
+
 export function FileStatusText({
   label,
   tone,

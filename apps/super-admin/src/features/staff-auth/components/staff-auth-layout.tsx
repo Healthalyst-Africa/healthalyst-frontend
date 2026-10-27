@@ -36,16 +36,16 @@ export function StaffAuthLayout({
         <header className="flex flex-col items-center gap-2 text-center">
           <h2
             ref={headingReference}
-            className="font-serif text-3xl font-normal leading-tight outline-none"
+            className="font-serif text-title font-normal outline-none"
             tabIndex={-1}
           >
             {title}
           </h2>
-          <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+          <p className="max-w-sm text-lede text-muted-foreground">
             {description}
           </p>
         </header>
-        <ContentPanel>{children}</ContentPanel>
+        <ContentPanel frame="wide-screens">{children}</ContentPanel>
       </div>
     </SplitPanelLayout>
   );

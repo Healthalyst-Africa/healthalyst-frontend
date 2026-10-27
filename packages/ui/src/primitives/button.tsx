@@ -27,7 +27,8 @@ const buttonVariants = createClassVariants(
         unstyled: "",
         default: "h-10 px-4 py-2",
         small: "h-9 px-4",
-        large: "h-11 px-8",
+        // Full-width form actions wrap a long label instead of widening the page.
+        large: "min-h-11 whitespace-normal px-8 py-2 text-center",
         icon: "size-10",
       },
     },

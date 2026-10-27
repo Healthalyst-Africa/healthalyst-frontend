@@ -34,4 +34,9 @@ export {
   IconExternalLink as OpenDocumentIcon,
   IconHourglassEmpty as UpcomingIcon,
   IconLock as LockedIcon,
+  IconFiles as ApplicationsIcon,
+  IconClock as PendingIcon,
+  IconMessageExclamation as ChangesRequestedIcon,
+  IconRosetteDiscountCheck as ApprovedIcon,
+  IconAdjustmentsHorizontal as FilterIcon,
 } from "@tabler/icons-react";

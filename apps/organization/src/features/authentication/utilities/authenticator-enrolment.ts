@@ -1,8 +1,5 @@
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
-import {
-  EXPIRED_ENROLMENT_CODES,
-  RECOVERY_CODES_FILE_NAME,
-} from "~/features/authentication/config/authenticator-enrolment";
+import { EXPIRED_ENROLMENT_CODES } from "~/features/authentication/config/authenticator-enrolment";
 
 export function isExpiredEnrolment(error: Error | null): boolean {
   return (
@@ -24,21 +21,4 @@ export async function copyText(text: string): Promise<boolean> {
   } catch {
     return false;
   }
-}
-
-export function downloadRecoveryCodesFile(
-  recoveryCodes: readonly string[]
-): void {
-  const file = new Blob(
-    [
-      `HealthAlyst recovery codes\nEach code signs in once when your authenticator app is unavailable.\n\n${recoveryCodes.join("\n")}\n`,
-    ],
-    { type: "text/plain" }
-  );
-  const fileAddress = URL.createObjectURL(file);
-  const downloadLink = document.createElement("a");
-  downloadLink.href = fileAddress;
-  downloadLink.download = RECOVERY_CODES_FILE_NAME;
-  downloadLink.click();
-  URL.revokeObjectURL(fileAddress);
 }

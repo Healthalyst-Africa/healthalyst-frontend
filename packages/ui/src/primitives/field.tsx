@@ -41,7 +41,7 @@ function FieldLegend({
       className={cn(
         "mb-3 font-normal",
         "data-[variant=legend]:text-base",
-        "data-[variant=label]:text-sm",
+        "data-[variant=label]:text-body",
         className
       )}
       {...properties}
@@ -123,7 +123,7 @@ function FieldLabel({
     <Label
       data-slot="field-label"
       className={cn(
-        "group/field-label peer/field-label flex w-fit gap-2 leading-snug group-data-[disabled=true]/field:opacity-50",
+        "group/field-label peer/field-label flex w-fit gap-2 text-body leading-snug group-data-[disabled=true]/field:opacity-50",
         "has-[>[data-slot=field]]:w-full has-[>[data-slot=field]]:flex-col has-[>[data-slot=field]]:rounded-md has-[>[data-slot=field]]:border [&>[data-slot=field]]:p-4",
         "has-[[data-state=checked]]:bg-primary/5 has-[[data-state=checked]]:border-primary",
         className
@@ -233,7 +233,10 @@ function FieldError({
     <div
       role="alert"
       data-slot="field-error"
-      className={cn("text-destructive text-sm font-light italic", className)}
+      className={cn(
+        "text-destructive text-support font-light italic",
+        className
+      )}
       {...properties}
     >
       {content}

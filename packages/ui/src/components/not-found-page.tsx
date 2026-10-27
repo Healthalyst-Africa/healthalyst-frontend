@@ -29,10 +29,10 @@ export function NotFoundPage({
       <p className="mt-6 text-sm font-medium text-muted-foreground">
         Error 404
       </p>
-      <h1 className="mt-2 max-w-lg font-serif text-3xl font-normal leading-tight sm:text-4xl">
+      <h1 className="mt-2 max-w-lg font-serif text-display font-normal">
         {title}
       </h1>
-      <p className="mt-3 max-w-md text-sm leading-6 text-muted-foreground">
+      <p className="mt-3 max-w-md text-lede text-muted-foreground">
         {description}
       </p>
       <div className="mt-8 [&_a]:inline-flex [&_a]:h-11 [&_a]:items-center [&_a]:justify-center [&_a]:rounded-full [&_a]:bg-primary [&_a]:px-8 [&_a]:text-sm [&_a]:font-semibold [&_a]:text-primary-foreground [&_a]:transition-opacity hover:[&_a]:opacity-90 [&_a]:focus-visible:outline-none [&_a]:focus-visible:ring-2 [&_a]:focus-visible:ring-ring [&_a]:focus-visible:ring-offset-2">

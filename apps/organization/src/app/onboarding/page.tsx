@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import OrganizationOnboardingPage from "~/features/organization-application/components/organization-onboarding-page";
 
 export const metadata: Metadata = {
-  title: "Organisation onboarding | HealthAlyst",
+  title: "Your organisation",
   robots: { index: false, follow: false },
 };
 

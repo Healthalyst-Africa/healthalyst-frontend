@@ -3,6 +3,7 @@
 import { useId, useState, type ReactNode } from "react";
 import { DeleteIcon, LoaderIcon, ReplaceFileIcon } from "@healthalyst/icons";
 import {
+  FileName,
   FileStatusText,
   FileTile,
 } from "@healthalyst/ui/components/file-display/file-display";
@@ -315,16 +316,17 @@ function FileUploadFieldRow({
   const isNegative = file.status?.tone === "negative";
 
   return (
-    <li className="flex items-center gap-3 rounded-lg border bg-card px-3 py-3 sm:px-4">
+    <li className="flex items-center gap-2 rounded-lg border bg-card px-3 py-3 sm:gap-3 sm:px-4">
       <FileTile
+        className="size-12 sm:size-16"
         previewUrl={file.previewUrl}
         fileTypeLabel={file.fileTypeLabel}
       />
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <p className="text-sm font-medium leading-5 [overflow-wrap:anywhere]">
-          {file.fileName}
+        <p className="text-body font-medium">
+          <FileName fileName={file.fileName} />
         </p>
-        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs leading-5">
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-caption">
           {file.details && (
             <span className="text-muted-foreground">{file.details}</span>
           )}
@@ -335,7 +337,7 @@ function FileUploadFieldRow({
         {file.message && (
           <p
             className={cn(
-              "text-xs leading-5",
+              "text-support",
               isNegative ? "text-destructive" : "text-muted-foreground"
             )}
           >
@@ -348,7 +350,7 @@ function FileUploadFieldRow({
           type="button"
           size="icon"
           variant="ghost"
-          className="size-9 shrink-0 text-primary"
+          className="size-11 shrink-0 text-primary sm:size-9"
           onClick={onReplace}
           aria-label={`Replace ${file.fileName}`}
           title="Replace file"
@@ -361,7 +363,7 @@ function FileUploadFieldRow({
           type="button"
           size="icon"
           variant="ghost"
-          className="size-9 shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive"
+          className="size-11 shrink-0 text-destructive hover:bg-destructive/10 hover:text-destructive sm:size-9"
           isLoading={file.isRemoving}
           onClick={file.onRemove}
           aria-label={`Remove ${file.fileName}`}

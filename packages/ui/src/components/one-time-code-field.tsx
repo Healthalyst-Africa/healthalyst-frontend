@@ -26,7 +26,10 @@ type OneTimeCodeFieldProperties = {
   autoFocus?: boolean;
   className?: string;
   onChange?: (code: string) => void;
-  /** Called once every digit has been entered. */
+  /**
+   * Called once every digit has been entered. Without it, the field submits
+   * the form it belongs to, so nobody has to press the button afterwards.
+   */
   onComplete?: (code: string) => void;
 };
 
@@ -61,6 +64,20 @@ const OneTimeCodeField = forwardRef<
     elementReference
   ) => {
     const errorIdentifier = `${id}-error`;
+
+    function handleComplete(code: string) {
+      if (onComplete) {
+        onComplete(code);
+        return;
+      }
+      // Wait for the form's own state to hold the full code, then submit it.
+      window.setTimeout(() => {
+        const codeInput = document.getElementById(id);
+        if (codeInput instanceof HTMLInputElement) {
+          codeInput.form?.requestSubmit();
+        }
+      }, 0);
+    }
     const firstGroupLength = Math.ceil(length / 2);
     const slotIndices = Array.from(
       { length },
@@ -96,7 +113,7 @@ const OneTimeCodeField = forwardRef<
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={error ? errorIdentifier : undefined}
           onChange={onChange}
-          onComplete={onComplete}
+          onComplete={handleComplete}
           containerClassName="justify-center gap-3"
         >
           {slotGroups.map((slotGroup) => (

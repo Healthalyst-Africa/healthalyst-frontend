@@ -1,4 +1,5 @@
 "use client";
+import { useState } from "react";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
 
@@ -8,19 +9,19 @@ import Link from "next/link";
 import { WorkflowHeading } from "@healthalyst/ui/components/workflow-heading";
 import {
   CODE_LENGTH,
+  RECOVERY_CODES_FILE_HEADING,
+  RECOVERY_CODES_FILE_NAME,
   TOTAL_STEPS,
   SET_UP_STEPS,
 } from "~/features/authentication/config/authenticator-enrolment";
 import { useAuthenticatorConfirmation } from "~/features/authentication/hooks/use-authenticator-confirmation";
-import { useRecoveryCodeExport } from "~/features/authentication/hooks/use-recovery-code-export";
+import { RecoveryCodesPanel } from "@healthalyst/ui/components/recovery-codes-panel";
 import { useAuthenticatorEnrolmentWorkflow } from "~/features/authentication/hooks/use-authenticator-enrolment-workflow";
-import { CopyIcon, DownloadIcon, InformationIcon } from "@healthalyst/icons";
+import { CopyIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { CheckboxField } from "@healthalyst/ui/components/checkbox-field";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { ExpandableSection } from "@healthalyst/ui/components/expandable-section";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
-import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { OneTimeCodeField } from "@healthalyst/ui/components/one-time-code-field";
 import { QrCode } from "@healthalyst/ui/components/qr-code";
 import type {
@@ -79,7 +80,7 @@ function ScanAndConfirm({
               <li key={step.title} className="flex gap-3">
                 <span
                   aria-hidden="true"
-                  className="flex size-6 shrink-0 items-center justify-center rounded-full border border-gold-subtle bg-gold-subtle text-xs font-semibold text-muted-foreground"
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-primary"
                 >
                   {stepIndex + 1}
                 </span>
@@ -128,7 +129,7 @@ function ScanAndConfirm({
         </ExpandableSection>
 
         <form
-          className="flex flex-col gap-5 border-t border-border bg-gold-subtle px-6 py-7 md:px-8 md:py-8"
+          className="flex flex-col gap-5 border-t border-border bg-secondary/50 px-6 py-7 md:px-8 md:py-8"
           onSubmit={handleSubmit}
           noValidate
         >
@@ -171,13 +172,7 @@ function RecoveryCodes({
   recoveryCodes: readonly string[];
   onContinue: () => void;
 }) {
-  const {
-    hasSavedCodes,
-    setHasSavedCodes,
-    saveStatus,
-    downloadRecoveryCodes,
-    copyRecoveryCodes,
-  } = useRecoveryCodeExport(recoveryCodes);
+  const [hasSavedCodes, setHasSavedCodes] = useState(false);
 
   return (
     <div className="flex flex-col gap-6">
@@ -188,64 +183,16 @@ function RecoveryCodes({
         totalSteps={TOTAL_STEPS}
       />
       <ContentPanel>
-        <NoticeBanner
-          title="You will only see these once"
-          icon={<InformationIcon aria-hidden="true" />}
-        >
-          Each code works one time. Keep them somewhere safe and away from your
-          phone, such as a password manager.
-        </NoticeBanner>
-        <ul
-          aria-label="Recovery codes"
-          className="grid h-48 grid-cols-1 gap-2 overflow-y-auto overscroll-contain pr-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          tabIndex={0}
-        >
-          {recoveryCodes.map((recoveryCode) => (
-            <li
-              key={recoveryCode}
-              className="rounded-md bg-secondary px-3 py-2.5 text-center text-sm font-medium tabular-nums tracking-[0.08em]"
-            >
-              {recoveryCode}
-            </li>
-          ))}
-        </ul>
-        <div className="grid gap-2 sm:grid-cols-2">
-          <ActionButton
-            type="button"
-            variant="outline"
-            leadingIcon={<DownloadIcon />}
-            onClick={downloadRecoveryCodes}
-          >
-            Download codes
-          </ActionButton>
-          <ActionButton
-            type="button"
-            variant="outline"
-            leadingIcon={<CopyIcon />}
-            onClick={copyRecoveryCodes}
-          >
-            Copy codes
-          </ActionButton>
-        </div>
-        <p aria-live="polite" className="-mt-2 text-xs text-muted-foreground">
-          {saveStatus}
-        </p>
-        <CheckboxField
-          id="recovery-codes-saved"
-          className="border-t border-border pt-5"
-          label="I have saved my recovery codes somewhere safe."
-          checked={hasSavedCodes}
-          onCheckedChange={setHasSavedCodes}
+        <RecoveryCodesPanel
+          recoveryCodes={recoveryCodes}
+          downloadFileName={RECOVERY_CODES_FILE_NAME}
+          downloadHeading={RECOVERY_CODES_FILE_HEADING}
+          confirmationIdentifier="recovery-codes-saved"
+          hasSavedCodes={hasSavedCodes}
+          onHasSavedCodesChange={setHasSavedCodes}
+          continueLabel="Continue to HealthAlyst"
+          onContinue={onContinue}
         />
-        <ActionButton
-          className="w-full"
-          size="large"
-          type="button"
-          disabled={!hasSavedCodes}
-          onClick={onContinue}
-        >
-          Continue to HealthAlyst
-        </ActionButton>
       </ContentPanel>
     </div>
   );

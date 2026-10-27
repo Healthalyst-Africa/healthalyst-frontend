@@ -3,6 +3,8 @@ export type FormOption = {
   label: string;
   /** A shorter label for places with little room, such as a chosen chip. */
   selectedLabel?: string;
+  /** A short explanation shown under the label in option lists. */
+  description?: string;
 };
 
 type FormFieldBase = {

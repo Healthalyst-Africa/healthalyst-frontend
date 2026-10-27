@@ -126,10 +126,10 @@ export function ProductLauncherPage() {
     >
       <div className="flex flex-col gap-7">
         <div className="flex flex-col gap-2">
-          <h1 className="font-serif text-3xl font-normal leading-tight sm:text-4xl">
+          <h1 className="font-serif text-display font-normal">
             Choose a product
           </h1>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+          <p className="max-w-2xl text-lede text-muted-foreground">
             Open a product enabled for {membership.organization.name}. Other
             products are shown for reference.
           </p>

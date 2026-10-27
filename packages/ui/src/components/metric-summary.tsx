@@ -17,14 +17,15 @@ export function MetricSummary({
 }) {
   return (
     <div
-      className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4"
+      // Two across on phones, so four metrics take two rows, not four.
+      className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4"
       aria-busy={isLoading || undefined}
     >
       {items.map((item) => (
         <Card key={item.label} className="shadow-none">
-          <CardContent className="p-6">
-            <dl className="flex flex-col gap-3">
-              <dt className="flex items-center gap-3 text-sm text-muted-foreground">
+          <CardContent className="p-4 sm:p-6">
+            <dl className="flex flex-col gap-2 sm:gap-3">
+              <dt className="flex flex-col items-start gap-2 text-body text-muted-foreground sm:flex-row sm:items-center sm:gap-3">
                 {item.icon && (
                   <span
                     aria-hidden="true"
@@ -35,12 +36,12 @@ export function MetricSummary({
                 )}
                 {item.label}
               </dt>
-              <dd className="text-2xl font-normal tabular-nums">
+              <dd className="text-xl font-semibold tabular-nums sm:text-2xl">
                 {isLoading ? (
                   <>
                     <span className="sr-only">Loading</span>
                     <Skeleton
-                      className="h-8 w-12 motion-reduce:animate-none"
+                      className="h-7 w-12 motion-reduce:animate-none sm:h-8"
                       aria-hidden="true"
                     />
                   </>
