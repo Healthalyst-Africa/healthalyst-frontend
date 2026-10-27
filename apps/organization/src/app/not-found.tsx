@@ -1,6 +1,9 @@
+import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { NotFoundPage } from "@healthalyst/ui/components/not-found-page";
+
+export const metadata: Metadata = { title: "Page not found" };
 
 export default function NotFound() {
   return (

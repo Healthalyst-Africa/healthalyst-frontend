@@ -1,16 +1,13 @@
 import type { ReactNode } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@healthalyst/ui/primitives/accordion";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 type OnboardingLayoutProperties = {
   brand: ReactNode;
   actions?: ReactNode;
+  /** Progress beside the content on large screens. */
   progress?: ReactNode;
+  /** A compact form of the progress, pinned under the header on small screens. */
+  compactProgress?: ReactNode;
   children: ReactNode;
 };
 
@@ -19,6 +16,7 @@ export function OnboardingLayout({
   brand,
   actions,
   progress,
+  compactProgress,
   children,
 }: OnboardingLayoutProperties) {
   return (
@@ -35,6 +33,14 @@ export function OnboardingLayout({
           {actions}
         </div>
       </header>
+      {compactProgress && (
+        <nav
+          aria-label="Setup progress"
+          className="sticky top-20 z-20 border-b border-border bg-card px-5 py-2 sm:px-8 lg:hidden"
+        >
+          {compactProgress}
+        </nav>
+      )}
       <div
         className={cn(
           "mx-auto grid w-full max-w-7xl gap-8 px-5 py-6 sm:px-8 lg:gap-12 lg:px-0 lg:py-12",
@@ -42,23 +48,16 @@ export function OnboardingLayout({
         )}
       >
         {progress && (
-          <aside aria-label="Onboarding progress" className="min-w-0">
-            <div className="lg:hidden">
-              <Accordion type="single" collapsible>
-                <AccordionItem value="progress">
-                  <AccordionTrigger>Your onboarding progress</AccordionTrigger>
-                  <AccordionContent>{progress}</AccordionContent>
-                </AccordionItem>
-              </Accordion>
-            </div>
-            <div className="hidden lg:sticky lg:top-28 lg:block">
-              {progress}
-            </div>
+          <aside
+            aria-label="Onboarding progress"
+            className="hidden min-w-0 lg:block"
+          >
+            <div className="lg:sticky lg:top-28">{progress}</div>
           </aside>
         )}
         <main
           id="onboarding-content"
-          className="min-w-0 scroll-mt-28"
+          className="min-w-0 scroll-mt-40 lg:scroll-mt-28"
           tabIndex={-1}
         >
           {children}

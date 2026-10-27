@@ -1,6 +1,6 @@
 "use client";
 
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, FocusEvent } from "react";
 import type {
   FormFieldDefinition,
   FormDefinition,
@@ -28,23 +28,29 @@ import {
 } from "@healthalyst/ui/primitives/select";
 import { Textarea } from "@healthalyst/ui/primitives/textarea";
 import { FieldLabelText } from "./field-label-text";
+import { FieldStatusMessage, type FieldStatus } from "./field-status-message";
 
 export function DynamicFormField({
   definition,
   field,
   error,
+  status,
   defaultSelection,
   disabled,
   onFieldChange,
+  onFieldBlur,
   value,
   onValueChange,
 }: {
   definition: FormDefinition;
   field: FormFieldDefinition;
   error?: string;
+  /** Live feedback shown while there is no error. */
+  status?: FieldStatus;
   defaultSelection?: readonly string[];
   disabled: boolean;
   onFieldChange?: (fieldName: string) => void;
+  onFieldBlur?: (fieldName: string) => void;
   value?: string;
   onValueChange?: (fieldName: string, value: string) => void;
 }) {
@@ -53,9 +59,14 @@ export function DynamicFormField({
     ? `${fieldIdentifier}-description`
     : undefined;
   const errorIdentifier = error ? `${fieldIdentifier}-error` : undefined;
+  const visibleStatus = error ? undefined : status;
+  const statusIdentifier = visibleStatus
+    ? `${fieldIdentifier}-status`
+    : undefined;
   const describedBy =
-    [descriptionIdentifier, errorIdentifier].filter(Boolean).join(" ") ||
-    undefined;
+    [descriptionIdentifier, errorIdentifier, statusIdentifier]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   if (field.kind === "checkbox") {
     return (
@@ -158,6 +169,19 @@ export function DynamicFormField({
       onFieldChange?.(field.name);
       onValueChange?.(field.name, changeEvent.currentTarget.value);
     },
+    onBlur: (
+      focusEvent: FocusEvent<HTMLInputElement | HTMLTextAreaElement>
+    ) => {
+      // Moving to a control inside the same field, such as "Show password",
+      // is not leaving it.
+      const fieldElement =
+        focusEvent.currentTarget.closest("[data-slot=field]");
+      const nextFocus = focusEvent.relatedTarget;
+      if (nextFocus instanceof Node && fieldElement?.contains(nextFocus)) {
+        return;
+      }
+      onFieldBlur?.(field.name);
+    },
   };
 
   return (
@@ -253,6 +277,12 @@ export function DynamicFormField({
         </FieldDescription>
       )}
       {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
+      {visibleStatus && statusIdentifier && (
+        <FieldStatusMessage
+          identifier={statusIdentifier}
+          status={visibleStatus}
+        />
+      )}
     </Field>
   );
 }

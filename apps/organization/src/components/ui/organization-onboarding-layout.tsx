@@ -7,10 +7,12 @@ import { ORGANIZATION_ROUTES } from "~/config/routes";
 export default function OrganizationOnboardingLayout({
   children,
   progress,
+  compactProgress,
   actions,
 }: {
   children: ReactNode;
   progress?: ReactNode;
+  compactProgress?: ReactNode;
   actions?: ReactNode;
 }) {
   return (
@@ -33,6 +35,7 @@ export default function OrganizationOnboardingLayout({
         </Link>
       }
       progress={progress}
+      compactProgress={compactProgress}
       actions={actions}
     >
       {children}

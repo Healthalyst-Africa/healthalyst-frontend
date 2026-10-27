@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { EmailSentIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { EmailSentIllustration } from "@healthalyst/ui/illustrations/email-sent-illustration";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
@@ -64,17 +64,15 @@ export default function RegistrationConfirmation({
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
-        <span className="flex size-12 items-center justify-center rounded-full bg-secondary text-primary">
-          <EmailSentIcon aria-hidden="true" />
-        </span>
+        <EmailSentIllustration className="h-auto w-24 sm:w-28" />
         <h2
           ref={headingReference}
-          className="font-serif text-3xl font-normal leading-tight outline-none"
+          className="font-serif text-title font-normal outline-none"
           tabIndex={-1}
         >
           Check your email
         </h2>
-        <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+        <p className="max-w-sm text-lede text-muted-foreground">
           If{" "}
           <span className="break-all font-medium text-foreground">
             {emailAddress}
@@ -102,7 +100,7 @@ export default function RegistrationConfirmation({
                 </span>
                 <div className="flex flex-col gap-0.5">
                   <p className="text-sm font-medium">{step.title}</p>
-                  <p className="text-sm leading-6 text-muted-foreground">
+                  <p className="text-sm font-light leading-6 text-muted-foreground">
                     {step.description}
                   </p>
                 </div>
@@ -118,7 +116,7 @@ export default function RegistrationConfirmation({
           <h3 id="registration-resend-heading" className="sr-only">
             Resend the confirmation email
           </h3>
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="text-xs font-light leading-5 text-muted-foreground">
             No email after a few minutes? Check your spam folder, or request a
             new link.
           </p>
@@ -136,7 +134,10 @@ export default function RegistrationConfirmation({
               ? `Request again in ${secondsUntilResend} seconds`
               : "Resend confirmation email"}
           </ActionButton>
-          <p aria-live="polite" className="text-sm text-muted-foreground">
+          <p
+            aria-live="polite"
+            className="text-center text-xs font-light leading-5 text-muted-foreground"
+          >
             {resendMutation.isSuccess
               ? "If an unconfirmed account uses that address, a new link is on its way."
               : ""}

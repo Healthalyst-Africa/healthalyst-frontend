@@ -345,7 +345,7 @@ export function OrganizationReviewSubmissionStep({
           <div className="flex flex-col-reverse gap-4 pt-2 sm:flex-row sm:items-center sm:justify-between">
             <a
               href="#onboarding-content"
-              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              className="inline-flex min-h-11 items-center gap-1.5 self-center text-body font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:self-auto"
               onClick={(clickEvent) => {
                 clickEvent.preventDefault();
                 onBack();

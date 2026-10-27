@@ -60,10 +60,10 @@ export function OrganizationAccessPage() {
     >
       <div className="flex flex-col gap-6">
         <div className="flex flex-col items-center gap-2 text-center">
-          <h2 className="font-serif text-3xl font-normal leading-tight">
+          <h2 className="font-serif text-title font-normal">
             Welcome to HealthSchedule
           </h2>
-          <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+          <p className="max-w-sm text-lede text-muted-foreground">
             HealthSchedule is part of HealthAlyst. Your organisation registers
             and signs in once for every HealthAlyst product.
           </p>

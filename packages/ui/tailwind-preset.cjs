@@ -73,6 +73,31 @@ module.exports = {
       borderColor: {
         DEFAULT: "oklch(var(--border))",
       },
+      // Purpose-based text sizes; their values live in styles.css.
+      fontSize: {
+        display: [
+          "var(--text-display)",
+          { lineHeight: "var(--text-display-leading)" },
+        ],
+        title: [
+          "var(--text-title)",
+          { lineHeight: "var(--text-title-leading)" },
+        ],
+        heading: [
+          "var(--text-heading)",
+          { lineHeight: "var(--text-heading-leading)" },
+        ],
+        lede: ["var(--text-lede)", { lineHeight: "var(--text-lede-leading)" }],
+        body: ["var(--text-body)", { lineHeight: "var(--text-body-leading)" }],
+        support: [
+          "var(--text-support)",
+          { lineHeight: "var(--text-support-leading)" },
+        ],
+        caption: [
+          "var(--text-caption)",
+          { lineHeight: "var(--text-caption-leading)" },
+        ],
+      },
       fontFamily: {
         sans: ["var(--font-sans)"],
         serif: ["var(--font-serif)"],

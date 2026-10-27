@@ -30,6 +30,11 @@ type ContentPanelProperties = Omit<HTMLAttributes<HTMLDivElement>, "title"> & {
   /** `raised` panels stand on the page; `flat` panels sit inside a workflow. */
   elevation?: "raised" | "flat";
   spacing?: keyof typeof CONTENT_SPACING_CLASS_NAMES;
+  /**
+   * `wide-screens` drops the border and inner padding on phones, so a form
+   * uses the full width; the card returns from 640 px.
+   */
+  frame?: "always" | "wide-screens";
   contentClassName?: string;
   footerClassName?: string;
   children: ReactNode;
@@ -49,6 +54,7 @@ const ContentPanel = forwardRef<HTMLDivElement, ContentPanelProperties>(
       footer,
       elevation = "raised",
       spacing = "comfortable",
+      frame = "always",
       className,
       contentClassName,
       footerClassName,
@@ -65,13 +71,19 @@ const ContentPanel = forwardRef<HTMLDivElement, ContentPanelProperties>(
         className={cn(
           "border-border bg-card",
           elevation === "raised" ? "shadow-sm" : "shadow-none",
+          frame === "wide-screens" &&
+            "max-sm:rounded-none max-sm:border-0 max-sm:bg-transparent max-sm:shadow-none",
           className
         )}
         {...properties}
       >
         {(heading || description) && (
           <CardHeader
-            className={cn("gap-2", HEADER_SPACING_CLASS_NAMES[spacing])}
+            className={cn(
+              "gap-2",
+              HEADER_SPACING_CLASS_NAMES[spacing],
+              frame === "wide-screens" && "max-sm:px-0"
+            )}
           >
             <div className="flex flex-wrap items-start justify-between gap-3">
               {heading && (
@@ -92,6 +104,7 @@ const ContentPanel = forwardRef<HTMLDivElement, ContentPanelProperties>(
             (heading || description) &&
               spacing !== "flush" &&
               "pt-0 sm:pt-0 md:pt-0",
+            frame === "wide-screens" && "max-sm:px-0 max-sm:py-0",
             contentClassName
           )}
         >
@@ -101,6 +114,7 @@ const ContentPanel = forwardRef<HTMLDivElement, ContentPanelProperties>(
           <CardFooter
             className={cn(
               "flex flex-col gap-4 border-t border-border px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8",
+              frame === "wide-screens" && "max-sm:px-0",
               footerClassName
             )}
           >

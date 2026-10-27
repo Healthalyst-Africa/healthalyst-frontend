@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { StepNavigation } from "@healthalyst/ui/components/step-navigation";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import {
@@ -100,7 +100,7 @@ export function OrganizationAccountVerificationStep({
   }
 
   return (
-    <ContentPanel elevation="flat" spacing="compact">
+    <ContentPanel frame="wide-screens" elevation="flat" spacing="compact">
       <section
         aria-labelledby="phone-verification-heading"
         className="flex flex-col gap-6"
@@ -255,30 +255,18 @@ export function OrganizationAccountVerificationStep({
         </div>
       </section>
 
-      <div className="flex flex-col-reverse gap-3 border-t border-border pt-5 sm:flex-row sm:justify-between">
-        <a
-          href="#onboarding-content"
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          onClick={(clickEvent) => {
-            clickEvent.preventDefault();
-            onBack();
-          }}
-        >
-          <ChevronLeftIcon aria-hidden="true" className="size-4 shrink-0" />
-          Back to organisation details
-        </a>
-        <a
-          href="#onboarding-content"
-          className="inline-flex min-h-11 items-center gap-1.5 text-sm font-normal text-primary underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          onClick={(clickEvent) => {
-            clickEvent.preventDefault();
-            onContinue();
-          }}
-        >
-          Continue to supporting documents
-          <ChevronRightIcon aria-hidden="true" className="size-4 shrink-0" />
-        </a>
-      </div>
+      <StepNavigation
+        previous={{
+          destination: "organisation details",
+          href: "#onboarding-content",
+          onSelect: onBack,
+        }}
+        next={{
+          destination: "supporting documents",
+          href: "#onboarding-content",
+          onSelect: onContinue,
+        }}
+      />
     </ContentPanel>
   );
 }

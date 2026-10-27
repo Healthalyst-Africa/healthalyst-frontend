@@ -79,7 +79,7 @@ function ScanAndConfirm({
               <li key={step.title} className="flex gap-3">
                 <span
                   aria-hidden="true"
-                  className="flex size-6 shrink-0 items-center justify-center rounded-full border border-gold-subtle bg-gold-subtle text-xs font-semibold text-muted-foreground"
+                  className="flex size-6 shrink-0 items-center justify-center rounded-full bg-secondary text-xs font-semibold text-primary"
                 >
                   {stepIndex + 1}
                 </span>
@@ -128,7 +128,7 @@ function ScanAndConfirm({
         </ExpandableSection>
 
         <form
-          className="flex flex-col gap-5 border-t border-border bg-gold-subtle px-6 py-7 md:px-8 md:py-8"
+          className="flex flex-col gap-5 border-t border-border bg-secondary/50 px-6 py-7 md:px-8 md:py-8"
           onSubmit={handleSubmit}
           noValidate
         >

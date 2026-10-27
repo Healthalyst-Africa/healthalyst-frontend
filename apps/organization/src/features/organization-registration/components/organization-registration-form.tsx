@@ -30,6 +30,9 @@ export default function OrganizationRegistrationForm({
 }) {
   const {
     fieldErrors,
+    fieldStatuses,
+    handleFieldValueChange,
+    handleFieldBlur,
     currentStepIndex,
     captchaToken,
     captchaChallengeKey,
@@ -77,7 +80,7 @@ export default function OrganizationRegistrationForm({
         ) : (
           <span aria-hidden="true" />
         )}
-        <p aria-hidden="true" className="px-1 text-sm text-muted-foreground">
+        <p aria-hidden="true" className="px-1 text-xs text-muted-foreground">
           Step {currentStepIndex + 1} of {registrationSteps.length}
         </p>
       </div>
@@ -85,7 +88,7 @@ export default function OrganizationRegistrationForm({
         <h2
           ref={stepHeadingReference}
           id={`organization-registration-${currentStep?.identifier}-heading`}
-          className="font-serif text-3xl font-normal leading-tight outline-none"
+          className="font-serif text-title font-normal outline-none"
           tabIndex={-1}
         >
           <span className="sr-only">
@@ -94,12 +97,13 @@ export default function OrganizationRegistrationForm({
           {currentStep?.heading}
         </h2>
         {currentStep?.description && (
-          <p className="text-sm leading-6 text-muted-foreground">
+          <p className="text-lede text-muted-foreground">
             {currentStep.description}
           </p>
         )}
       </div>
       <ContentPanel
+        frame="wide-screens"
         ref={cardReference}
         className="lg:relative lg:min-h-0 lg:overflow-y-auto lg:overscroll-contain"
         contentClassName="gap-6"
@@ -129,8 +133,11 @@ export default function OrganizationRegistrationForm({
                     definition={definition}
                     defaultSelections={{ products: initialProducts }}
                     errors={fieldErrors}
+                    statuses={fieldStatuses}
                     disabled={isSubmitting}
                     onFieldChange={handleFieldChange}
+                    onValueChange={handleFieldValueChange}
+                    onFieldBlur={handleFieldBlur}
                   />
                 ))}
               </section>

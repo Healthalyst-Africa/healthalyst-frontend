@@ -48,6 +48,7 @@ export function OrganizationOnboardingForm(properties: {
 
   return (
     <ContentPanel
+      frame="wide-screens"
       className="overflow-hidden rounded-2xl"
       elevation="flat"
       spacing="compact"
