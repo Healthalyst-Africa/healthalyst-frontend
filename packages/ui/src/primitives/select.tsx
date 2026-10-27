@@ -123,7 +123,8 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={elementReference}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      // A clear highlight for pointer, keyboard and touch, and a heavier chosen option.
+      "relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 pl-2 pr-8 text-sm outline-none transition-colors hover:bg-secondary hover:text-primary focus:bg-secondary focus:text-primary data-[highlighted]:bg-secondary data-[highlighted]:text-primary data-[state=checked]:font-semibold data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...properties}
