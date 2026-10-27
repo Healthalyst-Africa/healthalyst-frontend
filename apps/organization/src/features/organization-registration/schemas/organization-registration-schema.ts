@@ -81,9 +81,11 @@ export const registrationSchema = z
     corporateAffairsCommissionNumber: z
       .string()
       .trim()
+      .min(1, {
+        error: "Enter the Corporate Affairs Commission (CAC) number.",
+      })
       .refine(
         (registrationNumber) =>
-          registrationNumber === "" ||
           CORPORATE_AFFAIRS_COMMISSION_NUMBER_PATTERN.test(registrationNumber),
         {
           error:
@@ -148,7 +150,7 @@ export const registrationSchema = z
       city: values.city,
       stateCode: values.stateCode,
       lga: values.localGovernmentArea || undefined,
-      cacNumber: values.corporateAffairsCommissionNumber || undefined,
+      cacNumber: values.corporateAffairsCommissionNumber,
       products: values.products,
     },
     admin: {

@@ -24,7 +24,8 @@ const sansSerifFont = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "HealthAlyst | Your organisation",
+  // Each page names itself, so the browser tab says where the person is.
+  title: { default: "HealthAlyst", template: "%s | HealthAlyst" },
   description:
     "Register your healthcare organisation, sign in, and manage access to HealthAlyst products.",
   robots: { index: false, follow: false },

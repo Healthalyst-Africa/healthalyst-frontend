@@ -14,7 +14,10 @@ import {
 import { SelectField } from "@healthalyst/ui/components/select-field";
 import OrganizationOnboardingLayout from "~/components/ui/organization-onboarding-layout";
 import { useOrganizationOnboardingWorkspace } from "~/features/organization-application/hooks/use-organization-onboarding-workspace";
-import { OrganizationOnboardingProgress } from "~/features/organization-application/components/organization-onboarding-progress";
+import {
+  OrganizationOnboardingProgress,
+  OrganizationOnboardingProgressSummary,
+} from "~/features/organization-application/components/organization-onboarding-progress";
 import { OrganizationAccountVerificationStep } from "~/features/organization-application/components/organization-account-verification-step";
 import { OrganizationSupportingDocumentsStep } from "~/features/organization-application/components/organization-supporting-documents-step";
 import { OrganizationReviewSubmissionStep } from "~/features/organization-application/components/organization-review-submission-step";
@@ -54,6 +57,16 @@ export function OrganizationOnboardingWorkspace({
           <OrganizationOnboardingProgress
             application={application}
             currentStep={visibleStep}
+            onStepSelect={goToStep}
+          />
+        ) : undefined
+      }
+      compactProgress={
+        organizationId ? (
+          <OrganizationOnboardingProgressSummary
+            application={application}
+            currentStep={visibleStep}
+            onStepSelect={goToStep}
           />
         ) : undefined
       }
@@ -78,12 +91,12 @@ export function OrganizationOnboardingWorkspace({
     >
       <div className="flex flex-col gap-7">
         <div className="flex flex-col gap-2">
-          <h1 className="font-serif text-3xl font-normal leading-tight sm:text-4xl">
+          <h1 className="font-serif text-display font-normal">
             {application && !application.canEdit
               ? "Your organisation"
               : "Set up your organisation"}
           </h1>
-          <p className="max-w-2xl text-sm leading-6 text-muted-foreground">
+          <p className="max-w-2xl text-lede text-muted-foreground">
             {application && !application.canEdit
               ? "Your organisation setup is read-only at this stage. Check the status details below."
               : visibleStep === "details"

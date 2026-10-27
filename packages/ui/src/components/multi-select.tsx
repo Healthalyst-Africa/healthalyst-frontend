@@ -100,7 +100,7 @@ export function MultiSelect({
             ))}
           </span>
         ) : (
-          <span className="text-xs font-light text-muted-foreground/50">
+          <span className="text-xs font-light text-muted-foreground">
             {placeholder}
           </span>
         )}
@@ -132,19 +132,35 @@ export function MultiSelect({
                 return (
                   <CommandItem
                     key={option.value}
-                    value={option.label}
+                    value={[option.label, option.description]
+                      .filter(Boolean)
+                      .join(" ")}
                     disabled={!isSelected && isAtMaximum}
                     onSelect={() => toggleValue(option.value)}
-                    className="py-2.5"
+                    className="min-h-11 items-start gap-3 py-2.5"
                   >
-                    <span className="flex-1">{option.label}</span>
-                    <CheckIcon
+                    {/* A checkbox mark, so the list reads as "choose any". */}
+                    <span
                       aria-hidden="true"
                       className={cn(
-                        "text-primary",
-                        isSelected ? "opacity-100" : "opacity-0"
+                        "mt-0.5 flex size-4 shrink-0 items-center justify-center rounded-[4px] border transition-colors",
+                        isSelected
+                          ? "border-primary bg-primary text-primary-foreground"
+                          : "border-muted-foreground bg-card"
                       )}
-                    />
+                    >
+                      {isSelected && <CheckIcon className="!size-3" />}
+                    </span>
+                    <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                      <span className="font-medium leading-5">
+                        {option.label}
+                      </span>
+                      {option.description && (
+                        <span className="text-xs leading-5 text-muted-foreground">
+                          {option.description}
+                        </span>
+                      )}
+                    </span>
                     {isSelected && <span className="sr-only">, selected</span>}
                   </CommandItem>
                 );

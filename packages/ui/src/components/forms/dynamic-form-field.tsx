@@ -5,6 +5,7 @@ import type {
   FormFieldDefinition,
   FormDefinition,
 } from "@healthalyst/ui/types/form-definition";
+import { isFocusLeaving } from "@healthalyst/ui/lib/focus";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import {
   Field,
@@ -28,23 +29,29 @@ import {
 } from "@healthalyst/ui/primitives/select";
 import { Textarea } from "@healthalyst/ui/primitives/textarea";
 import { FieldLabelText } from "./field-label-text";
+import { FieldStatusMessage, type FieldStatus } from "./field-status-message";
 
 export function DynamicFormField({
   definition,
   field,
   error,
+  status,
   defaultSelection,
   disabled,
   onFieldChange,
+  onFieldBlur,
   value,
   onValueChange,
 }: {
   definition: FormDefinition;
   field: FormFieldDefinition;
   error?: string;
+  /** Live feedback shown while there is no error. */
+  status?: FieldStatus;
   defaultSelection?: readonly string[];
   disabled: boolean;
   onFieldChange?: (fieldName: string) => void;
+  onFieldBlur?: (fieldName: string) => void;
   value?: string;
   onValueChange?: (fieldName: string, value: string) => void;
 }) {
@@ -53,9 +60,14 @@ export function DynamicFormField({
     ? `${fieldIdentifier}-description`
     : undefined;
   const errorIdentifier = error ? `${fieldIdentifier}-error` : undefined;
+  const visibleStatus = error ? undefined : status;
+  const statusIdentifier = visibleStatus
+    ? `${fieldIdentifier}-status`
+    : undefined;
   const describedBy =
-    [descriptionIdentifier, errorIdentifier].filter(Boolean).join(" ") ||
-    undefined;
+    [descriptionIdentifier, errorIdentifier, statusIdentifier]
+      .filter(Boolean)
+      .join(" ") || undefined;
 
   if (field.kind === "checkbox") {
     return (
@@ -165,6 +177,10 @@ export function DynamicFormField({
       className={cn("gap-1.5", field.columnSpan === 2 && "sm:col-span-2")}
       data-invalid={Boolean(error)}
       data-disabled={disabled}
+      // Leaving the whole field, not moving to its "Show password" button.
+      onBlur={(focusEvent) => {
+        if (isFocusLeaving(focusEvent)) onFieldBlur?.(field.name);
+      }}
     >
       <FieldLabel
         className={cn(field.hideLabel && "sr-only")}
@@ -253,6 +269,12 @@ export function DynamicFormField({
         </FieldDescription>
       )}
       {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
+      {visibleStatus && statusIdentifier && (
+        <FieldStatusMessage
+          identifier={statusIdentifier}
+          status={visibleStatus}
+        />
+      )}
     </Field>
   );
 }

@@ -29,6 +29,12 @@ export const STAFF_SIGN_IN_HEADINGS = {
   "recovery-codes": {
     title: "Save your recovery codes",
     description:
-      "Keep these codes somewhere safe. Each code can be used once if you lose access to your authenticator.",
+      "Use one of these to sign in if you lose your phone or cannot open your authenticator app.",
   },
+} as const;
+
+/** The text file staff recovery codes download as, and its first line. */
+export const STAFF_RECOVERY_CODES_FILE = {
+  name: "healthalyst-recovery-codes.txt",
+  heading: "HealthAlyst recovery codes",
 } as const;

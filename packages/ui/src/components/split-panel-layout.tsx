@@ -44,7 +44,7 @@ export function SplitPanelLayout({
     <div className={cn("min-h-dvh", className)}>
       <div
         className={cn(
-          "grid min-h-dvh w-full gap-6 p-4 lg:h-dvh lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:p-6",
+          "grid min-h-dvh w-full grid-cols-[minmax(0,1fr)] gap-6 p-4 lg:h-dvh lg:grid-rows-[minmax(0,1fr)] lg:overflow-hidden lg:p-6",
           showcaseVisible
             ? "lg:grid-cols-[min(45.5rem,calc((100%_-_4rem)/2))_minmax(0,32rem)] lg:justify-center lg:gap-16"
             : "lg:grid-cols-[minmax(0,1fr)] lg:justify-center"

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { OrganizationRegistrationForm } from "~/features/organization-registration";
 import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
@@ -5,6 +6,11 @@ import { readProductsFromQuery } from "~/shared/organization/utilities/read-prod
 import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 import Link from "next/link";
 import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
+
+// The layout template only reaches nested routes, so this title is written in full.
+export const metadata: Metadata = {
+  title: { absolute: "Register your organisation | HealthAlyst" },
+};
 
 /**
  * Registration. Product apps link here; `?product=` pre-selects the products

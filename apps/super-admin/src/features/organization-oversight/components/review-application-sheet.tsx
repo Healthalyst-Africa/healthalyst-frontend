@@ -132,20 +132,21 @@ export function ReviewApplicationSheet({
       Claim for review
     </ActionButton>
   ) : review.canReview ? (
-    <>
+    // Phones: approve across the top, the other two decisions side by side.
+    // Wider: reject on the left, request changes and approve on the right.
+    <div className="grid w-full grid-cols-2 gap-2 sm:flex sm:items-center sm:gap-3">
       <ActionButton
         type="button"
-        variant="ghost"
-        className="text-destructive hover:bg-destructive/10 hover:text-destructive sm:mr-auto"
+        variant="outline"
+        className="border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive sm:mr-auto"
         disabled={!detail}
         onClick={() => review.openDecisionDialog("reject")}
       >
-        Reject application
+        Reject
       </ActionButton>
       <ActionButton
         type="button"
-        variant="link"
-        className="px-2"
+        variant="outline"
         disabled={!detail}
         onClick={() => review.openDecisionDialog("changes")}
       >
@@ -153,12 +154,13 @@ export function ReviewApplicationSheet({
       </ActionButton>
       <ActionButton
         type="button"
+        className="max-sm:order-first max-sm:col-span-2"
         disabled={!detail}
         onClick={() => review.openDecisionDialog("approve")}
       >
         Approve organisation
       </ActionButton>
-    </>
+    </div>
   ) : undefined;
 
   return (
@@ -476,7 +478,6 @@ export function ReviewApplicationSheet({
           id="rejection-reason"
           label="Reason"
           name="reasonCode"
-          presentation="native"
           required
           placeholder="Choose a reason"
           options={REVIEW_REJECTION_REASONS.map((rejectionReason) => ({

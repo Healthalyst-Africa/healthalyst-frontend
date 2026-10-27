@@ -26,10 +26,10 @@ function DashboardOverview({
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-serif text-3xl font-normal tracking-tight">
+          <h1 className="font-serif text-title font-normal tracking-tight">
             Company overview
           </h1>
-          <p className="mt-2 text-sm text-muted-foreground">
+          <p className="mt-2 text-lede text-muted-foreground">
             Organisation registration and review activity.
           </p>
         </div>

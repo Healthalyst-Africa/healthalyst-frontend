@@ -1,6 +1,7 @@
 export const CODE_LENGTH = 6;
 export const TOTAL_STEPS = 2;
 export const RECOVERY_CODES_FILE_NAME = "healthalyst-recovery-codes.txt";
+export const RECOVERY_CODES_FILE_HEADING = "HealthAlyst recovery codes";
 
 /** Codes that mean the enrolment token can no longer be used. */
 export const EXPIRED_ENROLMENT_CODES = new Set([

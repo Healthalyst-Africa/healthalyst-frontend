@@ -4,13 +4,16 @@ import { BRAND_MARK_SOURCE } from "~/config/brand";
 
 import Link from "next/link";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { CheckboxField } from "@healthalyst/ui/components/checkbox-field";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { OneTimeCodeField } from "@healthalyst/ui/components/one-time-code-field";
 import { QrCode } from "@healthalyst/ui/components/qr-code";
+import { RecoveryCodesPanel } from "@healthalyst/ui/components/recovery-codes-panel";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import { useStaffSignInFlow } from "~/features/staff-auth/hooks/use-staff-sign-in-flow";
-import { STAFF_AUTHENTICATOR_CONFIGURATION } from "~/features/staff-auth/config/staff-sign-in";
+import {
+  STAFF_AUTHENTICATOR_CONFIGURATION,
+  STAFF_RECOVERY_CODES_FILE,
+} from "~/features/staff-auth/config/staff-sign-in";
 import { StaffAuthLayout } from "~/features/staff-auth/components/staff-auth-layout";
 import { APPLICATION_ROUTES } from "~/config/application-routes";
 
@@ -275,28 +278,16 @@ export function StaffSignInForm() {
       )}
 
       {stage.kind === "recovery-codes" && (
-        <div className="flex flex-col gap-5">
-          <ul className="max-h-48 list-inside list-decimal space-y-2 overflow-y-auto rounded-md border border-border bg-muted/40 p-4 font-mono text-sm">
-            {stage.recoveryCodes.map((recoveryCode) => (
-              <li key={recoveryCode}>{recoveryCode}</li>
-            ))}
-          </ul>
-          <CheckboxField
-            id="staff-recovery-codes-saved"
-            label="I have saved my recovery codes somewhere safe."
-            checked={hasSavedRecoveryCodes}
-            onCheckedChange={setHasSavedRecoveryCodes}
-          />
-          <ActionButton
-            type="button"
-            size="large"
-            className="w-full"
-            disabled={!hasSavedRecoveryCodes}
-            onClick={finishAuthenticatorEnrollment}
-          >
-            Continue to HealthAlyst
-          </ActionButton>
-        </div>
+        <RecoveryCodesPanel
+          recoveryCodes={stage.recoveryCodes}
+          downloadFileName={STAFF_RECOVERY_CODES_FILE.name}
+          downloadHeading={STAFF_RECOVERY_CODES_FILE.heading}
+          confirmationIdentifier="staff-recovery-codes-saved"
+          hasSavedCodes={hasSavedRecoveryCodes}
+          onHasSavedCodesChange={setHasSavedRecoveryCodes}
+          continueLabel="Continue to HealthAlyst"
+          onContinue={finishAuthenticatorEnrollment}
+        />
       )}
     </StaffAuthLayout>
   );

@@ -7,8 +7,8 @@ import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type FormEvent } from "react";
-import { EmailSentIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { EmailSentIllustration } from "@healthalyst/ui/illustrations/email-sent-illustration";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { TextField } from "@healthalyst/ui/components/text-field";
@@ -71,9 +71,12 @@ function ResendConfirmationForm() {
       >
         Send a new confirmation link
       </ActionButton>
-      <p aria-live="polite" className="text-sm text-muted-foreground">
+      <p
+        aria-live="polite"
+        className="text-center text-xs font-light leading-5 text-muted-foreground"
+      >
         {resendMutation.isSuccess
-          ? "If an unconfirmed account uses that address, a new link is on its way."
+          ? "If that address still needs confirming, a new link is on its way. Addresses that are already confirmed do not get one: sign in instead."
           : ""}
       </p>
       {resendMutation.error && (
@@ -152,7 +155,7 @@ export default function EmailVerification() {
   const heading = verificationMutation.isSuccess
     ? "Email address confirmed"
     : isLinkExpired
-      ? "This link has expired"
+      ? "This link can no longer be used"
       : verificationToken === null
         ? "Open the link from your email"
         : "Confirm your email address";
@@ -160,7 +163,7 @@ export default function EmailVerification() {
   const introduction = verificationMutation.isSuccess
     ? "Your administrator email address is confirmed."
     : isLinkExpired
-      ? "Confirmation links work once and for a limited time. Request a new one below."
+      ? "Each confirmation link works once and for a limited time. If you have already confirmed your address, sign in. Otherwise, request a new link below."
       : verificationToken === null
         ? "Use the link in the confirmation email we sent to the administrator address. If you cannot find it, request a new one."
         : "Confirm the email address for your HealthAlyst administrator account.";
@@ -168,22 +171,20 @@ export default function EmailVerification() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col items-center gap-3 text-center">
-        <span className="flex size-12 items-center justify-center rounded-full bg-secondary text-primary">
-          <EmailSentIcon aria-hidden="true" />
-        </span>
+        <EmailSentIllustration className="h-auto w-24 sm:w-28" />
         <h2
           ref={headingReference}
-          className="font-serif text-3xl font-normal leading-tight outline-none"
+          className="font-serif text-title font-normal outline-none"
           tabIndex={-1}
         >
           {heading}
         </h2>
-        <p className="max-w-sm text-sm leading-6 text-muted-foreground">
+        <p className="max-w-sm text-lede text-muted-foreground">
           {introduction}
         </p>
       </div>
 
-      <ContentPanel>
+      <ContentPanel frame="wide-screens">
         {verificationToken === undefined ? (
           <FormMessage tone="status">
             Reading your confirmation link…

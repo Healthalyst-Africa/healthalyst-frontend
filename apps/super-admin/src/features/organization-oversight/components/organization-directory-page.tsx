@@ -37,10 +37,10 @@ function OrganizationsList({
   return (
     <>
       <div>
-        <h1 className="font-serif text-3xl font-normal tracking-tight">
+        <h1 className="font-serif text-title font-normal tracking-tight">
           Organisations
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
+        <p className="mt-2 text-lede text-muted-foreground">
           Registration details and current access decisions.
         </p>
       </div>

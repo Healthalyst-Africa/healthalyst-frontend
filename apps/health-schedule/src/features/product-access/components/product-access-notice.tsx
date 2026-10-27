@@ -77,9 +77,7 @@ export function StatusPageLayout({
       </header>
       <main className="flex flex-1 items-center justify-center px-4 pb-16 sm:px-8">
         <div className="flex w-full max-w-2xl flex-col gap-6">
-          <h1 className="font-serif text-3xl font-normal leading-tight">
-            HealthSchedule
-          </h1>
+          <h1 className="font-serif text-title font-normal">HealthSchedule</h1>
           {children}
         </div>
       </main>

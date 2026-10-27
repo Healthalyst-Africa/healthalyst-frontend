@@ -62,11 +62,11 @@ export function ApplicationLauncherGrid({
                   className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-foreground/60 opacity-0 backdrop-blur-[3px] transition-opacity duration-300 group-hover:opacity-100 motion-reduce:transition-none"
                 >
                   {application.unavailableIcon && (
-                    <span className="flex size-12 items-center justify-center rounded-full bg-background/15 text-background ring-1 ring-background/35 [&_svg]:size-5">
+                    <span className="flex size-10 items-center justify-center rounded-full bg-background/15 text-background ring-1 ring-background/35 sm:size-12 [&_svg]:size-5">
                       {application.unavailableIcon}
                     </span>
                   )}
-                  <span className="font-serif text-xl leading-tight text-background">
+                  <span className="px-3 text-center font-serif text-heading text-background">
                     {application.unavailableLabel}
                   </span>
                 </span>

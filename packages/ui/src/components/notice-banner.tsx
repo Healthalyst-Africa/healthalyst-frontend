@@ -44,15 +44,16 @@ function NoticeContent({
 }) {
   return (
     <>
-      <AlertTitle className={cn("mb-0", isProminent && "text-base leading-6")}>
+      <AlertTitle className={cn("mb-0", isProminent && "text-heading")}>
         {title}
       </AlertTitle>
       {children && (
         <AlertDescription
           className={cn(
-            "flex flex-col items-start gap-3 text-xs leading-5 [&_p]:leading-5",
+            "flex flex-col items-start gap-3 text-caption [&_p]:leading-5",
             tone !== "error" && "text-muted-foreground",
-            isProminent && "gap-4"
+            // Under the title on phones, in the same column.
+            isProminent && "gap-4 max-sm:col-start-2"
           )}
         >
           {children}
@@ -161,23 +162,30 @@ export function StateNotice({
       variant={TONE_PRESENTATION[tone].variant}
       role={announcementRole(tone)}
       className={cn(
-        "flex flex-col gap-4 rounded-xl px-5 py-5 sm:flex-row sm:items-center sm:gap-5 sm:px-6",
+        // Phones: the illustration spans the title and description, which sit
+        // close together; links and actions follow in the same column.
+        // The illustration always starts level with the title.
+        "grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 rounded-xl px-4 py-4 sm:flex sm:flex-row sm:items-start sm:gap-5 sm:px-6 sm:py-5",
         className
       )}
     >
       {/* Illustrations sit on a white disc so they read on any tone. */}
       <div
         aria-hidden="true"
-        className="w-14 shrink-0 [--illustration-base:hsl(var(--background))] sm:w-16 [&_svg]:h-auto [&_svg]:w-full"
+        className="w-11 shrink-0 self-start [--illustration-base:hsl(var(--background))] max-sm:row-span-2 sm:w-16 [&_svg]:h-auto [&_svg]:w-full"
       >
         {illustration ?? DEFAULT_STATE_ILLUSTRATIONS[tone]}
       </div>
-      <div className="flex min-w-0 flex-1 flex-col">
+      <div className="contents sm:flex sm:min-w-0 sm:flex-1 sm:flex-col">
         <NoticeContent tone={tone} title={title} isProminent>
           {children}
         </NoticeContent>
       </div>
-      {action && <div className="shrink-0">{action}</div>}
+      {action && (
+        <div className="shrink-0 max-sm:col-start-2 max-sm:mt-3 sm:self-center">
+          {action}
+        </div>
+      )}
     </Alert>
   );
 }
@@ -197,7 +205,7 @@ export function NoticeBannerLinks({
   links: readonly NoticeBannerLink[];
 }) {
   return (
-    <ul className="flex flex-col gap-1">
+    <ul className="flex flex-col sm:gap-1">
       {links.map((noticeLink) => (
         <li key={noticeLink.key}>
           <a
@@ -207,7 +215,7 @@ export function NoticeBannerLinks({
               clickEvent.preventDefault();
               noticeLink.onSelect();
             }}
-            className="inline-flex min-h-8 items-center rounded-sm text-sm font-semibold text-primary underline underline-offset-4 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            className="inline-flex min-h-11 items-center rounded-sm text-body font-semibold sm:min-h-8 text-primary underline underline-offset-4 hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
           >
             {noticeLink.label}
           </a>

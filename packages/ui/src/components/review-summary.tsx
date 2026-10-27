@@ -54,9 +54,9 @@ type ReviewSection = {
 };
 
 /**
- * Reviewed parts of a workflow as expandable rows. Incomplete sections start
- * open so their gaps are visible; complete ones start collapsed. Each row's
- * trigger is a level-three heading.
+ * Reviewed parts of a workflow as expandable rows. Every section starts
+ * closed; its summary line and icon show whether anything is missing. Each
+ * row's trigger is a level-three heading.
  */
 export function ReviewSections({
   sections,
@@ -64,13 +64,7 @@ export function ReviewSections({
   sections: readonly ReviewSection[];
 }) {
   return (
-    <Accordion
-      type="multiple"
-      defaultValue={sections
-        .filter((section) => !section.complete)
-        .map((section) => section.value)}
-      className="flex flex-col gap-3"
-    >
+    <Accordion type="multiple" className="flex flex-col gap-3">
       {sections.map((section) => {
         // Matches the completed-step mark in OnboardingProgress.
         const CompletionIcon = section.complete ? SuccessIcon : WarningIcon;
@@ -98,10 +92,10 @@ export function ReviewSections({
                 </span>
               </span>
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-base font-medium leading-6 text-foreground">
+                <span className="text-heading font-medium text-foreground">
                   {section.heading}
                 </span>
-                <span className="text-xs font-light leading-5 text-muted-foreground sm:truncate">
+                <span className="text-caption font-light text-muted-foreground sm:truncate">
                   {section.summary}
                 </span>
               </span>
@@ -119,7 +113,7 @@ export function ReviewSections({
                     section.action && selectLink(section.action, clickEvent)
                   }
                   className={cn(
-                    "inline-flex min-h-8 w-fit items-center text-sm font-semibold text-primary underline underline-offset-4 hover:no-underline",
+                    "inline-flex min-h-11 w-fit items-center text-body font-semibold text-primary underline underline-offset-4 hover:no-underline sm:min-h-8",
                     LINK_FOCUS_CLASS_NAME
                   )}
                 >
@@ -150,10 +144,10 @@ export function SummaryDetailList({
     <dl className="grid gap-x-8 gap-y-4 rounded-lg bg-secondary/50 px-4 py-4 sm:grid-cols-2">
       {details.map((detail) => (
         <div key={detail.label} className="flex min-w-0 flex-col gap-0.5">
-          <dt className="text-xs text-muted-foreground">{detail.label}</dt>
+          <dt className="text-caption text-muted-foreground">{detail.label}</dt>
           <dd
             className={cn(
-              "text-sm [overflow-wrap:anywhere]",
+              "text-body [overflow-wrap:anywhere]",
               !detail.value && "text-muted-foreground"
             )}
           >
@@ -183,9 +177,9 @@ export function SummaryTiles({ tiles }: { tiles: readonly SummaryTile[] }) {
           className="flex min-w-0 flex-col gap-1 rounded-lg bg-secondary/50 px-4 py-3"
         >
           <span className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-sm font-medium">{tile.title}</span>
+            <span className="text-body font-medium">{tile.title}</span>
             {tile.status && (
-              <span className="text-xs">
+              <span className="text-caption">
                 <FileStatusText
                   label={tile.status.label}
                   tone={tile.status.tone}
@@ -194,7 +188,7 @@ export function SummaryTiles({ tiles }: { tiles: readonly SummaryTile[] }) {
             )}
           </span>
           {tile.description && (
-            <span className="text-xs font-light leading-5 text-muted-foreground">
+            <span className="text-caption font-light text-muted-foreground">
               {tile.description}
             </span>
           )}
@@ -216,7 +210,7 @@ export function SummaryChecks({ checks }: { checks: readonly SummaryCheck[] }) {
           <li
             key={check.key}
             className={cn(
-              "flex items-start gap-2 rounded-lg px-3 py-3 text-sm",
+              "flex items-start gap-2 rounded-lg px-3 py-3 text-body",
               check.complete ? "bg-secondary/50" : "bg-alert-warning-surface"
             )}
           >
@@ -267,24 +261,24 @@ export function SummaryFiles({ files }: { files: readonly SummaryFile[] }) {
         >
           {summaryFile.file ? (
             <FileTile
-              className="size-12 border-transparent bg-background"
+              className="size-10 border-transparent bg-background sm:size-12"
               previewUrl={summaryFile.file.previewUrl}
               fileTypeLabel={summaryFile.file.fileTypeLabel}
             />
           ) : (
             <span
               aria-hidden="true"
-              className="flex size-12 shrink-0 items-center justify-center rounded-md bg-background text-status-warning"
+              className="flex size-10 shrink-0 items-center justify-center rounded-md bg-background text-status-warning sm:size-12"
             >
               <DocumentIcon className="size-5" />
             </span>
           )}
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-            <p className="text-sm font-medium leading-5">{summaryFile.label}</p>
+            <p className="text-body font-medium">{summaryFile.label}</p>
             {summaryFile.file ? (
               <>
                 {summaryFile.file.status && (
-                  <span className="text-xs">
+                  <span className="text-caption">
                     <FileStatusText
                       label={summaryFile.file.status.label}
                       tone={summaryFile.file.status.tone}
@@ -300,14 +294,14 @@ export function SummaryFiles({ files }: { files: readonly SummaryFile[] }) {
                   selectLink(summaryFile.addLink, clickEvent)
                 }
                 className={cn(
-                  "w-fit text-xs font-semibold text-primary underline-offset-4 hover:underline",
+                  "w-fit text-caption font-semibold text-primary underline-offset-4 hover:underline",
                   LINK_FOCUS_CLASS_NAME
                 )}
               >
                 {summaryFile.addLink.label}
               </a>
             ) : (
-              <p className="text-xs text-muted-foreground">Not added</p>
+              <p className="text-caption text-muted-foreground">Not added</p>
             )}
           </div>
         </li>

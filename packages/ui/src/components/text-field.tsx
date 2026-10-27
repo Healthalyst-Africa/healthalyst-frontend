@@ -13,7 +13,10 @@ import {
 } from "@healthalyst/ui/primitives/field";
 import { Input } from "@healthalyst/ui/primitives/input";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
+import { FieldStatusMessage } from "@healthalyst/ui/components/forms/field-status-message";
+import { isFocusLeaving } from "@healthalyst/ui/lib/focus";
 import { cn } from "@healthalyst/ui/lib/utilities";
+import type { FieldStatus } from "@healthalyst/ui/types/field-status";
 
 type TextFieldProperties = Omit<
   ComponentPropsWithoutRef<"input">,
@@ -25,6 +28,10 @@ type TextFieldProperties = Omit<
   description?: ReactNode;
   /** Validation message shown below the control and linked to it. */
   error?: string;
+  /** Live feedback, such as a password's length, shown while there is no error. */
+  status?: FieldStatus;
+  /** Runs when focus leaves the whole field, not when it moves within it. */
+  onFieldLeave?: () => void;
   className?: string;
   inputClassName?: string;
 };
@@ -41,6 +48,8 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProperties>(
       hideLabel = false,
       description,
       error,
+      status,
+      onFieldLeave,
       type = "text",
       disabled,
       className,
@@ -52,8 +61,15 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProperties>(
   ) => {
     const descriptionIdentifier = description ? `${id}-description` : "";
     const errorIdentifier = error ? `${id}-error` : "";
+    const visibleStatus = error ? undefined : status;
+    const statusIdentifier = visibleStatus ? `${id}-status` : "";
     const describedBy =
-      [additionalDescribedBy, descriptionIdentifier, errorIdentifier]
+      [
+        additionalDescribedBy,
+        descriptionIdentifier,
+        errorIdentifier,
+        statusIdentifier,
+      ]
         .filter(Boolean)
         .join(" ") || undefined;
     const controlProperties = {
@@ -71,6 +87,9 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProperties>(
         className={cn("gap-1.5", className)}
         data-invalid={Boolean(error)}
         data-disabled={disabled || undefined}
+        onBlur={(focusEvent) => {
+          if (onFieldLeave && isFocusLeaving(focusEvent)) onFieldLeave();
+        }}
       >
         <FieldLabel className={cn(hideLabel && "sr-only")} htmlFor={id}>
           {label}
@@ -86,6 +105,12 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProperties>(
           </FieldDescription>
         )}
         {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
+        {visibleStatus && (
+          <FieldStatusMessage
+            identifier={statusIdentifier}
+            status={visibleStatus}
+          />
+        )}
       </Field>
     );
   }
