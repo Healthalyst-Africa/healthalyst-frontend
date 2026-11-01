@@ -1,8 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { DataTable } from "@healthalyst/ui/components/data-table";
@@ -14,12 +13,12 @@ import { APPLICATION_ROUTES } from "~/config/application-routes";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
 import { ReviewApplicationSheet } from "~/features/organization-oversight/components/review-application-sheet";
 import {
-  REVIEW_APPLICATION_QUERY_PARAMETER,
   REVIEW_ASSIGNMENT_OPTIONS,
   createReviewQueueColumns,
   getReviewAssignment,
   type ReviewAssignment,
 } from "~/features/organization-oversight/config/review-queue";
+import { useOpenApplication } from "~/features/organization-oversight/hooks/use-open-application";
 import { useReviewQueueQuery } from "~/features/organization-oversight/hooks/use-organization-oversight";
 import type { OrganizationApplication } from "~/features/organization-oversight/types/organization-types";
 import { useStaffSession } from "~/infrastructure/auth/staff-session-provider";
@@ -51,14 +50,8 @@ function isReviewAssignment(value: string): value is ReviewAssignment {
 
 function ReviewQueue({ staffIdentity }: { staffIdentity: StaffIdentity }) {
   const reviewQueue = useReviewQueueQuery(staffIdentity);
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParameters = useSearchParams();
   const [organizationName, setOrganizationName] = useState("");
   const [assignment, setAssignment] = useState<ReviewAssignment | "">("");
-  const lastOpenApplicationReference = useRef<OrganizationApplication | null>(
-    null
-  );
 
   const applications = reviewQueue.data ?? [];
   const searchText = organizationName.trim().toLocaleLowerCase("en-NG");
@@ -74,40 +67,8 @@ function ReviewQueue({ staffIdentity }: { staffIdentity: StaffIdentity }) {
   );
   const hasFilters = Boolean(searchText || assignment);
 
-  const openApplicationIdentifier = searchParameters.get(
-    REVIEW_APPLICATION_QUERY_PARAMETER
-  );
-  const listedOpenApplication = applications.find(
-    (application) => application.id === openApplicationIdentifier
-  );
-  // A decision can move the application out of the queue; keep showing it
-  // until the reviewer closes the panel.
-  if (listedOpenApplication) {
-    lastOpenApplicationReference.current = listedOpenApplication;
-  }
-  const openApplication =
-    listedOpenApplication ??
-    (lastOpenApplicationReference.current?.id === openApplicationIdentifier
-      ? lastOpenApplicationReference.current
-      : null);
-
-  function setOpenApplication(applicationIdentifier: string | null) {
-    const nextSearchParameters = new URLSearchParams(
-      searchParameters.toString()
-    );
-    if (applicationIdentifier) {
-      nextSearchParameters.set(
-        REVIEW_APPLICATION_QUERY_PARAMETER,
-        applicationIdentifier
-      );
-    } else {
-      nextSearchParameters.delete(REVIEW_APPLICATION_QUERY_PARAMETER);
-    }
-    const query = nextSearchParameters.toString();
-    router.replace(`${pathname}${query ? `?${query}` : ""}`, {
-      scroll: false,
-    });
-  }
+  const { openApplication, setOpenApplication } =
+    useOpenApplication(applications);
 
   const state: DataTableState<OrganizationApplication> = reviewQueue.isError
     ? {
