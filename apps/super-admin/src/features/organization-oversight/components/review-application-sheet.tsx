@@ -76,9 +76,12 @@ export function ReviewApplicationSheet({
   staffIdentity,
   open,
   onOpenChange,
+  returnLabel = "Back to the queue",
 }: ReviewApplicationProperties & {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Closes the confirmation shown after a decision. */
+  returnLabel?: string;
 }) {
   const review = useReviewApplication({ application, staffIdentity });
   const detail = review.detailQuery.data;
@@ -517,7 +520,7 @@ export function ReviewApplicationSheet({
           title={review.completedConfirmation.title}
           description={review.completedConfirmation.description}
           primaryAction={{
-            label: "Back to the queue",
+            label: returnLabel,
             onSelect: () => {
               review.clearCompletedDecision();
               onOpenChange(false);
