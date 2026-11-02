@@ -22,6 +22,8 @@ type OrganizationApplicationsTableProperties = {
   onRetry: () => void;
   recentApplicationLimit?: number;
   searchTerm?: string;
+  /** Opens an organisation's details when its row is chosen. */
+  onSelectApplication?: (application: OrganizationApplication) => void;
 };
 
 /** Supplies organisation content, filters and query state to the shared table compositions. */
@@ -32,6 +34,7 @@ export function OrganizationApplicationsTable({
   onRetry,
   recentApplicationLimit,
   searchTerm = "",
+  onSelectApplication,
 }: OrganizationApplicationsTableProperties) {
   const {
     filterBarProperties,
@@ -82,6 +85,13 @@ export function OrganizationApplicationsTable({
         }
         state={state}
         getRowIdentifier={(application) => application.id}
+        rowAction={
+          onSelectApplication && {
+            label: (application) =>
+              `View ${application.displayName || application.legalName}`,
+            onSelect: onSelectApplication,
+          }
+        }
         emptyState={
           hasAppliedFilters
             ? {
