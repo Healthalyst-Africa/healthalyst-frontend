@@ -92,7 +92,7 @@ export function OrganizationOnboardingWorkspace({
             ...(isApproved
               ? [
                   {
-                    label: "Organisation settings",
+                    label: "Settings",
                     icon: <OrganizationIcon aria-hidden="true" />,
                     onSelect: () =>
                       router.push(ORGANIZATION_ROUTES.organizationSettings),
@@ -100,7 +100,7 @@ export function OrganizationOnboardingWorkspace({
                 ]
               : []),
             {
-              label: "Account security",
+              label: "Account",
               icon: <AccountSecurityIcon aria-hidden="true" />,
               onSelect: () => router.push(ORGANIZATION_ROUTES.accountSecurity),
             },

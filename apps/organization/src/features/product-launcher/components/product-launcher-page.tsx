@@ -114,13 +114,13 @@ export function ProductLauncherPage() {
           error={signOutMutation.error?.message}
           actions={[
             {
-              label: "Organisation settings",
+              label: "Settings",
               icon: <OrganizationIcon aria-hidden="true" />,
               onSelect: () =>
                 router.push(ORGANIZATION_ROUTES.organizationSettings),
             },
             {
-              label: "Account security",
+              label: "Account",
               icon: <AccountSecurityIcon aria-hidden="true" />,
               onSelect: () => router.push(ORGANIZATION_ROUTES.accountSecurity),
             },

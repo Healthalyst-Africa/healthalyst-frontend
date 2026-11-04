@@ -107,7 +107,7 @@ export function AccountSecurityPage({
             ...(isApproved
               ? [
                   {
-                    label: "Organisation settings",
+                    label: "Settings",
                     icon: <OrganizationIcon aria-hidden="true" />,
                     onSelect: () =>
                       router.push(ORGANIZATION_ROUTES.organizationSettings),

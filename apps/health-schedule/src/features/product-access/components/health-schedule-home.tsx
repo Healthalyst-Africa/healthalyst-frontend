@@ -68,7 +68,7 @@ export function HealthScheduleHome({
             ...(organizationAppLinks
               ? [
                   {
-                    label: "Organisation settings",
+                    label: "Settings",
                     icon: <OrganizationIcon aria-hidden="true" />,
                     onSelect: () =>
                       window.location.assign(
@@ -76,7 +76,7 @@ export function HealthScheduleHome({
                       ),
                   },
                   {
-                    label: "Account security",
+                    label: "Account",
                     icon: <AccountSecurityIcon aria-hidden="true" />,
                     onSelect: () =>
                       window.location.assign(
