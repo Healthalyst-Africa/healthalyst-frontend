@@ -6,6 +6,7 @@ import type { PlatformSession } from "@healthalyst/platform-api/authentication-s
 import {
   AccountSecurityIcon,
   DashboardIcon,
+  OrganizationIcon,
   SignOutIcon,
 } from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
@@ -29,7 +30,7 @@ export function HealthScheduleHome({
 }) {
   const signOutMutation = useHealthScheduleSignOut();
   const { user } = platformSession;
-  const accountSecurityAddress = getOrganizationAppLinks()?.accountSecurity;
+  const organizationAppLinks = getOrganizationAppLinks();
 
   return (
     <DashboardShell
@@ -63,14 +64,24 @@ export function HealthScheduleHome({
           emailAddress={user.email ?? ""}
           error={signOutMutation.error?.message}
           actions={[
-            // Account security is owned by the organisation hub.
-            ...(accountSecurityAddress
+            // Settings and account security are owned by the organisation hub.
+            ...(organizationAppLinks
               ? [
+                  {
+                    label: "Organisation settings",
+                    icon: <OrganizationIcon aria-hidden="true" />,
+                    onSelect: () =>
+                      window.location.assign(
+                        organizationAppLinks.organizationSettings
+                      ),
+                  },
                   {
                     label: "Account security",
                     icon: <AccountSecurityIcon aria-hidden="true" />,
                     onSelect: () =>
-                      window.location.assign(accountSecurityAddress),
+                      window.location.assign(
+                        organizationAppLinks.accountSecurity
+                      ),
                   },
                 ]
               : []),

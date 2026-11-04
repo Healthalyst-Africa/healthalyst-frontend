@@ -12,7 +12,7 @@ export type AccountSecurityReturn = {
 };
 
 /**
- * Where "Back" goes from account security. A product that linked here is
+ * The page above account security in its breadcrumb trail. A product that linked here is
  * returned to only when the organisation is approved and the product's
  * address is configured, so the address never comes from the link itself.
  */
@@ -34,19 +34,19 @@ export function resolveAccountSecurityReturn({
   if (isApproved && productAddress && product) {
     return {
       href: productAddress,
-      label: `Back to ${product.name}`,
+      label: product.name,
       isProductApplication: true,
     };
   }
   return isApproved
     ? {
         href: ORGANIZATION_ROUTES.products,
-        label: "Back to your products",
+        label: "Products",
         isProductApplication: false,
       }
     : {
         href: ORGANIZATION_ROUTES.onboarding,
-        label: "Back to your application",
+        label: "Your application",
         isProductApplication: false,
       };
 }

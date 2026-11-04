@@ -8,11 +8,12 @@ export type OrganizationAppLinks = {
   signIn: string;
   application: string;
   accountSecurity: string;
+  organizationSettings: string;
 };
 
 /**
- * Organisation registration, sign-in and account security are owned by the
- * account hub. Links name HealthSchedule so registration pre-selects it, and
+ * Organisation registration, sign-in, settings and account security are
+ * owned by the account hub. Links name HealthSchedule so registration pre-selects it, and
  * sign-in and account security return here.
  */
 export function getOrganizationAppLinks(): OrganizationAppLinks | null {
@@ -23,5 +24,6 @@ export function getOrganizationAppLinks(): OrganizationAppLinks | null {
     signIn: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.signIn}?product=${ORGANIZATION_APP_ROUTES.product}`,
     application: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.application}`,
     accountSecurity: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.accountSecurity}?product=${ORGANIZATION_APP_ROUTES.product}`,
+    organizationSettings: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.organizationSettings}`,
   };
 }

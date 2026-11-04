@@ -23,6 +23,12 @@ describe("getOrganizationAppLinks", () => {
     );
   });
 
+  it("links to organisation settings in the organisation hub", () => {
+    expect(getOrganizationAppLinks()?.organizationSettings).toBe(
+      "https://organisation.example.test/settings"
+    );
+  });
+
   it("has no links when the hub address is not configured", () => {
     organizationAppAddress.current = undefined;
     expect(getOrganizationAppLinks()).toBeNull();
