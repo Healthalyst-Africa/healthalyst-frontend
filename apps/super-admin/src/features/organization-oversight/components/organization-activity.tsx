@@ -51,7 +51,7 @@ export function InternalNoteForm({
       <TextAreaField
         id="internal-note"
         label="Add an internal note"
-        hint="Only HealthAlyst staff can see internal notes."
+        description="Only HealthAlyst staff can see internal notes."
         name="note"
         rows={3}
         maxLength={ORGANIZATION_LIFECYCLE_LIMITS.noteMaximumLength}

@@ -78,7 +78,7 @@ export function OrganizationLifecycleDialogs({
         <TextAreaField
           id="lifecycle-reason"
           label={openPresentation?.reasonLabel ?? "Reason"}
-          hint={openPresentation?.reasonDescription}
+          description={openPresentation?.reasonDescription}
           name="reason"
           required
           rows={4}
