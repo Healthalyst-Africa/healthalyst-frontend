@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { SignOutIcon } from "@healthalyst/icons";
+import { AccountSecurityIcon, SignOutIcon } from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ApplicationLauncherGrid } from "@healthalyst/ui/components/application-launcher-grid";
@@ -109,6 +109,11 @@ export function ProductLauncherPage() {
           emailAddress={platformSession.user.email ?? ""}
           error={signOutMutation.error?.message}
           actions={[
+            {
+              label: "Account security",
+              icon: <AccountSecurityIcon aria-hidden="true" />,
+              onSelect: () => router.push(ORGANIZATION_ROUTES.accountSecurity),
+            },
             {
               label: "Sign out",
               pendingLabel: "Signing out…",
