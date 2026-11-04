@@ -11,6 +11,7 @@ import {
   FieldError,
   FieldLabel,
 } from "@healthalyst/ui/primitives/field";
+import { HintText } from "@healthalyst/ui/components/hint-text";
 import { Textarea } from "@healthalyst/ui/primitives/textarea";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
@@ -21,6 +22,8 @@ type TextAreaFieldProperties = Omit<
   id: string;
   label: string;
   description?: ReactNode;
+  /** A short tip with an information icon, shown below the control and linked to it. */
+  hint?: ReactNode;
   /** Validation message shown below the control and linked to it. */
   error?: string;
   className?: string;
@@ -29,10 +32,11 @@ type TextAreaFieldProperties = Omit<
 /** A labelled multi-line input with its description and validation message. */
 const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProperties>(
   (
-    { id, label, description, error, disabled, className, ...properties },
+    { id, label, description, hint, error, disabled, className, ...properties },
     elementReference
   ) => {
     const descriptionIdentifier = description ? `${id}-description` : "";
+    const hintIdentifier = hint ? `${id}-hint` : "";
     const errorIdentifier = error ? `${id}-error` : "";
 
     return (
@@ -49,7 +53,7 @@ const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProperties>(
           disabled={disabled}
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={
-            [descriptionIdentifier, errorIdentifier]
+            [descriptionIdentifier, hintIdentifier, errorIdentifier]
               .filter(Boolean)
               .join(" ") || undefined
           }
@@ -59,6 +63,7 @@ const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProperties>(
             {description}
           </FieldDescription>
         )}
+        {hint && <HintText id={hintIdentifier}>{hint}</HintText>}
         {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
       </Field>
     );
