@@ -3,11 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
-import { DashboardIcon, SignOutIcon } from "@healthalyst/icons";
+import {
+  AccountSecurityIcon,
+  DashboardIcon,
+  SignOutIcon,
+} from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { DashboardShell } from "@healthalyst/ui/components/dashboard-shell";
 import { EmptyState } from "@healthalyst/ui/components/empty-state";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
+import { getOrganizationAppLinks } from "~/features/organization-access/services/organization-app-links";
 import { useHealthScheduleSignOut } from "~/features/product-access/hooks/use-health-schedule-sign-out";
 
 const HOME_NAVIGATION = [
@@ -24,6 +29,7 @@ export function HealthScheduleHome({
 }) {
   const signOutMutation = useHealthScheduleSignOut();
   const { user } = platformSession;
+  const accountSecurityAddress = getOrganizationAppLinks()?.accountSecurity;
 
   return (
     <DashboardShell
@@ -57,6 +63,17 @@ export function HealthScheduleHome({
           emailAddress={user.email ?? ""}
           error={signOutMutation.error?.message}
           actions={[
+            // Account security is owned by the organisation hub.
+            ...(accountSecurityAddress
+              ? [
+                  {
+                    label: "Account security",
+                    icon: <AccountSecurityIcon aria-hidden="true" />,
+                    onSelect: () =>
+                      window.location.assign(accountSecurityAddress),
+                  },
+                ]
+              : []),
             {
               label: "Sign out",
               pendingLabel: "Signing out…",

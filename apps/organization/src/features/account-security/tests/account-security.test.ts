@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { passwordChangeSchema } from "~/features/account-security/schemas/password-change-schema";
 import { describeSessionDevice } from "~/features/account-security/utilities/describe-session-device";
+import { resolveAccountSecurityReturn } from "~/features/account-security/utilities/resolve-account-security-return";
 
 const VALID_VALUES = {
   currentPassword: "current-password-value",
@@ -91,5 +92,58 @@ describe("describeSessionDevice", () => {
   it("falls back when the browser is not known", () => {
     expect(describeSessionDevice(null)).toBe("Unknown device");
     expect(describeSessionDevice("curl/8.5.0")).toBe("Unknown device");
+  });
+});
+
+describe("resolveAccountSecurityReturn", () => {
+  const productAddresses = {
+    HEALTHSCHEDULE: "https://schedule.example.test",
+  };
+
+  it("returns to the product that linked here", () => {
+    expect(
+      resolveAccountSecurityReturn({
+        returnProductCode: "HEALTHSCHEDULE",
+        isApproved: true,
+        productAddresses,
+      })
+    ).toEqual({
+      href: "https://schedule.example.test",
+      label: "Back to HealthSchedule",
+      isProductApplication: true,
+    });
+  });
+
+  it("returns to the products page when the product has no configured address", () => {
+    expect(
+      resolveAccountSecurityReturn({
+        returnProductCode: "LABCONNECT",
+        isApproved: true,
+        productAddresses,
+      })
+    ).toMatchObject({ href: "/products", label: "Back to your products" });
+  });
+
+  it("returns to the application while the organisation is not approved", () => {
+    expect(
+      resolveAccountSecurityReturn({
+        returnProductCode: "HEALTHSCHEDULE",
+        isApproved: false,
+        productAddresses,
+      })
+    ).toMatchObject({
+      href: "/onboarding",
+      label: "Back to your application",
+    });
+  });
+
+  it("returns to the products page when no product linked here", () => {
+    expect(
+      resolveAccountSecurityReturn({
+        returnProductCode: undefined,
+        isApproved: true,
+        productAddresses,
+      })
+    ).toMatchObject({ href: "/products", isProductApplication: false });
   });
 });
