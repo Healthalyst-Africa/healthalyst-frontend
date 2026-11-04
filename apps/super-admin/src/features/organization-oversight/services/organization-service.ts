@@ -153,37 +153,43 @@ export async function addOrganizationInternalNote(
 
 export async function suspendOrganization(
   organizationId: string,
-  reason: string
+  reason: string,
+  version: number
 ): Promise<void> {
   await postOrganizationAction(
     organizationId,
     "suspend",
     { reason },
-    "We could not suspend this organisation. Try again."
+    "We could not suspend this organisation. Try again.",
+    version
   );
 }
 
 export async function reinstateOrganization(
   organizationId: string,
-  reason: string
+  reason: string,
+  version: number
 ): Promise<void> {
   await postOrganizationAction(
     organizationId,
     "reinstate",
     { reason },
-    "We could not reinstate this organisation. Try again."
+    "We could not reinstate this organisation. Try again.",
+    version
   );
 }
 
 export async function deactivateOrganization(
   organizationId: string,
-  reason: string
+  reason: string,
+  version: number
 ): Promise<void> {
   await postOrganizationAction(
     organizationId,
     "deactivate",
     { reason },
-    "We could not deactivate this organisation. Try again."
+    "We could not deactivate this organisation. Try again.",
+    version
   );
 }
 

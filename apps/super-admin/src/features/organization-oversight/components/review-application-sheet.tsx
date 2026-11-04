@@ -46,6 +46,16 @@ import {
   REVIEW_VALIDATION_LIMITS,
 } from "~/features/organization-oversight/config/review-configuration";
 import { useReviewApplication } from "~/features/organization-oversight/hooks/use-review-application";
+import { useOrganizationLifecycle } from "~/features/organization-oversight/hooks/use-organization-lifecycle";
+import {
+  InternalNoteForm,
+  OrganizationHistory,
+} from "~/features/organization-oversight/components/organization-activity";
+import {
+  OrganizationLifecycleButtons,
+  OrganizationLifecycleDialogs,
+} from "~/features/organization-oversight/components/organization-lifecycle-actions";
+import { INTERNAL_NOTE_ROLES } from "~/features/organization-oversight/config/organization-lifecycle";
 import type { OrganizationDetail } from "~/features/organization-oversight/types/organization-types";
 import type { ReviewApplicationProperties } from "~/features/organization-oversight/types/review-controller";
 
@@ -86,6 +96,15 @@ export function ReviewApplicationSheet({
 }) {
   const review = useReviewApplication({ application, staffIdentity });
   const detail = review.detailQuery.data;
+  const lifecycle = useOrganizationLifecycle({
+    organizationId: application.id,
+    status: application.status,
+    detail,
+    staffIdentity,
+  });
+  const canWriteInternalNote = INTERNAL_NOTE_ROLES.some((role) =>
+    staffIdentity.platformRoles.includes(role)
+  );
   const organizationName = application.displayName || application.legalName;
   const statusPresentation =
     APPLICATION_STATUS_PRESENTATION[application.status];
@@ -165,6 +184,8 @@ export function ReviewApplicationSheet({
         Approve organisation
       </ActionButton>
     </div>
+  ) : lifecycle.availableActions.length > 0 ? (
+    <OrganizationLifecycleButtons lifecycle={lifecycle} />
   ) : undefined;
 
   return (
@@ -376,6 +397,19 @@ export function ReviewApplicationSheet({
                   after a minute.
                 </HintText>
               </ReviewSection>
+
+              {canWriteInternalNote && (
+                <ReviewSection heading="Internal notes">
+                  <InternalNoteForm
+                    organizationId={application.id}
+                    staffIdentity={staffIdentity}
+                  />
+                </ReviewSection>
+              )}
+
+              <ReviewSection heading="History">
+                <OrganizationHistory history={detail.history} />
+              </ReviewSection>
             </>
           ) : null}
         </div>
@@ -499,6 +533,8 @@ export function ReviewApplicationSheet({
           maxLength={REVIEW_VALIDATION_LIMITS.noteMaximumLength}
         />
       </FormDialog>
+
+      <OrganizationLifecycleDialogs lifecycle={lifecycle} />
 
       <StepUpDialog
         open={review.isAwaitingStepUp}
