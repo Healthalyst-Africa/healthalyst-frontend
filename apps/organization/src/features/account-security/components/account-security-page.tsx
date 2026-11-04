@@ -11,6 +11,7 @@ import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { StatusPanel } from "@healthalyst/ui/components/status-panel";
 import { StepUpDialog } from "@healthalyst/ui/components/step-up-dialog";
 import OrganizationOnboardingLayout from "~/components/ui/organization-onboarding-layout";
+import { getProductApplicationAddresses } from "~/config/application-addresses";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { PasswordChangeSection } from "~/features/account-security/components/password-change-section";
@@ -18,15 +19,22 @@ import { RecoveryCodesSection } from "~/features/account-security/components/rec
 import { SignedInSessionsSection } from "~/features/account-security/components/signed-in-sessions-section";
 import { PLATFORM_SESSIONS_QUERY_KEY } from "~/features/account-security/config/account-security";
 import { useStepUpProtection } from "~/features/account-security/hooks/use-step-up-protection";
+import { resolveAccountSecurityReturn } from "~/features/account-security/utilities/resolve-account-security-return";
 import { CODE_LENGTH } from "~/features/authentication/config/authenticator-enrolment";
 import { SIGN_IN_LIMITS } from "~/features/authentication/config/authentication-limits";
 import { useSignOutMutation } from "~/features/authentication/hooks/use-sign-in";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
+import type { OrganizationProductCode } from "~/shared/organization/config/organization-products";
 import { APPROVED_ORGANIZATION_STATUS } from "~/shared/organization/config/organization-status";
 import { findActiveMembership } from "~/shared/organization/utilities/find-active-membership";
 
 /** The signed-in person's password, recovery codes and signed-in devices. */
-export function AccountSecurityPage() {
+export function AccountSecurityPage({
+  returnProductCode,
+}: {
+  /** The product that linked here, which "Back" returns to. */
+  returnProductCode?: OrganizationProductCode;
+}) {
   const router = useRouter();
   const queryClient = useQueryClient();
   const {
@@ -78,13 +86,14 @@ export function AccountSecurityPage() {
   }
 
   const membership = findActiveMembership(platformSession);
-  const returnLink =
-    membership?.organization.status === APPROVED_ORGANIZATION_STATUS
-      ? { href: ORGANIZATION_ROUTES.products, label: "Back to your products" }
-      : {
-          href: ORGANIZATION_ROUTES.onboarding,
-          label: "Back to your application",
-        };
+  const returnLink = resolveAccountSecurityReturn({
+    returnProductCode,
+    isApproved:
+      membership?.organization.status === APPROVED_ORGANIZATION_STATUS,
+    productAddresses: getProductApplicationAddresses(),
+  });
+  const returnLinkClassName =
+    "w-fit text-sm font-semibold text-primary underline underline-offset-4 hover:no-underline";
 
   return (
     <OrganizationOnboardingLayout
@@ -111,12 +120,15 @@ export function AccountSecurityPage() {
     >
       <div className="flex flex-col gap-7">
         <div className="flex flex-col gap-2">
-          <Link
-            className="w-fit text-sm font-semibold text-primary underline underline-offset-4 hover:no-underline"
-            href={returnLink.href}
-          >
-            {returnLink.label}
-          </Link>
+          {returnLink.isProductApplication ? (
+            <a className={returnLinkClassName} href={returnLink.href}>
+              {returnLink.label}
+            </a>
+          ) : (
+            <Link className={returnLinkClassName} href={returnLink.href}>
+              {returnLink.label}
+            </Link>
+          )}
           <h1 className="font-serif text-display font-normal">
             Account security
           </h1>
