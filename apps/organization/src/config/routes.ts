@@ -4,6 +4,7 @@ export const ORGANIZATION_ROUTES = {
   signIn: "/sign-in",
   onboarding: "/onboarding",
   products: "/products",
+  accountSecurity: "/account/security",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
   verifyEmail: "/verify-email",

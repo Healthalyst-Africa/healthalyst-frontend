@@ -34,6 +34,7 @@ export {
   IconExternalLink as OpenDocumentIcon,
   IconHourglassEmpty as UpcomingIcon,
   IconLock as LockedIcon,
+  IconShieldLock as AccountSecurityIcon,
   IconFiles as ApplicationsIcon,
   IconClock as PendingIcon,
   IconMessageExclamation as ChangesRequestedIcon,
