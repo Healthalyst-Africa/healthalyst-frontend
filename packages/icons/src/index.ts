@@ -42,4 +42,11 @@ export {
   IconMessageExclamation as ChangesRequestedIcon,
   IconRosetteDiscountCheck as ApprovedIcon,
   IconAdjustmentsHorizontal as FilterIcon,
+  IconUsers as TeamIcon,
+  IconUserPlus as InviteIcon,
+  IconKey as RolesIcon,
+  IconSend as ResendIcon,
+  IconBan as RevokeIcon,
+  IconCertificate as LicenceIcon,
+  IconRestore as ResetAuthenticatorIcon,
 } from "@tabler/icons-react";
