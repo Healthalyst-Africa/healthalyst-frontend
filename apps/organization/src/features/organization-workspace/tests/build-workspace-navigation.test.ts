@@ -19,6 +19,15 @@ describe("organisation hub navigation", () => {
     ]);
   });
 
+  it("shows partners to people who may read them", () => {
+    const { sidebar } = buildOrganizationWorkspaceNavigation({
+      permissions: ["partner:read"],
+      enabledProductCodes: [],
+      productAddresses: {},
+    });
+    expect(labels(sidebar)).toEqual([["Products", "Partners", "Settings"]]);
+  });
+
   it("lists the products it can open in the switcher, with the hub ticked", () => {
     const { switcher } = buildOrganizationWorkspaceNavigation({
       permissions: [],
