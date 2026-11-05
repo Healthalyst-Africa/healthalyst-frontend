@@ -5,10 +5,12 @@ import {
   organizationDetailSchema,
   organizationStatusChangeSchema,
   organizationListResponseSchema,
+  ownerAssignmentSchema,
 } from "~/features/organization-oversight/schemas/organization-schemas";
 import type {
   OrganizationApplication,
   OrganizationDetail,
+  OwnerAssignment,
   RegistrationStatus,
 } from "~/features/organization-oversight/types/organization-types";
 import { approvalBodySchema } from "~/features/organization-oversight/schemas/review-decision-schemas";
@@ -190,6 +192,26 @@ export async function deactivateOrganization(
     { reason },
     "We could not deactivate this organisation. Try again.",
     version
+  );
+}
+
+/**
+ * Support-assisted recovery: makes an active member an owner when no owner
+ * can be reached. Existing owners keep their role.
+ */
+export async function assignOrganizationOwner(
+  organizationId: string,
+  assignment: { userId: string; reason: string }
+): Promise<OwnerAssignment> {
+  return runPlatformRequest(
+    "We could not assign the owner. Try again.",
+    async () => {
+      const response = await getPlatformHttpClient().post<unknown>(
+        `${ORGANIZATION_API_CONFIGURATION.organizationsEndpoint}/${encodeURIComponent(organizationId)}/assign-owner`,
+        assignment
+      );
+      return ownerAssignmentSchema.parse(response.data);
+    }
   );
 }
 

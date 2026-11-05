@@ -18,16 +18,28 @@ import {
   DropdownMenuTrigger,
 } from "@healthalyst/ui/primitives/dropdown-menu";
 
-type WorkspaceSwitcherItem = {
+type WorkspaceSwitcherItemBase = {
   label: string;
-  href: string;
   /** A decorative icon component, rendered hidden from assistive technology. */
   icon: ComponentType<{ "aria-hidden"?: boolean | "true"; className?: string }>;
-  /** Marks the app or page the person is in now. */
+  /** Marks the app, page or organisation the person is in now. */
   isCurrent?: boolean;
-  /** The page belongs to another app, so it opens with a full page load. */
-  opensAnotherApp?: boolean;
 };
+
+/**
+ * An item either opens a page (`href`) or runs an action, such as switching
+ * organisation (`onSelect`).
+ */
+type WorkspaceSwitcherItem = WorkspaceSwitcherItemBase &
+  (
+    | {
+        href: string;
+        /** The page belongs to another app, so it opens with a full page load. */
+        opensAnotherApp?: boolean;
+        onSelect?: never;
+      }
+    | { onSelect: () => void; href?: never; opensAnotherApp?: never }
+  );
 
 type WorkspaceSwitcherSection = {
   label: string;
@@ -51,8 +63,9 @@ type WorkspaceSwitcherProperties = {
 
 /**
  * The sidebar header: the current app and organisation, opening a menu to
- * move to another product or the organisation's pages. It keeps those
- * secondary destinations out of the app's own navigation.
+ * move to another product, open the organisation's pages or switch to another
+ * organisation. It keeps those secondary destinations out of the app's own
+ * navigation.
  */
 export function WorkspaceSwitcher({
   logo,
@@ -100,6 +113,33 @@ export function WorkspaceSwitcher({
             </DropdownMenuLabel>
             {section.items.map((item) => {
               const ItemIcon = item.icon;
+              const content = (
+                <>
+                  <ItemIcon aria-hidden="true" className="size-4" />
+                  <span className="flex-1">{item.label}</span>
+                  {item.isCurrent && (
+                    <CheckIcon
+                      aria-hidden="true"
+                      className="size-4 text-primary"
+                    />
+                  )}
+                </>
+              );
+
+              if (item.onSelect) {
+                return (
+                  <DropdownMenuItem
+                    key={`${section.label}-${item.label}`}
+                    // Choosing where you already are does nothing.
+                    onSelect={item.isCurrent ? undefined : item.onSelect}
+                    aria-current={item.isCurrent ? "true" : undefined}
+                    className="flex min-h-10 cursor-pointer items-center gap-2"
+                  >
+                    {content}
+                  </DropdownMenuItem>
+                );
+              }
+
               const ItemLink = item.opensAnotherApp ? "a" : AppLink;
               return (
                 <DropdownMenuItem key={item.href} asChild>
@@ -108,14 +148,7 @@ export function WorkspaceSwitcher({
                     aria-current={item.isCurrent ? "page" : undefined}
                     className="flex min-h-10 cursor-pointer items-center gap-2"
                   >
-                    <ItemIcon aria-hidden="true" className="size-4" />
-                    <span className="flex-1">{item.label}</span>
-                    {item.isCurrent && (
-                      <CheckIcon
-                        aria-hidden="true"
-                        className="size-4 text-primary"
-                      />
-                    )}
+                    {content}
                   </ItemLink>
                 </DropdownMenuItem>
               );

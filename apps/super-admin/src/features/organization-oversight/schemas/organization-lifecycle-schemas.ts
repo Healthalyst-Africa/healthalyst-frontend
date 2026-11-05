@@ -1,5 +1,8 @@
 import { z as schemaLibrary } from "zod";
-import { ORGANIZATION_LIFECYCLE_LIMITS } from "~/features/organization-oversight/config/organization-lifecycle";
+import {
+  ORGANIZATION_LIFECYCLE_LIMITS,
+  OWNER_RECOVERY,
+} from "~/features/organization-oversight/config/organization-lifecycle";
 
 export const lifecycleReasonSchema = schemaLibrary.object({
   reason: schemaLibrary
@@ -24,4 +27,22 @@ export const internalNoteSchema = schemaLibrary.object({
       ORGANIZATION_LIFECYCLE_LIMITS.noteMaximumLength,
       `Keep the note to ${ORGANIZATION_LIFECYCLE_LIMITS.noteMaximumLength} characters or fewer.`
     ),
+});
+
+export const ownerAssignmentFormSchema = schemaLibrary.object({
+  userId: schemaLibrary.string().min(1, "Choose the member to make an owner."),
+  reason: schemaLibrary
+    .string()
+    .trim()
+    .min(
+      OWNER_RECOVERY.reasonMinimumLength,
+      `Describe how you verified the request in at least ${OWNER_RECOVERY.reasonMinimumLength} characters.`
+    )
+    .max(
+      OWNER_RECOVERY.reasonMaximumLength,
+      `Keep the reason to ${OWNER_RECOVERY.reasonMaximumLength} characters or fewer.`
+    ),
+  confirmed: schemaLibrary.literal(true, {
+    error: "Confirm that you verified the request outside HealthAlyst.",
+  }),
 });

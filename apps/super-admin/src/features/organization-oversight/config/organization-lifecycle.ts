@@ -101,3 +101,25 @@ export const ORGANIZATION_HISTORY_DATE_FORMATTER = new Intl.DateTimeFormat(
   "en-NG",
   { dateStyle: "medium", timeStyle: "short", timeZone: "Africa/Lagos" }
 );
+
+/** Support-assisted owner recovery, from the Platform API's assign-owner rules. */
+export const OWNER_RECOVERY = {
+  roles: ["SUPER_ADMIN", "PLATFORM_ADMIN"],
+  fromStatuses: ["ACTIVE", "SUSPENDED"],
+  ownerRoleCode: "owner",
+  reasonMinimumLength: 5,
+  reasonMaximumLength: 2000,
+} as const satisfies {
+  roles: readonly string[];
+  fromStatuses: readonly RegistrationStatus[];
+  ownerRoleCode: string;
+  reasonMinimumLength: number;
+  reasonMaximumLength: number;
+};
+
+export const MEMBER_STATUS_LABELS = {
+  INVITED: "Invited",
+  ACTIVE: "Active",
+  SUSPENDED: "Suspended",
+  REVOKED: "Removed",
+} as const;

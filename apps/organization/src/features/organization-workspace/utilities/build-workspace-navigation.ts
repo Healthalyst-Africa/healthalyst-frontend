@@ -1,6 +1,7 @@
 import {
   HealthScheduleIcon,
   OrganizationIcon,
+  PartnersIcon,
   ProductsIcon,
   RolesIcon,
   TeamIcon,
@@ -17,6 +18,7 @@ import {
 const ORGANIZATION_PAGE_PERMISSIONS = {
   team: "staff:read",
   roles: "role:read",
+  partners: "partner:read",
 } as const;
 
 const PRODUCT_ICONS: Record<
@@ -45,10 +47,17 @@ export function buildOrganizationWorkspaceNavigation({
   permissions,
   enabledProductCodes,
   productAddresses,
+  organizations = [],
+  currentOrganizationId = null,
+  switchOrganization,
 }: {
   permissions: readonly string[];
   enabledProductCodes: readonly string[];
   productAddresses: Partial<Record<OrganizationProductCode, string>>;
+  /** Every organisation the person belongs to. */
+  organizations?: readonly WorkspaceOrganization[];
+  currentOrganizationId?: string | null;
+  switchOrganization?: (organization: WorkspaceOrganization) => void;
 }): OrganizationWorkspaceNavigation {
   const openableProducts = ORGANIZATION_PRODUCTS.flatMap((product) => {
     const address = productAddresses[product.code];
@@ -92,6 +101,15 @@ export function buildOrganizationWorkspaceNavigation({
                 },
               ]
             : []),
+          ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.partners)
+            ? [
+                {
+                  label: "Partners",
+                  href: ORGANIZATION_ROUTES.partners,
+                  icon: PartnersIcon,
+                },
+              ]
+            : []),
           {
             label: "Settings",
             href: ORGANIZATION_ROUTES.organizationSettings,
@@ -113,6 +131,43 @@ export function buildOrganizationWorkspaceNavigation({
           },
         ],
       },
+      ...buildOrganizationSwitchSection({
+        organizations,
+        currentOrganizationId,
+        switchOrganization,
+      }),
     ],
   };
+}
+
+export type WorkspaceOrganization = { id: string; name: string };
+
+/**
+ * "Your organisations", for people who belong to more than one, such as a
+ * doctor who works at two hospitals. Choosing one switches the session to it.
+ * HealthSchedule's switcher has the same section.
+ */
+export function buildOrganizationSwitchSection({
+  organizations,
+  currentOrganizationId,
+  switchOrganization,
+}: {
+  organizations: readonly WorkspaceOrganization[];
+  currentOrganizationId: string | null;
+  switchOrganization?: (organization: WorkspaceOrganization) => void;
+}): WorkspaceSwitcherSection[] {
+  if (organizations.length < 2 || !switchOrganization) return [];
+  return [
+    {
+      label: "Your organisations",
+      items: [...organizations]
+        .sort((first, second) => first.name.localeCompare(second.name))
+        .map((organization) => ({
+          label: organization.name,
+          icon: OrganizationIcon,
+          isCurrent: organization.id === currentOrganizationId,
+          onSelect: () => switchOrganization(organization),
+        })),
+    },
+  ];
 }

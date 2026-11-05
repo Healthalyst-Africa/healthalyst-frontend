@@ -4,6 +4,8 @@ import type { PlatformBranchCapability } from "~/features/organization-managemen
 export const ORGANIZATION_SETTINGS_PERMISSIONS = {
   updateProfile: "org:update",
   manageBranches: "branch:manage",
+  transferOwnership: "org:transfer-ownership",
+  readStaff: "staff:read",
 } as const;
 
 /** The Platform API's codes for an edit made against an older version. */

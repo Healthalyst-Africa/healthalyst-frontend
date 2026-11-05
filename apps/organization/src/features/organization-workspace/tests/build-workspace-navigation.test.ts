@@ -19,6 +19,15 @@ describe("organisation hub navigation", () => {
     ]);
   });
 
+  it("shows partners to people who may read them", () => {
+    const { sidebar } = buildOrganizationWorkspaceNavigation({
+      permissions: ["partner:read"],
+      enabledProductCodes: [],
+      productAddresses: {},
+    });
+    expect(labels(sidebar)).toEqual([["Products", "Partners", "Settings"]]);
+  });
+
   it("lists the products it can open in the switcher, with the hub ticked", () => {
     const { switcher } = buildOrganizationWorkspaceNavigation({
       permissions: [],
@@ -41,5 +50,41 @@ describe("organisation hub navigation", () => {
     });
     expect(labels(navigation.sidebar)).toEqual([["Products", "Settings"]]);
     expect(labels(navigation.switcher)).toEqual([["Organisation"]]);
+  });
+
+  it("lets people in several organisations switch between them", () => {
+    const chosen: string[] = [];
+    const { switcher } = buildOrganizationWorkspaceNavigation({
+      permissions: [],
+      enabledProductCodes: [],
+      productAddresses: {},
+      organizations: [
+        { id: "second", name: "Zenith Clinic" },
+        { id: "first", name: "Abuja General" },
+      ],
+      currentOrganizationId: "first",
+      switchOrganization: (organization) => chosen.push(organization.id),
+    });
+    const organizationSection = switcher[1];
+    expect(organizationSection?.label).toBe("Your organisations");
+    expect(organizationSection?.items.map((item) => item.label)).toEqual([
+      "Abuja General",
+      "Zenith Clinic",
+    ]);
+    expect(organizationSection?.items[0]?.isCurrent).toBe(true);
+    organizationSection?.items[1]?.onSelect?.();
+    expect(chosen).toEqual(["second"]);
+  });
+
+  it("offers no organisation choice to people in only one", () => {
+    const { switcher } = buildOrganizationWorkspaceNavigation({
+      permissions: [],
+      enabledProductCodes: [],
+      productAddresses: {},
+      organizations: [{ id: "only", name: "Abuja General" }],
+      currentOrganizationId: "only",
+      switchOrganization: () => undefined,
+    });
+    expect(switcher.map((section) => section.label)).toEqual(["Apps"]);
   });
 });

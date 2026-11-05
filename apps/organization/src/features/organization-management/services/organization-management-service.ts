@@ -1,5 +1,7 @@
 import { getPlatformHttpClient } from "@healthalyst/platform-api/http-client";
 import { toPlatformApiError } from "@healthalyst/platform-api/api-error";
+import { staffMemberSchema } from "~/features/team-management/schemas/team-response-schemas";
+import type { StaffMember } from "~/features/team-management/types/team-management";
 import {
   organizationProfileSchema,
   branchSchema,
@@ -224,5 +226,29 @@ export async function updatePlatformDepartment(
     return department.data;
   } catch (error) {
     throw toPlatformApiError(error, "We could not update this department.");
+  }
+}
+
+/**
+ * Make another member the owner; the current owner stays on as an
+ * administrator. Owners only, and the API asks for a recent authenticator
+ * check. Returns the new owner's membership.
+ */
+export async function transferOrganizationOwnership(
+  membershipId: string
+): Promise<StaffMember> {
+  try {
+    const response = await getPlatformHttpClient().post<unknown>(
+      ORGANIZATION_MANAGEMENT_ENDPOINTS.transferOwnership,
+      { membershipId }
+    );
+    const newOwner = staffMemberSchema.safeParse(response.data);
+    if (!newOwner.success) throw new Error(UNEXPECTED_ORGANIZATION_RESPONSE);
+    return newOwner.data;
+  } catch (error) {
+    throw toPlatformApiError(
+      error,
+      "We could not transfer ownership. Try again."
+    );
   }
 }
