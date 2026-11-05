@@ -37,6 +37,7 @@ export function DynamicFormField({
   error,
   status,
   defaultSelection,
+  defaultValue,
   disabled,
   onFieldChange,
   onFieldBlur,
@@ -49,6 +50,8 @@ export function DynamicFormField({
   /** Live feedback shown while there is no error. */
   status?: FieldStatus;
   defaultSelection?: readonly string[];
+  /** Starting text or choice when the field is not controlled by `value`. */
+  defaultValue?: string;
   disabled: boolean;
   onFieldChange?: (fieldName: string) => void;
   onFieldBlur?: (fieldName: string) => void;
@@ -158,6 +161,9 @@ export function DynamicFormField({
     required: field.required,
     disabled,
     value,
+    ...(value === undefined && defaultValue !== undefined
+      ? { defaultValue }
+      : {}),
     "aria-invalid": Boolean(error) || undefined,
     "aria-describedby": describedBy,
     onChange: (
@@ -194,6 +200,7 @@ export function DynamicFormField({
           required={field.required}
           disabled={disabled}
           value={value}
+          defaultValue={value === undefined ? defaultValue : undefined}
           onValueChange={(selectedValue) => {
             onFieldChange?.(field.name);
             onValueChange?.(field.name, selectedValue);

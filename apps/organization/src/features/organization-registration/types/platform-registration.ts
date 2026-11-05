@@ -38,6 +38,8 @@ export type PlatformRegistrationDetails = {
 /** Registration details plus the Turnstile token required by the Platform API. */
 export type PlatformRegistrationSubmission = PlatformRegistrationDetails & {
   captchaToken: string;
+  /** From a partner invitation link; links the inviter's request on approval. */
+  partnerInvitationToken?: string;
 };
 
 /** `POST /v1/onboarding/registrations` body (`RegistrationBody`). */

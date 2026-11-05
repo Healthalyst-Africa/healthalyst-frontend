@@ -24,9 +24,15 @@ import type { OrganizationProduct } from "~/features/organization-registration/t
  */
 export default function OrganizationRegistrationForm({
   initialProducts = [],
+  initialValues = {},
+  partnerInvitationToken,
 }: {
   /** Products to pre-select, for example from the product app a visitor came from. */
   initialProducts?: readonly OrganizationProduct[];
+  /** Starting values by field name, for example from a partner invitation. */
+  initialValues?: Readonly<Record<string, string>>;
+  /** Links the registration to the partner invitation it came from. */
+  partnerInvitationToken?: string;
 }) {
   const {
     fieldErrors,
@@ -48,7 +54,7 @@ export default function OrganizationRegistrationForm({
     showStep,
     handleFieldChange,
     handleRegistrationSubmit,
-  } = useOrganizationRegistrationWorkflow();
+  } = useOrganizationRegistrationWorkflow({ partnerInvitationToken });
 
   if (registrationMutation.isSuccess) {
     return (
@@ -132,6 +138,7 @@ export default function OrganizationRegistrationForm({
                       .join(" ")}
                     definition={definition}
                     defaultSelections={{ products: initialProducts }}
+                    defaultValues={initialValues}
                     errors={fieldErrors}
                     statuses={fieldStatuses}
                     disabled={isSubmitting}

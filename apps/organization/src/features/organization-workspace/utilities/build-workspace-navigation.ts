@@ -1,6 +1,7 @@
 import {
   HealthScheduleIcon,
   OrganizationIcon,
+  PartnersIcon,
   ProductsIcon,
   RolesIcon,
   TeamIcon,
@@ -17,6 +18,7 @@ import {
 const ORGANIZATION_PAGE_PERMISSIONS = {
   team: "staff:read",
   roles: "role:read",
+  partners: "partner:read",
 } as const;
 
 const PRODUCT_ICONS: Record<
@@ -96,6 +98,15 @@ export function buildOrganizationWorkspaceNavigation({
                   label: "Roles and permissions",
                   href: ORGANIZATION_ROUTES.teamRoles,
                   icon: RolesIcon,
+                },
+              ]
+            : []),
+          ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.partners)
+            ? [
+                {
+                  label: "Partners",
+                  href: ORGANIZATION_ROUTES.partners,
+                  icon: PartnersIcon,
                 },
               ]
             : []),

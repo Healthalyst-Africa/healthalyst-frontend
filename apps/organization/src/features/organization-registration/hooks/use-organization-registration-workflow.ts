@@ -22,7 +22,12 @@ import {
   pickFieldErrors,
 } from "~/shared/forms/form-validation";
 const FINAL_STEP_INDEX = registrationSteps.length - 1;
-export function useOrganizationRegistrationWorkflow() {
+export function useOrganizationRegistrationWorkflow({
+  partnerInvitationToken,
+}: {
+  /** Sent with the registration when the visitor came from a partner invitation. */
+  partnerInvitationToken?: string;
+} = {}) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
@@ -138,7 +143,11 @@ export function useOrganizationRegistrationWorkflow() {
 
     setFieldErrors({});
     registrationMutation.mutate(
-      { ...validationResult.data, captchaToken },
+      {
+        ...validationResult.data,
+        captchaToken,
+        ...(partnerInvitationToken ? { partnerInvitationToken } : {}),
+      },
       {
         onError: (error) => {
           if (
