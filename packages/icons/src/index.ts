@@ -51,6 +51,10 @@ export {
   IconRestore as ResetAuthenticatorIcon,
   IconLayoutGrid as ProductsIcon,
   IconCalendarEvent as HealthScheduleIcon,
+  IconUserShield as PlatformStaffIcon,
+  IconHistory as AuditLogIcon,
+  IconShieldCheck as IntegrityCheckIcon,
+  IconCrown as OwnerIcon,
   IconHeartHandshake as PartnersIcon,
   IconStar as PreferredIcon,
 } from "@tabler/icons-react";

@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { StaffIdentity } from "~/features/staff-auth/types/staff-identity";
 import {
   addOrganizationInternalNote,
+  assignOrganizationOwner,
   claimOrganizationApplication,
   deactivateOrganization,
   getOrganizationDetail,
@@ -145,6 +146,31 @@ export function useOrganizationInternalNoteMutation(
       organizationId: string;
       note: string;
     }) => addOrganizationInternalNote(organizationId, note),
+    onSuccess: async (_result, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: organizationQueryKeys.detail(
+          staffIdentity.staffAccountId,
+          variables.organizationId
+        ),
+      });
+    },
+  });
+}
+
+export function useAssignOrganizationOwnerMutation(
+  staffIdentity: StaffIdentity
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      organizationId,
+      userId,
+      reason,
+    }: {
+      organizationId: string;
+      userId: string;
+      reason: string;
+    }) => assignOrganizationOwner(organizationId, { userId, reason }),
     onSuccess: async (_result, variables) => {
       await queryClient.invalidateQueries({
         queryKey: organizationQueryKeys.detail(

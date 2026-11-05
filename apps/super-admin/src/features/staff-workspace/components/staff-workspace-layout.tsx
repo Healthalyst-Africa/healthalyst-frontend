@@ -12,7 +12,7 @@ import { DashboardShell } from "@healthalyst/ui/components/dashboard-shell";
 import { NotificationPanel } from "@healthalyst/ui/components/notification-panel";
 import { SearchField } from "@healthalyst/ui/components/search-field";
 import { useStaffWorkspace } from "~/features/staff-workspace/hooks/use-staff-workspace";
-import { WORKSPACE_NAVIGATION } from "~/features/staff-workspace/config/workspace-navigation";
+import { filterWorkspaceNavigation } from "~/features/staff-workspace/utilities/filter-workspace-navigation";
 
 export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
   const {
@@ -85,7 +85,12 @@ export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
         </div>
       }
       navigationLabel="Workspace"
-      navigationSections={[{ label: "Workspace", items: WORKSPACE_NAVIGATION }]}
+      navigationSections={[
+        {
+          label: "Workspace",
+          items: filterWorkspaceNavigation(staffIdentity.platformRoles),
+        },
+      ]}
       navigationLocation={pathname}
       linkComponent={Link}
       toolbar={

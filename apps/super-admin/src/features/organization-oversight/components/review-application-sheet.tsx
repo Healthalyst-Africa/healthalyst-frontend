@@ -55,6 +55,7 @@ import {
   OrganizationLifecycleButtons,
   OrganizationLifecycleDialogs,
 } from "~/features/organization-oversight/components/organization-lifecycle-actions";
+import { OrganizationMembers } from "~/features/organization-oversight/components/organization-members";
 import { INTERNAL_NOTE_ROLES } from "~/features/organization-oversight/config/organization-lifecycle";
 import type { OrganizationDetail } from "~/features/organization-oversight/types/organization-types";
 import type { ReviewApplicationProperties } from "~/features/organization-oversight/types/review-controller";
@@ -396,6 +397,16 @@ export function ReviewApplicationSheet({
                   Documents open in a new tab through a secure link that expires
                   after a minute.
                 </HintText>
+              </ReviewSection>
+
+              <ReviewSection heading="Members">
+                <OrganizationMembers
+                  organizationId={application.id}
+                  organizationName={organizationName}
+                  status={application.status}
+                  members={detail.members}
+                  staffIdentity={staffIdentity}
+                />
               </ReviewSection>
 
               {canWriteInternalNote && (
