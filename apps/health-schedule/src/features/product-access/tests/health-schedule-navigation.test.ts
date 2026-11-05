@@ -77,4 +77,28 @@ describe("HealthSchedule navigation", () => {
       )
     ).toEqual([{ label: "Apps", items: ["HealthSchedule"] }]);
   });
+
+  it("lets people in several organisations switch between them", () => {
+    const chosen: string[] = [];
+    const { switcher } = buildHealthScheduleNavigation({
+      permissions: [],
+      organizationAppLinks: HUB_LINKS,
+      organizations: [
+        { id: "second", name: "Zenith Clinic" },
+        { id: "first", name: "Abuja General" },
+      ],
+      currentOrganizationId: "second",
+      switchOrganization: (organization) => chosen.push(organization.id),
+    });
+    const organizationSection = switcher.at(-1);
+    expect(organizationSection?.label).toBe("Your organisations");
+    expect(
+      organizationSection?.items.map((item) => [item.label, item.isCurrent])
+    ).toEqual([
+      ["Abuja General", false],
+      ["Zenith Clinic", true],
+    ]);
+    organizationSection?.items[0]?.onSelect?.();
+    expect(chosen).toEqual(["first"]);
+  });
 });
