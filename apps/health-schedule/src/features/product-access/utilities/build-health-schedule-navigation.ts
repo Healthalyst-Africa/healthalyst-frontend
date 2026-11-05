@@ -31,9 +31,16 @@ export type HealthScheduleNavigation = {
 export function buildHealthScheduleNavigation({
   permissions,
   organizationAppLinks,
+  organizations = [],
+  currentOrganizationId = null,
+  switchOrganization,
 }: {
   permissions: readonly string[];
   organizationAppLinks: OrganizationAppLinks | null;
+  /** Every organisation the person belongs to. */
+  organizations?: readonly WorkspaceOrganization[];
+  currentOrganizationId?: string | null;
+  switchOrganization?: (organization: WorkspaceOrganization) => void;
 }): HealthScheduleNavigation {
   const sidebar: DashboardNavigationSection[] = [
     {
@@ -47,8 +54,19 @@ export function buildHealthScheduleNavigation({
     icon: HealthScheduleIcon,
     isCurrent: true,
   };
+  const organizationSection = buildOrganizationSwitchSection({
+    organizations,
+    currentOrganizationId,
+    switchOrganization,
+  });
   if (!organizationAppLinks) {
-    return { sidebar, switcher: [{ label: "Apps", items: [currentApp] }] };
+    return {
+      sidebar,
+      switcher: [
+        { label: "Apps", items: [currentApp] },
+        ...organizationSection,
+      ],
+    };
   }
 
   return {
@@ -97,6 +115,39 @@ export function buildHealthScheduleNavigation({
           },
         ],
       },
+      ...organizationSection,
     ],
   };
+}
+
+export type WorkspaceOrganization = { id: string; name: string };
+
+/**
+ * "Your organisations", for people who belong to more than one, such as a
+ * doctor who works at two hospitals. It matches the organisation hub's
+ * section of the same name.
+ */
+function buildOrganizationSwitchSection({
+  organizations,
+  currentOrganizationId,
+  switchOrganization,
+}: {
+  organizations: readonly WorkspaceOrganization[];
+  currentOrganizationId: string | null;
+  switchOrganization?: (organization: WorkspaceOrganization) => void;
+}): WorkspaceSwitcherSection[] {
+  if (organizations.length < 2 || !switchOrganization) return [];
+  return [
+    {
+      label: "Your organisations",
+      items: [...organizations]
+        .sort((first, second) => first.name.localeCompare(second.name))
+        .map((organization) => ({
+          label: organization.name,
+          icon: OrganizationIcon,
+          isCurrent: organization.id === currentOrganizationId,
+          onSelect: () => switchOrganization(organization),
+        })),
+    },
+  ];
 }
