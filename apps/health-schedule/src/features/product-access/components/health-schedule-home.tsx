@@ -3,22 +3,15 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
-import {
-  AccountSecurityIcon,
-  DashboardIcon,
-  OrganizationIcon,
-  SignOutIcon,
-} from "@healthalyst/icons";
+import { AccountSecurityIcon, SignOutIcon } from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { DashboardShell } from "@healthalyst/ui/components/dashboard-shell";
 import { EmptyState } from "@healthalyst/ui/components/empty-state";
+import { WorkspaceSwitcher } from "@healthalyst/ui/components/workspace-switcher";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { getOrganizationAppLinks } from "~/features/organization-access/services/organization-app-links";
+import { buildHealthScheduleNavigation } from "~/features/product-access/utilities/build-health-schedule-navigation";
 import { useHealthScheduleSignOut } from "~/features/product-access/hooks/use-health-schedule-sign-out";
-
-const HOME_NAVIGATION = [
-  { label: "Overview", href: "/", icon: DashboardIcon },
-] as const;
 
 /** The signed-in HealthSchedule workspace for an approved organisation. */
 export function HealthScheduleHome({
@@ -31,28 +24,32 @@ export function HealthScheduleHome({
   const signOutMutation = useHealthScheduleSignOut();
   const { user } = platformSession;
   const organizationAppLinks = getOrganizationAppLinks();
+  const navigation = buildHealthScheduleNavigation({
+    permissions: platformSession.activeContext.permissions ?? [],
+    organizationAppLinks,
+  });
 
   return (
     <DashboardShell
       brand={
-        <div className="flex w-full items-center gap-3 group-data-[collapsible=icon]:justify-center">
-          <Image
-            src="/logo.jpg"
-            alt="HealthAlyst"
-            width={32}
-            height={32}
-            className="shrink-0 rounded-md"
-          />
-          <div className="min-w-0 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm font-semibold">HealthSchedule</p>
-            <p className="truncate text-xs text-muted-foreground">
-              {organizationName}
-            </p>
-          </div>
-        </div>
+        <WorkspaceSwitcher
+          logo={
+            <Image
+              src="/logo.jpg"
+              alt=""
+              width={32}
+              height={32}
+              className="rounded-md"
+            />
+          }
+          title="HealthSchedule"
+          subtitle={organizationName}
+          sections={navigation.switcher}
+          linkComponent={Link}
+        />
       }
       navigationLabel="HealthSchedule"
-      navigationItems={HOME_NAVIGATION}
+      navigationSections={navigation.sidebar}
       navigationLocation="/"
       linkComponent={Link}
       toolbar={
@@ -64,19 +61,12 @@ export function HealthScheduleHome({
           emailAddress={user.email ?? ""}
           error={signOutMutation.error?.message}
           actions={[
-            // Settings and account security are owned by the organisation hub.
+            // Account security is owned by the organisation hub, which
+            // returns here afterwards. Organisation pages are in the sidebar.
             ...(organizationAppLinks
               ? [
                   {
-                    label: "Settings",
-                    icon: <OrganizationIcon aria-hidden="true" />,
-                    onSelect: () =>
-                      window.location.assign(
-                        organizationAppLinks.organizationSettings
-                      ),
-                  },
-                  {
-                    label: "Account",
+                    label: "Account security",
                     icon: <AccountSecurityIcon aria-hidden="true" />,
                     onSelect: () =>
                       window.location.assign(

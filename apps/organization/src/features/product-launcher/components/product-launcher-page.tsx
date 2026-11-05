@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import {
-  AccountSecurityIcon,
-  OrganizationIcon,
-  SignOutIcon,
-} from "@healthalyst/icons";
-import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ApplicationLauncherGrid } from "@healthalyst/ui/components/application-launcher-grid";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
@@ -18,7 +11,7 @@ import { BRAND_MARK_SOURCE } from "~/config/brand";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { AuthenticatedApplicationRedirectState } from "~/features/authentication/components/authenticated-application-redirect-state";
 import { useAuthenticatedApplicationRedirect } from "~/features/authentication/hooks/use-authenticated-application-redirect";
-import { useSignOutMutation } from "~/features/authentication/hooks/use-sign-in";
+import { OrganizationWorkspaceShell } from "~/features/organization-workspace/components/organization-workspace-shell";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
 import { buildProductLauncherApplications } from "~/shared/organization/components/product-launcher-applications";
 import { APPROVED_ORGANIZATION_STATUS } from "~/shared/organization/config/organization-status";
@@ -30,20 +23,14 @@ import { findActiveMembership } from "~/shared/organization/utilities/find-activ
  */
 export function ProductLauncherPage() {
   const router = useRouter();
-  const {
-    platformSession,
-    isRestoring,
-    restoreError,
-    restoreSession,
-    clearPlatformSession,
-  } = usePlatformSession();
+  const { platformSession, isRestoring, restoreError, restoreSession } =
+    usePlatformSession();
   const { isRedirecting, redirectError, redirectMessage } =
     useAuthenticatedApplicationRedirect({
       platformSession,
       isRestoring,
       redirectOrganizationSession: false,
     });
-  const signOutMutation = useSignOutMutation();
   const membership = platformSession
     ? findActiveMembership(platformSession)
     : undefined;
@@ -106,39 +93,7 @@ export function ProductLauncherPage() {
   }
 
   return (
-    <OrganizationOnboardingLayout
-      actions={
-        <AccountMenu
-          fullName={`${platformSession.user.firstName} ${platformSession.user.lastName}`}
-          emailAddress={platformSession.user.email ?? ""}
-          error={signOutMutation.error?.message}
-          actions={[
-            {
-              label: "Settings",
-              icon: <OrganizationIcon aria-hidden="true" />,
-              onSelect: () =>
-                router.push(ORGANIZATION_ROUTES.organizationSettings),
-            },
-            {
-              label: "Account",
-              icon: <AccountSecurityIcon aria-hidden="true" />,
-              onSelect: () => router.push(ORGANIZATION_ROUTES.accountSecurity),
-            },
-            {
-              label: "Sign out",
-              pendingLabel: "Signing out…",
-              isPending: signOutMutation.isPending,
-              icon: <SignOutIcon aria-hidden="true" />,
-              tone: "destructive",
-              onSelect: () =>
-                signOutMutation.mutate(undefined, {
-                  onSuccess: clearPlatformSession,
-                }),
-            },
-          ]}
-        />
-      }
-    >
+    <OrganizationWorkspaceShell platformSession={platformSession}>
       <div className="flex flex-col gap-7">
         <div className="flex flex-col gap-2">
           <h1 className="font-serif text-display font-normal">
@@ -155,15 +110,7 @@ export function ProductLauncherPage() {
             enabledProductCodes: membership.products,
           })}
         />
-        <p className="text-sm text-muted-foreground">
-          <Link
-            className="font-semibold text-primary underline underline-offset-4"
-            href={ORGANIZATION_ROUTES.organizationSettings}
-          >
-            Manage your organisation details and branches
-          </Link>
-        </p>
       </div>
-    </OrganizationOnboardingLayout>
+    </OrganizationWorkspaceShell>
   );
 }

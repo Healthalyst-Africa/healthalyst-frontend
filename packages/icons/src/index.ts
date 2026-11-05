@@ -49,4 +49,6 @@ export {
   IconBan as RevokeIcon,
   IconCertificate as LicenceIcon,
   IconRestore as ResetAuthenticatorIcon,
+  IconLayoutGrid as ProductsIcon,
+  IconCalendarEvent as HealthScheduleIcon,
 } from "@tabler/icons-react";
