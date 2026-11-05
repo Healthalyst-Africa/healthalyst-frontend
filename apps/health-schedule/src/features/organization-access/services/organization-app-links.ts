@@ -9,6 +9,9 @@ export type OrganizationAppLinks = {
   application: string;
   accountSecurity: string;
   organizationSettings: string;
+  team: string;
+  teamRoles: string;
+  products: string;
 };
 
 /**
@@ -25,5 +28,8 @@ export function getOrganizationAppLinks(): OrganizationAppLinks | null {
     application: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.application}`,
     accountSecurity: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.accountSecurity}?product=${ORGANIZATION_APP_ROUTES.product}`,
     organizationSettings: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.organizationSettings}`,
+    team: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.team}`,
+    teamRoles: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.teamRoles}`,
+    products: `${organizationAppAddress}${ORGANIZATION_APP_ROUTES.products}`,
   };
 }

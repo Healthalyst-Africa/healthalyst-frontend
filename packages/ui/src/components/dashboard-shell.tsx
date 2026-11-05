@@ -31,6 +31,17 @@ type DashboardNavigationItem = {
   href: string;
   /** A decorative icon component, rendered hidden from assistive technology. */
   icon: ComponentType<{ "aria-hidden"?: boolean | "true" }>;
+  /**
+   * The page belongs to another HealthAlyst app, so it opens with a full page
+   * load instead of the app's client-side link, and is never the current page.
+   */
+  opensAnotherApp?: boolean;
+};
+
+/** A labelled group of links, such as an app's own pages or its organisation. */
+type DashboardNavigationSection = {
+  label: string;
+  items: readonly DashboardNavigationItem[];
 };
 
 type DashboardNavigationLinkProperties =
@@ -38,9 +49,13 @@ type DashboardNavigationLinkProperties =
 
 type DashboardShellProperties = {
   brand: ReactNode;
+  /** Names the navigation landmark for assistive technology. */
   navigationLabel: string;
-  navigationItems: readonly DashboardNavigationItem[];
-  /** The current location; the matching item is marked as the current page. */
+  navigationSections: readonly DashboardNavigationSection[];
+  /**
+   * The current path. The item whose address matches it most closely is
+   * marked as the current page, so `/team/roles` marks "Roles", not "Team".
+   */
   navigationLocation: string;
   /** The application's link component, such as the framework's client-side link. */
   linkComponent?: ElementType<DashboardNavigationLinkProperties>;
@@ -52,57 +67,83 @@ type DashboardShellProperties = {
   contentClassName?: string;
 };
 
+/** The in-app item whose address is the longest prefix of the location. */
+function findCurrentHref(
+  sections: readonly DashboardNavigationSection[],
+  location: string
+): string | undefined {
+  return sections
+    .flatMap((section) => section.items)
+    .filter(
+      (navigationItem) =>
+        !navigationItem.opensAnotherApp &&
+        (location === navigationItem.href ||
+          location.startsWith(`${navigationItem.href.replace(/\/$/, "")}/`))
+    )
+    .sort((first, second) => second.href.length - first.href.length)[0]?.href;
+}
+
 function DashboardNavigation({
-  navigationLabel,
-  navigationItems,
+  navigationSections,
   navigationLocation,
   linkComponent: NavigationLink = "a",
 }: Pick<
   DashboardShellProperties,
-  "navigationLabel" | "navigationItems" | "navigationLocation" | "linkComponent"
+  "navigationSections" | "navigationLocation" | "linkComponent"
 >) {
-  return (
-    <>
-      <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
-        {navigationLabel}
-      </SidebarGroupLabel>
-      <SidebarGroupContent>
-        <SidebarMenu className="group-data-[collapsible=icon]:items-center">
-          {navigationItems.map((navigationItem) => {
-            const NavigationIcon = navigationItem.icon;
-            const isCurrentPage = navigationLocation === navigationItem.href;
+  const currentHref = findCurrentHref(navigationSections, navigationLocation);
 
-            return (
-              <SidebarMenuItem key={navigationItem.href}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={isCurrentPage}
-                  tooltip={navigationItem.label}
-                  className="min-h-10 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2"
-                >
-                  <NavigationLink
-                    href={navigationItem.href}
-                    aria-current={isCurrentPage ? "page" : undefined}
+  return navigationSections
+    .filter((section) => section.items.length > 0)
+    .map((section) => (
+      <SidebarGroup
+        key={section.label}
+        className="p-0 group-data-[collapsible=icon]:items-center"
+      >
+        <SidebarGroupLabel className="group-data-[collapsible=icon]:hidden">
+          {section.label}
+        </SidebarGroupLabel>
+        <SidebarGroupContent>
+          <SidebarMenu className="group-data-[collapsible=icon]:items-center">
+            {section.items.map((navigationItem) => {
+              const NavigationIcon = navigationItem.icon;
+              const isCurrentPage = navigationItem.href === currentHref;
+              // Another app's page needs a full page load, not a client route.
+              const ItemLink = navigationItem.opensAnotherApp
+                ? "a"
+                : NavigationLink;
+
+              return (
+                <SidebarMenuItem key={navigationItem.href}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={isCurrentPage}
+                    tooltip={navigationItem.label}
+                    className="min-h-10 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-2"
                   >
-                    <NavigationIcon aria-hidden="true" />
-                    <span className="group-data-[collapsible=icon]:hidden">
-                      {navigationItem.label}
-                    </span>
-                  </NavigationLink>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            );
-          })}
-        </SidebarMenu>
-      </SidebarGroupContent>
-    </>
-  );
+                    <ItemLink
+                      href={navigationItem.href}
+                      aria-current={isCurrentPage ? "page" : undefined}
+                    >
+                      <NavigationIcon aria-hidden="true" />
+                      <span className="group-data-[collapsible=icon]:hidden">
+                        {navigationItem.label}
+                      </span>
+                    </ItemLink>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              );
+            })}
+          </SidebarMenu>
+        </SidebarGroupContent>
+      </SidebarGroup>
+    ));
 }
 
 function DashboardShellContent({
   brand,
   navigationLabel,
-  navigationItems,
+  navigationSections,
   navigationLocation,
   linkComponent,
   footer,
@@ -124,14 +165,16 @@ function DashboardShellContent({
           {brand}
         </SidebarHeader>
         <SidebarContent className="px-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
-          <SidebarGroup className="p-0 group-data-[collapsible=icon]:items-center">
+          <nav
+            aria-label={navigationLabel}
+            className="flex flex-col gap-4 group-data-[collapsible=icon]:items-center"
+          >
             <DashboardNavigation
-              navigationLabel={navigationLabel}
-              navigationItems={navigationItems}
+              navigationSections={navigationSections}
               navigationLocation={navigationLocation}
               linkComponent={linkComponent}
             />
-          </SidebarGroup>
+          </nav>
         </SidebarContent>
         {footer && (
           <SidebarFooter className="border-t border-sidebar-border px-4 py-5 group-data-[collapsible=icon]:hidden">
@@ -181,4 +224,4 @@ export function DashboardShell({
   );
 }
 
-export type { DashboardNavigationItem };
+export type { DashboardNavigationItem, DashboardNavigationSection };
