@@ -4,8 +4,10 @@ import Link from "next/link";
 import { PageBreadcrumbs } from "@healthalyst/ui/components/page-breadcrumbs";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { OrganizationBranchesSection } from "~/features/organization-settings/components/organization-branches-section";
+import { OrganizationOwnershipSection } from "~/features/organization-settings/components/organization-ownership-section";
 import { OrganizationProfileSection } from "~/features/organization-settings/components/organization-profile-section";
 import { OrganizationSettingsFrame } from "~/features/organization-settings/components/organization-settings-frame";
+import { ORGANIZATION_SETTINGS_PERMISSIONS } from "~/features/organization-settings/config/organization-settings";
 
 /** An approved organisation's profile and its list of branches. */
 export function OrganizationSettingsPage() {
@@ -37,6 +39,19 @@ export function OrganizationSettingsPage() {
             organizationId={settings.organizationId}
             userId={settings.userId}
             canManage={settings.canManageBranches}
+          />
+          <OrganizationOwnershipSection
+            organizationId={settings.organizationId}
+            userId={settings.userId}
+            // Choosing the new owner means listing the team.
+            canTransfer={
+              settings.permissions.includes(
+                ORGANIZATION_SETTINGS_PERMISSIONS.transferOwnership
+              ) &&
+              settings.permissions.includes(
+                ORGANIZATION_SETTINGS_PERMISSIONS.readStaff
+              )
+            }
           />
         </div>
       )}

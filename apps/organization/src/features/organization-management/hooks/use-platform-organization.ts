@@ -7,11 +7,13 @@ import {
   getPlatformBranches,
   getPlatformOrganization,
   replacePlatformBranchCapabilities,
+  transferOrganizationOwnership,
   updatePlatformBranch,
   updatePlatformDepartment,
   updatePlatformOrganization,
 } from "~/features/organization-management/services/organization-management-service";
 import { type PlatformBranchCapability } from "~/features/organization-management/types/organization-management";
+import { TEAM_MEMBERS_QUERY_KEY } from "~/features/team-management/config/team-management";
 
 import {
   ORGANIZATION_PROFILE_QUERY_KEY,
@@ -153,6 +155,29 @@ export function usePlatformDepartmentCreateMutation({
       department: { name: string; code: string };
     }) => createPlatformDepartment(branchId, department),
     onSuccess: refreshBranches,
+  });
+}
+
+/**
+ * Hand the organisation to another member. Both people get new tokens at
+ * once; the caller restores the session afterwards to show the signed-in
+ * person's new role.
+ */
+export function useOwnershipTransferMutation({
+  organizationId,
+  userId,
+}: {
+  organizationId: string;
+  userId: string;
+}) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (membershipId: string) =>
+      transferOrganizationOwnership(membershipId),
+    onSuccess: () =>
+      queryClient.invalidateQueries({
+        queryKey: [TEAM_MEMBERS_QUERY_KEY, userId, organizationId],
+      }),
   });
 }
 

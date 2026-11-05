@@ -17,6 +17,8 @@ type DynamicFormFieldsProperties = {
   definition: FormDefinition;
   /** Choices already made in multi-select fields, by field name. */
   defaultSelections?: Readonly<Record<string, readonly string[]>>;
+  /** Starting text or choice for uncontrolled fields, by field name. */
+  defaultValues?: Readonly<Record<string, string>>;
   errors?: Readonly<Record<string, string>>;
   /** Live feedback by field name, shown while a field has no error. */
   statuses?: Readonly<Record<string, FieldStatus>>;
@@ -32,6 +34,7 @@ type DynamicFormFieldsProperties = {
 export function DynamicFormFields({
   definition,
   defaultSelections = {},
+  defaultValues = {},
   errors = {},
   statuses = {},
   disabled = false,
@@ -67,6 +70,7 @@ export function DynamicFormFields({
                 error={errors[field.name]}
                 status={statuses[field.name]}
                 defaultSelection={defaultSelections[field.name]}
+                defaultValue={defaultValues[field.name]}
                 disabled={disabled}
                 onFieldChange={onFieldChange}
                 onFieldBlur={onFieldBlur}

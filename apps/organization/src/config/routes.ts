@@ -8,6 +8,9 @@ export const ORGANIZATION_ROUTES = {
   organizationSettings: "/settings",
   team: "/team",
   teamRoles: "/team/roles",
+  partners: "/partners",
+  /** Partner invitation emails link here with `?partnerInvitation=`. */
+  partnerInvitation: "/register",
   acceptInvitation: "/invitations/accept",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",

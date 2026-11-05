@@ -55,4 +55,6 @@ export {
   IconHistory as AuditLogIcon,
   IconShieldCheck as IntegrityCheckIcon,
   IconCrown as OwnerIcon,
+  IconHeartHandshake as PartnersIcon,
+  IconStar as PreferredIcon,
 } from "@tabler/icons-react";

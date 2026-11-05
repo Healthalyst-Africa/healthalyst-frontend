@@ -3,6 +3,7 @@ export const UNEXPECTED_ORGANIZATION_RESPONSE =
 
 export const ORGANIZATION_MANAGEMENT_ENDPOINTS = {
   organization: "/v1/organization",
+  transferOwnership: "/v1/organization/transfer-ownership",
   branches: "/v1/organization/branches",
   departments: "/v1/organization/departments",
 } as const;
