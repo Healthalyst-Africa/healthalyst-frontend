@@ -85,7 +85,7 @@ export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
         </div>
       }
       navigationLabel="Workspace"
-      navigationItems={WORKSPACE_NAVIGATION}
+      navigationSections={[{ label: "Workspace", items: WORKSPACE_NAVIGATION }]}
       navigationLocation={pathname}
       linkComponent={Link}
       toolbar={

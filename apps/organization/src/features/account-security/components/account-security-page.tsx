@@ -5,7 +5,7 @@ import Link from "next/link";
 import { PageBreadcrumbs } from "@healthalyst/ui/components/page-breadcrumbs";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { OrganizationIcon, SignOutIcon } from "@healthalyst/icons";
+import { SignOutIcon } from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
@@ -24,6 +24,7 @@ import { resolveAccountSecurityReturn } from "~/features/account-security/utilit
 import { CODE_LENGTH } from "~/features/authentication/config/authenticator-enrolment";
 import { SIGN_IN_LIMITS } from "~/features/authentication/config/authentication-limits";
 import { useSignOutMutation } from "~/features/authentication/hooks/use-sign-in";
+import { OrganizationWorkspaceShell } from "~/features/organization-workspace/components/organization-workspace-shell";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
 import type { OrganizationProductCode } from "~/shared/organization/config/organization-products";
 import { APPROVED_ORGANIZATION_STATUS } from "~/shared/organization/config/organization-status";
@@ -95,40 +96,8 @@ export function AccountSecurityPage({
     productAddresses: getProductApplicationAddresses(),
   });
 
-  return (
-    <OrganizationOnboardingLayout
-      actions={
-        <AccountMenu
-          fullName={`${platformSession.user.firstName} ${platformSession.user.lastName}`}
-          emailAddress={platformSession.user.email ?? ""}
-          error={signOutMutation.error?.message}
-          actions={[
-            // Organisations under review keep to their application.
-            ...(isApproved
-              ? [
-                  {
-                    label: "Settings",
-                    icon: <OrganizationIcon aria-hidden="true" />,
-                    onSelect: () =>
-                      router.push(ORGANIZATION_ROUTES.organizationSettings),
-                  },
-                ]
-              : []),
-            {
-              label: "Sign out",
-              pendingLabel: "Signing out…",
-              isPending: signOutMutation.isPending,
-              icon: <SignOutIcon aria-hidden="true" />,
-              tone: "destructive",
-              onSelect: () =>
-                signOutMutation.mutate(undefined, {
-                  onSuccess: clearPlatformSession,
-                }),
-            },
-          ]}
-        />
-      }
-    >
+  const content = (
+    <>
       <div className="flex flex-col gap-7">
         <div className="flex flex-col gap-2">
           <div className="mb-2">
@@ -177,6 +146,43 @@ export function AccountSecurityPage({
         authenticatorCodeLength={CODE_LENGTH}
         recoveryCodeMaximumLength={SIGN_IN_LIMITS.recoveryCodeMaximum}
       />
+    </>
+  );
+
+  // Approved organisations get the shared sidebar; organisations under review
+  // keep to their application, so they only get a way to sign out.
+  if (isApproved) {
+    return (
+      <OrganizationWorkspaceShell platformSession={platformSession}>
+        {content}
+      </OrganizationWorkspaceShell>
+    );
+  }
+
+  return (
+    <OrganizationOnboardingLayout
+      actions={
+        <AccountMenu
+          fullName={`${platformSession.user.firstName} ${platformSession.user.lastName}`}
+          emailAddress={platformSession.user.email ?? ""}
+          error={signOutMutation.error?.message}
+          actions={[
+            {
+              label: "Sign out",
+              pendingLabel: "Signing out…",
+              isPending: signOutMutation.isPending,
+              icon: <SignOutIcon aria-hidden="true" />,
+              tone: "destructive",
+              onSelect: () =>
+                signOutMutation.mutate(undefined, {
+                  onSuccess: clearPlatformSession,
+                }),
+            },
+          ]}
+        />
+      }
+    >
+      {content}
     </OrganizationOnboardingLayout>
   );
 }
