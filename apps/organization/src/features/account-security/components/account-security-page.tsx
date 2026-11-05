@@ -2,9 +2,10 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { PageBreadcrumbs } from "@healthalyst/ui/components/page-breadcrumbs";
 import { useRouter } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
-import { SignOutIcon } from "@healthalyst/icons";
+import { OrganizationIcon, SignOutIcon } from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
@@ -86,14 +87,13 @@ export function AccountSecurityPage({
   }
 
   const membership = findActiveMembership(platformSession);
+  const isApproved =
+    membership?.organization.status === APPROVED_ORGANIZATION_STATUS;
   const returnLink = resolveAccountSecurityReturn({
     returnProductCode,
-    isApproved:
-      membership?.organization.status === APPROVED_ORGANIZATION_STATUS,
+    isApproved,
     productAddresses: getProductApplicationAddresses(),
   });
-  const returnLinkClassName =
-    "w-fit text-sm font-semibold text-primary underline underline-offset-4 hover:no-underline";
 
   return (
     <OrganizationOnboardingLayout
@@ -103,6 +103,17 @@ export function AccountSecurityPage({
           emailAddress={platformSession.user.email ?? ""}
           error={signOutMutation.error?.message}
           actions={[
+            // Organisations under review keep to their application.
+            ...(isApproved
+              ? [
+                  {
+                    label: "Settings",
+                    icon: <OrganizationIcon aria-hidden="true" />,
+                    onSelect: () =>
+                      router.push(ORGANIZATION_ROUTES.organizationSettings),
+                  },
+                ]
+              : []),
             {
               label: "Sign out",
               pendingLabel: "Signing out…",
@@ -120,15 +131,19 @@ export function AccountSecurityPage({
     >
       <div className="flex flex-col gap-7">
         <div className="flex flex-col gap-2">
-          {returnLink.isProductApplication ? (
-            <a className={returnLinkClassName} href={returnLink.href}>
-              {returnLink.label}
-            </a>
-          ) : (
-            <Link className={returnLinkClassName} href={returnLink.href}>
-              {returnLink.label}
-            </Link>
-          )}
+          <div className="mb-2">
+            <PageBreadcrumbs
+              linkComponent={Link}
+              trail={[
+                {
+                  label: returnLink.label,
+                  href: returnLink.href,
+                  isExternal: returnLink.isProductApplication,
+                },
+              ]}
+              currentPage="Account security"
+            />
+          </div>
           <h1 className="font-serif text-display font-normal">
             Account security
           </h1>

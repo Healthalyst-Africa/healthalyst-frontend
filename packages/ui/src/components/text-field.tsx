@@ -7,10 +7,10 @@ import {
 } from "react";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldLabel,
 } from "@healthalyst/ui/primitives/field";
+import { HintText } from "@healthalyst/ui/components/hint-text";
 import { Input } from "@healthalyst/ui/primitives/input";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import { FieldStatusMessage } from "@healthalyst/ui/components/forms/field-status-message";
@@ -100,9 +100,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProperties>(
           <Input {...controlProperties} type={type} />
         )}
         {description && (
-          <FieldDescription id={descriptionIdentifier}>
-            {description}
-          </FieldDescription>
+          <HintText id={descriptionIdentifier}>{description}</HintText>
         )}
         {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
         {visibleStatus && (

@@ -44,7 +44,9 @@ function NoticeContent({
 }) {
   return (
     <>
-      <AlertTitle className={cn("mb-0", isProminent && "text-heading")}>
+      <AlertTitle
+        className={cn("mb-0", isProminent ? "text-heading" : "leading-5")}
+      >
         {title}
       </AlertTitle>
       {children && (
@@ -106,7 +108,11 @@ export function NoticeBanner({
     <Alert
       variant={TONE_PRESENTATION[tone].variant}
       role={announcementRole(tone)}
-      className={cn("[&>svg]:size-4", className)}
+      // The title has a 20px line; the 16px icon, 14px down, shares its centre.
+      className={cn(
+        "[&>svg+div]:translate-y-0 [&>svg]:top-3.5 [&>svg]:size-4",
+        className
+      )}
     >
       {shownIcon}
       {action ? (

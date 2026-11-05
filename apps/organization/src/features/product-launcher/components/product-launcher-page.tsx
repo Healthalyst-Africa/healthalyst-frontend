@@ -3,7 +3,11 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { AccountSecurityIcon, SignOutIcon } from "@healthalyst/icons";
+import {
+  AccountSecurityIcon,
+  OrganizationIcon,
+  SignOutIcon,
+} from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ApplicationLauncherGrid } from "@healthalyst/ui/components/application-launcher-grid";
@@ -110,7 +114,13 @@ export function ProductLauncherPage() {
           error={signOutMutation.error?.message}
           actions={[
             {
-              label: "Account security",
+              label: "Settings",
+              icon: <OrganizationIcon aria-hidden="true" />,
+              onSelect: () =>
+                router.push(ORGANIZATION_ROUTES.organizationSettings),
+            },
+            {
+              label: "Account",
               icon: <AccountSecurityIcon aria-hidden="true" />,
               onSelect: () => router.push(ORGANIZATION_ROUTES.accountSecurity),
             },
@@ -148,9 +158,9 @@ export function ProductLauncherPage() {
         <p className="text-sm text-muted-foreground">
           <Link
             className="font-semibold text-primary underline underline-offset-4"
-            href={ORGANIZATION_ROUTES.onboarding}
+            href={ORGANIZATION_ROUTES.organizationSettings}
           >
-            View your organisation details
+            Manage your organisation details and branches
           </Link>
         </p>
       </div>

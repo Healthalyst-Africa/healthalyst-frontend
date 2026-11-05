@@ -35,6 +35,8 @@ export {
   IconHourglassEmpty as UpcomingIcon,
   IconLock as LockedIcon,
   IconShieldLock as AccountSecurityIcon,
+  IconPencil as EditIcon,
+  IconPlus as AddIcon,
   IconFiles as ApplicationsIcon,
   IconClock as PendingIcon,
   IconMessageExclamation as ChangesRequestedIcon,

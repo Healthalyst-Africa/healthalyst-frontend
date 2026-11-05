@@ -5,6 +5,7 @@ export const ORGANIZATION_APP_ROUTES = {
   signIn: "/sign-in",
   application: "/onboarding",
   accountSecurity: "/account/security",
+  organizationSettings: "/settings",
   product: "healthschedule",
 } as const;
 

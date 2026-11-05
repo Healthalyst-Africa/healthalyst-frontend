@@ -3,10 +3,10 @@
 import type { ReactNode } from "react";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldLabel,
 } from "@healthalyst/ui/primitives/field";
+import { HintText } from "@healthalyst/ui/components/hint-text";
 import { Checkbox } from "@healthalyst/ui/primitives/checkbox";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
@@ -74,9 +74,10 @@ export function CheckboxField({
         </FieldLabel>
       </div>
       {description && (
-        <FieldDescription id={descriptionIdentifier}>
+        // Indented to start under the label, past the checkbox and its gap.
+        <HintText id={descriptionIdentifier} className="pl-7">
           {description}
-        </FieldDescription>
+        </HintText>
       )}
       {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
     </Field>

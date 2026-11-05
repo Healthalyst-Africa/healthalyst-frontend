@@ -109,7 +109,7 @@ describe("resolveAccountSecurityReturn", () => {
       })
     ).toEqual({
       href: "https://schedule.example.test",
-      label: "Back to HealthSchedule",
+      label: "HealthSchedule",
       isProductApplication: true,
     });
   });
@@ -121,7 +121,7 @@ describe("resolveAccountSecurityReturn", () => {
         isApproved: true,
         productAddresses,
       })
-    ).toMatchObject({ href: "/products", label: "Back to your products" });
+    ).toMatchObject({ href: "/products", label: "Products" });
   });
 
   it("returns to the application while the organisation is not approved", () => {
@@ -133,7 +133,7 @@ describe("resolveAccountSecurityReturn", () => {
       })
     ).toMatchObject({
       href: "/onboarding",
-      label: "Back to your application",
+      label: "Your application",
     });
   });
 

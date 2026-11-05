@@ -83,7 +83,17 @@ export const organizationDetailSchema = organizationApplicationSchema.extend({
   ),
   documents: schemaLibrary.array(organizationDocumentSchema),
   members: schemaLibrary.array(schemaLibrary.unknown()),
-  history: schemaLibrary.array(schemaLibrary.unknown()),
+  history: schemaLibrary.array(
+    schemaLibrary.object({
+      fromStatus: organizationStatusSchema.nullable(),
+      toStatus: organizationStatusSchema,
+      actorId: schemaLibrary.uuid(),
+      reasonCode: schemaLibrary.string().nullable(),
+      message: schemaLibrary.string().nullable(),
+      internalNote: schemaLibrary.string().nullable(),
+      createdAt: schemaLibrary.iso.datetime(),
+    })
+  ),
   possibleDuplicates: schemaLibrary.array(
     schemaLibrary.object({
       id: schemaLibrary.uuid(),

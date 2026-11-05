@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { FeedbackDialog } from "@healthalyst/ui/components/feedback-dialog";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import {
@@ -140,12 +141,6 @@ export function PasswordChangeSection({
           onChange={clearFeedback}
         />
         {generalError && <FormMessage tone="error">{generalError}</FormMessage>}
-        {passwordChangeMutation.isSuccess && (
-          <FormMessage tone="success">
-            Your password has been changed. You were signed out on your other
-            devices.
-          </FormMessage>
-        )}
         <ActionButton
           className="self-start"
           type="submit"
@@ -155,6 +150,18 @@ export function PasswordChangeSection({
           Change password
         </ActionButton>
       </form>
+
+      <FeedbackDialog
+        open={passwordChangeMutation.isSuccess}
+        onOpenChange={(isOpen) => !isOpen && passwordChangeMutation.reset()}
+        tone="success"
+        title="Password changed"
+        description="Use your new password the next time you sign in. You were signed out on your other devices; this one stays signed in."
+        primaryAction={{
+          label: "Done",
+          onSelect: () => passwordChangeMutation.reset(),
+        }}
+      />
     </ContentPanel>
   );
 }
