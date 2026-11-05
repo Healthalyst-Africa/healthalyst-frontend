@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { verifyStepUpCode } from "@healthalyst/platform-api/authentication-service";
+import type { StepUpMethod } from "@healthalyst/ui/components/step-up-dialog";
 import {
   staffAuthenticatorCodeSchema,
   staffRecoveryCodeSchema,
@@ -11,8 +12,6 @@ import {
 
 /** The Platform API's error code when an action needs a recent authenticator check. */
 export const STEP_UP_REQUIRED_ERROR_CODE = "AUTH_STEP_UP_REQUIRED";
-
-export type StepUpMethod = "totp" | "recovery_code";
 
 export function isStepUpRequiredError(error: unknown): boolean {
   return (

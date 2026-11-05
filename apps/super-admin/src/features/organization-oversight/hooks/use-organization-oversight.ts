@@ -3,15 +3,20 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { StaffIdentity } from "~/features/staff-auth/types/staff-identity";
 import {
+  addOrganizationInternalNote,
   claimOrganizationApplication,
+  deactivateOrganization,
   getOrganizationDetail,
   getOrganizationDocumentViewAddress,
   listOrganizationApplications,
   listReviewQueue,
   recordReviewDecision,
+  reinstateOrganization,
   releaseOrganizationApplication,
+  suspendOrganization,
 } from "~/features/organization-oversight/services/organization-service";
 import type { ReviewDecision } from "~/features/organization-oversight/types/review-types";
+import type { OrganizationLifecycleAction } from "~/features/organization-oversight/config/organization-lifecycle";
 import { organizationQueryKeys } from "~/features/organization-oversight/services/organization-query-keys";
 
 export function useOrganizationsQuery(
@@ -91,6 +96,62 @@ export function useReviewDecisionMutation(staffIdentity: StaffIdentity) {
         staffIdentity,
         variables.organizationId
       );
+    },
+  });
+}
+
+const LIFECYCLE_REQUESTS: Record<
+  OrganizationLifecycleAction,
+  (organizationId: string, reason: string, version: number) => Promise<void>
+> = {
+  suspend: suspendOrganization,
+  reinstate: reinstateOrganization,
+  deactivate: deactivateOrganization,
+};
+
+export function useOrganizationLifecycleMutation(staffIdentity: StaffIdentity) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      action,
+      organizationId,
+      reason,
+      version,
+    }: {
+      action: OrganizationLifecycleAction;
+      organizationId: string;
+      reason: string;
+      version: number;
+    }) => LIFECYCLE_REQUESTS[action](organizationId, reason, version),
+    onSuccess: async (_result, variables) => {
+      await invalidateOrganizationReviewData(
+        queryClient,
+        staffIdentity,
+        variables.organizationId
+      );
+    },
+  });
+}
+
+export function useOrganizationInternalNoteMutation(
+  staffIdentity: StaffIdentity
+) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      organizationId,
+      note,
+    }: {
+      organizationId: string;
+      note: string;
+    }) => addOrganizationInternalNote(organizationId, note),
+    onSuccess: async (_result, variables) => {
+      await queryClient.invalidateQueries({
+        queryKey: organizationQueryKeys.detail(
+          staffIdentity.staffAccountId,
+          variables.organizationId
+        ),
+      });
     },
   });
 }

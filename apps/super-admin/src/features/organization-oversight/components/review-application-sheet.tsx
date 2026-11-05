@@ -22,10 +22,12 @@ import {
 } from "@healthalyst/ui/components/review-summary";
 import { SelectField } from "@healthalyst/ui/components/select-field";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
+import { StepUpDialog } from "@healthalyst/ui/components/step-up-dialog";
 import { TextAreaField } from "@healthalyst/ui/components/text-area-field";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import { formatFileSize } from "@healthalyst/ui/lib/file-size";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
+import { STAFF_AUTHENTICATOR_CONFIGURATION } from "~/features/staff-auth/config/staff-sign-in";
 import {
   APPLICATION_DATE_FORMATTER,
   APPLICATION_STATUS_PRESENTATION,
@@ -44,7 +46,16 @@ import {
   REVIEW_VALIDATION_LIMITS,
 } from "~/features/organization-oversight/config/review-configuration";
 import { useReviewApplication } from "~/features/organization-oversight/hooks/use-review-application";
-import { StepUpDialog } from "~/features/staff-auth/components/step-up-dialog";
+import { useOrganizationLifecycle } from "~/features/organization-oversight/hooks/use-organization-lifecycle";
+import {
+  InternalNoteForm,
+  OrganizationHistory,
+} from "~/features/organization-oversight/components/organization-activity";
+import {
+  OrganizationLifecycleButtons,
+  OrganizationLifecycleDialogs,
+} from "~/features/organization-oversight/components/organization-lifecycle-actions";
+import { INTERNAL_NOTE_ROLES } from "~/features/organization-oversight/config/organization-lifecycle";
 import type { OrganizationDetail } from "~/features/organization-oversight/types/organization-types";
 import type { ReviewApplicationProperties } from "~/features/organization-oversight/types/review-controller";
 
@@ -85,6 +96,15 @@ export function ReviewApplicationSheet({
 }) {
   const review = useReviewApplication({ application, staffIdentity });
   const detail = review.detailQuery.data;
+  const lifecycle = useOrganizationLifecycle({
+    organizationId: application.id,
+    status: application.status,
+    detail,
+    staffIdentity,
+  });
+  const canWriteInternalNote = INTERNAL_NOTE_ROLES.some((role) =>
+    staffIdentity.platformRoles.includes(role)
+  );
   const organizationName = application.displayName || application.legalName;
   const statusPresentation =
     APPLICATION_STATUS_PRESENTATION[application.status];
@@ -164,6 +184,8 @@ export function ReviewApplicationSheet({
         Approve organisation
       </ActionButton>
     </div>
+  ) : lifecycle.availableActions.length > 0 ? (
+    <OrganizationLifecycleButtons lifecycle={lifecycle} />
   ) : undefined;
 
   return (
@@ -375,6 +397,19 @@ export function ReviewApplicationSheet({
                   after a minute.
                 </HintText>
               </ReviewSection>
+
+              {canWriteInternalNote && (
+                <ReviewSection heading="Internal notes">
+                  <InternalNoteForm
+                    organizationId={application.id}
+                    staffIdentity={staffIdentity}
+                  />
+                </ReviewSection>
+              )}
+
+              <ReviewSection heading="History">
+                <OrganizationHistory history={detail.history} />
+              </ReviewSection>
             </>
           ) : null}
         </div>
@@ -499,11 +534,23 @@ export function ReviewApplicationSheet({
         />
       </FormDialog>
 
+      <OrganizationLifecycleDialogs lifecycle={lifecycle} />
+
       <StepUpDialog
         open={review.isAwaitingStepUp}
         actionDescription={review.stepUpActionDescription}
-        verification={review.stepUpVerification}
+        method={review.stepUpVerification.method}
+        code={review.stepUpVerification.code}
+        error={review.stepUpVerification.error}
+        isVerifying={review.stepUpVerification.isVerifying}
         isCompletingAction={review.decisionMutation.isPending}
+        completingLabel="Saving decision"
+        authenticatorCodeLength={STAFF_AUTHENTICATOR_CONFIGURATION.codeLength}
+        recoveryCodeMaximumLength={
+          STAFF_AUTHENTICATOR_CONFIGURATION.recoveryCodeMaximumLength
+        }
+        onCodeChange={review.stepUpVerification.updateCode}
+        onMethodToggle={review.stepUpVerification.toggleMethod}
         onCancel={review.cancelStepUp}
         onSubmit={() => void review.confirmStepUp()}
       />

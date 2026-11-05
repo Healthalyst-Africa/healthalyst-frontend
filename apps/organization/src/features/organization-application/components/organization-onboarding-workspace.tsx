@@ -1,8 +1,13 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
-import { SignOutIcon } from "@healthalyst/icons";
+import {
+  AccountSecurityIcon,
+  OrganizationIcon,
+  SignOutIcon,
+} from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
@@ -13,6 +18,9 @@ import {
 } from "@healthalyst/ui/components/notice-banner";
 import { SelectField } from "@healthalyst/ui/components/select-field";
 import OrganizationOnboardingLayout from "~/components/ui/organization-onboarding-layout";
+import { ORGANIZATION_ROUTES } from "~/config/routes";
+import { APPROVED_ORGANIZATION_STATUS } from "~/shared/organization/config/organization-status";
+import { findActiveMembership } from "~/shared/organization/utilities/find-active-membership";
 import { useOrganizationOnboardingWorkspace } from "~/features/organization-application/hooks/use-organization-onboarding-workspace";
 import {
   OrganizationOnboardingProgress,
@@ -31,6 +39,10 @@ export function OrganizationOnboardingWorkspace({
   session: PlatformSession;
   onSignedOut: () => void;
 }) {
+  const router = useRouter();
+  const isApproved =
+    findActiveMembership(session)?.organization.status ===
+    APPROVED_ORGANIZATION_STATUS;
   const { currentStep, goToStep } = useOnboardingStep();
   const {
     organizationId,
@@ -76,6 +88,22 @@ export function OrganizationOnboardingWorkspace({
           emailAddress={session.user.email ?? ""}
           error={signOutMutation.error?.message}
           actions={[
+            // Organisations under review keep to their application.
+            ...(isApproved
+              ? [
+                  {
+                    label: "Settings",
+                    icon: <OrganizationIcon aria-hidden="true" />,
+                    onSelect: () =>
+                      router.push(ORGANIZATION_ROUTES.organizationSettings),
+                  },
+                ]
+              : []),
+            {
+              label: "Account",
+              icon: <AccountSecurityIcon aria-hidden="true" />,
+              onSelect: () => router.push(ORGANIZATION_ROUTES.accountSecurity),
+            },
             {
               label: "Sign out",
               pendingLabel: "Signing out…",
