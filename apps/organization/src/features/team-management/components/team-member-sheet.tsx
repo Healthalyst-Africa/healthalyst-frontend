@@ -502,7 +502,7 @@ export function TeamMemberSheet({
         open={openDialog === "reset-authenticator"}
         onOpenChange={(isOpen) => !isOpen && closeDialog()}
         title={`Reset ${fullName}'s authenticator?`}
-        description="Use this when they have lost the phone with their authenticator app. They set up a new one the next time they sign in. You will be asked for your own code first."
+        description="Use this when they have lost the phone with their authenticator app. They set up a new one the next time they sign in. If you have not entered your own authenticator code in the last 15 minutes, you will be asked for it first."
         submitLabel="Reset authenticator"
         submittingLabel="Resetting"
         tone="destructive"
