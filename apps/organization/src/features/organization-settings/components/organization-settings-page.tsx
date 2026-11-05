@@ -26,10 +26,6 @@ export function OrganizationSettingsPage() {
             <h1 className="font-serif text-display font-normal">
               {settings.organizationName}
             </h1>
-            <p className="max-w-2xl text-lede text-muted-foreground">
-              Your organisation&apos;s details and the branches people work
-              from.
-            </p>
           </div>
 
           <OrganizationProfileSection
