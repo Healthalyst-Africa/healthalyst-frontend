@@ -13,6 +13,7 @@ import {
 } from "~/features/team-management/utilities/date-text";
 import {
   describeBranchScope,
+  describeBulkInvitationFailures,
   groupPermissionsByArea,
   koboToNairaText,
   readBulkInvitationRows,
@@ -272,6 +273,26 @@ describe("bulk invitations", () => {
       ).join("\n")
     );
     expect(rows.success).toBe(false);
+  });
+
+  it("summarises failed rows in one sentence", () => {
+    expect(
+      describeBulkInvitationFailures([
+        {
+          name: "Amaka Obi",
+          message: "This person already has a pending invitation.",
+        },
+      ])
+    ).toBe(
+      "Not sent: Amaka Obi: This person already has a pending invitation."
+    );
+    const manyFailures = Array.from({ length: 7 }, (_, failureIndex) => ({
+      name: `Person ${failureIndex + 1}`,
+      message: "Invalid",
+    }));
+    expect(describeBulkInvitationFailures(manyFailures)).toMatch(
+      /Person 5: Invalid; and 2 more\.$/
+    );
   });
 
   it("asks for people before anything else", () => {

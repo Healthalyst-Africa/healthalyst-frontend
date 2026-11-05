@@ -151,6 +151,22 @@ export function groupPermissionsByArea(
   return areas.filter((area) => area.permissions.length > 0);
 }
 
+const LISTED_FAILURE_MAXIMUM = 5;
+
+/** Which invitations in a batch were not sent, and why, as one sentence. */
+export function describeBulkInvitationFailures(
+  failures: readonly { name: string; message: string }[]
+): string {
+  const listed = failures
+    .slice(0, LISTED_FAILURE_MAXIMUM)
+    .map((failure) => `${failure.name}: ${failure.message.replace(/\.$/, "")}`)
+    .join("; ");
+  const remainingCount = failures.length - LISTED_FAILURE_MAXIMUM;
+  return remainingCount > 0
+    ? `Not sent: ${listed}; and ${remainingCount} more.`
+    : `Not sent: ${listed}.`;
+}
+
 type SharedInvitationScope = Pick<
   StaffInvitationRequest,
   "roleIds" | "allBranches" | "branchIds" | "departmentIds"

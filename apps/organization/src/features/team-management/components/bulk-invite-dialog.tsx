@@ -17,6 +17,7 @@ import type {
   TeamRole,
 } from "~/features/team-management/types/team-management";
 import {
+  describeBulkInvitationFailures,
   describeFullName,
   readBulkInvitationRows,
 } from "~/features/team-management/utilities/describe-team";
@@ -180,22 +181,11 @@ export function BulkInviteDialog({
             ? `${report.sentCount} ${report.sentCount === 1 ? "invitation" : "invitations"} sent`
             : ""
         }
+        // The description is a single paragraph, so failures are text.
         description={
-          report && report.failures.length > 0 ? (
-            <div className="flex flex-col gap-2 text-left">
-              <p>These were not sent:</p>
-              <ul className="list-disc pl-5">
-                {report.failures.map((failure) => (
-                  <li key={`${failure.name}-${failure.message}`}>
-                    <span className="font-medium">{failure.name}</span>:{" "}
-                    {failure.message}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ) : (
-            "Everyone on the list has a link to join. Links work for 72 hours."
-          )
+          report && report.failures.length > 0
+            ? describeBulkInvitationFailures(report.failures)
+            : "Everyone on the list has a link to join. Links work for 72 hours."
         }
         primaryAction={{ label: "Done", onSelect: () => setReport(null) }}
       />
