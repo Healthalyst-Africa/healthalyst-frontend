@@ -64,10 +64,9 @@ does not need all seven directories. Query keys live with the request services
 they identify. Avoid adding an extra forwarding service between those requests
 and the shared Platform package.
 
-The organisation hub's features include `authentication`,
-`organization-registration`, `organization-application`,
-`organization-management`, `team-management` (staff, invitations and roles)
-and `invitation-acceptance` (the public page an invitation link opens). Super Admin separates `staff-auth`, `staff-workspace`
+The organisation hub has four separate features: `authentication`,
+`organization-registration`, `organization-application`, and
+`organization-management`. Super Admin separates `staff-auth`, `staff-workspace`
 and `organization-oversight`. HealthSchedule currently has `organization-access`.
 
 ### Dependency direction
