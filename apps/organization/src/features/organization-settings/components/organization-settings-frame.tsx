@@ -7,6 +7,7 @@ import {
   AccountSecurityIcon,
   OrganizationIcon,
   SignOutIcon,
+  TeamIcon,
 } from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
@@ -26,6 +27,8 @@ export type OrganizationSettingsContext = {
   organizationId: string;
   organizationName: string;
   userId: string;
+  /** What the signed-in person may do here; the API still checks every request. */
+  permissions: readonly string[];
   canEditProfile: boolean;
   canManageBranches: boolean;
 };
@@ -114,6 +117,11 @@ export function OrganizationSettingsFrame({
                 router.push(ORGANIZATION_ROUTES.organizationSettings),
             },
             {
+              label: "Team",
+              icon: <TeamIcon aria-hidden="true" />,
+              onSelect: () => router.push(ORGANIZATION_ROUTES.team),
+            },
+            {
               label: "Account",
               icon: <AccountSecurityIcon aria-hidden="true" />,
               onSelect: () => router.push(ORGANIZATION_ROUTES.accountSecurity),
@@ -138,6 +146,7 @@ export function OrganizationSettingsFrame({
         organizationId: membership.organization.id,
         organizationName: membership.organization.name,
         userId: platformSession.user.id,
+        permissions,
         canEditProfile: permissions.includes(
           ORGANIZATION_SETTINGS_PERMISSIONS.updateProfile
         ),

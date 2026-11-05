@@ -80,7 +80,9 @@ export function MultiSelect({
   }
 
   return (
-    <Popover open={isOpen} onOpenChange={setIsOpen}>
+    // Modal, so the list scrolls inside a dialog: the dialog blocks scrolling
+    // outside itself, and the list is rendered outside it.
+    <Popover modal open={isOpen} onOpenChange={setIsOpen}>
       {selectedValues.map((value) => (
         <input key={value} type="hidden" name={name} value={value} />
       ))}
