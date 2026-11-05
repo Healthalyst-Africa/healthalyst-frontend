@@ -5,4 +5,6 @@ export const APPLICATION_ROUTES = {
   dashboard: "/dashboard",
   organizations: "/organizations",
   review: "/review",
+  staff: "/staff",
+  auditLog: "/audit-log",
 } as const;

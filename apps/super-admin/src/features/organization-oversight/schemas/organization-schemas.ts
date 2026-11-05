@@ -69,6 +69,25 @@ export const organizationDocumentSchema = schemaLibrary.object({
   createdAt: schemaLibrary.iso.datetime(),
 });
 
+export const organizationMemberSchema = schemaLibrary.object({
+  userId: schemaLibrary.uuid(),
+  name: schemaLibrary.string(),
+  /** Role codes, such as "owner". */
+  roles: schemaLibrary.array(schemaLibrary.string()),
+  status: schemaLibrary.enum(["INVITED", "ACTIVE", "SUSPENDED", "REVOKED"]),
+});
+
+export const ownerAssignmentSchema = schemaLibrary.object({
+  organizationId: schemaLibrary.uuid(),
+  userId: schemaLibrary.uuid(),
+  owners: schemaLibrary.array(
+    schemaLibrary.object({
+      userId: schemaLibrary.uuid(),
+      name: schemaLibrary.string(),
+    })
+  ),
+});
+
 export const organizationDetailSchema = organizationApplicationSchema.extend({
   version: schemaLibrary.number().int().positive(),
   profile: schemaLibrary.record(
@@ -82,7 +101,7 @@ export const organizationDetailSchema = organizationApplicationSchema.extend({
     })
   ),
   documents: schemaLibrary.array(organizationDocumentSchema),
-  members: schemaLibrary.array(schemaLibrary.unknown()),
+  members: schemaLibrary.array(organizationMemberSchema),
   history: schemaLibrary.array(
     schemaLibrary.object({
       fromStatus: organizationStatusSchema.nullable(),

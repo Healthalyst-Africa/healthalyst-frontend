@@ -4,6 +4,8 @@ import type {
   organizationDetailSchema,
   organizationStatusSchema,
   organizationDocumentSchema,
+  organizationMemberSchema,
+  ownerAssignmentSchema,
 } from "~/features/organization-oversight/schemas/organization-schemas";
 
 export type OrganizationApplication = schemaLibrary.infer<
@@ -18,3 +20,7 @@ export type RegistrationStatus = schemaLibrary.infer<
 export type OrganizationDocument = schemaLibrary.infer<
   typeof organizationDocumentSchema
 >;
+export type OrganizationMember = schemaLibrary.infer<
+  typeof organizationMemberSchema
+>;
+export type OwnerAssignment = schemaLibrary.infer<typeof ownerAssignmentSchema>;
