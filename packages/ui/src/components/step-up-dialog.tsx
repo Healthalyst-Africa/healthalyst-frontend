@@ -5,16 +5,25 @@ import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { FormDialog } from "@healthalyst/ui/components/form-dialog";
 import { OneTimeCodeField } from "@healthalyst/ui/components/one-time-code-field";
 import { TextField } from "@healthalyst/ui/components/text-field";
-import { STAFF_AUTHENTICATOR_CONFIGURATION } from "~/features/staff-auth/config/staff-sign-in";
-import type { useStepUpVerification } from "~/features/staff-auth/hooks/use-step-up-verification";
+
+type StepUpMethod = "totp" | "recovery_code";
 
 type StepUpDialogProperties = {
   open: boolean;
   /** What the code confirms, such as "approve this organisation". */
   actionDescription: string;
-  verification: ReturnType<typeof useStepUpVerification>;
+  method: StepUpMethod;
+  code: string;
+  error?: string;
+  isVerifying: boolean;
   /** True while the protected action is sent again after a successful check. */
   isCompletingAction?: boolean;
+  /** Shown on the confirm button while the protected action is sent again. */
+  completingLabel?: string;
+  authenticatorCodeLength: number;
+  recoveryCodeMaximumLength: number;
+  onCodeChange: (code: string) => void;
+  onMethodToggle: () => void;
   onCancel: () => void;
   onSubmit: () => void;
 };
@@ -23,12 +32,20 @@ type StepUpDialogProperties = {
 export function StepUpDialog({
   open,
   actionDescription,
-  verification,
+  method,
+  code,
+  error,
+  isVerifying,
   isCompletingAction = false,
+  completingLabel = "Saving",
+  authenticatorCodeLength,
+  recoveryCodeMaximumLength,
+  onCodeChange,
+  onMethodToggle,
   onCancel,
   onSubmit,
 }: StepUpDialogProperties) {
-  const isBusy = verification.isVerifying || isCompletingAction;
+  const isBusy = isVerifying || isCompletingAction;
 
   function handleSubmit(formEvent: FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
@@ -42,21 +59,21 @@ export function StepUpDialog({
       title="Confirm it is you"
       description={`For security, enter a code from your authenticator app to ${actionDescription}.`}
       submitLabel="Confirm"
-      submittingLabel={isCompletingAction ? "Saving decision" : "Checking code"}
+      submittingLabel={isCompletingAction ? completingLabel : "Checking code"}
       isSubmitting={isBusy}
       onSubmit={handleSubmit}
     >
-      {verification.method === "totp" ? (
+      {method === "totp" ? (
         <OneTimeCodeField
           id="step-up-authenticator-code"
           label="Authenticator code"
-          length={STAFF_AUTHENTICATOR_CONFIGURATION.codeLength}
+          length={authenticatorCodeLength}
           required
           autoFocus
-          value={verification.code}
+          value={code}
           disabled={isBusy}
-          error={verification.error}
-          onChange={verification.updateCode}
+          error={error}
+          onChange={onCodeChange}
         />
       ) : (
         <TextField
@@ -65,15 +82,11 @@ export function StepUpDialog({
           autoComplete="one-time-code"
           required
           autoFocus
-          maxLength={
-            STAFF_AUTHENTICATOR_CONFIGURATION.recoveryCodeMaximumLength
-          }
-          value={verification.code}
+          maxLength={recoveryCodeMaximumLength}
+          value={code}
           disabled={isBusy}
-          error={verification.error}
-          onChange={(changeEvent) =>
-            verification.updateCode(changeEvent.target.value)
-          }
+          error={error}
+          onChange={(changeEvent) => onCodeChange(changeEvent.target.value)}
         />
       )}
       <ActionButton
@@ -82,12 +95,14 @@ export function StepUpDialog({
         type="button"
         variant="link"
         disabled={isBusy}
-        onClick={verification.toggleMethod}
+        onClick={onMethodToggle}
       >
-        {verification.method === "totp"
+        {method === "totp"
           ? "Use a recovery code instead"
           : "Use an authenticator code instead"}
       </ActionButton>
     </FormDialog>
   );
 }
+
+export type { StepUpDialogProperties, StepUpMethod };

@@ -9,12 +9,12 @@ import { isFocusLeaving } from "@healthalyst/ui/lib/focus";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldLabel,
   FieldLegend,
   FieldSet,
 } from "@healthalyst/ui/primitives/field";
+import { HintText } from "@healthalyst/ui/components/hint-text";
 import { Checkbox } from "@healthalyst/ui/primitives/checkbox";
 import { Input } from "@healthalyst/ui/primitives/input";
 import { MultiSelect } from "@healthalyst/ui/components/multi-select";
@@ -96,9 +96,7 @@ export function DynamicFormField({
           </FieldLabel>
         </div>
         {field.description && (
-          <FieldDescription id={descriptionIdentifier}>
-            {field.description}
-          </FieldDescription>
+          <HintText id={descriptionIdentifier}>{field.description}</HintText>
         )}
         {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
       </Field>
@@ -126,9 +124,7 @@ export function DynamicFormField({
           />
         </FieldLegend>
         {field.description && (
-          <FieldDescription id={descriptionIdentifier}>
-            {field.description}
-          </FieldDescription>
+          <HintText id={descriptionIdentifier}>{field.description}</HintText>
         )}
         <div className="flex flex-col gap-3">
           {field.options.map((option) => {
@@ -264,9 +260,7 @@ export function DynamicFormField({
         />
       )}
       {field.description && (
-        <FieldDescription id={descriptionIdentifier}>
-          {field.description}
-        </FieldDescription>
+        <HintText id={descriptionIdentifier}>{field.description}</HintText>
       )}
       {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
       {visibleStatus && statusIdentifier && (

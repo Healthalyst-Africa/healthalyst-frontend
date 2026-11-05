@@ -15,10 +15,11 @@ import {
   verifyStepUpCode,
   type SignInMethod,
 } from "@healthalyst/platform-api/authentication-service";
+import { PLATFORM_SESSIONS_QUERY_KEY } from "~/features/account-security/config/account-security";
 
 export function usePlatformSessionsQuery({ userId }: { userId: string }) {
   return useQuery({
-    queryKey: ["platform-sessions", userId],
+    queryKey: [PLATFORM_SESSIONS_QUERY_KEY, userId],
     queryFn: getPlatformSessions,
     retry: false,
   });

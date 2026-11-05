@@ -7,10 +7,10 @@ import {
 } from "react";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldLabel,
 } from "@healthalyst/ui/primitives/field";
+import { HintText } from "@healthalyst/ui/components/hint-text";
 import { Textarea } from "@healthalyst/ui/primitives/textarea";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
@@ -55,9 +55,7 @@ const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProperties>(
           }
         />
         {description && (
-          <FieldDescription id={descriptionIdentifier}>
-            {description}
-          </FieldDescription>
+          <HintText id={descriptionIdentifier}>{description}</HintText>
         )}
         {error && <FieldError id={errorIdentifier}>{error}</FieldError>}
       </Field>

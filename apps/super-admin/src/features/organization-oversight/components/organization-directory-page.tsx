@@ -6,6 +6,8 @@ import { Suspense } from "react";
 import { useStaffSession } from "~/infrastructure/auth/staff-session-provider";
 import { useOrganizationDirectory } from "~/features/organization-oversight/hooks/use-organization-directory";
 import { OrganizationApplicationsTable } from "~/features/organization-oversight/components/organization-applications-table";
+import { ReviewApplicationSheet } from "~/features/organization-oversight/components/review-application-sheet";
+import { useOpenApplication } from "~/features/organization-oversight/hooks/use-open-application";
 
 import type { StaffIdentity } from "~/features/staff-auth/types/staff-identity";
 
@@ -34,6 +36,9 @@ function OrganizationsList({
 }) {
   const { searchTerm, organizationsQuery, matchingOrganizations } =
     useOrganizationDirectory(staffIdentity);
+  const { openApplication, setOpenApplication } = useOpenApplication(
+    matchingOrganizations
+  );
   return (
     <>
       <div>
@@ -50,7 +55,20 @@ function OrganizationsList({
         errorMessage={organizationsQuery.error?.message}
         onRetry={() => void organizationsQuery.refetch()}
         searchTerm={searchTerm}
+        onSelectApplication={(application) =>
+          setOpenApplication(application.id)
+        }
       />
+      {openApplication && (
+        <ReviewApplicationSheet
+          key={openApplication.id}
+          application={openApplication}
+          staffIdentity={staffIdentity}
+          open
+          onOpenChange={(isOpen) => !isOpen && setOpenApplication(null)}
+          returnLabel="Back to organisations"
+        />
+      )}
     </>
   );
 }

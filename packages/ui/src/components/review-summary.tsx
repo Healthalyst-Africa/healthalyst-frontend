@@ -176,20 +176,19 @@ export function SummaryTiles({ tiles }: { tiles: readonly SummaryTile[] }) {
           key={tile.key}
           className="flex min-w-0 flex-col gap-1 rounded-lg bg-secondary/50 px-4 py-3"
         >
-          <span className="flex flex-wrap items-center justify-between gap-2">
-            <span className="text-body font-medium">{tile.title}</span>
-            {tile.status && (
-              <span className="text-caption">
-                <FileStatusText
-                  label={tile.status.label}
-                  tone={tile.status.tone}
-                />
-              </span>
-            )}
-          </span>
+          <span className="text-body font-medium">{tile.title}</span>
           {tile.description && (
             <span className="text-caption font-light text-muted-foreground">
               {tile.description}
+            </span>
+          )}
+          {/* Pinned to the bottom so statuses line up across tiles. */}
+          {tile.status && (
+            <span className="mt-auto pt-2 text-caption">
+              <FileStatusText
+                label={tile.status.label}
+                tone={tile.status.tone}
+              />
             </span>
           )}
         </li>
