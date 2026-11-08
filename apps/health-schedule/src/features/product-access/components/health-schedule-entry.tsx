@@ -5,18 +5,18 @@ import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { StateNotice } from "@healthalyst/ui/components/notice-banner";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
-import { HealthScheduleHome } from "~/features/product-access/components/health-schedule-home";
 import {
   ProductAccessNotice,
   StatusPageLayout,
 } from "~/features/product-access/components/product-access-notice";
+import { HealthScheduleWorkspace } from "~/features/product-access/components/health-schedule-workspace";
 import { resolveProductAccess } from "~/features/product-access/utilities/resolve-product-access";
 import { usePlatformSession } from "~/infrastructure/auth/platform-session-provider";
 
 /**
  * Picks HealthSchedule's first screen from the HealthAlyst sign-in made in
  * the organisation app: the sign-in options, the organisation's application
- * status, or the workspace.
+ * status, or the workspace once HealthSchedule confirms it can open.
  */
 export function HealthScheduleEntry({
   signedOutView,
@@ -62,9 +62,9 @@ export function HealthScheduleEntry({
   }
 
   return (
-    <HealthScheduleHome
+    <HealthScheduleWorkspace
       platformSession={platformSession}
-      organizationName={productAccess.organization.name}
+      organization={productAccess.organization}
     />
   );
 }

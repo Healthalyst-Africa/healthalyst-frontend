@@ -68,7 +68,10 @@ The organisation hub's features include `authentication`,
 `organization-registration`, `organization-application`,
 `organization-management`, `team-management` (staff, invitations and roles)
 and `invitation-acceptance` (the public page an invitation link opens). Super Admin separates `staff-auth`, `staff-workspace`
-and `organization-oversight`. HealthSchedule currently has `organization-access`.
+and `organization-oversight`. HealthSchedule has `organization-access`,
+`product-access` (the sign-in, application and product checks that choose the
+first screen) and `branch-selection` (the branch the person is working at).
+Its HealthSchedule API client is in `infrastructure/api`.
 
 ### Dependency direction
 
@@ -90,17 +93,18 @@ unchanged; use descriptive names for project-authored identifiers.
 
 ## What belongs in configuration
 
-| Value                                                               | Owner                                                      |
-| ------------------------------------------------------------------- | ---------------------------------------------------------- |
-| Route destinations                                                  | App `config/routes.ts` or `config/application-routes.ts`   |
-| Endpoint paths, allowed options, field limits, upload limits        | Owning feature `config/`                                   |
-| Shared timeout, refresh margin, public requests and session signals | `platform-api/src/config/browser-config.ts`                |
-| Public app origins, Platform API origin and validation              | `packages/config`                                          |
-| Platform API fixed proxy target and rewrite                         | `packages/platform-api/next-config.mjs`                    |
-| App route paths                                                     | Owning app `src/config/`                                   |
-| Shared colours and interaction tokens                               | `packages/ui/src/styles.css` and its Tailwind preset       |
-| Neutral reusable visual behaviour                                   | UI package `config/`                                       |
-| One-off labels and local rendering choices                          | Owning view, unless several views share a presentation map |
+| Value                                                               | Owner                                                         |
+| ------------------------------------------------------------------- | ------------------------------------------------------------- |
+| Route destinations                                                  | App `config/routes.ts` or `config/application-routes.ts`      |
+| Endpoint paths, allowed options, field limits, upload limits        | Owning feature `config/`                                      |
+| Shared timeout, refresh margin, public requests and session signals | `platform-api/src/config/browser-config.ts`                   |
+| Public app origins, Platform API origin and validation              | `packages/config`                                             |
+| Platform API fixed proxy target and rewrite                         | `packages/platform-api/next-config.mjs`                       |
+| Product API address parsing and proxy rewrite                       | `packages/config` and `packages/platform-api/next-config.mjs` |
+| App route paths                                                     | Owning app `src/config/`                                      |
+| Shared colours and interaction tokens                               | `packages/ui/src/styles.css` and its Tailwind preset          |
+| Neutral reusable visual behaviour                                   | UI package `config/`                                          |
+| One-off labels and local rendering choices                          | Owning view, unless several views share a presentation map    |
 
 `packages/config` is the shared source for public environment names and their
 validation. Apps still own route paths, and each independently deployed app

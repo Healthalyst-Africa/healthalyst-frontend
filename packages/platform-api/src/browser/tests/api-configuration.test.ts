@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { createPlatformApiRewrites } from "../../../next-config.mjs";
-import { validatePlatformApiAddress } from "../config/api-address";
+import {
+  createPlatformApiRewrites,
+  createProductApiRewrites,
+} from "../../../next-config.mjs";
+import {
+  validatePlatformApiAddress,
+  validateProductApiAddress,
+} from "../config/api-address";
 
 const API_ORIGIN = "https://healthalyst-platform-api-dev.onrender.com";
 
@@ -59,5 +65,80 @@ describe("API addresses and transparent /v1 proxy", () => {
     expect(() =>
       createPlatformApiRewrites({ browserAddress: "/", upstreamAddress })
     ).toThrow();
+  });
+});
+
+const PRODUCT_API_ORIGIN =
+  "https://healthalyst-healthschedule-api-dev.onrender.com";
+const PRODUCT_VARIABLE_NAMES = {
+  browserVariableName: "NEXT_PUBLIC_HEALTHALYST_HEALTH_SCHEDULE_API_URL",
+  upstreamVariableName: "HEALTHALYST_HEALTH_SCHEDULE_API_URL",
+};
+
+describe("Product API addresses and proxy", () => {
+  it.each([
+    "/health-schedule-api",
+    PRODUCT_API_ORIGIN,
+    "http://localhost:4000",
+  ])("accepts a product API origin or proxy path: %s", (address) => {
+    expect(validateProductApiAddress(address)).toBe(address);
+  });
+
+  it.each([
+    undefined,
+    "",
+    "/",
+    "/v1",
+    "/health-schedule-api/",
+    "/health/schedule",
+    "/Health-Schedule",
+    "//api.example.test",
+    "https://api.example.test/v1",
+    "http://api.example.test",
+  ])("rejects an invalid product API address: %s", (address) => {
+    expect(() => validateProductApiAddress(address)).toThrow();
+  });
+
+  it("proxies the product's /v1 paths from the app's own origin", () => {
+    expect(
+      createProductApiRewrites({
+        browserAddress: "/health-schedule-api",
+        upstreamAddress: PRODUCT_API_ORIGIN,
+        ...PRODUCT_VARIABLE_NAMES,
+      })
+    ).toEqual([
+      {
+        source: "/health-schedule-api/v1/:path*",
+        destination: `${PRODUCT_API_ORIGIN}/v1/:path*`,
+      },
+    ]);
+  });
+
+  it("does not add a proxy when the product API is called directly", () => {
+    expect(
+      createProductApiRewrites({
+        browserAddress: PRODUCT_API_ORIGIN,
+        ...PRODUCT_VARIABLE_NAMES,
+      })
+    ).toEqual([]);
+  });
+
+  it("names the missing proxy target", () => {
+    expect(() =>
+      createProductApiRewrites({
+        browserAddress: "/health-schedule-api",
+        ...PRODUCT_VARIABLE_NAMES,
+      })
+    ).toThrow("HEALTHALYST_HEALTH_SCHEDULE_API_URL");
+  });
+
+  it("rejects an insecure proxy target", () => {
+    expect(() =>
+      createProductApiRewrites({
+        browserAddress: "/health-schedule-api",
+        upstreamAddress: "http://untrusted.example.test",
+        ...PRODUCT_VARIABLE_NAMES,
+      })
+    ).toThrow("HEALTHALYST_HEALTH_SCHEDULE_API_URL");
   });
 });

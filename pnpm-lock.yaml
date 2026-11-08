@@ -53,6 +53,9 @@ importers:
       react-dom:
         specifier: 19.2.4
         version: 19.2.4(react@19.2.4)
+      zod:
+        specifier: ^4.6.5
+        version: 4.6.5
     devDependencies:
       '@healthalyst/eslint-config':
         specifier: workspace:*

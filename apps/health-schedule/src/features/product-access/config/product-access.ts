@@ -15,3 +15,23 @@ export const APPLICATION_IN_REVIEW_STATUSES = [
   "PENDING_VERIFICATION",
   "UNDER_REVIEW",
 ] as const;
+
+/** HealthSchedule's own check that the product is open to the organisation. */
+export const HEALTH_SCHEDULE_ORGANIZATION_ENDPOINT = "/v1/organization";
+
+/**
+ * HealthSchedule refuses these when the organisation has the product but the
+ * approval has not reached HealthSchedule yet, which usually takes under a
+ * minute.
+ */
+export const PRODUCT_SETUP_PENDING_ERRORS = [
+  "PRODUCT_NOT_ENABLED",
+  "AUTH_TOKEN_INVALID",
+] as const;
+
+/** HealthSchedule refuses these while the organisation cannot use products. */
+export const ORGANIZATION_UNAVAILABLE_ERRORS = [
+  "ORG_NOT_APPROVED",
+  "ORG_SUSPENDED",
+  "ORG_DEACTIVATED",
+] as const;

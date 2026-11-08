@@ -13,6 +13,9 @@ import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { WorkspaceSwitcher } from "@healthalyst/ui/components/workspace-switcher";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
+import { BranchPicker } from "~/features/branch-selection/components/branch-picker";
+import { BranchSelectionNotice } from "~/features/branch-selection/components/branch-selection-notice";
+import { useBranchSelection } from "~/features/branch-selection/hooks/use-branch-selection";
 import { getOrganizationAppLinks } from "~/features/organization-access/services/organization-app-links";
 import { buildHealthScheduleNavigation } from "~/features/product-access/utilities/build-health-schedule-navigation";
 import { useHealthScheduleSignOut } from "~/features/product-access/hooks/use-health-schedule-sign-out";
@@ -29,6 +32,7 @@ export function HealthScheduleHome({
   const signOutMutation = useHealthScheduleSignOut();
   const { user } = platformSession;
   const organizationSwitch = useOrganizationSwitch();
+  const branchSelection = useBranchSelection(platformSession);
   const [switchingTo, setSwitchingTo] = useState<string | null>(null);
   const organizationAppLinks = getOrganizationAppLinks();
   const navigation = buildHealthScheduleNavigation({
@@ -79,7 +83,12 @@ export function HealthScheduleHome({
       navigationLocation="/"
       linkComponent={Link}
       toolbar={
-        <p className="truncate text-sm font-medium">{organizationName}</p>
+        // Until a branch is chosen, the notice below holds the only picker.
+        branchSelection.status === "selected" ? (
+          <BranchPicker branchSelection={branchSelection} />
+        ) : (
+          <p className="truncate text-sm font-medium">{organizationName}</p>
+        )
       }
       actions={
         <AccountMenu
@@ -124,15 +133,21 @@ export function HealthScheduleHome({
             Welcome, {user.firstName}
           </h1>
           <p className="mt-2 text-lede text-muted-foreground">
-            {organizationName} is set up for HealthSchedule.
+            {branchSelection.status === "selected"
+              ? `You are working at ${branchSelection.branch.name}, ${organizationName}.`
+              : `${organizationName} is set up for HealthSchedule.`}
           </p>
         </div>
-        <EmptyState
-          surface="panel"
-          illustration={<DocumentsCompleteIllustration />}
-          title="Your workspace is ready"
-          description="Scheduling tools will appear here as they become available to your organisation."
-        />
+        {branchSelection.status === "selected" ? (
+          <EmptyState
+            surface="panel"
+            illustration={<DocumentsCompleteIllustration />}
+            title="Your workspace is ready"
+            description="Scheduling tools will appear here as they become available to your organisation."
+          />
+        ) : (
+          <BranchSelectionNotice branchSelection={branchSelection} />
+        )}
       </div>
     </DashboardShell>
   );

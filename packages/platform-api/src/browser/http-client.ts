@@ -42,7 +42,11 @@ export function clearPlatformSession() {
   getPlatformClient().clearSession();
 }
 
-/** Each product app owns one client per product API; all refreshes use Platform API. */
+/**
+ * Each product app owns one client per product API; all refreshes use
+ * Platform API. The address is the product API's origin or the app's proxy
+ * path to it.
+ */
 export function createProductHttpClient(productAddress: string) {
   return getPlatformClient().createProductHttpClient(productAddress);
 }

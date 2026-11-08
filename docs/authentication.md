@@ -125,9 +125,23 @@ backend sessions. Direct deployed apps that use the same API cookie also need
 explicit account/context UX; this transport does not implement a product launcher
 or an OAuth SSO handoff.
 
-HealthSchedule currently provides hub navigation, not scheduling screens. The
-shared product client factory supports the backend's bearer-token contract;
-adding product workflows and their access screens remains separate work.
+HealthSchedule has one client for the HealthSchedule API, in
+`apps/health-schedule/src/infrastructure/api`. Its address,
+`NEXT_PUBLIC_HEALTHALYST_HEALTH_SCHEDULE_API_URL`, is either the API origin or
+this app's proxy path, `/health-schedule-api`. Use the proxy: the API does not
+accept browser `PATCH`, `PUT` or `DELETE` requests from other origins, and
+deployed hosts may not be on its origin list. `HEALTHALYST_HEALTH_SCHEDULE_API_URL`
+is the proxy's fixed target. Before opening the workspace, HealthSchedule calls
+its own `GET /v1/organization`; a `PRODUCT_NOT_ENABLED` or product-audience
+refusal shows a "still being set up" notice with a retry, because approval can
+reach HealthSchedule a little after the Platform API lists the product.
+
+HealthSchedule requests name their branch. The workspace keeps the chosen
+branch in the app, from the open branches in the session's `branchIds` scope,
+and remembers it per person and organisation on this device. It does not switch
+the session's branch through `/v1/auth/context`, because that narrows the
+token's branch scope to one branch and would hide the others from the picker.
+Listing branches needs `branch:read`, which every preset role has.
 
 ## Migration from the previous frontend session system
 

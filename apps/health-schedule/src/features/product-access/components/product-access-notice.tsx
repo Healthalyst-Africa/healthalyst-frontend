@@ -85,7 +85,8 @@ export function StatusPageLayout({
   );
 }
 
-function SignOutControl() {
+/** Signs out from a status screen, which has no account menu. */
+export function SignOutControl() {
   const signOutMutation = useHealthScheduleSignOut();
 
   return (
