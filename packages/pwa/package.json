@@ -1,0 +1,43 @@
+{
+  "name": "@healthalyst/pwa",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./next-config": {
+      "types": "./next-config.d.mts",
+      "default": "./next-config.mjs"
+    },
+    "./service-worker-route": "./src/service-worker-route.ts",
+    "./service-worker": "./src/service-worker.ts",
+    "./caching-rules": "./src/caching-rules.ts",
+    "./web-app-manifest": "./src/web-app-manifest.ts",
+    "./hooks/*": "./src/hooks/*.ts"
+  },
+  "scripts": {
+    "lint": "eslint . --max-warnings=0",
+    "check-types": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@serwist/turbopack": "^9.5.13",
+    "@serwist/window": "^9.5.13",
+    "esbuild": "^0.25.12",
+    "serwist": "^9.5.13"
+  },
+  "peerDependencies": {
+    "next": ">=16.0.0",
+    "react": ">=19.0.0"
+  },
+  "devDependencies": {
+    "@healthalyst/eslint-config": "workspace:*",
+    "@healthalyst/typescript-config": "workspace:*",
+    "@types/node": "^22.0.0",
+    "@types/react": "19.2.7",
+    "eslint": "^10.12.0",
+    "next": "16.3.8",
+    "react": "19.2.4",
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.3"
+  }
+}

@@ -18,6 +18,34 @@
       "runtimeExecutable": "pnpm",
       "runtimeArgs": ["--filter", "@healthalyst/super-admin", "dev"],
       "port": 3007
+    },
+    {
+      "name": "health-schedule-production",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@healthalyst/health-schedule",
+        "exec",
+        "next",
+        "start",
+        "--port",
+        "3016"
+      ],
+      "port": 3016
+    },
+    {
+      "name": "organization-production",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "--filter",
+        "@healthalyst/organization",
+        "exec",
+        "next",
+        "start",
+        "--port",
+        "3015"
+      ],
+      "port": 3015
     }
   ]
 }
