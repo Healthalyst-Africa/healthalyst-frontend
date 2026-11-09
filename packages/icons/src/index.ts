@@ -57,4 +57,8 @@ export {
   IconCrown as OwnerIcon,
   IconHeartHandshake as PartnersIcon,
   IconStar as PreferredIcon,
+  IconCalendar as DateIcon,
+  IconCalendarUser as ScheduleCalendarsIcon,
+  IconCalendarOff as TimeOffIcon,
+  IconListDetails as AppointmentTypesIcon,
 } from "@tabler/icons-react";

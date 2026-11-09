@@ -35,6 +35,20 @@ describe("HealthSchedule navigation", () => {
     ]);
   });
 
+  it("adds the schedule setup pages for people who can read the schedule", () => {
+    const navigation = buildHealthScheduleNavigation({
+      permissions: ["schedule:read"],
+      organizationAppLinks: HUB_LINKS,
+    });
+    expect(describeSections(navigation.sidebar)).toEqual([
+      { label: "HealthSchedule", items: ["Overview"] },
+      {
+        label: "Schedule setup",
+        items: ["Calendars", "Time off and holidays", "Appointment types"],
+      },
+    ]);
+  });
+
   it("puts the other app and the organisation's pages in the switcher", () => {
     const { switcher } = buildHealthScheduleNavigation({
       permissions: ["staff:read", "role:read"],
