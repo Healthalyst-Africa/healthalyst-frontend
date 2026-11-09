@@ -46,7 +46,8 @@ and the backend's exact CORS/origin allowlist. See
 [authentication](docs/authentication.md) for configuration, failure behavior,
 product API transport, and the one-time sign-in needed after migration.
 HealthSchedule currently links to the hub; scheduling/product screens are
-separate work.
+separate work. The packages proposed for those screens are in
+[HealthSchedule package recommendations](docs/health-schedule-package-recommendations.md).
 Read [code organisation](docs/code-organization.md) for feature folders,
 configuration ownership, shared package internals and enforced import direction.
 

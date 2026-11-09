@@ -20,9 +20,12 @@ import { usePlatformSession } from "~/infrastructure/auth/platform-session-provi
  */
 export function HealthScheduleEntry({
   signedOutView,
+  children,
 }: {
   /** Shown when nobody is signed in. */
   signedOutView: ReactNode;
+  /** The page to show once the workspace opens. */
+  children: ReactNode;
 }) {
   const { platformSession, isRestoring, restoreError, restoreSession } =
     usePlatformSession();
@@ -65,6 +68,8 @@ export function HealthScheduleEntry({
     <HealthScheduleWorkspace
       platformSession={platformSession}
       organization={productAccess.organization}
-    />
+    >
+      {children}
+    </HealthScheduleWorkspace>
   );
 }

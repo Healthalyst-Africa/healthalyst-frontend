@@ -3,6 +3,7 @@ import type React from "react";
 import { Inter, Young_Serif } from "next/font/google";
 import "@healthalyst/ui/styles.css";
 import "./globals.css";
+import { ToastRegion } from "@healthalyst/ui/components/toast-region";
 import { PlatformSessionProvider } from "~/infrastructure/auth/platform-session-provider";
 import { ApplicationQueryProvider } from "~/infrastructure/query/query-provider";
 
@@ -41,6 +42,7 @@ export default function RootLayout({
       <body className={sansSerifFont.className}>
         <ApplicationQueryProvider>
           <PlatformSessionProvider>{children}</PlatformSessionProvider>
+          <ToastRegion />
         </ApplicationQueryProvider>
       </body>
     </html>

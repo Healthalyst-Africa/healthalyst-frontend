@@ -70,7 +70,10 @@ The organisation hub's features include `authentication`,
 and `invitation-acceptance` (the public page an invitation link opens). Super Admin separates `staff-auth`, `staff-workspace`
 and `organization-oversight`. HealthSchedule has `organization-access`,
 `product-access` (the sign-in, application and product checks that choose the
-first screen) and `branch-selection` (the branch the person is working at).
+first screen), `branch-selection` (the branch the person is working at) and
+`schedule-setup` (calendars with weekly hours, time off and holidays, and
+appointment types). Workspace pages share the signed-in session, permissions
+and branch through `shared/workspace`.
 Its HealthSchedule API client is in `infrastructure/api`.
 
 ### Dependency direction
