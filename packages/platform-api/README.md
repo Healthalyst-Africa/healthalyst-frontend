@@ -45,8 +45,11 @@ repeated. Context-changing refresh cannot replay an operation for another
 organisation. Product clients use bearer tokens without cookies, and always
 refresh through Platform API.
 
-Use `createProductHttpClient(productApiOrigin)` once in the owning product app's
-API layer when adding product API calls. It shares that app's Platform token
+Use `createProductHttpClient(productApiAddress)` once in the owning product
+app's API layer when adding product API calls. The address is the product API's
+origin, or a one-segment proxy path on the app's own origin, such as
+`/health-schedule-api`; `createProductApiRewrites` in the `next-config` export
+builds that proxy. It shares that app's Platform token
 lifecycle without importing another application. Product audience failures do
 not clear a valid Platform session.
 
