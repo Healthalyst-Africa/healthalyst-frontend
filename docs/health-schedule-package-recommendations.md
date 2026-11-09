@@ -1,7 +1,15 @@
 # HealthSchedule package recommendations
 
-**Status:** proposed, not yet adopted. Nothing below is installed.
+**Status:** partly adopted. The schedule setup screens added
+`react-hook-form` with `@hookform/resolvers` 5.9, `date-fns` 4 with
+`@date-fns/tz`, the shadcn calendar on react-day-picker 10, and `sonner`.
+MSW is still to add, with the first mock handlers. The rest is not installed.
 **Date:** 9 November 2026.
+
+Adopting the calendar also updated `@radix-ui/react-dialog` to 1.3.1 and
+`@radix-ui/react-select` to 2.4.1. Before that, dialogs, popovers and selects
+used different versions of Radix's dismissable layer, so Escape in a date
+picker or open select also closed the dialog around it.
 **Scope:** the HealthSchedule screens built on the HealthSchedule API:
 schedule setup, booking, the day board, queues, patients, clinical notes and
 patient import.
@@ -23,7 +31,7 @@ schemas.
 | ---------------------------------------------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `react-hook-form` and `@hookform/resolvers` (5.1 or later) | HealthSchedule app | The appointment type form has 13 fields, and weekly hours is a list of rows that people add and remove. A form library handles that, including its field arrays. It uses the app's existing Zod schemas; the resolver supports Zod 4 from 5.1. Existing `DynamicFormFields` forms stay as they are; this is for forms with repeating rows or many related fields. |
 | `date-fns` 4 and `@date-fns/tz`                            | HealthSchedule app | The API works in branch-local Lagos time (`HH:MM` hours, date-times with `+01:00`). Screens need week ranges, the 31-day limit on free slots and date-time conversion for time off. Plain `Date` arithmetic gets time zones wrong. The built-in Temporal API is not yet in stable Safari.                                                                         |
-| shadcn `calendar` (react-day-picker 9)                     | `packages/ui`      | A shared date picker and date-range picker for time off, holidays and booking dates. Times stay as the browser's own time input, which works well on phones, so no separate time-picker package.                                                                                                                                                                  |
+| shadcn `calendar` (react-day-picker 10)                    | `packages/ui`      | A shared date picker and date-range picker for time off, holidays and booking dates. Times stay as the browser's own time input, which works well on phones, so no separate time-picker package.                                                                                                                                                                  |
 | `msw` (Mock Service Worker)                                | Development only   | Tests and local demos of states the shared dev API rarely shows, such as several branches, "still being set up" or a missing permission, without writing test data to it.                                                                                                                                                                                         |
 | `sonner` (the shadcn toast)                                | `packages/ui`      | Short confirmations such as "Calendar saved". Page, step and panel states still use `StateNotice`; inline guidance still uses `NoticeBanner`.                                                                                                                                                                                                                     |
 

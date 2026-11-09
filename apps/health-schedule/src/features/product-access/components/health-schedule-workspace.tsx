@@ -1,11 +1,12 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { StateNotice } from "@healthalyst/ui/components/notice-banner";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
-import { HealthScheduleHome } from "~/features/product-access/components/health-schedule-home";
+import { HealthScheduleShell } from "~/features/product-access/components/health-schedule-shell";
 import {
   ProductAccessNotice,
   SignOutControl,
@@ -22,9 +23,12 @@ import { resolveProductAvailabilityFailure } from "~/features/product-access/uti
 export function HealthScheduleWorkspace({
   platformSession,
   organization,
+  children,
 }: {
   platformSession: PlatformSession;
   organization: { id: string; name: string };
+  /** The page to show inside the workspace. */
+  children: ReactNode;
 }) {
   const productAvailability = useProductAvailability(organization.id);
 
@@ -85,9 +89,11 @@ export function HealthScheduleWorkspace({
   }
 
   return (
-    <HealthScheduleHome
+    <HealthScheduleShell
       platformSession={platformSession}
       organizationName={productAvailability.data.name}
-    />
+    >
+      {children}
+    </HealthScheduleShell>
   );
 }

@@ -1,42 +1,52 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
 import { AccountSecurityIcon, SignOutIcon } from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { DashboardShell } from "@healthalyst/ui/components/dashboard-shell";
-import { EmptyState } from "@healthalyst/ui/components/empty-state";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { WorkspaceSwitcher } from "@healthalyst/ui/components/workspace-switcher";
-import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
 import { BranchPicker } from "~/features/branch-selection/components/branch-picker";
-import { BranchSelectionNotice } from "~/features/branch-selection/components/branch-selection-notice";
 import { useBranchSelection } from "~/features/branch-selection/hooks/use-branch-selection";
 import { getOrganizationAppLinks } from "~/features/organization-access/services/organization-app-links";
 import { buildHealthScheduleNavigation } from "~/features/product-access/utilities/build-health-schedule-navigation";
 import { useHealthScheduleSignOut } from "~/features/product-access/hooks/use-health-schedule-sign-out";
 import { useOrganizationSwitch } from "~/features/product-access/hooks/use-organization-switch";
+import { WorkspaceProvider } from "~/shared/workspace/workspace-context";
 
-/** The signed-in HealthSchedule workspace for an approved organisation. */
-export function HealthScheduleHome({
+/**
+ * The frame around every HealthSchedule page for an approved organisation:
+ * navigation, the branch picker and the account menu. Pages read the
+ * session, permissions and branch through `useWorkspace`.
+ */
+export function HealthScheduleShell({
   platformSession,
   organizationName,
+  children,
 }: {
   platformSession: PlatformSession;
   organizationName: string;
+  children: ReactNode;
 }) {
   const signOutMutation = useHealthScheduleSignOut();
   const { user } = platformSession;
   const organizationSwitch = useOrganizationSwitch();
   const branchSelection = useBranchSelection(platformSession);
+  const pathname = usePathname();
+  const permissions = useMemo(
+    () => platformSession.activeContext.permissions ?? [],
+    [platformSession]
+  );
   const [switchingTo, setSwitchingTo] = useState<string | null>(null);
   const organizationAppLinks = getOrganizationAppLinks();
   const navigation = buildHealthScheduleNavigation({
-    permissions: platformSession.activeContext.permissions ?? [],
+    permissions,
     organizationAppLinks,
     organizations: platformSession.memberships.map(
       (membership) => membership.organization
@@ -80,7 +90,7 @@ export function HealthScheduleHome({
       }
       navigationLabel="HealthSchedule"
       navigationSections={navigation.sidebar}
-      navigationLocation="/"
+      navigationLocation={pathname}
       linkComponent={Link}
       toolbar={
         // Until a branch is chosen, the notice below holds the only picker.
@@ -128,26 +138,16 @@ export function HealthScheduleHome({
             {organizationSwitch.error.message}
           </NoticeBanner>
         )}
-        <div>
-          <h1 className="font-serif text-title font-normal tracking-tight">
-            Welcome, {user.firstName}
-          </h1>
-          <p className="mt-2 text-lede text-muted-foreground">
-            {branchSelection.status === "selected"
-              ? `You are working at ${branchSelection.branch.name}, ${organizationName}.`
-              : `${organizationName} is set up for HealthSchedule.`}
-          </p>
-        </div>
-        {branchSelection.status === "selected" ? (
-          <EmptyState
-            surface="panel"
-            illustration={<DocumentsCompleteIllustration />}
-            title="Your workspace is ready"
-            description="Scheduling tools will appear here as they become available to your organisation."
-          />
-        ) : (
-          <BranchSelectionNotice branchSelection={branchSelection} />
-        )}
+        <WorkspaceProvider
+          value={{
+            platformSession,
+            organizationName,
+            permissions,
+            branchSelection,
+          }}
+        >
+          {children}
+        </WorkspaceProvider>
       </div>
     </DashboardShell>
   );
