@@ -1,17 +1,32 @@
 import { fileURLToPath } from "node:url";
-import { createPlatformApiRewritesFromEnvironment } from "@healthalyst/platform-api/next-config";
+import {
+  createHealthScheduleApiRewritesFromEnvironment,
+  createPlatformApiRewritesFromEnvironment,
+} from "@healthalyst/platform-api/next-config";
+import { getHealthScheduleApiBrowserAddress } from "@healthalyst/config/platform-api-environment";
+
+const NO_STORE_HEADERS = [{ key: "Cache-Control", value: "no-store" }];
+const healthScheduleApiAddress = getHealthScheduleApiBrowserAddress();
 
 const nextConfiguration = {
   reactStrictMode: true,
   rewrites() {
-    return createPlatformApiRewritesFromEnvironment();
+    return [
+      ...createPlatformApiRewritesFromEnvironment(),
+      ...createHealthScheduleApiRewritesFromEnvironment(),
+    ];
   },
   headers() {
     return [
-      {
-        source: "/v1/:path*",
-        headers: [{ key: "Cache-Control", value: "no-store" }],
-      },
+      { source: "/v1/:path*", headers: NO_STORE_HEADERS },
+      ...(healthScheduleApiAddress.startsWith("/")
+        ? [
+            {
+              source: `${healthScheduleApiAddress}/v1/:path*`,
+              headers: NO_STORE_HEADERS,
+            },
+          ]
+        : []),
     ];
   },
   output: "standalone",

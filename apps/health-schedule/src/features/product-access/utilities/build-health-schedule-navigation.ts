@@ -1,13 +1,20 @@
 import {
+  AppointmentTypesIcon,
   DashboardIcon,
   HealthScheduleIcon,
   OrganizationIcon,
   RolesIcon,
+  ScheduleCalendarsIcon,
   TeamIcon,
+  TimeOffIcon,
 } from "@healthalyst/icons";
 import type { DashboardNavigationSection } from "@healthalyst/ui/components/dashboard-shell";
 import type { WorkspaceSwitcherSection } from "@healthalyst/ui/components/workspace-switcher";
+import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import type { OrganizationAppLinks } from "~/features/organization-access/services/organization-app-links";
+
+/** The HealthSchedule permission that shows the schedule setup pages. */
+const SCHEDULE_READ_PERMISSION = "schedule:read";
 
 /** The Platform API permission that shows each organisation page. */
 const ORGANIZATION_PAGE_PERMISSIONS = {
@@ -45,12 +52,42 @@ export function buildHealthScheduleNavigation({
   const sidebar: DashboardNavigationSection[] = [
     {
       label: "HealthSchedule",
-      items: [{ label: "Overview", href: "/", icon: DashboardIcon }],
+      items: [
+        {
+          label: "Overview",
+          href: HEALTH_SCHEDULE_ROUTES.overview,
+          icon: DashboardIcon,
+        },
+      ],
     },
+    ...(permissions.includes(SCHEDULE_READ_PERMISSION)
+      ? [
+          {
+            label: "Schedule setup",
+            items: [
+              {
+                label: "Calendars",
+                href: HEALTH_SCHEDULE_ROUTES.scheduleCalendars,
+                icon: ScheduleCalendarsIcon,
+              },
+              {
+                label: "Time off and holidays",
+                href: HEALTH_SCHEDULE_ROUTES.scheduleTimeOff,
+                icon: TimeOffIcon,
+              },
+              {
+                label: "Appointment types",
+                href: HEALTH_SCHEDULE_ROUTES.scheduleAppointmentTypes,
+                icon: AppointmentTypesIcon,
+              },
+            ],
+          },
+        ]
+      : []),
   ];
   const currentApp = {
     label: "HealthSchedule",
-    href: "/",
+    href: HEALTH_SCHEDULE_ROUTES.overview,
     icon: HealthScheduleIcon,
     isCurrent: true,
   };

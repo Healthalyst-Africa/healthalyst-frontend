@@ -1,5 +1,8 @@
 import axios, { type AxiosInstance } from "axios";
-import { validatePlatformApiAddress } from "./config/api-address";
+import {
+  validatePlatformApiAddress,
+  validateProductApiAddress,
+} from "./config/api-address";
 import { createAccessCredentialStore } from "./session/create-access-credential-store";
 import { createSessionRefresh } from "./session/create-session-refresh";
 import { installBearerAuthentication } from "./interceptors/install-bearer-authentication";
@@ -40,9 +43,7 @@ export function createPlatformClient(properties: {
       productAddress: string,
       productClient: AxiosInstance = axios.create()
     ) {
-      const validatedAddress = validatePlatformApiAddress(productAddress);
-      if (validatedAddress === "/")
-        throw new Error("A product API requires its own configured origin.");
+      const validatedAddress = validateProductApiAddress(productAddress);
       installBearerAuthentication({
         httpClient: productClient,
         address: validatedAddress,

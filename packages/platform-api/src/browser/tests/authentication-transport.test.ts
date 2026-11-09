@@ -459,6 +459,34 @@ describe("Platform bearer transport", () => {
     }
   );
 
+  it("sends product requests through the app's proxy path", async () => {
+    const transport = createTransportFixture(() => createCredential());
+    transport.replaceAccessCredential(createCredential("proxied-credential"));
+    const productRequests: InternalAxiosRequestConfig[] = [];
+    const product = transport.createProductHttpClient(
+      "/health-schedule-api",
+      axios.create({
+        adapter: async (requestConfiguration) => {
+          productRequests.push(requestConfiguration);
+          return respond(requestConfiguration, { name: "Example clinic" });
+        },
+      })
+    );
+    await product.get("/v1/organization");
+    expect(productRequests[0]?.baseURL).toBe("/health-schedule-api");
+    expect(productRequests[0]?.url).toBe("/v1/organization");
+    expect(productRequests[0]?.withCredentials).toBe(false);
+    expect(productRequests[0]?.headers.get("Authorization")).toBe(
+      "Bearer proxied-credential"
+    );
+  });
+
+  it("rejects a product address that is not an origin or a proxy path", () => {
+    const transport = createTransportFixture(() => createCredential());
+    expect(() => transport.createProductHttpClient("/")).toThrow();
+    expect(() => transport.createProductHttpClient("/v1")).toThrow();
+  });
+
   it("does not destroy Platform authentication for a rejected product audience", async () => {
     const onSessionExpired = mockUtilities.fn();
     const transport = createTransportFixture(
