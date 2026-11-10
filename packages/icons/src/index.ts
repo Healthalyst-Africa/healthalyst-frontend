@@ -1,5 +1,4 @@
 export {
-  IconArrowRight as ArrowRightIcon,
   IconCheck as CheckIcon,
   IconChevronDown as ChevronDownIcon,
   IconChevronLeft as ChevronLeftIcon,
@@ -12,7 +11,6 @@ export {
   IconEyeOff as HidePasswordIcon,
   IconInfoCircle as InformationIcon,
   IconLoader2 as LoaderIcon,
-  IconMailForward as EmailSentIcon,
   IconMenu2 as MenuIcon,
   IconPlayerPause as PauseIcon,
   IconPlayerPlay as PlayIcon,

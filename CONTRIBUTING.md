@@ -32,19 +32,25 @@ pnpm --filter @healthalyst/organization --filter @healthalyst/health-schedule --
 
 The organisation hub runs on port 3005, HealthSchedule on 3006, and Super Admin
 on 3007. Each app uses its own environment file. Local `/v1` calls can use a
-Next.js transport rewrite to Render; deployed direct requests require a same-site
-API origin and an allowed browser origin. The backend owns the refresh cookie,
-and the shared browser transport keeps access tokens in memory. Follow
-[authentication](docs/authentication.md) for setup and migration requirements.
+Next.js transport rewrite to Render. Deployed, the hub
+(`account.healthalystafrica.com`) proxies `/v1`, and HealthSchedule and Super
+Admin set their Platform API address to the hub, so all three share one session.
+The backend owns the refresh cookie, and the shared browser transport keeps access
+tokens in memory. Follow [authentication](docs/authentication.md) for setup.
 Keep all credentials out of public environment variables and browser persistence.
 
 ## Repository structure
 
-- `apps/organization`: shared registration, authentication and organisation hub.
-- `apps/health-schedule`: product entry and future scheduling workflows.
-- `apps/super-admin`: HealthAlyst staff sign-in and organisation review.
+- `apps/organization`: shared registration, authentication and organisation hub:
+  settings, team, partners and products.
+- `apps/health-schedule`: product access, branch selection and schedule setup.
+- `apps/super-admin`: HealthAlyst staff sign-in, organisation review and lifecycle,
+  staff management, the audit log and owner recovery.
+- `packages/config`: shared public environment names and validation.
 - `packages/platform-api`: shared NestJS Platform API client and auth/session services.
-- `packages/ui`: shared shadcn primitives, neutral styles, and utilities.
+- `packages/ui`: shared shadcn primitives, compositions, neutral styles, and utilities.
+- `packages/icons`: semantic icon exports.
+- `packages/pwa`: service worker, caching rules, web app manifest and install hooks.
 - `packages/eslint-config`: shared lint rules.
 - `packages/typescript-config`: strict TypeScript presets.
 - `packages/test-utilities`: shared test setup.
@@ -72,8 +78,8 @@ configuration, contracts and dependency direction before adding folders.
 ## Shared UI changes
 
 Inspect the existing primitive and official shadcn documentation first. Keep all
-shadcn primitives in `packages/ui`; compose them from the HealthSchedule app. Keep
-its `components.json` aligned with `packages/ui/components.json`, including the
+shadcn primitives in `packages/ui` and compose them in
+`packages/ui/src/components`. Keep the HealthSchedule app's `components.json` aligned with `packages/ui/components.json`, including the
 Tailwind configuration and stylesheet paths.
 
 ## Commands

@@ -32,14 +32,6 @@
       "dependsOn": ["^test"],
       "inputs": ["$TURBO_DEFAULT$", "vitest.config.ts"],
       "outputs": []
-    },
-    "test:watch": {
-      "cache": false,
-      "persistent": true
-    },
-    "test:coverage": {
-      "dependsOn": ["^test:coverage"],
-      "outputs": ["coverage/**"]
     }
   }
 }

@@ -8,8 +8,6 @@
     "lint": "turbo run lint",
     "check-types": "turbo run check-types",
     "test": "turbo run test",
-    "test:watch": "turbo run test:watch",
-    "test:coverage": "turbo run test:coverage",
     "check-format": "prettier --check .",
     "format": "prettier --write .",
     "test-all": "pnpm check-format && pnpm lint && pnpm check-types && pnpm test && pnpm build",
