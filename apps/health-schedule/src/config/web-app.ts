@@ -11,5 +11,19 @@ export const WEB_APP_CONFIGURATION = {
   themeColour: "#145A46",
   backgroundColour: "#FFFFFF",
   offlinePagePath: "/offline",
+  /** Plain HTML with no JavaScript, so it works whatever failed to load. */
+  offlinePage: {
+    title: "You are offline",
+    description:
+      "This screen has not been opened on this device yet, so it needs a connection. Screens you have already opened still work offline.",
+    retryLabel: "Try again",
+    colours: {
+      primary: "#145A46",
+      onPrimary: "#FFFFFF",
+      text: "#112C23",
+      secondaryText: "#40584E",
+      background: "#FFFFFF",
+    },
+  },
   keepPagesForOffline: true,
 } as const;

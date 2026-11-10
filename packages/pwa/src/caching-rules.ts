@@ -32,6 +32,11 @@ export type CachingRequest = {
   destination: RequestDestination;
   /** True for the payloads Next.js fetches during client navigation. */
   isServerComponentPayload: boolean;
+  /**
+   * True when the request asks for an HTML page. The app sends these to store
+   * each screen it opens, so a reload works offline.
+   */
+  acceptsHtml: boolean;
 };
 
 export type CachingPolicy = {
@@ -65,7 +70,11 @@ export function decideCaching(
   ) {
     return "static-asset";
   }
-  if (request.mode === "navigate" || request.isServerComponentPayload) {
+  if (
+    request.mode === "navigate" ||
+    request.isServerComponentPayload ||
+    request.acceptsHtml
+  ) {
     return policy.keepPagesForOffline ? "page" : "network-only";
   }
   return "network-only";

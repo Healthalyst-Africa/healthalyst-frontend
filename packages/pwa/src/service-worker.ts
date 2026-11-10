@@ -88,6 +88,8 @@ function createRuntimeCaching(policy: CachingPolicy): RuntimeCaching[] {
           mode: request.mode,
           destination: request.destination,
           isServerComponentPayload: request.headers.get("RSC") === "1",
+          acceptsHtml:
+            request.headers.get("Accept")?.includes("text/html") ?? false,
         },
         policy
       ) === decision,

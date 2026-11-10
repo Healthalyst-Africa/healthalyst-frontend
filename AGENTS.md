@@ -326,8 +326,10 @@ code, repository policies, or branding into it.
   requirement, planned in phases; check which phase a change belongs to.
 - Every app is installable through `@healthalyst/pwa`: a manifest from
   `createWebAppManifest`, a worker started with `startHealthAlystServiceWorker`,
-  the `/serwist/[path]` route and an `/offline` page. Configure each app in
-  `src/config/web-app.ts`; do not import Serwist directly in applications.
+  the `/serwist/[path]` route and an `/offline` route that returns
+  `createOfflineDocument`. Keep the offline page plain HTML with no JavaScript;
+  never make it a Next.js page. Configure each app in `src/config/web-app.ts`;
+  do not import Serwist directly in applications.
 - Patient and organisation data never enters the service worker's Cache
   Storage. API requests (any path containing `/v1/`), cross-origin requests and
   writes always go to the network. Change `packages/pwa/src/caching-rules.ts`

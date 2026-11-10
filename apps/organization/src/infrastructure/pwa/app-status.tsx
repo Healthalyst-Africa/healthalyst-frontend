@@ -8,7 +8,9 @@ import { WEB_APP_CONFIGURATION } from "~/config/web-app";
 /** Registers the service worker and shows the offline and update notices. */
 export function AppStatus() {
   const { isOnline } = useConnectionStatus();
-  const serviceWorker = useServiceWorker();
+  const serviceWorker = useServiceWorker({
+    storeVisitedPages: WEB_APP_CONFIGURATION.keepPagesForOffline,
+  });
 
   return (
     <AppStatusRegion

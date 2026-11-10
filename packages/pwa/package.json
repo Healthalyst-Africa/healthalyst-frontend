@@ -12,7 +12,8 @@
     "./service-worker": "./src/service-worker.ts",
     "./caching-rules": "./src/caching-rules.ts",
     "./web-app-manifest": "./src/web-app-manifest.ts",
-    "./hooks/*": "./src/hooks/*.ts"
+    "./hooks/*": "./src/hooks/*.ts",
+    "./offline-document": "./src/offline-document.ts"
   },
   "scripts": {
     "lint": "eslint . --max-warnings=0",

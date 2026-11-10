@@ -12,12 +12,11 @@ const OFFLINE_PRODUCT_FILES = [
   "public/icons/*",
 ];
 
-/** What an online-only app stores at install, relative to the app. */
-const OFFLINE_PAGE_FILES = [
-  ".next/static/**/*.{css,woff2}",
-  "public/logo.jpg",
-  "public/icons/*",
-];
+/**
+ * What an online-only app stores at install, relative to the app: only the
+ * icons. Its offline page is self-contained HTML, stored separately.
+ */
+const OFFLINE_PAGE_FILES = ["public/icons/*"];
 
 /**
  * Identifies this build, so a new deploy replaces the stored offline page.
@@ -46,8 +45,8 @@ export function createServiceWorkerRoute({
   offlinePagePath: string;
   /**
    * Products built to work offline store all their code at install, so every
-   * screen opens without a connection. Online-only apps store just what the
-   * offline page needs: styles, fonts, the logo and icons.
+   * screen opens without a connection. Online-only apps store just their
+   * icons and the offline page.
    */
   keepPagesForOffline: boolean;
 }) {

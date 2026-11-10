@@ -15,6 +15,7 @@ function request(
     mode: "cors",
     destination: "",
     isServerComponentPayload: false,
+    acceptsHtml: false,
     ...rest,
   };
 }
@@ -75,6 +76,18 @@ describe("service worker caching rules", () => {
       isServerComponentPayload: true,
     });
     expect(decideCaching(payload, OFFLINE_PRODUCT)).toBe("page");
+  });
+
+  it("stores pages the app asks for as HTML, but never API responses", () => {
+    expect(
+      decideCaching(
+        request("/settings/calendars", { acceptsHtml: true }),
+        OFFLINE_PRODUCT
+      )
+    ).toBe("page");
+    expect(
+      decideCaching(request("/v1/me", { acceptsHtml: true }), OFFLINE_PRODUCT)
+    ).toBe("network-only");
   });
 
   it("does not serve the service worker from storage", () => {

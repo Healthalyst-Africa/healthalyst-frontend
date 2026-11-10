@@ -54,8 +54,15 @@ and security.
   - Pages and their React Server Component payloads are stored only for
     products built to work offline (`keepPagesForOffline`). No server
     component reads cookies or headers, so pages carry no personal data.
+  - Moving between screens fetches only their payloads, and the very first
+    page loads before the worker is in control. So, as each screen opens, the
+    app asks the worker to store its full page (`storeVisitedPages`), and a
+    reload works offline.
 - Every app stores an `/offline` page at install and shows it for any page
-  that cannot load.
+  that cannot load. It is plain HTML with inline styles and no JavaScript
+  (`createOfflineDocument`). The worker serves it at the address that failed,
+  so a Next.js page there would start its router, try to load that address
+  and crash; the plain page cannot.
 - A new version waits. The app shows "A new version is ready" and reloads
   only when the person chooses, so a form is never lost to an update.
 - The worker is registered in production builds only, so development never
