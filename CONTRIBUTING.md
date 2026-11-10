@@ -53,7 +53,6 @@ Keep all credentials out of public environment variables and browser persistence
 - `packages/pwa`: service worker, caching rules, web app manifest and install hooks.
 - `packages/eslint-config`: shared lint rules.
 - `packages/typescript-config`: strict TypeScript presets.
-- `packages/test-utilities`: shared test setup.
 
 Applications import reusable UI through `@healthalyst/ui` exports. Do not import
 source from another application or duplicate shared shadcn primitives.

@@ -15,7 +15,6 @@ packages/
   icons/                      Semantic icon exports
   platform-api/               Shared NestJS Platform API transport and authentication
   pwa/                        Service worker, caching rules, manifest and install hooks
-  test-utilities/             Shared Vitest setup
   typescript-config/          Shared TypeScript presets
   ui/                         Brand-neutral shadcn components and styles
 ```
