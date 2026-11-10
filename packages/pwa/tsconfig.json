@@ -1,0 +1,9 @@
+{
+  "extends": "@healthalyst/typescript-config/react-library.json",
+  "compilerOptions": {
+    "types": ["react", "node"],
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"]
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "next-config.d.mts"],
+  "exclude": ["node_modules", "dist"]
+}

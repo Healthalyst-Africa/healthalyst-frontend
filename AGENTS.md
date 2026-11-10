@@ -189,6 +189,7 @@ code, repository policies, or branding into it.
 | `apps/<application>/public`             | Files served directly by public paths                                       |
 | `packages/platform-api`                 | Shared browser transport, authentication contracts and refresh lifecycle    |
 | `packages/icons`                        | Semantic icon exports                                                       |
+| `packages/pwa`                          | Service worker, caching rules, web app manifest and install hooks           |
 | `packages/ui`                           | Shared shadcn primitives, neutral tokens, reusable interface utilities      |
 | `packages/eslint-config`                | Shared lint configuration                                                   |
 | `packages/typescript-config`            | Shared strict compiler configuration                                        |
@@ -253,7 +254,9 @@ code, repository policies, or branding into it.
 - Use a scoped TanStack Query provider for application data. Keep query keys in
   the API layer, use `useQuery` for reads and `useMutation` for writes, and
   invalidate or separate cached data when the signed-in identity changes. Do
-  not put passwords or bearer tokens in query keys or persist the query cache.
+  not put passwords or bearer tokens in query keys or persist the query cache,
+  except through `@healthalyst/offline` as described under "Offline and
+  installable apps".
 - Handle conflict, validation, unauthorized, forbidden, timeout, and connection
   failures explicitly. Retry only safe reads when appropriate; never retry a
   registration or other write automatically. Keep API errors recoverable in the
@@ -316,6 +319,28 @@ code, repository policies, or branding into it.
 - Keep static content rendered on the server where practical. Avoid unnecessary
   client dependencies, heavy animation libraries, oversized images, layout shifts,
   and eager loading of below-the-fold media. Preserve reduced-motion behavior.
+
+## Offline and installable apps
+
+- Follow `docs/offline-architecture.md`. Offline support is a core product
+  requirement, planned in phases; check which phase a change belongs to.
+- Every app is installable through `@healthalyst/pwa`: a manifest from
+  `createWebAppManifest`, a worker started with `startHealthAlystServiceWorker`,
+  the `/serwist/[path]` route and an `/offline` route that returns
+  `createOfflineDocument`. Keep the offline page plain HTML with no JavaScript;
+  never make it a Next.js page. Configure each app in `src/config/web-app.ts`;
+  do not import Serwist directly in applications.
+- Patient and organisation data never enters the service worker's Cache
+  Storage. API requests (any path containing `/v1/`), cross-origin requests and
+  writes always go to the network. Change `packages/pwa/src/caching-rules.ts`
+  only with tests that keep this true.
+- Only clinical products built to work offline set `keepPagesForOffline`. The
+  organisation hub and Super Admin stay online-only.
+- A new version waits for the person to choose "Update now"; never skip waiting
+  or reload automatically while someone may be filling in a form.
+- Persisting query or record data on the device is allowed only through the
+  planned `@healthalyst/offline` package: allowlisted, scoped per person,
+  organisation and branch, encrypted and wiped on sign-out.
 
 ## Security and privacy
 
