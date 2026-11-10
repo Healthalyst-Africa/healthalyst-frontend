@@ -1,4 +1,5 @@
 import { fileURLToPath } from "node:url";
+import { withHealthAlystPwa } from "@healthalyst/pwa/next-config";
 import { createPlatformApiRewritesFromEnvironment } from "@healthalyst/platform-api/next-config";
 
 const nextConfiguration = {
@@ -21,8 +22,9 @@ const nextConfiguration = {
     "@healthalyst/ui",
     "@healthalyst/icons",
     "@healthalyst/platform-api",
+    "@healthalyst/pwa",
   ],
   typescript: { ignoreBuildErrors: false },
 };
 
-export default nextConfiguration;
+export default withHealthAlystPwa(nextConfiguration);

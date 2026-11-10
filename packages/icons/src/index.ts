@@ -61,4 +61,5 @@ export {
   IconCalendarUser as ScheduleCalendarsIcon,
   IconCalendarOff as TimeOffIcon,
   IconListDetails as AppointmentTypesIcon,
+  IconWifiOff as OfflineIcon,
 } from "@tabler/icons-react";
