@@ -1,6 +1,7 @@
 "use client";
 
-import { OfflineIcon } from "@healthalyst/icons";
+import type { ReactNode } from "react";
+import { InstallAppIcon, OfflineIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 
@@ -16,18 +17,34 @@ type AppStatusRegionProperties = {
     isApplying: boolean;
     onApply: () => void;
   } | null;
+  /** Suggests installing the app, with a button or with instructions. */
+  installNotice?: {
+    title: string;
+    /** May include inline icons that show what to tap. */
+    description: ReactNode;
+    /** Present when the browser can open its own install dialog. */
+    installAction?: {
+      label: string;
+      pendingLabel: string;
+      isPending: boolean;
+      onSelect: () => void;
+    };
+    dismissLabel: string;
+    onDismiss: () => void;
+  } | null;
 };
 
 /**
- * App-wide notices that float above the page: no connection, and a new
- * version waiting. Each is announced politely and never takes focus, so
+ * App-wide notices that float above the page: no connection, a new version
+ * waiting, and a suggestion to install the app. Each is announced politely and never takes focus, so
  * nobody loses their place in a form.
  */
 export function AppStatusRegion({
   offlineNotice,
   updateNotice,
+  installNotice,
 }: AppStatusRegionProperties) {
-  if (!offlineNotice && !updateNotice) return null;
+  if (!offlineNotice && !updateNotice && !installNotice) return null;
   return (
     <div
       aria-label="App status"
@@ -63,6 +80,40 @@ export function AppStatusRegion({
             }
           >
             {updateNotice.description}
+          </NoticeBanner>
+        </div>
+      )}
+      {installNotice && (
+        <div className="pointer-events-auto rounded-lg bg-card shadow-lg">
+          <NoticeBanner
+            tone="information"
+            icon={<InstallAppIcon aria-hidden="true" />}
+            title={installNotice.title}
+          >
+            {/* One block, so inline icons stay within the sentence. */}
+            <span>{installNotice.description}</span>
+            {/* Below the text: two buttons beside it would squeeze it into a narrow column. */}
+            <span className="flex flex-wrap gap-2">
+              {installNotice.installAction && (
+                <ActionButton
+                  type="button"
+                  size="small"
+                  isLoading={installNotice.installAction.isPending}
+                  loadingText={installNotice.installAction.pendingLabel}
+                  onClick={installNotice.installAction.onSelect}
+                >
+                  {installNotice.installAction.label}
+                </ActionButton>
+              )}
+              <ActionButton
+                type="button"
+                size="small"
+                variant="outline"
+                onClick={installNotice.onDismiss}
+              >
+                {installNotice.dismissLabel}
+              </ActionButton>
+            </span>
           </NoticeBanner>
         </div>
       )}

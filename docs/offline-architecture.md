@@ -107,9 +107,26 @@ the app is on the home screen, so installing on iOS is part of onboarding.
 
 ### Interface (`@healthalyst/ui`)
 
-Product-neutral components: the connection notice and the update prompt
-(phase 1), then the sync indicator ("3 waiting to send"), the "Saved on this
-device" label and the "Needs attention" list (phase 3).
+Product-neutral components: the connection notice, the update prompt and the
+install offer (phase 1), then the sync indicator ("3 waiting to send"), the
+"Saved on this device" label and the "Needs attention" list (phase 3).
+
+### Install offer (phase 1)
+
+Offline products suggest installing (`promptToInstall`), because iPhones never
+prompt by themselves and clear an uninstalled site's stored data after about
+seven days unused. `decideInstallOffer` picks one of:
+
+- **Install button:** Chrome and Edge fire `beforeinstallprompt`; the app keeps
+  it and opens the browser's install dialog from its own button.
+- **Home Screen instructions:** iPhones and iPads (including iPads that report
+  a Mac) get "Tap Share, then Add to Home Screen".
+- **Nothing:** already installed, "Not now" chosen in the last 14 days (kept in
+  `localStorage`, no personal data), or a browser that cannot install.
+
+Service workers need HTTPS, except on `localhost`. Testing on a phone over
+`http://<computer address>` gives no offline support; use a deployed site or
+an HTTPS tunnel.
 
 ## Scaling across products
 
