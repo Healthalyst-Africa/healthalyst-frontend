@@ -5,10 +5,10 @@ package. The package currently uses Tabler Icons and exposes a small semantic
 API so product code does not depend on the vendor's icon names.
 
 ```tsx
-import { ArrowRightIcon, CheckIcon } from "@healthalyst/icons";
+import { CheckIcon, SearchIcon } from "@healthalyst/icons";
 
 <CheckIcon aria-hidden="true" />
-<ArrowRightIcon aria-hidden="true" />
+<SearchIcon aria-hidden="true" />
 ```
 
 Add an icon by exporting it from `src/index.ts` with a descriptive semantic

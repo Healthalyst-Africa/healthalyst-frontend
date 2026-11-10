@@ -6,14 +6,15 @@ This repository contains Healthalyst client applications. Other local repositori
 
 ```text
 apps/
-  organization/              Shared organisation hub for onboarding and application status
+  organization/              Organisation hub: sign-in, onboarding, settings, team, partners, products
   health-schedule/           HealthSchedule product app (spoke)
-  super-admin/               HealthAlyst staff dashboard and review client
+  super-admin/               HealthAlyst staff dashboard: review, staff, audit log
 packages/
+  config/                     Shared public environment names and validation
   eslint-config/              Shared ESLint flat configurations
   icons/                      Semantic icon exports
   platform-api/               Shared NestJS Platform API transport and authentication
-  test-utilities/             Shared Vitest setup
+  pwa/                        Service worker, caching rules, manifest and install hooks
   typescript-config/          Shared TypeScript presets
   ui/                         Brand-neutral shadcn components and styles
 ```
@@ -41,13 +42,17 @@ refresh cookie. On reload it refreshes and loads `/v1/me`.
 
 For local development against Render, each app can proxy `/v1` through a fixed
 Next.js rewrite. This forwards the API's own responses and cookies without
-creating frontend sessions. Deployed direct requests need a same-site API origin
-and the backend's exact CORS/origin allowlist. See
-[authentication](docs/authentication.md) for configuration, failure behavior,
-product API transport, and the one-time sign-in needed after migration.
-HealthSchedule currently links to the hub; scheduling/product screens are
-separate work. The packages proposed for those screens are in
-[HealthSchedule package recommendations](docs/health-schedule-package-recommendations.md).
+creating frontend sessions. The deployed apps are the hub at
+`https://account.healthalystafrica.com`, HealthSchedule at
+`https://healthschedule.healthalystafrica.com` and Super Admin at
+`https://admin.healthalystafrica.com`. The hub proxies `/v1`, and the other apps
+set their Platform API address to the hub, so all three share one session. See
+[authentication](docs/authentication.md) for configuration, failure behavior and
+product API transport. HealthSchedule has branch selection and schedule setup;
+the packages chosen for its screens are in
+[HealthSchedule package recommendations](docs/health-schedule-package-recommendations.md),
+and the install and offline plan is in
+[offline architecture](docs/offline-architecture.md).
 Read [code organisation](docs/code-organization.md) for feature folders,
 configuration ownership, shared package internals and enforced import direction.
 
