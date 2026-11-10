@@ -1,15 +1,11 @@
 /**
- * How this app installs and behaves offline. The staff app needs a connection and keeps no data on the device.
+ * Super Admin is browser-only: it cannot be installed, but keeps a service
+ * worker for its offline page and notices. It keeps no data on the device.
  */
 export const WEB_APP_CONFIGURATION = {
-  identifier: "/?product=super-admin",
   name: "HealthAlyst Super Admin",
-  shortName: "Super Admin",
-  description:
-    "The HealthAlyst staff workspace for reviewing and managing organisations.",
-  /** Brand green; also the browser and title bar colour when installed. */
+  /** Brand green; the browser's toolbar colour where it supports one. */
   themeColour: "#145A46",
-  backgroundColour: "#FFFFFF",
   offlinePagePath: "/offline",
   /** Plain HTML with no JavaScript, so it works whatever failed to load. */
   offlinePage: {
@@ -25,10 +21,5 @@ export const WEB_APP_CONFIGURATION = {
       background: "#FFFFFF",
     },
   },
-  /**
-   * Suggest installing to the home screen. iPhones never prompt by themselves,
-   * and clear an uninstalled site's stored data after about a week unused.
-   */
-  promptToInstall: false,
   keepPagesForOffline: false,
 } as const;

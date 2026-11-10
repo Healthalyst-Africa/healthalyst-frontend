@@ -26,13 +26,6 @@ const sansSerifFont = Inter({
 });
 
 export const metadata: Metadata = {
-  applicationName: WEB_APP_CONFIGURATION.name,
-  appleWebApp: {
-    capable: true,
-    title: WEB_APP_CONFIGURATION.shortName,
-    statusBarStyle: "default",
-  },
-  icons: { apple: "/icons/apple-touch-icon.png" },
   // Phone numbers stay plain text unless a page links them on purpose.
   formatDetection: { telephone: false },
   title: "HealthAlyst Super Admin",
