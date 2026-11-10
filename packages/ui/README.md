@@ -35,6 +35,7 @@ Applications import only the dedicated compositions in
 | Choosing several options                   | `multi-select-field`, `multi-select`,            |
 |                                            | `checkbox-matrix`, `toolbar-select`              |
 | Dates and working hours                    | `date-picker-field`, `weekly-hours-editor`       |
+| Signing in (password, then a code)         | `sign-in-form`                                   |
 | Security and sessions                      | `step-up-dialog`, `password-input`,              |
 |                                            | `recovery-codes-panel`, `signed-in-session-list` |
 | Multi-step workflows                       | `step-navigation`, `onboarding-progress-summary` |

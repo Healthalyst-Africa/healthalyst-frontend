@@ -7,10 +7,7 @@ import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Link from "next/link";
 import { useSignInWorkflow } from "~/features/authentication/hooks/use-sign-in-workflow";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
-import { ContentPanel } from "@healthalyst/ui/components/content-panel";
-import { FormMessage } from "@healthalyst/ui/components/form-message";
-import { OneTimeCodeField } from "@healthalyst/ui/components/one-time-code-field";
-import { TextField } from "@healthalyst/ui/components/text-field";
+import { SignInForm } from "@healthalyst/ui/components/sign-in-form";
 import OrganizationSignInLayout from "~/components/ui/organization-sign-in-layout";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import AuthenticatorEnrolment from "~/features/authentication/components/authenticator-enrolment";
@@ -19,27 +16,23 @@ import { clearFieldError } from "~/shared/forms/form-validation";
 import { AuthenticatedApplicationRedirectState } from "~/features/authentication/components/authenticated-application-redirect-state";
 import type { OrganizationProductCode } from "~/shared/organization/config/organization-products";
 
-function ApiErrorMessage({ error }: { error: Error }) {
-  return (
-    <FormMessage
-      tone="error"
-      details={
-        error instanceof PlatformApiError &&
-        error.code === "EMAIL_NOT_VERIFIED" && (
-          <p className="text-sm text-muted-foreground">
-            <Link
-              className="font-semibold text-primary underline underline-offset-4"
-              href={ORGANIZATION_ROUTES.verifyEmail}
-            >
-              Request a new confirmation link
-            </Link>
-          </p>
-        )
-      }
-    >
-      {error.message}
-    </FormMessage>
-  );
+/** The request's failure, with a way to recover when the email is unconfirmed. */
+function describeSignInError(error: Error | null) {
+  if (!error) return null;
+  return {
+    message: error.message,
+    details: error instanceof PlatformApiError &&
+      error.code === "EMAIL_NOT_VERIFIED" && (
+        <p className="text-sm text-muted-foreground">
+          <Link
+            className="font-semibold text-primary underline underline-offset-4"
+            href={ORGANIZATION_ROUTES.verifyEmail}
+          >
+            Request a new confirmation link
+          </Link>
+        </p>
+      ),
+  };
 }
 
 /**
@@ -151,153 +144,53 @@ export default function SignIn({
 
   return (
     <OrganizationSignInLayout footerContent={footerContent}>
-      <div className="flex flex-col gap-6">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <h2
-            ref={headingReference}
-            className="font-serif text-title font-normal outline-none"
-            tabIndex={-1}
-          >
-            {heading}
-          </h2>
-          <p className="max-w-sm text-lede text-muted-foreground">
-            {introduction}
-          </p>
-        </div>
-
-        <ContentPanel frame="wide-screens">
-          {stageNotice && (
-            <FormMessage tone="status">{stageNotice}</FormMessage>
-          )}
-
-          {stage.kind === "password" && (
-            <form
-              className="flex flex-col gap-5"
-              onSubmit={handlePasswordSubmit}
-              noValidate
-            >
-              <TextField
-                autoComplete="username"
-                id="sign-in-identifier"
-                label="Work email address"
-                name="identifier"
-                type="email"
-                maxLength={SIGN_IN_LIMITS.identifierMaximum}
-                required
-                disabled={passwordMutation.isPending}
-                error={fieldErrors.identifier}
-                onChange={() =>
-                  setFieldErrors((currentErrors) =>
-                    clearFieldError(currentErrors, "identifier")
-                  )
-                }
-              />
-              <TextField
-                autoComplete="current-password"
-                id="sign-in-password"
-                label="Password"
-                name="password"
-                type="password"
-                maxLength={SIGN_IN_LIMITS.passwordMaximum}
-                required
-                disabled={passwordMutation.isPending}
-                error={fieldErrors.password}
-                onChange={() =>
-                  setFieldErrors((currentErrors) =>
-                    clearFieldError(currentErrors, "password")
-                  )
-                }
-              />
-              <p className="-mt-3 self-end text-sm">
-                <Link
-                  className="text-primary underline-offset-4 hover:underline"
-                  href={ORGANIZATION_ROUTES.forgotPassword}
-                >
-                  Forgot password?
-                </Link>
-              </p>
-              {passwordMutation.error && (
-                <ApiErrorMessage error={passwordMutation.error} />
-              )}
-              <ActionButton
-                className="w-full"
-                size="large"
-                type="submit"
-                isLoading={passwordMutation.isPending}
-                loadingText="Signing in"
-              >
-                Sign in
-              </ActionButton>
-            </form>
-          )}
-
-          {stage.kind === "code" && (
-            <form
-              className="flex flex-col gap-5"
-              onSubmit={handleCodeSubmit}
-              noValidate
-            >
-              {stage.method === "totp" ? (
-                <OneTimeCodeField
-                  autoFocus
-                  id="sign-in-code"
-                  label="Authenticator code"
-                  name="code"
-                  required
-                  disabled={codeMutation.isPending}
-                  error={fieldErrors.code}
-                  onChange={handleCodeChange}
-                />
-              ) : (
-                <TextField
-                  autoComplete="one-time-code"
-                  autoFocus
-                  id="sign-in-code"
-                  label="Recovery code"
-                  name="code"
-                  maxLength={SIGN_IN_LIMITS.recoveryCodeMaximum}
-                  required
-                  disabled={codeMutation.isPending}
-                  error={fieldErrors.code}
-                  onChange={handleCodeChange}
-                />
-              )}
-              {codeMutation.error && (
-                <ApiErrorMessage error={codeMutation.error} />
-              )}
-              <ActionButton
-                className="w-full"
-                size="large"
-                type="submit"
-                isLoading={codeMutation.isPending}
-                loadingText="Checking the code"
-              >
-                Continue
-              </ActionButton>
-              {stage.methods.length > 1 && (
-                <ActionButton
-                  className="self-center font-normal"
-                  size="small"
-                  type="button"
-                  variant="link"
-                  disabled={codeMutation.isPending}
-                  onClick={() =>
-                    showStage({
-                      ...stage,
-                      method:
-                        stage.method === "totp" ? "recovery_code" : "totp",
-                    })
-                  }
-                >
-                  {stage.method === "totp"
-                    ? "Use a recovery code instead"
-                    : "Use your authenticator app instead"}
-                </ActionButton>
-              )}
-            </form>
-          )}
-        </ContentPanel>
-      </div>
+      <SignInForm
+        identifier="sign-in"
+        stage={
+          stage.kind === "code"
+            ? {
+                kind: "code",
+                method: stage.method,
+                canSwitchMethod: stage.methods.length > 1,
+              }
+            : { kind: "password" }
+        }
+        heading={heading}
+        introduction={introduction}
+        headingReference={headingReference}
+        notice={stageNotice}
+        fieldErrors={fieldErrors}
+        error={describeSignInError(
+          stage.kind === "code" ? codeMutation.error : passwordMutation.error
+        )}
+        isSubmitting={
+          stage.kind === "code"
+            ? codeMutation.isPending
+            : passwordMutation.isPending
+        }
+        limits={SIGN_IN_LIMITS}
+        forgotPasswordLink={
+          <Link href={ORGANIZATION_ROUTES.forgotPassword}>
+            Forgot password?
+          </Link>
+        }
+        onPasswordSubmit={handlePasswordSubmit}
+        onCodeSubmit={handleCodeSubmit}
+        onFieldChange={(fieldName) =>
+          fieldName === "code"
+            ? handleCodeChange()
+            : setFieldErrors((currentErrors) =>
+                clearFieldError(currentErrors, fieldName)
+              )
+        }
+        onSwitchMethod={() => {
+          if (stage.kind !== "code") return;
+          showStage({
+            ...stage,
+            method: stage.method === "totp" ? "recovery_code" : "totp",
+          });
+        }}
+      />
     </OrganizationSignInLayout>
   );
 }

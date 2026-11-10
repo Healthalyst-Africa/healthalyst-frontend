@@ -7,6 +7,7 @@ import {
   type ElementType,
   type ReactNode,
 } from "react";
+import { OpenDocumentIcon } from "@healthalyst/icons";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +37,11 @@ type DashboardNavigationItem = {
    * load instead of the app's client-side link, and is never the current page.
    */
   opensAnotherApp?: boolean;
+  /**
+   * Opens in a new browser window instead of replacing this page, so an
+   * installed app stays where it was. Only for another app's page.
+   */
+  opensInNewWindow?: boolean;
 };
 
 /** A labelled group of links, such as an app's own pages or its organisation. */
@@ -123,12 +129,27 @@ function DashboardNavigation({
                   >
                     <ItemLink
                       href={navigationItem.href}
+                      {...(navigationItem.opensInNewWindow
+                        ? { target: "_blank", rel: "noopener" }
+                        : {})}
                       aria-current={isCurrentPage ? "page" : undefined}
                     >
                       <NavigationIcon aria-hidden="true" />
-                      <span className="group-data-[collapsible=icon]:hidden">
+                      <span className="flex-1 group-data-[collapsible=icon]:hidden">
                         {navigationItem.label}
+                        {navigationItem.opensInNewWindow && (
+                          <span className="sr-only">
+                            {" "}
+                            (opens in a new window)
+                          </span>
+                        )}
                       </span>
+                      {navigationItem.opensInNewWindow && (
+                        <OpenDocumentIcon
+                          aria-hidden="true"
+                          className="text-muted-foreground group-data-[collapsible=icon]:hidden"
+                        />
+                      )}
                     </ItemLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

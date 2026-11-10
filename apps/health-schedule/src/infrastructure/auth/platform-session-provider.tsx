@@ -24,6 +24,8 @@ type PlatformSessionContextValue = {
   isRestoring: boolean;
   restoreError: Error | null;
   restoreSession: () => Promise<void>;
+  /** Uses the session a sign-in in this app just returned. */
+  setPlatformSession: (platformSession: PlatformSession) => void;
   clearPlatformSession: () => void;
 };
 
@@ -31,7 +33,7 @@ const platformSessionContext =
   createContext<PlatformSessionContextValue | null>(null);
 
 /**
- * Restores the HealthAlyst sign-in made in the organisation app. The access
+ * Restores the HealthAlyst sign-in, made here or in the organisation app. The access
  * token stays in the shared transport's memory; only the identity reaches
  * React state.
  */
@@ -68,6 +70,18 @@ export function PlatformSessionProvider({ children }: { children: ReactNode }) {
         setIsRestoring(false);
     }
   }, [queryClient]);
+
+  const setPlatformSession = useCallback(
+    (nextPlatformSession: PlatformSession) => {
+      // A finished sign-in wins over any restore still running.
+      restorationRevisionReference.current += 1;
+      queryClient.clear();
+      setRestoreError(null);
+      setIsRestoring(false);
+      updatePlatformSession(nextPlatformSession);
+    },
+    [queryClient]
+  );
 
   const clearPlatformSession = useCallback(() => {
     clearPlatformAccessCredential();
@@ -117,6 +131,7 @@ export function PlatformSessionProvider({ children }: { children: ReactNode }) {
       isRestoring,
       restoreError,
       restoreSession,
+      setPlatformSession,
       clearPlatformSession,
     }),
     [
@@ -124,6 +139,7 @@ export function PlatformSessionProvider({ children }: { children: ReactNode }) {
       isRestoring,
       restoreError,
       restoreSession,
+      setPlatformSession,
       clearPlatformSession,
     ]
   );

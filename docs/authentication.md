@@ -122,7 +122,12 @@ identity/context snapshots to workflow consumers.
 ## Hub and spokes
 
 Each app has its own JavaScript runtime and query cache. Tokens are not passed
-through URLs, shared browser storage, or imports from another app. An API-calling
+through URLs, shared browser storage, or imports from another app. The hub and
+HealthSchedule both sign people in, with the shared `SignInForm` and their own
+validation and workflow; either sign-in sets the same refresh cookie on the
+hub's host, so the other app is signed in too. An installed HealthSchedule on an
+iPhone keeps its own cookies, separate from Safari, so it needs this in-app
+sign-in once per device. Account set-up and recovery stay in the hub. An API-calling
 spoke recovers its own access token from Platform refresh when the backend cookie
 is available, then uses a separate product Axios client. Product requests do not
 send Platform cookies or implement their own refresh endpoint. The backend

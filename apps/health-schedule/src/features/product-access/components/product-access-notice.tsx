@@ -128,8 +128,14 @@ export function ProductAccessNotice({
         title={content.title}
         action={
           actionAddress ? (
-            <a className={LINK_CLASS_NAME} href={actionAddress}>
+            <a
+              className={LINK_CLASS_NAME}
+              href={actionAddress}
+              target="_blank"
+              rel="noopener"
+            >
               {content.actionLabel}
+              <span className="sr-only"> (opens in a new window)</span>
             </a>
           ) : undefined
         }

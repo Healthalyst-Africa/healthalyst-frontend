@@ -118,6 +118,7 @@ export function buildHealthScheduleNavigation({
             href: organizationAppLinks.products,
             icon: OrganizationIcon,
             opensAnotherApp: true,
+            opensInNewWindow: true,
           },
         ],
       },
@@ -131,6 +132,7 @@ export function buildHealthScheduleNavigation({
                   href: organizationAppLinks.team,
                   icon: TeamIcon,
                   opensAnotherApp: true,
+                  opensInNewWindow: true,
                 },
               ]
             : []),
@@ -141,6 +143,7 @@ export function buildHealthScheduleNavigation({
                   href: organizationAppLinks.teamRoles,
                   icon: RolesIcon,
                   opensAnotherApp: true,
+                  opensInNewWindow: true,
                 },
               ]
             : []),
@@ -149,6 +152,7 @@ export function buildHealthScheduleNavigation({
             href: organizationAppLinks.organizationSettings,
             icon: OrganizationIcon,
             opensAnotherApp: true,
+            opensInNewWindow: true,
           },
         ],
       },
