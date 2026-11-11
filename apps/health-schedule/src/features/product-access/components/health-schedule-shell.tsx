@@ -106,16 +106,18 @@ export function HealthScheduleShell({
           emailAddress={user.email ?? ""}
           error={signOutMutation.error?.message}
           actions={[
-            // Account security is owned by the organisation hub, which
-            // returns here afterwards. Organisation pages are in the sidebar.
+            // Account security is owned by the organisation hub. It opens in
+            // a new browser window, so an installed app stays where it was.
             ...(organizationAppLinks
               ? [
                   {
                     label: "Account security",
                     icon: <AccountSecurityIcon aria-hidden="true" />,
                     onSelect: () =>
-                      window.location.assign(
-                        organizationAppLinks.accountSecurity
+                      window.open(
+                        organizationAppLinks.accountSecurity,
+                        "_blank",
+                        "noopener"
                       ),
                   },
                 ]

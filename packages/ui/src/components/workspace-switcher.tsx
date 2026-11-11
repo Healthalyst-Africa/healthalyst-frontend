@@ -6,7 +6,11 @@ import type {
   ElementType,
   ReactNode,
 } from "react";
-import { CheckIcon, ChevronDownIcon } from "@healthalyst/icons";
+import {
+  CheckIcon,
+  ChevronDownIcon,
+  OpenDocumentIcon,
+} from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import {
   DropdownMenu,
@@ -36,9 +40,19 @@ type WorkspaceSwitcherItem = WorkspaceSwitcherItemBase &
         href: string;
         /** The page belongs to another app, so it opens with a full page load. */
         opensAnotherApp?: boolean;
+        /**
+         * Opens in a new browser window instead of replacing this page, so an
+         * installed app stays where it was. Only for another app's page.
+         */
+        opensInNewWindow?: boolean;
         onSelect?: never;
       }
-    | { onSelect: () => void; href?: never; opensAnotherApp?: never }
+    | {
+        onSelect: () => void;
+        href?: never;
+        opensAnotherApp?: never;
+        opensInNewWindow?: never;
+      }
   );
 
 type WorkspaceSwitcherSection = {
@@ -116,7 +130,18 @@ export function WorkspaceSwitcher({
               const content = (
                 <>
                   <ItemIcon aria-hidden="true" className="size-4" />
-                  <span className="flex-1">{item.label}</span>
+                  <span className="flex-1">
+                    {item.label}
+                    {item.opensInNewWindow && (
+                      <span className="sr-only"> (opens in a new window)</span>
+                    )}
+                  </span>
+                  {item.opensInNewWindow && (
+                    <OpenDocumentIcon
+                      aria-hidden="true"
+                      className="size-4 text-muted-foreground"
+                    />
+                  )}
                   {item.isCurrent && (
                     <CheckIcon
                       aria-hidden="true"
@@ -145,6 +170,9 @@ export function WorkspaceSwitcher({
                 <DropdownMenuItem key={item.href} asChild>
                   <ItemLink
                     href={item.href}
+                    {...(item.opensInNewWindow
+                      ? { target: "_blank", rel: "noopener" }
+                      : {})}
                     aria-current={item.isCurrent ? "page" : undefined}
                     className="flex min-h-10 cursor-pointer items-center gap-2"
                   >

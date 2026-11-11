@@ -18,26 +18,33 @@ flowchart TD
   HealthSchedule --> Config
   Organization --> Platform[Shared Platform transport]
   SuperAdmin --> Platform
+  HealthSchedule --> Platform
+  Organization --> Pwa[Shared install and offline package]
+  SuperAdmin --> Pwa
+  HealthSchedule --> Pwa
   Platform --> Config
   Platform --> Browser[Browser requests and auth contracts]
   Browser --> Nest[NestJS Platform API]
   Browser --> Product[Product bearer API transport]
 ```
 
-An app never imports another app's source. Product spokes navigate to the hub;
-sharing code does not share their runtime, cookie host, session or query cache.
+An app never imports another app's source, and each keeps its own runtime and
+query cache. The deployed apps share one sign-in session because every app
+refreshes through the hub's `/v1` (`docs/authentication.md`), not because they
+share code.
 The NestJS backend remains the authority for permissions and business rules.
 
-| Workspace               | Responsibility                                                                                          |
-| ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| `apps/organization`     | Shared account authentication, registration, application status and organisation management integration |
-| `apps/health-schedule`  | HealthSchedule product entry and future scheduling workflows                                            |
-| `apps/super-admin`      | Platform staff authentication, workspace and organisation review                                        |
-| `packages/config`       | Shared public environment names, parsing and validation                                                 |
-| `packages/platform-api` | Stable Platform auth contract, browser transport and refresh lifecycle                                  |
-| `packages/ui`           | Neutral shadcn primitives and reusable visual compositions                                              |
-| `packages/icons`        | Semantic icon exports and the icon vendor dependency                                                    |
-| Tooling packages        | Focused ESLint, TypeScript and test presets                                                             |
+| Workspace               | Responsibility                                                                                        |
+| ----------------------- | ----------------------------------------------------------------------------------------------------- |
+| `apps/organization`     | Account sign-in, registration, application status, organisation settings, team, partners and products |
+| `apps/health-schedule`  | HealthSchedule: product access, branch selection and schedule setup                                   |
+| `apps/super-admin`      | Platform staff sign-in, organisation review and lifecycle, staff management and the audit log         |
+| `packages/config`       | Shared public environment names, parsing and validation                                               |
+| `packages/platform-api` | Stable Platform auth contract, browser transport and refresh lifecycle                                |
+| `packages/ui`           | Neutral shadcn primitives and reusable visual compositions                                            |
+| `packages/icons`        | Semantic icon exports and the icon vendor dependency                                                  |
+| `packages/pwa`          | Service worker, caching rules, web app manifest and install hooks                                     |
+| Tooling packages        | Focused ESLint, TypeScript and test presets                                                           |
 
 ## Inside an app
 
@@ -64,13 +71,15 @@ does not need all seven directories. Query keys live with the request services
 they identify. Avoid adding an extra forwarding service between those requests
 and the shared Platform package.
 
-The organisation hub's features include `authentication`,
+The organisation hub's features include `authentication`, `account-security`,
 `organization-registration`, `organization-application`,
-`organization-management`, `team-management` (staff, invitations and roles)
-and `invitation-acceptance` (the public page an invitation link opens). Super Admin separates `staff-auth`, `staff-workspace`
-and `organization-oversight`. HealthSchedule has `organization-access`,
-`product-access` (the sign-in, application and product checks that choose the
-first screen), `branch-selection` (the branch the person is working at) and
+`organization-management`, `organization-settings`, `organization-workspace`
+(the signed-in shell and navigation), `team-management` (staff, invitations and
+roles), `partner-network`, `product-launcher` and `invitation-acceptance` (the
+public page an invitation link opens). Super Admin separates `staff-auth`,
+`staff-workspace`, `organization-oversight`, `staff-management` and `audit-log`. HealthSchedule has `sign-in` (its own sign-in
+page), `organization-access` (links into the hub), `product-access` (the
+sign-in, application and product checks that choose the first screen), `branch-selection` (the branch the person is working at) and
 `schedule-setup` (calendars with weekly hours, time off and holidays, and
 appointment types). Workspace pages share the signed-in session, permissions
 and branch through `shared/workspace`.
@@ -86,8 +95,8 @@ route → feature composition → workflow/query hook → request service
 
 Contracts and configuration do not import rendering, workflow hooks or request
 services. ESLint enforces these direct imports and rejects cross-app source
-imports. The Platform browser modules also reject imports of server modules,
-Node.js built-ins and Redis. These rules supplement review; they do not resolve
+imports. The Platform browser modules also reject imports of server modules and
+Node.js built-ins. These rules supplement review; they do not resolve
 every possible transitive dependency.
 
 Keep a component's private properties next to the component. Move types when
@@ -166,8 +175,9 @@ responsibility. Adding empty folder layers would make them harder to navigate.
 4. Share code when consumers have the same stable responsibility. Use app-local
    `shared/<domain>` for multiple workflows in one app, a package for multiple apps.
 5. A new spoke gets its own manifest, environment, routes, build and runtime.
-   Account navigation points to the organisation hub; session handoff needs an
-   explicit contract. A source import is not session handoff.
+   Account navigation points to the organisation hub, and the spoke shares the
+   session by setting its Platform API address to the hub
+   (`docs/authentication.md`). A source import is not session sharing.
 
 Run the required repository checks, review public exports and imports, and
 exercise affected browser journeys when behaviour changes. Compilation alone

@@ -54,5 +54,5 @@ lifecycle without importing another application. Product audience failures do
 not clear a valid Platform session.
 
 See [authentication](../../docs/authentication.md) for environment setup, cookie
-constraints, session recovery, and migration behavior, and
+constraints, session recovery, and deployed addresses, and
 [code organisation](../../docs/code-organization.md) for ownership rules.

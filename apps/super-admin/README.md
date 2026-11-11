@@ -1,19 +1,23 @@
 # HealthAlyst Super Admin
 
 The internal staff app runs on port 3007 for `dev` and `start`. It owns staff
-sign-in, the staff workspace, and organisation application review.
+sign-in, the staff workspace, organisation review and lifecycle (suspend,
+reinstate, deactivate, owner recovery), HealthAlyst staff management and the
+audit log. Deployed at `https://admin.healthalystafrica.com`.
 
 ```text
 src/
   app/                         Thin routes, root layout and styles
-  config/                      Application routes
-  components/                  Thin branded adapters
+  config/                      Application routes, brand and web app settings
   features/
-    staff-auth/                Password/MFA workflow and Platform realm activation
+    staff-auth/                Password/MFA workflow, step-up and Platform realm activation
     staff-workspace/           Workspace shell, overview, navigation and metrics
-    organization-oversight/    Directory, detail and review operations
+    organization-oversight/    Directory, review, lifecycle, members and owner recovery
+    staff-management/          HealthAlyst staff and their platform roles
+    audit-log/                 Audit search, event details and integrity check
   infrastructure/
     auth/                      Browser staff identity provider
+    pwa/                       Service worker registration and app status notices
     query/                     Query provider and defaults
 ```
 
@@ -24,6 +28,7 @@ screens open. An organisation account rejected by the staff gate is not globally
 signed out as a side effect.
 
 Copy `.env.example` to `.env.local`. Local `/v1` calls use the fixed Next.js
-transport proxy to Render. See [authentication](../../docs/authentication.md)
-for deployment origins, cookie behavior, and simultaneous local account testing,
+transport proxy to Render; deployed, the Platform API address is the hub
+(`https://account.healthalystafrica.com`). See
+[authentication](../../docs/authentication.md) for deployment origins, cookie behavior, and simultaneous local account testing,
 and [code organisation](../../docs/code-organization.md) for shared ownership.
