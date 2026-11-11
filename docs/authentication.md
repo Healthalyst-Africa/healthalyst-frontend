@@ -41,13 +41,14 @@ MFA workflow returns the user to password sign-in; challenges are not persisted.
 
 Copy each app's `.env.example` into its ignored `.env.local`.
 
-| Variable                                       | Purpose                                                                          |
-| ---------------------------------------------- | -------------------------------------------------------------------------------- |
-| `NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL`     | Browser Platform API origin, or `/` for a same-origin `/v1` proxy                |
-| `HEALTHALYST_PLATFORM_API_URL`                 | Fixed upstream origin for that proxy; only needed when the public address is `/` |
-| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`               | Public registration challenge key in the organisation hub                        |
-| `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL` | Hub navigation destination in HealthSchedule                                     |
-| `NEXT_PUBLIC_HEALTHALYST_SUPER_ADMIN_APP_URL`  | Super Admin destination for platform staff signing in through the hub            |
+| Variable                                          | Purpose                                                                          |
+| ------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL`        | Browser Platform API origin, or `/` for a same-origin `/v1` proxy                |
+| `HEALTHALYST_PLATFORM_API_URL`                    | Fixed upstream origin for that proxy; only needed when the public address is `/` |
+| `NEXT_PUBLIC_TURNSTILE_SITE_KEY`                  | Public registration challenge key in the organisation hub                        |
+| `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL`    | Hub navigation destination in HealthSchedule                                     |
+| `NEXT_PUBLIC_HEALTHALYST_SUPER_ADMIN_APP_URL`     | Super Admin destination for platform staff signing in through the hub            |
+| `NEXT_PUBLIC_HEALTHALYST_HEALTH_SCHEDULE_APP_URL` | HealthSchedule destination after sign-in and in the hub's product launcher       |
 
 Set the Super Admin destination to `http://localhost:3007` locally and to the
 deployed Super Admin app address for deployed builds.
@@ -73,13 +74,24 @@ custom session cookie, or `/api/platform` route is involved. Restart the app aft
 changing these configuration values; rewrites and public variables are captured
 by Next.js configuration/build processing.
 
-For direct deployed requests, set the public variable to the actual HTTPS
-Platform API origin and omit the proxy target. The apps and API must be on the
-same site for the API's `SameSite=Strict` refresh cookie. For example, app
-subdomains and `platform-api.dev.healthalystafrica.com` can use this arrangement
-when the backend allows their exact origins. A HealthAlyst page directly calling
-a Render hostname is cross-site; CORS alone cannot make the Strict refresh cookie
-available. Use the documented proxy until the same-site API origin is configured.
+### Deployed: one session through the hub
+
+The live apps are the hub at `https://account.healthalystafrica.com`,
+HealthSchedule at `https://healthschedule.healthalystafrica.com` and Super Admin
+at `https://admin.healthalystafrica.com`. The hub keeps `/` and proxies `/v1` to
+the Platform API, so the HttpOnly refresh cookie is set on the hub's host.
+HealthSchedule and Super Admin set
+`NEXT_PUBLIC_HEALTHALYST_PLATFORM_API_URL=https://account.healthalystafrica.com`
+and leave out `HEALTHALYST_PLATFORM_API_URL`. All three refresh through
+`https://account.healthalystafrica.com/v1/auth/refresh`; the apps are subdomains
+of one site, so the `SameSite=Strict` cookie goes with each request and they
+share one session. Every product's sign-in therefore depends on the hub's host
+being available. A new product, such as LabConnect, uses the same setting, and
+the hub's proxy must allow its origin with credentials.
+
+A HealthAlyst page calling a Render hostname directly is cross-site; CORS alone
+cannot make the Strict refresh cookie available, so always go through a
+`healthalystafrica.com` host or a local proxy.
 
 ## Session and failure behavior
 
@@ -121,9 +133,9 @@ ports can therefore share the API refresh cookie. Signing in as a different user
 or changing the server-side context can affect the identity/context recovered by
 another app. Use separate browser profiles when testing independent organisation
 and Super Admin accounts simultaneously. Do not assume separate ports isolate
-backend sessions. Direct deployed apps that use the same API cookie also need
-explicit account/context UX; this transport does not implement a product launcher
-or an OAuth SSO handoff.
+backend sessions. Deployed apps share the session the same way, through the hub's
+`/v1` (above); the hub's product launcher and organisation switcher handle moving
+between apps and organisations, and there is no OAuth SSO hand-off.
 
 HealthSchedule has one client for the HealthSchedule API, in
 `apps/health-schedule/src/infrastructure/api`. Its address,
@@ -143,51 +155,10 @@ the session's branch through `/v1/auth/context`, because that narrows the
 token's branch scope to one branch and would hide the others from the picker.
 Listing branches needs `branch:read`, which every preset role has.
 
-## Migration from the previous frontend session system
-
-Existing frontend session cookies and Redis records are no longer used. The
-browser must sign in once to receive the Platform API refresh cookie. After that,
-page reloads restore through refresh and `/me`. Remove the old frontend Redis,
-app-origin, encryption-secret, and refresh-cookie-name variables from deployment
-configuration. Never copy old credential values into public variables.
-
-## Verification on 24 October 2026
-
-The transport/contract suite contains 61 passing tests. Frozen-lockfile install,
-workspace lint/type checks, and all three production app builds passed. Formatting
-of changed files passes; the repository-wide format command still flags the
-pre-existing, unmodified `docs/BFF-guide.md` reference.
-
-Browser checks used isolated contexts and simulated backend responses for
-organisation password/MFA sign-in, reload, expired-token recovery, logout,
-Super Admin realm activation/reload, rejection of non-staff access without global
-logout, email confirmation/TOTP enrolment, recovery-code acknowledgement,
-forgot/reset password, and retry after a temporary refresh failure. They verified
-the HttpOnly/Secure/Strict cookie attributes, no credential persistence, and no
-horizontal overflow on the checked 390-pixel mobile views. No page runtime
-exceptions occurred in those scenarios. Authenticated deployed backend journeys
-were not exercised with real accounts.
-
-A reload regression check uses a JWT-shaped fixture with a user subject. It
-reproduced a successful refresh followed by a frontend `AUTH_CONTEXT_CHANGED`
-error before `/me` was sent. Initial identity establishment now proceeds; the
-identity-change guard still applies to existing credentials and retried requests.
-Desktop and 390-pixel browser checks confirmed direct `/application` entry and
-reload restore without clicking Try again, with one refresh per reload and no
-page runtime exceptions. These checks also used simulated backend responses.
-
-A live read through the local proxy to Render returned `200` for reference
-policies. Refresh without a valid credential returned the expected
-`401 AUTH_REFRESH_INVALID`. Live refresh checks also accepted the three local
-origins on ports 3005, 3006, and 3007, returning matching CORS origin headers and
-the expected unauthenticated response. These establish transport connectivity and
-failure handling, not successful live sign-in, email delivery, or business mutations.
-
 ## Sources
 
-- Current backend `packages/contracts/src/auth.ts`, `auth.controller.ts`, and
-  `auth/http.ts`; the [Platform Swagger reference](https://healthalyst-platform-api-dev.onrender.com/docs/swagger/?urls.primaryName=Platform)
-  documents the deployed API.
+- The [Platform Swagger reference](https://healthalyst-platform-api-dev.onrender.com/docs/swagger/?urls.primaryName=Platform)
+  is the source of truth for the API.
 - [Axios interceptors](https://axios-http.com/docs/interceptors).
 - [MDN Set-Cookie](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie),
   including credential, host/path, Secure, and SameSite behavior.

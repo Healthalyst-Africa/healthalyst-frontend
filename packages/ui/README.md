@@ -26,12 +26,22 @@ Applications import only the dedicated compositions in
 | Files with an action each                  | `file-action-list`                               |
 | Short tips with an information icon        | `hint-text`                                      |
 | Page, step or panel states (illustrated)   | `StateNotice` in `notice-banner`                 |
-| Inline notices and status labels           | `notice-banner`, `status-badge`, `status-label`  |
+| Inline notices and status labels           | `notice-banner`, `status-label`                  |
 | File uploads with drag and drop            | `file-upload-field`                              |
 | Review pages before submitting a workflow  | `review-summary`                                 |
 | Form-level errors and confirmations        | `form-message`                                   |
 | Labelled controls with validation messages | `text-field`, `text-area-field`, `select-field`, |
 |                                            | `checkbox-field`, `one-time-code-field`          |
+| Choosing several options                   | `multi-select-field`, `multi-select`,            |
+|                                            | `checkbox-matrix`, `toolbar-select`              |
+| Dates and working hours                    | `date-picker-field`, `weekly-hours-editor`       |
+| Security and sessions                      | `step-up-dialog`, `password-input`,              |
+|                                            | `recovery-codes-panel`, `signed-in-session-list` |
+| Multi-step workflows                       | `step-navigation`, `onboarding-progress-summary` |
+| A record's history                         | `activity-history`                               |
+| Moving between apps and organisations      | `workspace-switcher`, `page-breadcrumbs`,        |
+|                                            | `application-launcher-grid`                      |
+| App-wide notices and toasts                | `app-status-region`, `toast-region`              |
 | Custom or embedded controls                | `labelled-control-group`                         |
 | Metadata-driven forms                      | `dynamic-form-fields`                            |
 | Optional help                              | `expandable-section`                             |
@@ -102,10 +112,10 @@ trigger's `showIndicator` option lets a composition supply its own indicator.
 Native select retains browser-native options and forwards standard selection
 attributes, including the element reference.
 
-The card, radio group, field, label, separator and alert sources were installed
-from the official shadcn registry. The field's responsive and selected-state
-utilities were adapted for Tailwind 3. Only the radio group, label and separator
-needed additional Radix dependencies.
+The card, field, label, separator and alert sources were installed from the
+official shadcn registry. The field's responsive and selected-state utilities
+were adapted for Tailwind 3. Only the label and separator needed additional
+Radix dependencies.
 
 Applications must load the shared stylesheet, transpile this package through
 Next.js, and include its source in Tailwind scanning. Import through package
@@ -113,10 +123,10 @@ exports rather than relative paths into another workspace.
 
 ## Stylesheet
 
-`src/styles.css` defines the neutral light and dark token sets shared by every
-primitive. An application overrides the semantic roles it needs in its own global
-stylesheet, loaded after this one, and supplies any brand aliases its Tailwind
-configuration consumes.
+`src/styles.css` owns the visual tokens for every frontend app: the HealthAlyst
+palette, radius and semantic roles, in a single light theme. Applications load it
+before their own `globals.css`, which holds the Tailwind directives and only the
+few app-specific rules they need.
 
 ## Illustrations
 

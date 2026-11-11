@@ -27,7 +27,8 @@ the owning Zod schema. Map validated values to the workflow's explicit API
 request. Use server validation and authorization as the source of truth; client
 validation provides immediate feedback only. Never log form values or passwords.
 
-The current field set covers text, email, password, telephone, textarea, and
-single select. Form definitions are bundled with the frontend. Organisation
+The current field set covers text, email, password, telephone, web address,
+textarea, single select, checkbox, multi-select and checkbox group. Text and
+select fields can start with a value through `defaultValues`. Form definitions are bundled with the frontend. Organisation
 authored forms, conditional fields, file uploads, saved drafts, and published
 schema versions require separate product and backend contracts before use.

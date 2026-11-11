@@ -14,9 +14,9 @@ picker or open select also closed the dialog around it.
 schedule setup, booking, the day board, queues, patients, clinical notes and
 patient import.
 
-The frontend has no form library, date library, date picker, toast or API
-mocking. Forms are built with `DynamicFormFields` and `FormData`
-([form system](form-system.md)), and dates use the browser's date input. The
+Before schedule setup, the frontend had no form library, date library, date
+picker, toast or API mocking. Forms were built with `DynamicFormFields` and `FormData`
+([form system](form-system.md)), and dates used the browser's date input. The
 HealthSchedule screens need more than that, so this note records which
 packages to add, which to leave until a screen needs them, and which to skip.
 
@@ -42,7 +42,7 @@ schemas.
 | `libphonenumber-js`       | Patient registration            | Checking and formatting patient phone numbers, using its small Nigeria-only data set.                                                                                                           |
 | shadcn `chart` (Recharts) | Visit-times report              | Median waits, the slow tail and the share over target.                                                                                                                                          |
 | Playwright                | Booking and front-desk journeys | End-to-end tests of journeys that span several screens.                                                                                                                                         |
-| Generated API types       | Every API service               | Types generated from the OpenAPI files, as the backend's frontend guide suggests, so a changed response fails the build. Needs a short trial first: generated names may break the naming rules. |
+| Generated API types       | Every API service               | Types generated from the APIs' OpenAPI files (served beside their Swagger pages), so a changed response fails the build. Needs a short trial first: generated names may break the naming rules. |
 
 ## Decide at the day board: the calendar view
 

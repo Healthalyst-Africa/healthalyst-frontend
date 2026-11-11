@@ -193,7 +193,6 @@ code, repository policies, or branding into it.
 | `packages/ui`                           | Shared shadcn primitives, neutral tokens, reusable interface utilities      |
 | `packages/eslint-config`                | Shared lint configuration                                                   |
 | `packages/typescript-config`            | Shared strict compiler configuration                                        |
-| `packages/test-utilities`               | Shared testing setup                                                        |
 
 - Read manifests rather than assuming versions. The current stack uses Next.js
   App Router, React, TypeScript, Tailwind 3, pnpm workspaces, and Turborepo.
@@ -390,10 +389,10 @@ pnpm build
 pnpm test-all
 ```
 
-`pnpm test-all` includes tests. Vitest and Testing Library are configured; a
-successful `--passWithNoTests` run does not establish test coverage. The configured
-continuous integration workflow runs `pnpm test-all` on pull requests and pushes
-to `main`. Do not bypass failing checks or invent approvals, protected-branch
+`pnpm test-all` includes tests. Vitest is configured in each app, `platform-api`
+and `pwa`; a successful `--passWithNoTests` run does not establish test coverage.
+The configured continuous integration workflow runs `pnpm test-all` on pull
+requests and pushes to `main`. Do not bypass failing checks or invent approvals, protected-branch
 rules, hooks, or ticket systems that this repository does not configure.
 
 Do not commit, push, publish, deploy, send external messages, or mutate production
