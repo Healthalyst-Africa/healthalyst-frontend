@@ -23,6 +23,12 @@ describe("getOrganizationAppLinks", () => {
     );
   });
 
+  it("links to password recovery in the organisation hub", () => {
+    expect(getOrganizationAppLinks()?.forgotPassword).toBe(
+      "https://organisation.example.test/forgot-password"
+    );
+  });
+
   it("links to organisation settings in the organisation hub", () => {
     expect(getOrganizationAppLinks()?.organizationSettings).toBe(
       "https://organisation.example.test/settings"

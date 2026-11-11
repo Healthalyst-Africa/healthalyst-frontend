@@ -6,24 +6,29 @@ and `pnpm start`, and is deployed at `https://healthschedule.healthalystafrica.c
 It is the installable, offline-capable product app; see
 [offline architecture](../../docs/offline-architecture.md).
 
-HealthSchedule has no registration or sign-in screens of its own. Every
-HealthAlyst product uses the shared organisation app (`apps/organization`)
-for those, so an organisation registers once and can use several products.
-HealthSchedule links there through `NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL`,
-with `?product=healthschedule` so registration pre-selects HealthSchedule.
+HealthSchedule signs people in itself, with the shared sign-in form
+(`@healthalyst/ui/components/sign-in-form`), so an installed app never has to
+leave to sign in. The session it gets is the same HealthAlyst session the hub
+uses. Registration, first authenticator set-up, password recovery, account
+security and organisation management stay in the shared organisation app
+(`apps/organization`), so an organisation registers once and can use several
+products. HealthSchedule links there through
+`NEXT_PUBLIC_HEALTHALYST_ORGANIZATION_APP_URL`, with `?product=healthschedule`
+so registration pre-selects HealthSchedule; every hub link opens a new browser
+window.
 For local development, set that variable to `http://localhost:3005`.
 Copy `.env.example` to `.env.local` for the shared Platform transport configuration.
 See [authentication](../../docs/authentication.md) for the backend cookie contract
 and the HealthSchedule API client in `src/infrastructure/api`.
 
-## Entry and sign-in hand-over
+## Entry and sign-in
 
-The home route restores the HealthAlyst sign-in made in the organisation app
-(refresh, then `/v1/me`) and chooses the first screen:
+Every route restores the HealthAlyst sign-in, made here or in the organisation
+app (refresh, then `/v1/me`), and chooses the first screen:
 
 | Session                                             | Screen                                              |
 | --------------------------------------------------- | --------------------------------------------------- |
-| Nobody signed in                                    | Sign-in and registration links                      |
+| Nobody signed in                                    | HealthSchedule's sign-in, at the requested address  |
 | Application in draft, changes requested or review   | Application status, linking to the organisation app |
 | Approved, but HealthSchedule not among its products | "Not enabled" notice                                |
 | Suspended, rejected or deactivated                  | "Not available" notice                              |
@@ -52,8 +57,8 @@ src/
   components/ui/               App-wide branded wrappers
   config/                      Hub address, routes, brand and web app settings
   features/
+    sign-in/                   Signed-out page: password and code steps, own validation
     organization-access/
-      components/              Signed-out entry composition
       services/                Links into the organisation hub
     product-access/
       components/              Entry routing, status notices, workspace home

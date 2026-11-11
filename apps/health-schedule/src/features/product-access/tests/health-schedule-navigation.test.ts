@@ -7,6 +7,7 @@ const HUB_ADDRESS = "https://organisation.example.test";
 const HUB_LINKS: OrganizationAppLinks = {
   registration: `${HUB_ADDRESS}/?product=healthschedule`,
   signIn: `${HUB_ADDRESS}/sign-in?product=healthschedule`,
+  forgotPassword: `${HUB_ADDRESS}/forgot-password`,
   application: `${HUB_ADDRESS}/onboarding`,
   accountSecurity: `${HUB_ADDRESS}/account/security?product=healthschedule`,
   organizationSettings: `${HUB_ADDRESS}/settings`,
@@ -62,13 +63,17 @@ describe("HealthSchedule navigation", () => {
       },
     ]);
     expect(switcher[0]?.items[0]?.isCurrent).toBe(true);
-    // Every hub page loads as another app.
+    // Every hub page loads as another app, in a new browser window, so an
+    // installed HealthSchedule stays where it was.
     expect(
       switcher
         .flatMap((section) => section.items)
         .filter((item) => !item.isCurrent)
         .every(
-          (item) => item.opensAnotherApp && item.href.startsWith(HUB_ADDRESS)
+          (item) =>
+            item.opensAnotherApp &&
+            item.opensInNewWindow &&
+            item.href.startsWith(HUB_ADDRESS)
         )
     ).toBe(true);
   });
