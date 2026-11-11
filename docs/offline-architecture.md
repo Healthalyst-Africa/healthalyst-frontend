@@ -32,10 +32,14 @@ products.
 | Queued, checked when sent | Sent with the version the device saw; a refusal goes to "Needs attention" | Edit patient details, record allergies and consents, reschedule                                                                                                                  |
 | Online only               | Disabled offline, with the reason shown                                   | Booking against shared calendars, calling the next patient, break-the-glass access, eligibility checks, step-up verification, everything in Super Admin and the organisation hub |
 
-Clinical products, HealthSchedule first and LabConnect later, get full
-offline support. The organisation hub and Super Admin are installable and
-show an offline page, but keep no data, because they handle administration
-and security.
+Only the service products, HealthSchedule first and LabConnect later, are
+installable, and they get full offline support. The organisation hub and Super
+Admin are browser-only: they have no web app manifest, so browsers never offer
+to install them, but they keep a service worker for their offline page, the
+"You are offline" notice and the update prompt. They keep no data, because
+they handle administration and security, and their actions need the server.
+Being installable comes from the manifest; offline handling comes from the
+service worker, so dropping one does not drop the other.
 
 ## Architecture
 
@@ -58,8 +62,8 @@ and security.
     page loads before the worker is in control. So, as each screen opens, the
     app asks the worker to store its full page (`storeVisitedPages`), and a
     reload works offline.
-- Every app stores an `/offline` page at install and shows it for any page
-  that cannot load. It is plain HTML with inline styles and no JavaScript
+- Every app, installable or not, stores an `/offline` page when its worker
+  installs and shows it for any page that cannot load. It is plain HTML with inline styles and no JavaScript
   (`createOfflineDocument`). The worker serves it at the address that failed,
   so a Next.js page there would start its router, try to load that address
   and crash; the plain page cannot.
@@ -107,9 +111,26 @@ the app is on the home screen, so installing on iOS is part of onboarding.
 
 ### Interface (`@healthalyst/ui`)
 
-Product-neutral components: the connection notice and the update prompt
-(phase 1), then the sync indicator ("3 waiting to send"), the "Saved on this
-device" label and the "Needs attention" list (phase 3).
+Product-neutral components: the connection notice, the update prompt and the
+install offer (phase 1), then the sync indicator ("3 waiting to send"), the
+"Saved on this device" label and the "Needs attention" list (phase 3).
+
+### Install offer (phase 1)
+
+Offline products suggest installing (`promptToInstall`), because iPhones never
+prompt by themselves and clear an uninstalled site's stored data after about
+seven days unused. `decideInstallOffer` picks one of:
+
+- **Install button:** Chrome and Edge fire `beforeinstallprompt`; the app keeps
+  it and opens the browser's install dialog from its own button.
+- **Home Screen instructions:** iPhones and iPads (including iPads that report
+  a Mac) get "Tap Share, then Add to Home Screen".
+- **Nothing:** already installed, "Not now" chosen in the last 14 days (kept in
+  `localStorage`, no personal data), or a browser that cannot install.
+
+Service workers need HTTPS, except on `localhost`. Testing on a phone over
+`http://<computer address>` gives no offline support; use a deployed site or
+an HTTPS tunnel.
 
 ## Scaling across products
 
@@ -140,8 +161,9 @@ checks `If-Match` versions on edits. Still needed:
 
 ## Phases
 
-1. **Installable apps:** manifests, icons, service workers, offline page,
-   connection notice and update prompt in all three apps.
+1. **Installable products, browser-only admin apps:** service workers, offline
+   page, connection notice and update prompt in all three apps; a manifest,
+   icons and the install offer in HealthSchedule only.
 2. **`@healthalyst/offline`:** store, outbox, sync engine and device profiles,
    with thorough tests and no product features.
 3. **HealthSchedule offline features:** patient registration and notes first,

@@ -3,14 +3,14 @@
 import { useConnectionStatus } from "@healthalyst/pwa/hooks/use-connection-status";
 import { useServiceWorker } from "@healthalyst/pwa/hooks/use-service-worker";
 import { AppStatusRegion } from "@healthalyst/ui/components/app-status-region";
-import { WEB_APP_CONFIGURATION } from "~/config/web-app";
 
-/** Registers the service worker and shows the offline and update notices. */
+/**
+ * Registers the service worker and shows the offline and update notices. This
+ * app is browser-only, so it never offers to install.
+ */
 export function AppStatus() {
   const { isOnline } = useConnectionStatus();
-  const serviceWorker = useServiceWorker({
-    storeVisitedPages: WEB_APP_CONFIGURATION.keepPagesForOffline,
-  });
+  const serviceWorker = useServiceWorker();
 
   return (
     <AppStatusRegion
@@ -19,9 +19,8 @@ export function AppStatus() {
           ? null
           : {
               title: "You are offline",
-              description: WEB_APP_CONFIGURATION.keepPagesForOffline
-                ? "You can keep moving between screens. Anything that needs the server waits until you are back online."
-                : "Reconnect to keep working. Changes cannot be saved without a connection.",
+              description:
+                "Reconnect to keep working. Changes cannot be saved without a connection.",
             }
       }
       updateNotice={

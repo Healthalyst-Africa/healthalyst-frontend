@@ -25,5 +25,10 @@ export const WEB_APP_CONFIGURATION = {
       background: "#FFFFFF",
     },
   },
+  /**
+   * Suggest installing to the home screen. iPhones never prompt by themselves,
+   * and clear an uninstalled site's stored data after about a week unused.
+   */
+  promptToInstall: true,
   keepPagesForOffline: true,
 } as const;

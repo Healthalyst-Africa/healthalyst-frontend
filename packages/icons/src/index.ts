@@ -62,4 +62,7 @@ export {
   IconCalendarOff as TimeOffIcon,
   IconListDetails as AppointmentTypesIcon,
   IconWifiOff as OfflineIcon,
+  IconDeviceMobileDown as InstallAppIcon,
+  IconShare2 as ShareIcon,
+  IconSquarePlus as AddToHomeScreenIcon,
 } from "@tabler/icons-react";

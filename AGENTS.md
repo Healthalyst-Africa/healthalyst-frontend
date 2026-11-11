@@ -324,12 +324,17 @@ code, repository policies, or branding into it.
 
 - Follow `docs/offline-architecture.md`. Offline support is a core product
   requirement, planned in phases; check which phase a change belongs to.
-- Every app is installable through `@healthalyst/pwa`: a manifest from
-  `createWebAppManifest`, a worker started with `startHealthAlystServiceWorker`,
-  the `/serwist/[path]` route and an `/offline` route that returns
-  `createOfflineDocument`. Keep the offline page plain HTML with no JavaScript;
-  never make it a Next.js page. Configure each app in `src/config/web-app.ts`;
-  do not import Serwist directly in applications.
+- Every app has a worker started with `startHealthAlystServiceWorker`, the
+  `/serwist/[path]` route and an `/offline` route that returns
+  `createOfflineDocument`, all from `@healthalyst/pwa`. Keep the offline page
+  plain HTML with no JavaScript; never make it a Next.js page. Configure each
+  app in `src/config/web-app.ts`; do not import Serwist directly in applications.
+- Only service products (HealthSchedule, LabConnect and later clinical products)
+  are installable: they add a manifest from `createWebAppManifest`, the app
+  icons, Apple web-app metadata and the install offer (`promptToInstall`). The
+  organisation hub and Super Admin are browser-only: never give them a manifest,
+  install metadata or install offer; they keep their worker, offline page and
+  notices.
 - Patient and organisation data never enters the service worker's Cache
   Storage. API requests (any path containing `/v1/`), cross-origin requests and
   writes always go to the network. Change `packages/pwa/src/caching-rules.ts`
