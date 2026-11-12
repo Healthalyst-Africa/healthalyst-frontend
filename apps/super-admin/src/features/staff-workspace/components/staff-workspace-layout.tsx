@@ -59,7 +59,7 @@ export function StaffWorkspaceLayout({ children }: { children: ReactNode }) {
     return (
       <BrandLoader
         markSource={BRAND_MARK_SOURCE}
-        label="Opening staff sign in"
+        label="Opening admin sign in"
       />
     );
   }

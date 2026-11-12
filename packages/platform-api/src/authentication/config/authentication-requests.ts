@@ -20,6 +20,7 @@ export const AUTHENTICATION_ENDPOINTS = {
   forgotPassword: "/v1/auth/password/forgot",
   resetPassword: "/v1/auth/password/reset",
   changePassword: "/v1/auth/password/change",
+  confirmEmailChange: "/v1/auth/email-change/confirm",
   session: (sessionIdentifier: string) =>
     `/v1/auth/sessions/${encodeURIComponent(sessionIdentifier)}`,
 } as const;

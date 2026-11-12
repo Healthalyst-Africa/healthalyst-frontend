@@ -22,6 +22,12 @@ export const platformStaffListSchema = schemaLibrary.object({
   data: schemaLibrary.array(platformStaffMemberSchema),
 });
 
+export const removedPlatformStaffMemberSchema =
+  platformStaffMemberSchema.extend({
+    /** Applications they had claimed for review, now back in the review queue. */
+    releasedApplications: schemaLibrary.array(schemaLibrary.uuid()),
+  });
+
 export const addedPlatformStaffMemberSchema = platformStaffMemberSchema.extend({
   newAccount: schemaLibrary.boolean(),
 });
@@ -59,17 +65,23 @@ export const platformStaffRolesFormSchema = schemaLibrary.object({
   roles: grantableRolesSchema,
 });
 
+const removalReasonSchema = schemaLibrary
+  .string()
+  .trim()
+  .min(
+    STAFF_MANAGEMENT_LIMITS.removalReasonMinimumLength,
+    `Give a reason of at least ${STAFF_MANAGEMENT_LIMITS.removalReasonMinimumLength} characters.`
+  )
+  .max(
+    STAFF_MANAGEMENT_LIMITS.removalReasonMaximumLength,
+    `Keep the reason to ${STAFF_MANAGEMENT_LIMITS.removalReasonMaximumLength} characters or fewer.`
+  );
+
 export const removeSuperAdminFormSchema = schemaLibrary.object({
-  reason: schemaLibrary
-    .string()
-    .trim()
-    .min(
-      STAFF_MANAGEMENT_LIMITS.removalReasonMinimumLength,
-      `Give a reason of at least ${STAFF_MANAGEMENT_LIMITS.removalReasonMinimumLength} characters.`
-    )
-    .max(
-      STAFF_MANAGEMENT_LIMITS.removalReasonMaximumLength,
-      `Keep the reason to ${STAFF_MANAGEMENT_LIMITS.removalReasonMaximumLength} characters or fewer.`
-    ),
+  reason: removalReasonSchema,
   deactivate: schemaLibrary.boolean(),
+});
+
+export const removePlatformStaffFormSchema = schemaLibrary.object({
+  reason: removalReasonSchema,
 });

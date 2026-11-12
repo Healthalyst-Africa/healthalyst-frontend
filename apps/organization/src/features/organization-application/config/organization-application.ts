@@ -3,6 +3,12 @@ export const ORGANIZATION_APPLICATION_ENDPOINTS = {
   submit: "/v1/onboarding/application/submit",
 } as const;
 export const ORGANIZATION_APPLICATION_QUERY_KEY = "organization-application";
+
+/**
+ * After changes were requested, resubmitting needs an edit to the details or
+ * a document added or removed since the request (`409`).
+ */
+export const UNCHANGED_APPLICATION_ERROR_CODE = "APPLICATION_UNCHANGED";
 export const ORGANIZATION_PROFILE_FIELD_NAMES = [
   "legalName",
   "tradingName",

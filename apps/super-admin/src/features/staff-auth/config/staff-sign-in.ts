@@ -7,7 +7,7 @@ export const STAFF_AUTHENTICATOR_CONFIGURATION = {
 
 export const STAFF_SIGN_IN_HEADINGS = {
   password: {
-    title: "Staff sign in",
+    title: "Admin sign in",
     description:
       "Use your HealthAlyst staff account to open the company dashboard.",
   },

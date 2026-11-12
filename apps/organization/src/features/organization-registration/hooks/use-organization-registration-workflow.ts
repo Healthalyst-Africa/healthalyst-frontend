@@ -24,11 +24,16 @@ import {
 const FINAL_STEP_INDEX = registrationSteps.length - 1;
 export function useOrganizationRegistrationWorkflow({
   partnerInvitationToken,
+  initialStateCode = "",
 }: {
   /** Sent with the registration when the visitor came from a partner invitation. */
   partnerInvitationToken?: string;
+  initialStateCode?: string;
 } = {}) {
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  // The area list follows the state, so both are tracked while the form is open.
+  const [stateCode, setStateCode] = useState(initialStateCode);
+  const [localGovernmentArea, setLocalGovernmentArea] = useState("");
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [captchaToken, setCaptchaToken] = useState<string | null>(null);
   const [captchaChallengeKey, setCaptchaChallengeKey] = useState(0);
@@ -105,6 +110,18 @@ export function useOrganizationRegistrationWorkflow({
     registrationMutation.reset();
   }
 
+  function handleFieldValueChange(fieldName: string, value: string) {
+    if (fieldName === "stateCode" && value !== stateCode) {
+      setStateCode(value);
+      setLocalGovernmentArea("");
+      setFieldErrors((currentErrors) =>
+        clearRegistrationFieldErrors(currentErrors, "localGovernmentArea")
+      );
+    }
+    if (fieldName === "localGovernmentArea") setLocalGovernmentArea(value);
+    passwordFeedback.handleValueChange(fieldName, value);
+  }
+
   function handleRegistrationSubmit(formEvent: FormEvent<HTMLFormElement>) {
     formEvent.preventDefault();
     const validationResult = parseFormData(
@@ -169,7 +186,9 @@ export function useOrganizationRegistrationWorkflow({
     // Live password feedback shows over an older error for the same field.
     fieldErrors: { ...fieldErrors, ...passwordFeedback.errors },
     fieldStatuses: passwordFeedback.statuses,
-    handleFieldValueChange: passwordFeedback.handleValueChange,
+    handleFieldValueChange,
+    stateCode,
+    controlledValues: { localGovernmentArea },
     handleFieldBlur: passwordFeedback.handleFieldBlur,
     currentStepIndex,
     captchaToken,

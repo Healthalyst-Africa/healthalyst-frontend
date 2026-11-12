@@ -14,6 +14,8 @@ export const ORGANIZATION_ROUTES = {
   acceptInvitation: "/invitations/accept",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",
+  /** Email-change links, sent to the new address, open here with `?token=`. */
+  confirmEmailChange: "/confirm-email-change",
   verifyEmail: "/verify-email",
 } as const;
 

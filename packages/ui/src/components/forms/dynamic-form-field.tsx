@@ -38,7 +38,7 @@ export function DynamicFormField({
   status,
   defaultSelection,
   defaultValue,
-  disabled,
+  disabled: formDisabled,
   onFieldChange,
   onFieldBlur,
   value,
@@ -58,6 +58,7 @@ export function DynamicFormField({
   value?: string;
   onValueChange?: (fieldName: string, value: string) => void;
 }) {
+  const disabled = formDisabled || Boolean(field.disabled);
   const fieldIdentifier = `${definition.identifier}-${field.name}`;
   const descriptionIdentifier = field.description
     ? `${fieldIdentifier}-description`

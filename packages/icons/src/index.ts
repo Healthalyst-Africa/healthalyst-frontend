@@ -47,6 +47,7 @@ export {
   IconBan as RevokeIcon,
   IconCertificate as LicenceIcon,
   IconRestore as ResetAuthenticatorIcon,
+  IconMailForward as ChangeEmailIcon,
   IconLayoutGrid as ProductsIcon,
   IconCalendarEvent as HealthScheduleIcon,
   IconUserShield as PlatformStaffIcon,

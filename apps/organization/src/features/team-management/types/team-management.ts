@@ -4,8 +4,10 @@ import type {
   LicenceVerificationMethod,
   SpecialtyCode,
 } from "~/features/team-management/config/team-management";
+import type { memberEmailChangeFormSchema } from "~/features/team-management/schemas/team-form-schemas";
 import type {
   bulkInvitationResultSchema,
+  emailChangeRequestResponseSchema,
   invitationSchema,
   permissionListSchema,
   roleSchema,
@@ -78,3 +80,10 @@ export type LicenceVerificationRequest = {
 };
 
 export type TeamRoleRequest = { name: string; permissions: string[] };
+
+export type MemberEmailChangeRequest = z.output<
+  typeof memberEmailChangeFormSchema
+>;
+export type MemberEmailChangeResult = z.infer<
+  typeof emailChangeRequestResponseSchema
+>;

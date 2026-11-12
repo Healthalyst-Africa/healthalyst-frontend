@@ -16,12 +16,14 @@ import {
   listStaffMembers,
   reactivateStaffMember,
   removeStaffMember,
+  requestStaffEmailChange,
   resetStaffAuthenticator,
   suspendStaffMember,
   updateStaffMember,
   verifyStaffLicence,
 } from "~/features/team-management/services/staff-service";
 import type {
+  MemberEmailChangeRequest,
   LicenceVerificationRequest,
   StaffListFilters,
   StaffMember,
@@ -158,6 +160,18 @@ export function useTeamMemberAccessMutation(scope: TeamScope) {
 export function useAuthenticatorResetMutation() {
   return useMutation({
     mutationFn: (membershipId: string) => resetStaffAuthenticator(membershipId),
+  });
+}
+
+export function useMemberEmailChangeMutation() {
+  return useMutation({
+    mutationFn: ({
+      membershipId,
+      request,
+    }: {
+      membershipId: string;
+      request: MemberEmailChangeRequest;
+    }) => requestStaffEmailChange(membershipId, request),
   });
 }
 
