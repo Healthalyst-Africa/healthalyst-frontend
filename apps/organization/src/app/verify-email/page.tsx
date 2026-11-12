@@ -1,25 +1,16 @@
 import type { Metadata } from "next";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import Link from "next/link";
-import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
-import HealthAlystBrand from "~/components/ui/healthalyst-brand";
+import OrganizationCenteredLayout from "~/components/ui/organization-centered-layout";
 import { EmailVerification } from "~/features/authentication";
-import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
 
 export const metadata: Metadata = { title: "Confirm your email address" };
 
 export default function VerifyEmailRoute() {
   return (
-    <SplitPanelLayout
-      className="bg-card"
-      title="Confirm your administrator email address"
-      showcaseClassName="bg-primary text-primary-foreground"
-      showcaseLabel="About HealthAlyst"
-      compactHeader={<HealthAlystBrand />}
-      showcase={
-        <OnboardingHeroPanel lede="Confirm your email address to continue setting up your organisation." />
-      }
-      footer={
+    <OrganizationCenteredLayout
+      pageTitle="Confirm your administrator email address"
+      footerContent={
         <p className="text-sm text-muted-foreground">
           Already confirmed?{" "}
           <Link
@@ -32,6 +23,6 @@ export default function VerifyEmailRoute() {
       }
     >
       <EmailVerification />
-    </SplitPanelLayout>
+    </OrganizationCenteredLayout>
   );
 }

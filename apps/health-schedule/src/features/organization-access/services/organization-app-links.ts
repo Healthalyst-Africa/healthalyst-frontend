@@ -17,7 +17,8 @@ export type OrganizationAppLinks = {
 
 /**
  * Organisation registration, account set-up, settings and account security
- * are owned by the account hub; HealthSchedule signs people in itself. Links
+ * are owned by the account hub. Desktop browsers also sign in there; phones,
+ * tablets and the installed app sign in on HealthSchedule's own page. Links
  * name HealthSchedule so registration pre-selects it and account security
  * returns here. Every hub page opens in a new browser window.
  */

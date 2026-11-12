@@ -78,7 +78,7 @@ The organisation hub's features include `authentication`, `account-security`,
 roles), `partner-network`, `product-launcher` and `invitation-acceptance` (the
 public page an invitation link opens). Super Admin separates `staff-auth`,
 `staff-workspace`, `organization-oversight`, `staff-management` and `audit-log`. HealthSchedule has `sign-in` (its own sign-in
-page), `organization-access` (links into the hub), `product-access` (the
+page for phones, tablets and the installed app; desktop browsers sign in at the hub), `organization-access` (links into the hub), `product-access` (the
 sign-in, application and product checks that choose the first screen), `branch-selection` (the branch the person is working at) and
 `schedule-setup` (calendars with weekly hours, time off and holidays, and
 appointment types). Workspace pages share the signed-in session, permissions

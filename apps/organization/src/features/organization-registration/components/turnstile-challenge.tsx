@@ -6,6 +6,7 @@ import {
   TURNSTILE_SCRIPT_URL,
   TURNSTILE_STATUS_MESSAGES,
 } from "~/features/organization-registration/config/turnstile";
+import { describeTurnstileFailure } from "~/features/organization-registration/utilities/turnstile-failure";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import Script from "next/script";
 import { LabelledControlGroup } from "@healthalyst/ui/components/labelled-control-group";
@@ -17,12 +18,16 @@ export default function TurnstileChallenge({
   const {
     setIsScriptReady,
     verificationStatus,
+    failure,
     containerReference,
     restartChallenge,
     canRestartChallenge,
     handleScriptError,
   } = useTurnstileChallenge({ onResponseTokenChange, siteKey });
-  const statusMessage = TURNSTILE_STATUS_MESSAGES[verificationStatus];
+  const statusMessage =
+    verificationStatus === "error"
+      ? describeTurnstileFailure(failure ?? { kind: "challenge-failed" })
+      : TURNSTILE_STATUS_MESSAGES[verificationStatus];
 
   return (
     <LabelledControlGroup

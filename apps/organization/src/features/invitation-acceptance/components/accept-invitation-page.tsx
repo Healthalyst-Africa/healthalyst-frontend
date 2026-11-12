@@ -11,7 +11,7 @@ import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { SummaryDetailList } from "@healthalyst/ui/components/review-summary";
 import { TextField } from "@healthalyst/ui/components/text-field";
-import OrganizationSignInLayout from "~/components/ui/organization-sign-in-layout";
+import OrganizationCenteredLayout from "~/components/ui/organization-centered-layout";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { PASSWORD_LIMITS } from "~/features/authentication/config/authentication-limits";
@@ -340,11 +340,7 @@ export function AcceptInvitationPage() {
   }
 
   return (
-    <OrganizationSignInLayout
-      pageTitle={heading}
-      showcaseLabel="About invitations"
-      showcaseLede="Join your organisation on HealthAlyst."
-    >
+    <OrganizationCenteredLayout pageTitle={heading}>
       <div className="flex flex-col gap-6">
         <div className="flex flex-col items-center gap-2 text-center">
           <h2
@@ -360,6 +356,6 @@ export function AcceptInvitationPage() {
         </div>
         <ContentPanel frame="wide-screens">{renderContent()}</ContentPanel>
       </div>
-    </OrganizationSignInLayout>
+    </OrganizationCenteredLayout>
   );
 }
