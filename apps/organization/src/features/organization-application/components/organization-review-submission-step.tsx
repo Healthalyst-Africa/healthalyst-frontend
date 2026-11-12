@@ -20,6 +20,8 @@ import {
 import { AttentionNeededIllustration } from "@healthalyst/ui/illustrations/attention-needed-illustration";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
+import { PlatformApiError } from "@healthalyst/platform-api/api-error";
+import { UNCHANGED_APPLICATION_ERROR_CODE } from "~/features/organization-application/config/organization-application";
 import { useOrganizationApplicationSubmitMutation } from "~/features/organization-application/hooks/use-organization-application";
 import { APPROVED_ORGANIZATION_STATUS } from "~/shared/organization/config/organization-status";
 import {
@@ -85,6 +87,10 @@ export function OrganizationReviewSubmissionStep({
     isApproved,
     enabledProductCodes,
   });
+
+  const isUnchangedSinceRequest =
+    submitMutation.error instanceof PlatformApiError &&
+    submitMutation.error.code === UNCHANGED_APPLICATION_ERROR_CODE;
 
   function submitApplication() {
     submitMutation.mutate(application.entityTag, {
@@ -394,17 +400,33 @@ export function OrganizationReviewSubmissionStep({
         open={submissionFeedback === "error"}
         onOpenChange={(open) => !open && setSubmissionFeedback(null)}
         tone="error"
-        title="We could not submit your application"
-        description={
-          submitMutation.error?.message ??
-          "Something went wrong while submitting. Try again."
+        title={
+          isUnchangedSinceRequest
+            ? "Make the requested changes first"
+            : "We could not submit your application"
         }
-        primaryAction={{
-          label: "Try again",
-          onSelect: submitApplication,
-          isLoading: submitMutation.isPending,
-          loadingText: "Submitting application",
-        }}
+        description={
+          isUnchangedSinceRequest
+            ? "Nothing has changed since HealthAlyst asked for changes. Update your details, or add or remove a document, then submit again."
+            : (submitMutation.error?.message ??
+              "Something went wrong while submitting. Try again.")
+        }
+        primaryAction={
+          isUnchangedSinceRequest
+            ? {
+                label: "Update your details",
+                onSelect: () => {
+                  setSubmissionFeedback(null);
+                  onEditStep("details");
+                },
+              }
+            : {
+                label: "Try again",
+                onSelect: submitApplication,
+                isLoading: submitMutation.isPending,
+                loadingText: "Submitting application",
+              }
+        }
         secondaryAction={{
           label: "Close",
           onSelect: () => setSubmissionFeedback(null),

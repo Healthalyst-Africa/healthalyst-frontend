@@ -16,10 +16,7 @@ import {
 } from "@healthalyst/ui/components/notice-banner";
 import { EmptyOrganizationsIllustration } from "@healthalyst/ui/illustrations/empty-organizations-illustration";
 import { EmptySearchIllustration } from "@healthalyst/ui/illustrations/empty-search-illustration";
-import {
-  SummaryDetailList,
-  SummaryTiles,
-} from "@healthalyst/ui/components/review-summary";
+import { SummaryDetailList } from "@healthalyst/ui/components/review-summary";
 import { SelectField } from "@healthalyst/ui/components/select-field";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { StepUpDialog } from "@healthalyst/ui/components/step-up-dialog";
@@ -37,7 +34,6 @@ import {
   REVIEW_CONTENT_TYPE_LABELS,
   REVIEW_DOCUMENT_STATUS_PRESENTATION,
   REVIEW_DOCUMENT_TYPE_LABELS,
-  REVIEW_PRODUCT_STATUS_PRESENTATION,
 } from "~/features/organization-oversight/config/review-queue";
 import {
   REVIEW_CHECKLIST_ITEMS,
@@ -56,6 +52,7 @@ import {
   OrganizationLifecycleDialogs,
 } from "~/features/organization-oversight/components/organization-lifecycle-actions";
 import { OrganizationMembers } from "~/features/organization-oversight/components/organization-members";
+import { OrganizationProductsSection } from "~/features/organization-oversight/components/organization-products-section";
 import { INTERNAL_NOTE_ROLES } from "~/features/organization-oversight/config/organization-lifecycle";
 import type { OrganizationDetail } from "~/features/organization-oversight/types/organization-types";
 import type { ReviewApplicationProperties } from "~/features/organization-oversight/types/review-controller";
@@ -312,36 +309,12 @@ export function ReviewApplicationSheet({
                 />
               </ReviewSection>
 
-              <ReviewSection heading="Products requested">
-                {detail.products.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">
-                    No products were requested.
-                  </p>
-                ) : (
-                  <SummaryTiles
-                    tiles={detail.products.map((product) => {
-                      const reviewProduct = REVIEW_PRODUCTS.find(
-                        (candidate) => candidate.code === product.code
-                      );
-                      return {
-                        key: product.code,
-                        title: reviewProduct?.label ?? product.code,
-                        description: reviewProduct?.description,
-                        // Every listed product was requested; show other states only.
-                        status:
-                          product.status === "PENDING"
-                            ? undefined
-                            : (REVIEW_PRODUCT_STATUS_PRESENTATION[
-                                product.status
-                              ] ?? {
-                                label: product.status,
-                                tone: "neutral" as const,
-                              }),
-                      };
-                    })}
-                  />
-                )}
-              </ReviewSection>
+              <OrganizationProductsSection
+                organizationId={application.id}
+                status={application.status}
+                detail={detail}
+                staffIdentity={staffIdentity}
+              />
 
               <ReviewSection heading="Documents">
                 {detail.documents.length === 0 ? (

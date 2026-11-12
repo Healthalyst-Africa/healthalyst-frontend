@@ -15,6 +15,7 @@ onboarding. This app runs on port 3005 for both `dev` and `start`.
 | `/verify-email`                 | One-time email confirmation and optional MFA enrolment                                     |
 | `/forgot-password`              | Request a password reset link                                                              |
 | `/reset-password`               | Set a password from a one-time email link                                                  |
+| `/confirm-email-change`         | Confirm a new sign-in email, sent by an administrator, and set a new password              |
 | `/products`                     | Product launcher for approved organisations                                                |
 | `/settings`                     | Organisation profile, branches and ownership                                               |
 | `/settings/branches/[branchId]` | A branch's services and departments                                                        |

@@ -323,3 +323,27 @@ export const bulkInvitationFormSchema = z
     ...accessScopeFields,
   })
   .superRefine(checkBranchScope);
+
+/** A new sign-in email for a member who lost access to theirs. */
+export const memberEmailChangeFormSchema = z.object({
+  newEmail: z
+    .string()
+    .trim()
+    .min(1, "Enter the new email address.")
+    .max(
+      TEAM_FIELD_LIMITS.emailMaximumLength,
+      `Keep the email address to ${TEAM_FIELD_LIMITS.emailMaximumLength} characters or fewer.`
+    )
+    .pipe(z.email("Enter a valid email address.")),
+  reason: z
+    .string()
+    .trim()
+    .min(
+      TEAM_FIELD_LIMITS.emailChangeReasonMinimumLength,
+      `Give a reason of at least ${TEAM_FIELD_LIMITS.emailChangeReasonMinimumLength} characters.`
+    )
+    .max(
+      TEAM_FIELD_LIMITS.emailChangeReasonMaximumLength,
+      `Keep the reason to ${TEAM_FIELD_LIMITS.emailChangeReasonMaximumLength} characters or fewer.`
+    ),
+});

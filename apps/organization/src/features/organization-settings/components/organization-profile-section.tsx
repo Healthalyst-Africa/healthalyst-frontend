@@ -13,7 +13,6 @@ import {
 } from "@healthalyst/ui/components/notice-banner";
 import { SummaryDetailList } from "@healthalyst/ui/components/review-summary";
 import { SectionHeading } from "@healthalyst/ui/components/section-heading";
-import { SelectField } from "@healthalyst/ui/components/select-field";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
@@ -21,6 +20,7 @@ import {
   usePlatformOrganizationQuery,
   usePlatformOrganizationUpdateMutation,
 } from "~/features/organization-management/hooks/use-platform-organization";
+import { OrganizationAddressFields } from "~/features/organization-settings/components/organization-address-fields";
 import { organizationProfileFormSchema } from "~/features/organization-settings/schemas/organization-settings-schemas";
 import {
   isStaleVersionError,
@@ -256,23 +256,10 @@ export function OrganizationProfileSection({
               required
               error={visibleFieldErrors.city}
             />
-            <SelectField
-              id="profile-state"
-              label="State"
-              name="stateCode"
-              placeholder="Choose a state"
-              options={nigerianStateOptions}
-              defaultValue={profile.stateCode ?? ""}
-              required
-              error={visibleFieldErrors.stateCode}
-            />
-            <TextField
-              id="profile-local-government-area"
-              label="Local government area"
-              name="lga"
-              defaultValue={profile.lga ?? ""}
-              maxLength={ORGANIZATION_FIELD_LIMITS.localGovernmentArea}
-              error={visibleFieldErrors.lga}
+            <OrganizationAddressFields
+              savedStateCode={profile.stateCode ?? ""}
+              savedLocalGovernmentArea={profile.lga ?? ""}
+              errors={visibleFieldErrors}
             />
           </div>
           <CheckboxField

@@ -8,11 +8,14 @@ import {
   addedPlatformStaffMemberSchema,
   platformStaffListSchema,
   platformStaffMemberSchema,
+  removedPlatformStaffMemberSchema,
 } from "~/features/staff-management/schemas/staff-management-schemas";
 import type {
   AddedPlatformStaffMember,
   NewPlatformStaffMember,
   PlatformStaffMember,
+  PlatformStaffRemoval,
+  RemovedPlatformStaffMember,
   SuperAdminRemoval,
 } from "~/features/staff-management/types/staff-management";
 
@@ -82,6 +85,27 @@ export function removeSuperAdmin(
         removal
       );
       return platformStaffMemberSchema.parse(response.data);
+    }
+  );
+}
+
+/**
+ * Ends someone's HealthAlyst staff access in one step: every role goes, they
+ * are signed out and emailed, and applications they had claimed return to the
+ * review queue. Super admins are removed with `removeSuperAdmin` first.
+ */
+export function removePlatformStaff(
+  userId: string,
+  removal: PlatformStaffRemoval
+): Promise<RemovedPlatformStaffMember> {
+  return runPlatformRequest(
+    "We could not remove this person from staff. Try again.",
+    async () => {
+      const response = await getPlatformHttpClient().post<unknown>(
+        STAFF_MANAGEMENT_ENDPOINTS.remove(userId),
+        removal
+      );
+      return removedPlatformStaffMemberSchema.parse(response.data);
     }
   );
 }

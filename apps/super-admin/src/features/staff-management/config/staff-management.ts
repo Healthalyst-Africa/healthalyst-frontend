@@ -36,6 +36,8 @@ export const STAFF_MANAGEMENT_ENDPOINTS = {
   staff: "/v1/admin/staff",
   roles: (userId: string) =>
     `/v1/admin/staff/${encodeURIComponent(userId)}/roles`,
+  remove: (userId: string) =>
+    `/v1/admin/staff/${encodeURIComponent(userId)}/remove`,
   removeSuperAdmin: (userId: string) =>
     `/v1/admin/staff/${encodeURIComponent(userId)}/remove-super-admin`,
 } as const;
@@ -91,6 +93,10 @@ export const STAFF_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("en-NG", {
   timeStyle: "short",
   timeZone: "Africa/Lagos",
 });
+
+/** Everything cached for this staff member, such as staff and the review queue. */
+export const platformStaffWorkspaceQueryKey = (staffAccountId: string) =>
+  ["platform-staff", staffAccountId] as const;
 
 export const platformStaffQueryKey = (staffAccountId: string) =>
   ["platform-staff", staffAccountId, "staff-members"] as const;

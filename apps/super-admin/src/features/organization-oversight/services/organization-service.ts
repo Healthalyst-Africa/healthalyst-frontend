@@ -13,8 +13,15 @@ import type {
   OwnerAssignment,
   RegistrationStatus,
 } from "~/features/organization-oversight/types/organization-types";
-import { approvalBodySchema } from "~/features/organization-oversight/schemas/review-decision-schemas";
-import type { ReviewDecision } from "~/features/organization-oversight/types/review-types";
+import {
+  approvalBodySchema,
+  organizationProductsResponseSchema,
+} from "~/features/organization-oversight/schemas/review-decision-schemas";
+import type {
+  OrganizationProductsChange,
+  OrganizationProductsResult,
+  ReviewDecision,
+} from "~/features/organization-oversight/types/review-types";
 import { ORGANIZATION_API_CONFIGURATION } from "~/features/organization-oversight/config/organization-api";
 
 export async function listOrganizationApplications(
@@ -211,6 +218,26 @@ export async function assignOrganizationOwner(
         assignment
       );
       return ownerAssignmentSchema.parse(response.data);
+    }
+  );
+}
+
+/**
+ * Sets the products an approved organisation uses. New ones start; ones left
+ * out are paused with their data kept, and listing them again restarts them.
+ */
+export async function setOrganizationProducts(
+  organizationId: string,
+  change: OrganizationProductsChange
+): Promise<OrganizationProductsResult> {
+  return runPlatformRequest(
+    "We could not change this organisation's products. Try again.",
+    async () => {
+      const response = await getPlatformHttpClient().put<unknown>(
+        `${ORGANIZATION_API_CONFIGURATION.organizationsEndpoint}/${encodeURIComponent(organizationId)}/products`,
+        change
+      );
+      return organizationProductsResponseSchema.parse(response.data);
     }
   );
 }

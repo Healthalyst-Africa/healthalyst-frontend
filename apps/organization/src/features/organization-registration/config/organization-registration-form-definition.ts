@@ -7,6 +7,7 @@ import {
 } from "~/shared/organization/config/organization-reference";
 import { productOptions } from "~/features/organization-registration/config/organization-registration-options";
 import { REGISTRATION_LIMITS } from "~/features/organization-registration/config/registration-limits";
+import { LOCAL_GOVERNMENT_AREA_FIELD_TEXT } from "~/shared/organization/config/local-government-areas";
 
 export const organizationFormDefinition = {
   identifier: "organization-registration",
@@ -123,13 +124,14 @@ export const contactFormDefinition = {
           required: true,
           options: nigerianStateOptions,
         },
+        // Its choices follow the chosen state; the form fills them in.
         {
-          kind: "text",
+          kind: "select",
           name: "localGovernmentArea",
-          label: "Local government area",
-          placeholder: "Local government area",
-          autoComplete: "off",
-          maxLength: REGISTRATION_LIMITS.localGovernmentArea,
+          label: LOCAL_GOVERNMENT_AREA_FIELD_TEXT.label,
+          placeholder: LOCAL_GOVERNMENT_AREA_FIELD_TEXT.chooseStateFirst,
+          options: [],
+          disabled: true,
           columnSpan: 2,
           required: false,
         },

@@ -14,9 +14,13 @@ import {
   recordReviewDecision,
   reinstateOrganization,
   releaseOrganizationApplication,
+  setOrganizationProducts,
   suspendOrganization,
 } from "~/features/organization-oversight/services/organization-service";
-import type { ReviewDecision } from "~/features/organization-oversight/types/review-types";
+import type {
+  OrganizationProductsChange,
+  ReviewDecision,
+} from "~/features/organization-oversight/types/review-types";
 import type { OrganizationLifecycleAction } from "~/features/organization-oversight/config/organization-lifecycle";
 import { organizationQueryKeys } from "~/features/organization-oversight/services/organization-query-keys";
 
@@ -124,6 +128,26 @@ export function useOrganizationLifecycleMutation(staffIdentity: StaffIdentity) {
       reason: string;
       version: number;
     }) => LIFECYCLE_REQUESTS[action](organizationId, reason, version),
+    onSuccess: async (_result, variables) => {
+      await invalidateOrganizationReviewData(
+        queryClient,
+        staffIdentity,
+        variables.organizationId
+      );
+    },
+  });
+}
+
+export function useOrganizationProductsMutation(staffIdentity: StaffIdentity) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      organizationId,
+      change,
+    }: {
+      organizationId: string;
+      change: OrganizationProductsChange;
+    }) => setOrganizationProducts(organizationId, change),
     onSuccess: async (_result, variables) => {
       await invalidateOrganizationReviewData(
         queryClient,

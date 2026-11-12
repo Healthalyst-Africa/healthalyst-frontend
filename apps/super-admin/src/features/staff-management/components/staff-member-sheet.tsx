@@ -21,11 +21,13 @@ import {
   STAFF_MANAGEMENT_LIMITS,
 } from "~/features/staff-management/config/staff-management";
 import {
+  useRemovePlatformStaffMutation,
   useRemoveSuperAdminMutation,
   useReplacePlatformStaffRolesMutation,
 } from "~/features/staff-management/hooks/use-platform-staff";
 import {
   platformStaffRolesFormSchema,
+  removePlatformStaffFormSchema,
   removeSuperAdminFormSchema,
 } from "~/features/staff-management/schemas/staff-management-schemas";
 import type { PlatformStaffMember } from "~/features/staff-management/types/staff-management";
@@ -40,7 +42,14 @@ import {
 const DESTRUCTIVE_OUTLINE_CLASS_NAME =
   "border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive";
 
-type OpenDialog = "roles" | "remove-super-admin" | null;
+type OpenDialog = "roles" | "remove-staff" | "remove-super-admin" | null;
+
+function describeReleasedApplications(count: number): string {
+  if (count === 0) return "They had no applications claimed for review.";
+  return count === 1
+    ? "The application they had claimed went back to the review queue."
+    : `The ${count} applications they had claimed went back to the review queue.`;
+}
 
 export function StaffMemberSheet({
   staffMember,
@@ -53,6 +62,7 @@ export function StaffMemberSheet({
 }) {
   const rolesMutation = useReplacePlatformStaffRolesMutation(staffIdentity);
   const removalMutation = useRemoveSuperAdminMutation(staffIdentity);
+  const staffRemovalMutation = useRemovePlatformStaffMutation(staffIdentity);
   const stepUpProtection = useStepUpProtection();
   const [openDialog, setOpenDialog] = useState<OpenDialog>(null);
   const [reasonError, setReasonError] = useState("");
@@ -67,6 +77,7 @@ export function StaffMemberSheet({
   function openActionDialog(dialog: Exclude<OpenDialog, null>) {
     rolesMutation.reset();
     removalMutation.reset();
+    staffRemovalMutation.reset();
     setReasonError("");
     setOpenDialog(dialog);
   }
@@ -75,6 +86,7 @@ export function StaffMemberSheet({
     if (
       rolesMutation.isPending ||
       removalMutation.isPending ||
+      staffRemovalMutation.isPending ||
       stepUpProtection.isAwaitingCode
     )
       return;
@@ -99,12 +111,12 @@ export function StaffMemberSheet({
             ? {
                 title: `${name} no longer has staff access`,
                 description:
-                  "They were signed out of the staff app. Give them a role to restore their access.",
+                  "They were signed out of the staff app, and any applications they had claimed went back to the review queue. Give them a role to restore their access.",
               }
             : {
                 title: `${name}'s roles were saved`,
                 description:
-                  "Any role you removed signed them out of the staff app at once.",
+                  "Any role you removed signed them out of the staff app at once. If they can no longer review, applications they had claimed went back to the review queue.",
               }
         );
       },
@@ -142,6 +154,43 @@ export function StaffMemberSheet({
     });
   }
 
+  async function handleStaffRemovalSubmit(
+    formEvent: FormEvent<HTMLFormElement>
+  ) {
+    formEvent.preventDefault();
+    if (!staffMember) return;
+    const formElement = formEvent.currentTarget;
+    const result = removePlatformStaffFormSchema.safeParse({
+      reason: new FormData(formElement).get("reason"),
+    });
+    if (!result.success) {
+      setReasonError(result.error.issues[0]?.message ?? "Give a reason.");
+      formElement.querySelector<HTMLElement>('[name="reason"]')?.focus();
+      return;
+    }
+    setReasonError("");
+    const removal = result.data;
+    await stepUpProtection.runProtected({
+      description: `remove ${name} from HealthAlyst staff`,
+      run: async () => {
+        const removedMember = await staffRemovalMutation.mutateAsync({
+          userId: staffMember.id,
+          removal,
+        });
+        setOpenDialog(null);
+        setConfirmation({
+          title: `${name} no longer has staff access`,
+          description: `Every role was removed, they were signed out and they were emailed. ${describeReleasedApplications(removedMember.releasedApplications.length)}`,
+        });
+      },
+    });
+  }
+
+  const canRemoveFromStaff =
+    staffMember !== null &&
+    !isSuperAdmin(staffMember) &&
+    staffMember.roles.length > 0 &&
+    !isSelf;
   const canRemoveSuperAdmin =
     staffMember !== null && isSuperAdmin(staffMember) && !isSelf;
 
@@ -164,6 +213,16 @@ export function StaffMemberSheet({
         footer={
           staffMember && !isSelf ? (
             <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+              {canRemoveFromStaff && (
+                <ActionButton
+                  type="button"
+                  variant="outline"
+                  className={`${DESTRUCTIVE_OUTLINE_CLASS_NAME} sm:mr-auto`}
+                  onClick={() => openActionDialog("remove-staff")}
+                >
+                  Remove from staff
+                </ActionButton>
+              )}
               {canRemoveSuperAdmin && (
                 <ActionButton
                   type="button"
@@ -232,7 +291,7 @@ export function StaffMemberSheet({
           description={
             isSuperAdmin(staffMember)
               ? "They stay a super admin whatever you choose here. Removing a role signs them out of the staff app."
-              : "Removing a role signs them out of the staff app. Clear every role to end their staff access."
+              : "Removing a role signs them out of the staff app. If they can no longer review, applications they had claimed go back to the review queue."
           }
           submitLabel="Save roles"
           submittingLabel="Saving roles"
@@ -250,6 +309,35 @@ export function StaffMemberSheet({
           />
         </FormDialog>
       )}
+
+      <FormDialog
+        open={openDialog === "remove-staff"}
+        onOpenChange={(isOpen) => !isOpen && closeActionDialog()}
+        title={`Remove ${name} from staff`}
+        description="Every staff role goes and they are signed out at once. Applications they had claimed go back to the review queue. They are emailed, and you can add them again later."
+        submitLabel="Remove from staff"
+        submittingLabel="Removing from staff"
+        tone="destructive"
+        isSubmitting={staffRemovalMutation.isPending}
+        error={
+          staffRemovalMutation.error && !stepUpProtection.isAwaitingCode
+            ? staffRemovalMutation.error.message
+            : ""
+        }
+        onSubmit={(formEvent) => void handleStaffRemovalSubmit(formEvent)}
+      >
+        <TextAreaField
+          id="remove-staff-reason"
+          label="Reason"
+          description="Recorded in the audit log and included in the email."
+          name="reason"
+          required
+          rows={4}
+          minLength={STAFF_MANAGEMENT_LIMITS.removalReasonMinimumLength}
+          maxLength={STAFF_MANAGEMENT_LIMITS.removalReasonMaximumLength}
+          error={reasonError}
+        />
+      </FormDialog>
 
       <FormDialog
         open={openDialog === "remove-super-admin"}
