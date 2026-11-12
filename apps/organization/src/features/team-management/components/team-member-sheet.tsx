@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import {
+  ChangeEmailIcon,
   EditIcon,
   LicenceIcon,
   PauseIcon,
@@ -19,6 +20,7 @@ import { useStepUpProtection } from "~/features/account-security/hooks/use-step-
 import { SIGN_IN_LIMITS } from "~/features/authentication/config/authentication-limits";
 import { CODE_LENGTH } from "~/features/authentication/config/authenticator-enrolment";
 import type { PlatformBranch } from "~/features/organization-management/types/organization-management";
+import { ChangeMemberEmailDialog } from "~/features/team-management/components/change-member-email-dialog";
 import { EditMemberAccessDialog } from "~/features/team-management/components/edit-member-access-dialog";
 import {
   LicenceVerificationDialog,
@@ -68,6 +70,7 @@ type OpenDialog =
   | "suspend"
   | "reactivate"
   | "reset-authenticator"
+  | "change-email"
   | "remove"
   | null;
 
@@ -136,6 +139,8 @@ export function TeamMemberSheet({
   const isOwn = isOwnMembership(member, currentUserId);
   const isRemoved = member.status === "REVOKED";
   const canChange = !isOwn && !isRemoved;
+  const canChangeEmail =
+    canChange && abilities.canUpdate && member.status === "ACTIVE";
   const statusPresentation = STAFF_STATUS_PRESENTATION[member.status];
   const licencePresentation = LICENCE_STATUS_PRESENTATION[member.licenceStatus];
   const departmentNames = (branches ?? [])
@@ -340,7 +345,17 @@ export function TeamMemberSheet({
               ]}
             />
             {canChange && abilities.canUpdate && (
-              <div>
+              <div className="flex flex-wrap gap-3">
+                {canChangeEmail && (
+                  <ActionButton
+                    type="button"
+                    variant="outline"
+                    leadingIcon={<ChangeEmailIcon className="size-4" />}
+                    onClick={() => openFor("change-email")}
+                  >
+                    Change sign-in email
+                  </ActionButton>
+                )}
                 <ActionButton
                   type="button"
                   variant="outline"
@@ -457,6 +472,20 @@ export function TeamMemberSheet({
             onOpenChange={(isOpen) => setOpenDialog(isOpen ? "licence" : null)}
             scope={scope}
           />
+          {canChangeEmail && (
+            <ChangeMemberEmailDialog
+              member={member}
+              open={openDialog === "change-email"}
+              onOpenChange={(isOpen) =>
+                setOpenDialog(isOpen ? "change-email" : null)
+              }
+              onRequested={(result) =>
+                setNotice(
+                  `We emailed a confirmation link to ${result.pendingEmail}. ${fullName}'s sign-in email changes once they open it and choose a new password, before ${TEAM_DATE_TIME_FORMATTER.format(new Date(result.expiresAt))}. Their old address was told. If they also lost their phone, reset their authenticator too.`
+                )
+              }
+            />
+          )}
           <LicenceVerificationDialog
             member={member}
             open={openDialog === "licence-check"}

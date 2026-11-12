@@ -49,7 +49,25 @@ export const TEAM_FIELD_LIMITS = {
   /** Approval limits are sent in kobo; people enter naira. */
   approvalAmountMaximumKobo: 1_000_000_000,
   discountPercentMaximum: 100,
+  emailChangeReasonMinimumLength: 5,
+  emailChangeReasonMaximumLength: 500,
 } as const;
+
+/**
+ * Why the API can refuse to change a member's sign-in email (`409`), worded
+ * for the person asking.
+ */
+export const EMAIL_CHANGE_REFUSALS: Readonly<Record<string, string>> = {
+  EMAIL_IN_USE:
+    "Another HealthAlyst account already uses that email address. Choose a different one.",
+  EMAIL_UNCHANGED: "That is already their sign-in email address.",
+  MEMBER_NOT_ACTIVE:
+    "Only active members can have their email changed. For an invitation, cancel it and invite the new address.",
+  EMAIL_CHANGE_NOT_ALLOWED:
+    "They also work in another organisation or for HealthAlyst, so HealthAlyst support has to change their email. Contact HealthAlyst support.",
+  EMAIL_CHANGE_LIMIT:
+    "This email has been changed 3 times today, which is the limit. Try again tomorrow.",
+};
 
 export type StaffMemberStatus = "INVITED" | "ACTIVE" | "SUSPENDED" | "REVOKED";
 export type InvitationStatus = "PENDING" | "ACCEPTED" | "REVOKED" | "EXPIRED";

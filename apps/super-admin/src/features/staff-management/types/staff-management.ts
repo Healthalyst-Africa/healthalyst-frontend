@@ -3,7 +3,9 @@ import type {
   addPlatformStaffFormSchema,
   addedPlatformStaffMemberSchema,
   platformStaffMemberSchema,
+  removePlatformStaffFormSchema,
   removeSuperAdminFormSchema,
+  removedPlatformStaffMemberSchema,
 } from "~/features/staff-management/schemas/staff-management-schemas";
 
 export type PlatformStaffMember = schemaLibrary.infer<
@@ -20,4 +22,12 @@ export type NewPlatformStaffMember = schemaLibrary.infer<
 
 export type SuperAdminRemoval = schemaLibrary.infer<
   typeof removeSuperAdminFormSchema
+>;
+
+export type PlatformStaffRemoval = schemaLibrary.infer<
+  typeof removePlatformStaffFormSchema
+>;
+
+export type RemovedPlatformStaffMember = schemaLibrary.infer<
+  typeof removedPlatformStaffMemberSchema
 >;

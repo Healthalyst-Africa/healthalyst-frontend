@@ -17,6 +17,9 @@ import {
 } from "~/features/organization-registration/hooks/use-platform-reference-data";
 import { organizationTypeOptions } from "~/shared/organization/config/organization-reference";
 import type { OrganizationApplication } from "~/features/organization-application/types/organization-application";
+import { LocalGovernmentAreaLoadNotice } from "~/shared/organization/components/local-government-area-load-notice";
+import { useLocalGovernmentAreaChoice } from "~/shared/organization/hooks/use-local-government-area-choice";
+import { createLocalGovernmentAreaField } from "~/shared/organization/utilities/local-government-area-field";
 
 export function OrganizationOnboardingForm(properties: {
   application: OrganizationApplication;
@@ -29,6 +32,13 @@ export function OrganizationOnboardingForm(properties: {
   const organizationTypesQuery = usePlatformOrganizationTypesQuery();
   const statesQuery = usePlatformNigerianStatesQuery();
   const form = useOrganizationOnboardingForm(properties);
+  const localGovernmentAreaChoice = useLocalGovernmentAreaChoice({
+    stateCode: form.values.stateCode,
+    savedArea: {
+      stateCode: form.savedValues.stateCode,
+      localGovernmentArea: form.savedValues.lga,
+    },
+  });
   const referenceError = organizationTypesQuery.error ?? statesQuery.error;
   const isLoadingReferences =
     organizationTypesQuery.isPending || statesQuery.isPending;
@@ -41,7 +51,12 @@ export function OrganizationOnboardingForm(properties: {
     statesQuery.data?.map((state) => ({
       value: state.code,
       label: state.name,
-    })) ?? []
+    })) ?? [],
+    createLocalGovernmentAreaField({
+      name: "lga",
+      choice: localGovernmentAreaChoice,
+      columnSpan: 2,
+    })
   );
 
   const formIdentifier = `organization-onboarding-form-${application.id}`;
@@ -146,6 +161,9 @@ export function OrganizationOnboardingForm(properties: {
           fieldGroupClassName="sm:gap-x-6"
           sectionHeadingSize="large"
         />
+        {application.canEdit && (
+          <LocalGovernmentAreaLoadNotice choice={localGovernmentAreaChoice} />
+        )}
         {form.updateMutation.error && (
           <NoticeBanner
             tone="error"

@@ -4,6 +4,7 @@ import { useOrganizationRegistrationWorkflow } from "~/features/organization-reg
 import { ChevronLeftIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { DynamicFormFields } from "@healthalyst/ui/components/dynamic-form-fields";
+import { replaceFormField } from "@healthalyst/ui/forms/form-definition";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { cn } from "@healthalyst/ui/lib/utilities";
@@ -13,6 +14,9 @@ import RegistrationConfirmation from "~/features/organization-registration/compo
 import TurnstileChallenge from "~/features/organization-registration/components/turnstile-challenge";
 import { registrationSteps } from "~/features/organization-registration/config/organization-registration-form-definition";
 import type { OrganizationProduct } from "~/features/organization-registration/types/organization-product";
+import { LocalGovernmentAreaLoadNotice } from "~/shared/organization/components/local-government-area-load-notice";
+import { useLocalGovernmentAreaChoice } from "~/shared/organization/hooks/use-local-government-area-choice";
+import { createLocalGovernmentAreaField } from "~/shared/organization/utilities/local-government-area-field";
 
 /**
  * Organisation registration against the Platform API
@@ -38,6 +42,8 @@ export default function OrganizationRegistrationForm({
     fieldErrors,
     fieldStatuses,
     handleFieldValueChange,
+    stateCode,
+    controlledValues,
     handleFieldBlur,
     currentStepIndex,
     captchaToken,
@@ -54,7 +60,13 @@ export default function OrganizationRegistrationForm({
     showStep,
     handleFieldChange,
     handleRegistrationSubmit,
-  } = useOrganizationRegistrationWorkflow({ partnerInvitationToken });
+  } = useOrganizationRegistrationWorkflow({
+    partnerInvitationToken,
+    initialStateCode: initialValues.stateCode,
+  });
+  const localGovernmentAreaChoice = useLocalGovernmentAreaChoice({
+    stateCode,
+  });
 
   if (registrationMutation.isSuccess) {
     return (
@@ -136,9 +148,18 @@ export default function OrganizationRegistrationForm({
                     key={definition.sections
                       .map((section) => section.identifier)
                       .join(" ")}
-                    definition={definition}
+                    definition={replaceFormField(
+                      definition,
+                      "localGovernmentArea",
+                      createLocalGovernmentAreaField({
+                        name: "localGovernmentArea",
+                        choice: localGovernmentAreaChoice,
+                        columnSpan: 2,
+                      })
+                    )}
                     defaultSelections={{ products: initialProducts }}
                     defaultValues={initialValues}
+                    values={controlledValues}
                     errors={fieldErrors}
                     statuses={fieldStatuses}
                     disabled={isSubmitting}
@@ -147,6 +168,11 @@ export default function OrganizationRegistrationForm({
                     onFieldBlur={handleFieldBlur}
                   />
                 ))}
+                {step.fieldNames.includes("localGovernmentArea") && (
+                  <LocalGovernmentAreaLoadNotice
+                    choice={localGovernmentAreaChoice}
+                  />
+                )}
               </section>
             );
           })}

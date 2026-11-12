@@ -123,3 +123,10 @@ export const roleListSchema = z.object({ data: z.array(roleSchema) });
 export const permissionListSchema = z.object({
   data: z.array(z.object({ code: z.string(), description: z.string() })),
 });
+
+/** `POST /v1/staff/{membershipId}/email-change` (`202`) */
+export const emailChangeRequestResponseSchema = z.object({
+  status: z.literal("PENDING_CONFIRMATION"),
+  pendingEmail: z.string(),
+  expiresAt: z.string(),
+});

@@ -3,6 +3,7 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   changePassword,
+  confirmEmailChange,
   getPlatformSessions,
   regenerateRecoveryCodes,
   requestPasswordReset,
@@ -77,6 +78,10 @@ export function usePhoneVerificationMutation() {
 
 export function usePasswordResetRequestMutation() {
   return useMutation({ mutationFn: requestPasswordReset });
+}
+
+export function useEmailChangeConfirmationMutation() {
+  return useMutation({ mutationFn: confirmEmailChange });
 }
 
 export function usePasswordResetMutation() {

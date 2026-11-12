@@ -1,5 +1,7 @@
 import type { z as schemaLibrary } from "zod";
 import type {
+  organizationProductsFormSchema,
+  organizationProductsResponseSchema,
   reviewChecklistSchema,
   productCodeSchema,
 } from "~/features/organization-oversight/schemas/review-decision-schemas";
@@ -32,3 +34,11 @@ export type ReviewDecision =
       reasonCode: ReviewRejectionCode;
       message: string;
     };
+
+export type OrganizationProductsChange = schemaLibrary.infer<
+  typeof organizationProductsFormSchema
+>;
+
+export type OrganizationProductsResult = schemaLibrary.infer<
+  typeof organizationProductsResponseSchema
+>;

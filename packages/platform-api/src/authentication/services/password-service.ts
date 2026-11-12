@@ -8,6 +8,7 @@ import { acceptedResponseSchema } from "../schemas/verification";
 import { UNEXPECTED_RESPONSE_MESSAGE } from "../errors/authentication-errors";
 import { toPlatformApiError } from "../../browser/errors/index";
 import type {
+  EmailChangeConfirmationRequest,
   PasswordResetRequest,
   PasswordChangeRequest,
 } from "../types/authentication";
@@ -45,6 +46,32 @@ export async function resetPassword(
     throw toPlatformApiError(error, "We could not reset your password.", {
       password: "password",
     });
+  }
+}
+
+/**
+ * `POST /v1/auth/email-change/confirm`: the new address becomes the sign-in
+ * email and the password is replaced. Every session ends, so the person signs
+ * in again with the new address; their authenticator app stays.
+ */
+export async function confirmEmailChange(
+  request: EmailChangeConfirmationRequest
+): Promise<void> {
+  try {
+    await getPlatformHttpClient().post(
+      AUTHENTICATION_ENDPOINTS.confirmEmailChange,
+      request,
+      PUBLIC_PLATFORM_REQUEST
+    );
+    clearPlatformSession();
+  } catch (error) {
+    throw toPlatformApiError(
+      error,
+      "We could not confirm your new email address.",
+      {
+        password: "password",
+      }
+    );
   }
 }
 

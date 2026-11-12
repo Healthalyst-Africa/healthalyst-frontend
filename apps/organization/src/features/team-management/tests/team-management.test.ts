@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   bulkInvitationFormSchema,
   memberAccessFormSchema,
+  memberEmailChangeFormSchema,
   memberLicenceFormSchema,
   staffInvitationFormSchema,
 } from "~/features/team-management/schemas/team-form-schemas";
@@ -342,5 +343,31 @@ describe("presentation", () => {
     expect(isDateText("2026-11-30")).toBe(true);
     expect(formatDateText("2026-11-30")).toBe("30 Nov 2026");
     expect(todayAsDateText(new Date(2026, 10, 5))).toBe("2026-11-05");
+  });
+});
+
+describe("changing a member's sign-in email", () => {
+  it("needs a valid new address and a reason", () => {
+    const result = memberEmailChangeFormSchema.safeParse({
+      newEmail: "not an email",
+      reason: "lost",
+    });
+    expect(result.success).toBe(false);
+    expect(result.error?.issues.map((issue) => issue.path[0])).toEqual([
+      "newEmail",
+      "reason",
+    ]);
+  });
+
+  it("trims what was typed", () => {
+    expect(
+      memberEmailChangeFormSchema.parse({
+        newEmail: "  nurse@clinic.example ",
+        reason: "  Lost access to the old inbox  ",
+      })
+    ).toEqual({
+      newEmail: "nurse@clinic.example",
+      reason: "Lost access to the old inbox",
+    });
   });
 });

@@ -102,10 +102,11 @@ export const registrationSchema = z
     stateCode: z.enum(valuesOf(nigerianStateOptions), {
       error: "Select the state.",
     }),
+    // A dropdown that stays off until a state is chosen, so it may be absent.
     localGovernmentArea: optionalText(
       "Local government area",
       REGISTRATION_LIMITS.localGovernmentArea
-    ),
+    ).optional(),
     products: z.preprocess(
       checkedValues,
       z

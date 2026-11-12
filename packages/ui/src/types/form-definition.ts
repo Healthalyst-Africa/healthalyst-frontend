@@ -15,6 +15,8 @@ type FormFieldBase = {
   columnSpan?: 1 | 2;
   hideLabel?: boolean;
   borderless?: boolean;
+  /** Turns this one field off, for example while its choices load. */
+  disabled?: boolean;
 };
 
 export type FormFieldDefinition =

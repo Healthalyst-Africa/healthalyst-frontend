@@ -64,6 +64,12 @@ export type PlatformContextRequest =
 
 export type PasswordResetRequest = { token: string; password: string };
 
+/** From the email-change link sent to the new address, with a new password. */
+export type EmailChangeConfirmationRequest = {
+  token: string;
+  password: string;
+};
+
 export type PasswordChangeRequest = {
   currentPassword: string;
   newPassword: string;

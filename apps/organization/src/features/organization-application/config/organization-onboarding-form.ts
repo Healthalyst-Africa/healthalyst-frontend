@@ -1,12 +1,15 @@
 import type {
   FormDefinition,
+  FormFieldDefinition,
   FormOption,
 } from "@healthalyst/ui/types/form-definition";
 import { ORGANIZATION_FIELD_LIMITS } from "~/shared/organization/config/organization-validation";
 
 export function createOrganizationOnboardingFormDefinition(
   organizationTypes: readonly FormOption[],
-  states: readonly FormOption[]
+  states: readonly FormOption[],
+  /** The `lga` dropdown, whose choices follow the chosen state. */
+  localGovernmentAreaField: FormFieldDefinition
 ): FormDefinition {
   return {
     identifier: "organization-onboarding",
@@ -87,13 +90,7 @@ export function createOrganizationOnboardingFormDefinition(
             maxLength: ORGANIZATION_FIELD_LIMITS.city,
             required: true,
           },
-          {
-            kind: "text",
-            name: "lga",
-            label: "Local government area",
-            maxLength: ORGANIZATION_FIELD_LIMITS.localGovernmentArea,
-            columnSpan: 2,
-          },
+          localGovernmentAreaField,
         ],
       },
       {

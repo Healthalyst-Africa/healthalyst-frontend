@@ -5,6 +5,7 @@ import {
   TEAM_FIELD_LIMITS,
 } from "~/features/team-management/config/team-management";
 import {
+  emailChangeRequestResponseSchema,
   staffListSchema,
   staffMemberSchema,
 } from "~/features/team-management/schemas/team-response-schemas";
@@ -14,6 +15,8 @@ import {
 } from "~/features/team-management/services/parse-team-response";
 import type {
   LicenceVerificationRequest,
+  MemberEmailChangeRequest,
+  MemberEmailChangeResult,
   StaffListFilters,
   StaffMember,
   StaffMemberChanges,
@@ -151,6 +154,31 @@ export async function resetStaffAuthenticator(
     throw toPlatformApiError(
       error,
       "We could not reset this team member's authenticator."
+    );
+  }
+}
+
+/**
+ * Starts changing the sign-in email of a member who lost access to theirs.
+ * Nothing changes until they confirm from the new address and choose a new
+ * password; the old address is told. Requires `staff:update` and a recent
+ * authenticator check.
+ */
+export async function requestStaffEmailChange(
+  membershipId: string,
+  request: MemberEmailChangeRequest
+): Promise<MemberEmailChangeResult> {
+  try {
+    const response = await getPlatformHttpClient().post<unknown>(
+      staffMemberEndpoint(membershipId, "email-change"),
+      request
+    );
+    return parseTeamResponse(emailChangeRequestResponseSchema, response.data);
+  } catch (error) {
+    throw toPlatformApiError(
+      error,
+      "We could not start the email change. Try again.",
+      { newEmail: "newEmail", reason: "reason" }
     );
   }
 }

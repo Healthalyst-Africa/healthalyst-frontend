@@ -62,8 +62,19 @@ export function useOrganizationOnboardingForm({
   }, [hasChanges, application.canEdit]);
 
   function changeValue(fieldName: string, value: string) {
-    setValues((currentValues) => ({ ...currentValues, [fieldName]: value }));
-    setFieldErrors((currentErrors) => ({ ...currentErrors, [fieldName]: "" }));
+    // A new state needs one of its own local government areas, so the old
+    // choice is cleared when the state changes.
+    const clearsArea = fieldName === "stateCode" && value !== values.stateCode;
+    setValues((currentValues) => ({
+      ...currentValues,
+      [fieldName]: value,
+      ...(clearsArea ? { lga: "" } : {}),
+    }));
+    setFieldErrors((currentErrors) => ({
+      ...currentErrors,
+      [fieldName]: "",
+      ...(clearsArea ? { lga: "" } : {}),
+    }));
     setSaveMessage("");
   }
 
@@ -205,6 +216,7 @@ export function useOrganizationOnboardingForm({
 
   return {
     values,
+    savedValues,
     fieldErrors,
     formReference,
     hasChanges,
