@@ -1,7 +1,7 @@
 export type TurnstileRenderOptions = {
   sitekey: string;
   callback: (responseToken: string) => void;
-  "error-callback": () => boolean;
+  "error-callback": (errorCode: string) => boolean;
   "expired-callback": () => void;
   "timeout-callback": () => void;
   retry: "auto" | "never";
@@ -30,4 +30,17 @@ export type TurnstileChallengeProperties = {
 };
 
 export type VerificationStatus =
-  "loading" | "ready" | "complete" | "expired" | "error";
+  "loading" | "retrying" | "ready" | "complete" | "expired" | "error";
+
+export type TurnstileFailureKind =
+  | "site-not-allowed"
+  | "browser-not-supported"
+  | "device-clock"
+  | "blocked"
+  | "challenge-failed";
+
+export type TurnstileFailure = {
+  kind: TurnstileFailureKind;
+  /** Cloudflare's error code; absent when the Turnstile script did not load. */
+  errorCode?: string;
+};

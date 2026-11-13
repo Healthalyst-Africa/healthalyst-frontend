@@ -1,9 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
-import HealthAlystBrand from "~/components/ui/healthalyst-brand";
-import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
+import OrganizationRegistrationLayout from "~/components/ui/organization-registration-layout";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { PartnerInvitationLanding } from "~/features/partner-network/components/partner-invitation-landing";
 
@@ -27,13 +25,11 @@ export default async function PartnerInvitationRoute({
   if (!invitationToken) redirect(ORGANIZATION_ROUTES.registration);
 
   return (
-    <SplitPanelLayout
-      className="bg-card"
-      title="You are invited to work together on HealthAlyst"
-      showcaseClassName="bg-primary text-primary-foreground"
+    <OrganizationRegistrationLayout
+      pageTitle="You are invited to work together on HealthAlyst"
       showcaseLabel="About partner invitations"
-      compactHeader={<HealthAlystBrand />}
-      footer={
+      showcaseLede="Register your facility and create the first administrator account. Once HealthAlyst approves it, the partnership request is waiting for you to accept."
+      footerContent={
         <div className="flex flex-col items-center gap-3">
           <p className="text-center text-xs leading-5 text-muted-foreground">
             Registration does not ask for patient records or medical
@@ -50,11 +46,8 @@ export default async function PartnerInvitationRoute({
           </p>
         </div>
       }
-      showcase={
-        <OnboardingHeroPanel lede="Register your facility and create the first administrator account. Once HealthAlyst approves it, the partnership request is waiting for you to accept." />
-      }
     >
       <PartnerInvitationLanding invitationToken={invitationToken} />
-    </SplitPanelLayout>
+    </OrganizationRegistrationLayout>
   );
 }

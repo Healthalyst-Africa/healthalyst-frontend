@@ -1,11 +1,9 @@
 import type { Metadata } from "next";
+import OrganizationRegistrationLayout from "~/components/ui/organization-registration-layout";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { OrganizationRegistrationForm } from "~/features/organization-registration";
-import OnboardingHeroPanel from "~/components/ui/onboarding-hero-panel";
 import { readProductsFromQuery } from "~/shared/organization/utilities/read-products-from-query";
-import HealthAlystBrand from "~/components/ui/healthalyst-brand";
 import Link from "next/link";
-import { SplitPanelLayout } from "@healthalyst/ui/components/split-panel-layout";
 
 // The layout template only reaches nested routes, so this title is written in full.
 export const metadata: Metadata = {
@@ -24,13 +22,11 @@ export default async function RegistrationPage({
   const { product } = await searchParams;
 
   return (
-    <SplitPanelLayout
-      className="bg-card"
-      title="Register your organisation on HealthAlyst"
-      showcaseClassName="bg-primary text-primary-foreground"
+    <OrganizationRegistrationLayout
+      pageTitle="Register your organisation on HealthAlyst"
       showcaseLabel="About organisation registration"
-      compactHeader={<HealthAlystBrand />}
-      footer={
+      showcaseLede="Register your facility and create the first administrator account. HealthAlyst reviews the application before access opens."
+      footerContent={
         <div className="flex flex-col items-center gap-3">
           <p className="text-center text-xs leading-5 text-muted-foreground">
             Registration does not ask for patient records or medical
@@ -47,13 +43,10 @@ export default async function RegistrationPage({
           </p>
         </div>
       }
-      showcase={
-        <OnboardingHeroPanel lede="Register your facility and create the first administrator account. HealthAlyst reviews the application before access opens." />
-      }
     >
       <OrganizationRegistrationForm
         initialProducts={readProductsFromQuery(product)}
       />
-    </SplitPanelLayout>
+    </OrganizationRegistrationLayout>
   );
 }

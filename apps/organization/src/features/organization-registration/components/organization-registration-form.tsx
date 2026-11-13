@@ -10,6 +10,7 @@ import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import { getOrganizationRegistrationSiteKey } from "@healthalyst/config/environment";
+import { useCenteredRegistrationView } from "~/components/ui/organization-registration-layout";
 import RegistrationConfirmation from "~/features/organization-registration/components/registration-confirmation";
 import TurnstileChallenge from "~/features/organization-registration/components/turnstile-challenge";
 import { registrationSteps } from "~/features/organization-registration/config/organization-registration-form-definition";
@@ -67,6 +68,9 @@ export default function OrganizationRegistrationForm({
   const localGovernmentAreaChoice = useLocalGovernmentAreaChoice({
     stateCode,
   });
+
+  // "Check your email" is not the form, so it shows without the showcase.
+  useCenteredRegistrationView(registrationMutation.isSuccess);
 
   if (registrationMutation.isSuccess) {
     return (

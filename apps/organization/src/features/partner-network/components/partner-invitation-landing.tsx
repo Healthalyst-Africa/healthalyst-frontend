@@ -11,6 +11,7 @@ import {
 import { SummaryDetailList } from "@healthalyst/ui/components/review-summary";
 import { BRAND_MARK_SOURCE } from "~/config/brand";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
+import { useCenteredRegistrationView } from "~/components/ui/organization-registration-layout";
 import { OrganizationRegistrationForm } from "~/features/organization-registration";
 import {
   PARTNER_DATE_FORMATTER,
@@ -149,6 +150,10 @@ export function PartnerInvitationLanding({
   const isGone =
     previewQuery.error instanceof PlatformApiError &&
     previewQuery.error.status === PARTNER_INVITATION_GONE_STATUS;
+  // The showcase stays only beside the registration form.
+  useCenteredRegistrationView(
+    previewQuery.isPending || (!isGone && (previewQuery.isError || !preview))
+  );
 
   if (previewQuery.isPending) {
     return (

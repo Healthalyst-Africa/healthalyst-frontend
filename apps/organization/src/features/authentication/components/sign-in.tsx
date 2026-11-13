@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useSignInWorkflow } from "~/features/authentication/hooks/use-sign-in-workflow";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { SignInForm } from "@healthalyst/ui/components/sign-in-form";
+import OrganizationCenteredLayout from "~/components/ui/organization-centered-layout";
 import OrganizationSignInLayout from "~/components/ui/organization-sign-in-layout";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 import AuthenticatorEnrolment from "~/features/authentication/components/authenticator-enrolment";
@@ -67,7 +68,7 @@ export default function SignIn({
 
   if (stage.kind === "enrolment-required") {
     return (
-      <OrganizationSignInLayout>
+      <OrganizationCenteredLayout pageTitle="Set up your authenticator app">
         <AuthenticatorEnrolment
           enrolmentToken={stage.enrolmentToken}
           onEnrolled={(confirmation) =>
@@ -79,19 +80,21 @@ export default function SignIn({
                 )
           }
         />
-      </OrganizationSignInLayout>
+      </OrganizationCenteredLayout>
     );
   }
 
   if (platformSession && (isRedirecting || redirectError)) {
     return (
-      <OrganizationSignInLayout>
+      <OrganizationCenteredLayout
+        pageTitle={isRedirecting ? "Opening HealthAlyst" : "Sign-in complete"}
+      >
         <AuthenticatedApplicationRedirectState
           isRedirecting={isRedirecting}
           redirectError={redirectError}
           redirectMessage={redirectMessage}
         />
-      </OrganizationSignInLayout>
+      </OrganizationCenteredLayout>
     );
   }
 
@@ -142,55 +145,65 @@ export default function SignIn({
     </div>
   );
 
-  return (
+  const signInForm = (
+    <SignInForm
+      identifier="sign-in"
+      stage={
+        stage.kind === "code"
+          ? {
+              kind: "code",
+              method: stage.method,
+              canSwitchMethod: stage.methods.length > 1,
+            }
+          : { kind: "password" }
+      }
+      heading={heading}
+      introduction={introduction}
+      headingReference={headingReference}
+      notice={stageNotice}
+      fieldErrors={fieldErrors}
+      error={describeSignInError(
+        stage.kind === "code" ? codeMutation.error : passwordMutation.error
+      )}
+      isSubmitting={
+        stage.kind === "code"
+          ? codeMutation.isPending
+          : passwordMutation.isPending
+      }
+      limits={SIGN_IN_LIMITS}
+      forgotPasswordLink={
+        <Link href={ORGANIZATION_ROUTES.forgotPassword}>Forgot password?</Link>
+      }
+      onPasswordSubmit={handlePasswordSubmit}
+      onCodeSubmit={handleCodeSubmit}
+      onFieldChange={(fieldName) =>
+        fieldName === "code"
+          ? handleCodeChange()
+          : setFieldErrors((currentErrors) =>
+              clearFieldError(currentErrors, fieldName)
+            )
+      }
+      onSwitchMethod={() => {
+        if (stage.kind !== "code") return;
+        showStage({
+          ...stage,
+          method: stage.method === "totp" ? "recovery_code" : "totp",
+        });
+      }}
+    />
+  );
+
+  // Only the first sign-in screen has the showcase; the code step is centred.
+  return stage.kind === "code" ? (
+    <OrganizationCenteredLayout
+      pageTitle={heading}
+      footerContent={footerContent}
+    >
+      {signInForm}
+    </OrganizationCenteredLayout>
+  ) : (
     <OrganizationSignInLayout footerContent={footerContent}>
-      <SignInForm
-        identifier="sign-in"
-        stage={
-          stage.kind === "code"
-            ? {
-                kind: "code",
-                method: stage.method,
-                canSwitchMethod: stage.methods.length > 1,
-              }
-            : { kind: "password" }
-        }
-        heading={heading}
-        introduction={introduction}
-        headingReference={headingReference}
-        notice={stageNotice}
-        fieldErrors={fieldErrors}
-        error={describeSignInError(
-          stage.kind === "code" ? codeMutation.error : passwordMutation.error
-        )}
-        isSubmitting={
-          stage.kind === "code"
-            ? codeMutation.isPending
-            : passwordMutation.isPending
-        }
-        limits={SIGN_IN_LIMITS}
-        forgotPasswordLink={
-          <Link href={ORGANIZATION_ROUTES.forgotPassword}>
-            Forgot password?
-          </Link>
-        }
-        onPasswordSubmit={handlePasswordSubmit}
-        onCodeSubmit={handleCodeSubmit}
-        onFieldChange={(fieldName) =>
-          fieldName === "code"
-            ? handleCodeChange()
-            : setFieldErrors((currentErrors) =>
-                clearFieldError(currentErrors, fieldName)
-              )
-        }
-        onSwitchMethod={() => {
-          if (stage.kind !== "code") return;
-          showStage({
-            ...stage,
-            method: stage.method === "totp" ? "recovery_code" : "totp",
-          });
-        }}
-      />
+      {signInForm}
     </OrganizationSignInLayout>
   );
 }

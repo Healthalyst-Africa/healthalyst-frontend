@@ -6,10 +6,13 @@ and `pnpm start`, and is deployed at `https://healthschedule.healthalystafrica.c
 It is the installable, offline-capable product app; see
 [offline architecture](../../docs/offline-architecture.md).
 
-HealthSchedule signs people in itself, with the shared sign-in form
+Where people sign in depends on the device. In a desktop browser, a signed-out
+visitor is sent to the account hub's sign-in (`account.healthalystafrica.com`),
+which returns them here. On a phone or tablet, and in the installed app,
+HealthSchedule signs people in itself with the shared sign-in form
 (`@healthalyst/ui/components/sign-in-form`), so an installed app never has to
-leave to sign in. The session it gets is the same HealthAlyst session the hub
-uses. Registration, first authenticator set-up, password recovery, account
+leave to sign in. Either way the session is the same HealthAlyst session the
+hub uses. Registration, first authenticator set-up, password recovery, account
 security and organisation management stay in the shared organisation app
 (`apps/organization`), so an organisation registers once and can use several
 products. HealthSchedule links there through
@@ -28,7 +31,8 @@ app (refresh, then `/v1/me`), and chooses the first screen:
 
 | Session                                             | Screen                                              |
 | --------------------------------------------------- | --------------------------------------------------- |
-| Nobody signed in                                    | HealthSchedule's sign-in, at the requested address  |
+| Nobody signed in, desktop browser                   | The account hub's sign-in                           |
+| Nobody signed in, phone, tablet or installed app    | HealthSchedule's sign-in, at the requested address  |
 | Application in draft, changes requested or review   | Application status, linking to the organisation app |
 | Approved, but HealthSchedule not among its products | "Not enabled" notice                                |
 | Suspended, rejected or deactivated                  | "Not available" notice                              |
