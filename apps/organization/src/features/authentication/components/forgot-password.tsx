@@ -8,7 +8,7 @@ import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { TextField } from "@healthalyst/ui/components/text-field";
-import OrganizationSignInLayout from "~/components/ui/organization-sign-in-layout";
+import OrganizationCenteredLayout from "~/components/ui/organization-centered-layout";
 import { usePasswordResetRequestMutation } from "~/features/authentication/hooks/use-platform-authentication";
 import { emailVerificationRequestSchema } from "~/features/authentication/schemas/email-verification-schema";
 import {
@@ -52,10 +52,8 @@ export default function ForgotPassword() {
   }
 
   return (
-    <OrganizationSignInLayout
+    <OrganizationCenteredLayout
       pageTitle="Reset your password"
-      showcaseLabel="About password recovery"
-      showcaseLede="Recover access to your organisation account."
       footerContent={
         <p className="text-sm text-muted-foreground">
           Remember your password?{" "}
@@ -128,6 +126,6 @@ export default function ForgotPassword() {
           </form>
         </ContentPanel>
       </div>
-    </OrganizationSignInLayout>
+    </OrganizationCenteredLayout>
   );
 }

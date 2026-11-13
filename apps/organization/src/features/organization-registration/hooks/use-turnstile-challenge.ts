@@ -3,9 +3,18 @@
 import { useEffect, useRef, useState } from "react";
 import type {
   TurnstileChallengeProperties,
+  TurnstileFailure,
   VerificationStatus,
 } from "~/features/organization-registration/types/turnstile";
-import { TURNSTILE_RENDER_CONFIGURATION } from "~/features/organization-registration/config/turnstile";
+import {
+  TURNSTILE_AUTOMATIC_RETRY,
+  TURNSTILE_RENDER_CONFIGURATION,
+} from "~/features/organization-registration/config/turnstile";
+import {
+  canRetryTurnstileFailure,
+  classifyTurnstileFailure,
+} from "~/features/organization-registration/utilities/turnstile-failure";
+
 export function useTurnstileChallenge({
   onResponseTokenChange,
   siteKey,
@@ -13,8 +22,10 @@ export function useTurnstileChallenge({
   const [isScriptReady, setIsScriptReady] = useState(false);
   const [verificationStatus, setVerificationStatus] =
     useState<VerificationStatus>("loading");
+  const [failure, setFailure] = useState<TurnstileFailure | null>(null);
   const containerReference = useRef<HTMLDivElement>(null);
   const widgetIdentifierReference = useRef<string | null>(null);
+  const automaticRetryCountReference = useRef(0);
 
   useEffect(() => {
     const containerElement = containerReference.current;
@@ -25,19 +36,24 @@ export function useTurnstileChallenge({
 
     const turnstileClient = window.turnstile;
     if (!turnstileClient) {
+      setFailure({ kind: "blocked" });
       setVerificationStatus("error");
       onResponseTokenChange(null);
       return;
     }
 
-    // Retries and refreshes wait for the person to ask. Turnstile's automatic
-    // retry repeats the whole challenge every few seconds after a failure,
-    // such as a site key that does not allow this hostname, which floods the
-    // browser's network log and hides the registration requests.
+    let retryTimeout: ReturnType<typeof setTimeout> | undefined;
+
+    // Turnstile's own retry repeats the challenge every few seconds without
+    // end, even when a retry cannot help, such as a site key that does not
+    // allow this hostname. That floods the browser's network log, so failed
+    // challenges run again here a limited number of times instead.
     const widgetIdentifier = turnstileClient.render(containerElement, {
       sitekey: siteKey,
       ...TURNSTILE_RENDER_CONFIGURATION,
       callback: (responseToken) => {
+        automaticRetryCountReference.current = 0;
+        setFailure(null);
         setVerificationStatus("complete");
         onResponseTokenChange(responseToken);
       },
@@ -49,9 +65,27 @@ export function useTurnstileChallenge({
         setVerificationStatus("expired");
         onResponseTokenChange(null);
       },
-      "error-callback": () => {
-        setVerificationStatus("error");
+      "error-callback": (errorCode) => {
         onResponseTokenChange(null);
+        const currentFailure: TurnstileFailure = {
+          kind: classifyTurnstileFailure(errorCode),
+          errorCode,
+        };
+        if (
+          canRetryTurnstileFailure(currentFailure) &&
+          automaticRetryCountReference.current <
+            TURNSTILE_AUTOMATIC_RETRY.attemptLimit
+        ) {
+          automaticRetryCountReference.current += 1;
+          setVerificationStatus("retrying");
+          retryTimeout = setTimeout(
+            () => window.turnstile?.reset(widgetIdentifier),
+            TURNSTILE_AUTOMATIC_RETRY.delayMilliseconds
+          );
+          return true;
+        }
+        setFailure(currentFailure);
+        setVerificationStatus("error");
         return true;
       },
     });
@@ -60,6 +94,7 @@ export function useTurnstileChallenge({
     setVerificationStatus("ready");
 
     return () => {
+      clearTimeout(retryTimeout);
       window.turnstile?.remove(widgetIdentifier);
       widgetIdentifierReference.current = null;
     };
@@ -70,21 +105,29 @@ export function useTurnstileChallenge({
     if (!widgetIdentifier || !window.turnstile) {
       return;
     }
+    automaticRetryCountReference.current = 0;
     window.turnstile.reset(widgetIdentifier);
+    setFailure(null);
     setVerificationStatus("ready");
   }
 
+  // Checking again cannot help when the site key does not allow this address.
   const canRestartChallenge =
     verificationStatus === "expired" ||
-    (verificationStatus === "error" && widgetIdentifierReference.current);
+    (verificationStatus === "error" &&
+      failure?.kind !== "site-not-allowed" &&
+      Boolean(widgetIdentifierReference.current));
 
   function handleScriptError() {
+    setFailure({ kind: "blocked" });
     setVerificationStatus("error");
     onResponseTokenChange(null);
   }
+
   return {
     setIsScriptReady,
     verificationStatus,
+    failure,
     containerReference,
     restartChallenge,
     canRestartChallenge,

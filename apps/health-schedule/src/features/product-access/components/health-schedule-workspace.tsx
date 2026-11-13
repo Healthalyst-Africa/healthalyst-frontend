@@ -72,7 +72,10 @@ export function HealthScheduleWorkspace({
           >
             <p>
               {organization.name} has HealthSchedule, but it is not ready to
-              open yet. This usually takes less than a minute.
+              open yet.{" "}
+              {productAvailability.errorUpdateCount > 1
+                ? "This is taking longer than usual. If it still does not open in a few minutes, contact HealthAlyst support."
+                : "This usually takes less than a minute."}
             </p>
           </StateNotice>
         ) : (
