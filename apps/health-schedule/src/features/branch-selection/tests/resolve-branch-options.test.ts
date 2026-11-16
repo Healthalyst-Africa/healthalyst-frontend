@@ -9,16 +9,19 @@ const IKEJA: WorkspaceBranch = {
   id: "0f6b4c2a-1d3e-4f5a-8b7c-9d0e1f2a3b4c",
   name: "Ikeja",
   isActive: true,
+  departments: [],
 };
 const ABUJA: WorkspaceBranch = {
   id: "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
   name: "Abuja",
   isActive: true,
+  departments: [],
 };
 const CLOSED_LEKKI: WorkspaceBranch = {
   id: "2b3c4d5e-6f70-4b8c-9d0e-1f2a3b4c5d6e",
   name: "Lekki",
   isActive: false,
+  departments: [],
 };
 
 describe("branch options", () => {

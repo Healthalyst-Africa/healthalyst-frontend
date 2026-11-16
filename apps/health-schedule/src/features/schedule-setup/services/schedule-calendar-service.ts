@@ -12,7 +12,7 @@ import {
   type ScheduleCalendar,
   type StaffMemberSummary,
 } from "~/features/schedule-setup/schemas/schedule-response-schemas";
-import { parseScheduleResponse } from "~/features/schedule-setup/services/parse-schedule-response";
+import { parseHealthScheduleResponse } from "~/shared/api/parse-health-schedule-response";
 import type { CreateCalendarRequest } from "~/features/schedule-setup/utilities/schedule-requests";
 import type { AvailabilityRuleRequest } from "~/features/schedule-setup/utilities/weekly-hours";
 import { getHealthScheduleHttpClient } from "~/infrastructure/api/health-schedule-http-client";
@@ -38,7 +38,7 @@ export async function listScheduleCalendars(): Promise<ScheduleCalendar[]> {
       SCHEDULE_ENDPOINTS.calendars,
       { params: { includeInactive: "true" } }
     );
-    return parseScheduleResponse(
+    return parseHealthScheduleResponse(
       scheduleCalendarListSchema,
       response.data,
       response.status
@@ -57,7 +57,7 @@ export async function createScheduleCalendar(
       SCHEDULE_ENDPOINTS.calendars,
       request
     );
-    return parseScheduleResponse(
+    return parseHealthScheduleResponse(
       scheduleCalendarSchema,
       response.data,
       response.status
@@ -81,7 +81,7 @@ export async function updateScheduleCalendar(
       SCHEDULE_ENDPOINTS.calendar(calendarId),
       changes
     );
-    return parseScheduleResponse(
+    return parseHealthScheduleResponse(
       scheduleCalendarSchema,
       response.data,
       response.status
@@ -105,7 +105,7 @@ export async function replaceCalendarHours(
       SCHEDULE_ENDPOINTS.calendarAvailability(calendarId),
       { rules }
     );
-    return parseScheduleResponse(
+    return parseHealthScheduleResponse(
       scheduleCalendarSchema,
       response.data,
       response.status
@@ -133,7 +133,7 @@ export async function listPractitionerCandidates(): Promise<{
         },
       }
     );
-    const staffList = parseScheduleResponse(
+    const staffList = parseHealthScheduleResponse(
       staffMemberSummaryListSchema,
       response.data,
       response.status

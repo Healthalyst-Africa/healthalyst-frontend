@@ -1,8 +1,10 @@
 import {
   AppointmentTypesIcon,
   DashboardIcon,
+  FrontDeskIcon,
   HealthScheduleIcon,
   OrganizationIcon,
+  QueueIcon,
   RolesIcon,
   ScheduleCalendarsIcon,
   TeamIcon,
@@ -15,6 +17,12 @@ import type { OrganizationAppLinks } from "~/features/organization-access/servic
 
 /** The HealthSchedule permission that shows the schedule setup pages. */
 const SCHEDULE_READ_PERMISSION = "schedule:read";
+
+/** The HealthSchedule permissions that show the front desk and queue boards. */
+const PATIENT_FLOW_PAGE_PERMISSIONS = {
+  frontDesk: "queue:check-in",
+  queues: "queue:read",
+} as const;
 
 /** The Platform API permission that shows each organisation page. */
 const ORGANIZATION_PAGE_PERMISSIONS = {
@@ -49,6 +57,26 @@ export function buildHealthScheduleNavigation({
   currentOrganizationId?: string | null;
   switchOrganization?: (organization: WorkspaceOrganization) => void;
 }): HealthScheduleNavigation {
+  const patientFlowItems = [
+    ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.frontDesk)
+      ? [
+          {
+            label: "Front desk",
+            href: HEALTH_SCHEDULE_ROUTES.frontDesk,
+            icon: FrontDeskIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.queues)
+      ? [
+          {
+            label: "Queues",
+            href: HEALTH_SCHEDULE_ROUTES.queues,
+            icon: QueueIcon,
+          },
+        ]
+      : []),
+  ];
   const sidebar: DashboardNavigationSection[] = [
     {
       label: "HealthSchedule",
@@ -60,6 +88,9 @@ export function buildHealthScheduleNavigation({
         },
       ],
     },
+    ...(patientFlowItems.length > 0
+      ? [{ label: "Patients today", items: patientFlowItems }]
+      : []),
     ...(permissions.includes(SCHEDULE_READ_PERMISSION)
       ? [
           {

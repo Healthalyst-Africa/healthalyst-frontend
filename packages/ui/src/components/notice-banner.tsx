@@ -169,16 +169,17 @@ export function StateNotice({
       role={announcementRole(tone)}
       className={cn(
         // Phones: the illustration spans the title and description, which sit
-        // close together; links and actions follow in the same column.
-        // The illustration always starts level with the title.
-        "grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 rounded-xl px-4 py-4 sm:flex sm:flex-row sm:items-start sm:gap-5 sm:px-6 sm:py-5",
+        // close together and start level with it; links and actions follow in
+        // the same column. Wider screens centre the text and action on the
+        // illustration.
+        "grid grid-cols-[auto_minmax(0,1fr)] gap-x-3 gap-y-1 rounded-xl px-4 py-4 sm:flex sm:flex-row sm:items-center sm:gap-5 sm:px-6 sm:py-5",
         className
       )}
     >
       {/* Illustrations sit on a white disc so they read on any tone. */}
       <div
         aria-hidden="true"
-        className="w-11 shrink-0 self-start [--illustration-base:hsl(var(--background))] max-sm:row-span-2 sm:w-16 [&_svg]:h-auto [&_svg]:w-full"
+        className="w-11 shrink-0 self-start sm:self-center [--illustration-base:hsl(var(--background))] max-sm:row-span-2 sm:w-16 [&_svg]:h-auto [&_svg]:w-full"
       >
         {illustration ?? DEFAULT_STATE_ILLUSTRATIONS[tone]}
       </div>

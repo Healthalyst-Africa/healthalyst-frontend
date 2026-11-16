@@ -59,7 +59,7 @@ sets it host-only, with `path=/v1/auth` and `SameSite=Strict`:
 src/
   app/                         Route entry points, root layout, styles
   components/ui/               App-wide branded wrappers
-  config/                      Hub address, routes, brand and web app settings
+  config/                      Hub address, routes, brand, branch time and web app settings
   features/
     sign-in/                   Signed-out page: password and code steps, own validation
     organization-access/
@@ -72,12 +72,17 @@ src/
       utilities/               Session-to-screen access rules and navigation
     branch-selection/          The branch the person is working at
     schedule-setup/            Calendars, weekly hours, time off and appointment types
+    patient-flow/              Front desk check-in and the queue boards staff call from
   infrastructure/
     api/                       HealthSchedule API client
     auth/                      HealthAlyst session provider
     pwa/                       Service worker registration and app status notices
     query/                     Query client and provider
-  shared/workspace/            Signed-in session, permissions and branch for workspace pages
+  shared/
+    api/                       Checks HealthSchedule responses before screens use them
+    forms/                     API field errors and focusing the first invalid field
+    time/                      Branch dates and times
+    workspace/                 Signed-in session, permissions and branch for workspace pages
 ```
 
 Keep product workflows in their own `features/<workflow>` folder, and use

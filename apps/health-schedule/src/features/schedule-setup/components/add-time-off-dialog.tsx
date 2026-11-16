@@ -20,9 +20,9 @@ import {
   type TimeOffFormValues,
 } from "~/features/schedule-setup/schemas/schedule-form-schemas";
 import type { ScheduleCalendar } from "~/features/schedule-setup/schemas/schedule-response-schemas";
-import { applyFieldErrors } from "~/features/schedule-setup/utilities/apply-field-errors";
-import { focusFirstInvalidField } from "~/features/schedule-setup/utilities/focus-first-invalid-field";
-import { branchToday } from "~/features/schedule-setup/utilities/branch-time";
+import { applyFieldErrors } from "~/shared/forms/apply-field-errors";
+import { focusFirstInvalidField } from "~/shared/forms/focus-first-invalid-field";
+import { branchToday } from "~/shared/time/branch-time";
 import { toCreateTimeOffRequest } from "~/features/schedule-setup/utilities/schedule-requests";
 
 const APPLIES_TO_OPTIONS = [

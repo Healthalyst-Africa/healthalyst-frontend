@@ -26,8 +26,8 @@ import type {
   AppointmentType,
   ScheduleCalendar,
 } from "~/features/schedule-setup/schemas/schedule-response-schemas";
-import { applyFieldErrors } from "~/features/schedule-setup/utilities/apply-field-errors";
-import { focusFirstInvalidField } from "~/features/schedule-setup/utilities/focus-first-invalid-field";
+import { applyFieldErrors } from "~/shared/forms/apply-field-errors";
+import { focusFirstInvalidField } from "~/shared/forms/focus-first-invalid-field";
 import {
   toAppointmentTypeFormValues,
   toAppointmentTypeRequest,

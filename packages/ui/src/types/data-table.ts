@@ -10,6 +10,13 @@ export type DataTableCell =
       tone: StatusTone;
     };
 
+/**
+ * How much a row needs attention. `attention` and `critical` tint the row
+ * from its leading edge and mark that edge in the status colour. Colour is
+ * never the only signal: a cell must also say why, such as a status label.
+ */
+export type DataTableRowEmphasis = "none" | "attention" | "critical";
+
 export type DataTableColumn<RowData> = {
   key: string;
   label: string;
@@ -51,6 +58,8 @@ export type DataTableProperties<RowData> = {
    * clickable, and a labelled button at the end of the row serves keyboards
    * and assistive technology.
    */
+  /** Highlights rows that need attention first, such as long waits. */
+  getRowEmphasis?: (row: RowData) => DataTableRowEmphasis;
   rowAction?: {
     /** The button's accessible name, such as "Review HealthAlyst". */
     label: (row: RowData) => string;

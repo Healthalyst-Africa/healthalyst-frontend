@@ -10,6 +10,7 @@ import type {
   DataTableProperties,
 } from "@healthalyst/ui/types/data-table";
 import { DataTableCellContent } from "./data-table-cell-content";
+import { CARD_EMPHASIS_CLASS_NAMES } from "./data-table-row-emphasis";
 
 const LOADING_CARD_IDENTIFIERS = ["first", "second", "third"] as const;
 
@@ -49,9 +50,14 @@ export function DataTableCardList<RowData>({
   state,
   getRowIdentifier,
   rowAction,
+  getRowEmphasis,
 }: Pick<
   DataTableProperties<RowData>,
-  "accessibleLabel" | "columns" | "getRowIdentifier" | "rowAction"
+  | "accessibleLabel"
+  | "columns"
+  | "getRowIdentifier"
+  | "rowAction"
+  | "getRowEmphasis"
 > & {
   state: Extract<
     DataTableProperties<RowData>["state"],
@@ -95,7 +101,8 @@ export function DataTableCardList<RowData>({
           <li
             key={getRowIdentifier(row)}
             className={cn(
-              "flex flex-col gap-3 rounded-xl border bg-card p-4",
+              "flex flex-col gap-3 rounded-xl border p-4",
+              CARD_EMPHASIS_CLASS_NAMES[getRowEmphasis?.(row) ?? "none"],
               rowAction &&
                 "cursor-pointer transition-colors hover:bg-secondary/40"
             )}

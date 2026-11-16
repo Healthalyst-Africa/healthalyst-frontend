@@ -10,10 +10,7 @@ import type {
   Modality,
   TimeOffKind,
 } from "~/features/schedule-setup/schemas/schedule-response-schemas";
-import {
-  toBranchDateTime,
-  toEndOfBranchDay,
-} from "~/features/schedule-setup/utilities/branch-time";
+import { toBranchDateTime, toEndOfBranchDay } from "~/shared/time/branch-time";
 import {
   koboToNairaText,
   nairaTextToKobo,
