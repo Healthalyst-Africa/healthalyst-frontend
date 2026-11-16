@@ -32,6 +32,12 @@ import type {
   UnknownPatientRequest,
 } from "~/features/patient-flow/utilities/patient-flow-requests";
 import {
+  getPatientRecord,
+  recordTriage,
+  TRIAGE_QUERY_KEYS,
+} from "~/features/patient-flow/services/triage-service";
+import type { TriageRequest } from "~/features/patient-flow/utilities/triage-assessment";
+import {
   encodeQueueTarget,
   type QueueTarget,
 } from "~/features/patient-flow/utilities/queue-targets";
@@ -204,4 +210,32 @@ export function readPatientFlowDepartments(branch: WorkspaceBranch) {
   return isPatientFlowSampleDataEnabled()
     ? SAMPLE_DEPARTMENTS
     : branch.departments;
+}
+
+/** The patient's date of birth, for whether adult danger signs apply. */
+export function usePatientRecord(patientId: string, isEnabled: boolean) {
+  const organizationIdentifier = useOrganizationIdentifier();
+  return useQuery({
+    queryKey: TRIAGE_QUERY_KEYS.patientRecord(
+      organizationIdentifier,
+      patientId
+    ),
+    queryFn: () => getPatientRecord(patientId),
+    enabled: isEnabled,
+  });
+}
+
+/** Saves vitals and the band; every queue and the front desk refresh. */
+export function useRecordTriage() {
+  const invalidatePatientFlow = usePatientFlowInvalidation();
+  return useMutation({
+    mutationFn: ({
+      visitId,
+      request,
+    }: {
+      visitId: string;
+      request: TriageRequest;
+    }) => recordTriage(visitId, request),
+    onSettled: invalidatePatientFlow,
+  });
 }

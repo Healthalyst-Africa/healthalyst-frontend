@@ -9,6 +9,7 @@ import {
   ScheduleCalendarsIcon,
   TeamIcon,
   TimeOffIcon,
+  VitalsIcon,
 } from "@healthalyst/icons";
 import type { DashboardNavigationSection } from "@healthalyst/ui/components/dashboard-shell";
 import type { WorkspaceSwitcherSection } from "@healthalyst/ui/components/workspace-switcher";
@@ -21,6 +22,7 @@ const SCHEDULE_READ_PERMISSION = "schedule:read";
 /** The HealthSchedule permissions that show the front desk and queue boards. */
 const PATIENT_FLOW_PAGE_PERMISSIONS = {
   frontDesk: "queue:check-in",
+  triage: "triage:record",
   queues: "queue:read",
 } as const;
 
@@ -64,6 +66,15 @@ export function buildHealthScheduleNavigation({
             label: "Front desk",
             href: HEALTH_SCHEDULE_ROUTES.frontDesk,
             icon: FrontDeskIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.triage)
+      ? [
+          {
+            label: "Triage and vitals",
+            href: HEALTH_SCHEDULE_ROUTES.triage,
+            icon: VitalsIcon,
           },
         ]
       : []),

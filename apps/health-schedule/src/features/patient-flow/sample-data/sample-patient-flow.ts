@@ -6,6 +6,8 @@ import type {
   QueueEntry,
   QueueKind,
   QueueSummary,
+  PatientRecord,
+  TriageAssessment,
   TriageBand,
   Visit,
   VisitBoard,
@@ -18,6 +20,12 @@ import type {
 } from "~/features/patient-flow/utilities/patient-flow-requests";
 import type { QueueTarget } from "~/features/patient-flow/utilities/queue-targets";
 import { isLiveEntryStatus } from "~/features/patient-flow/utilities/front-desk";
+import {
+  assessDangerSigns,
+  isAssessedAsAdult,
+  needsOverride,
+  type TriageRequest,
+} from "~/features/patient-flow/utilities/triage-assessment";
 import { branchToday, toBranchDateTime } from "~/shared/time/branch-time";
 
 /**
@@ -222,6 +230,13 @@ function createInitialState(): SampleState {
       dateOfBirth: "1994-02-03",
       phone: "+2348101234411",
     }),
+    samplePatient(13, {
+      firstName: "Chiamaka",
+      lastName: "Obi",
+      sex: "female",
+      dateOfBirth: "2019-08-30",
+      phone: "+2348031234413",
+    }),
     samplePatient(12, {
       firstName: "Unknown",
       lastName: "Patient",
@@ -349,6 +364,16 @@ function createInitialState(): SampleState {
       checkedInAt: minutesAgo(9),
       isOpen: true,
     },
+    {
+      id: "sample-visit-7",
+      token: "W-005",
+      kind: "WALK_IN",
+      patientId: "sample-patient-13",
+      appointmentId: null,
+      triageBand: null,
+      checkedInAt: minutesAgo(3),
+      isOpen: true,
+    },
   ];
   const entries: SampleEntry[] = [
     {
@@ -430,12 +455,25 @@ function createInitialState(): SampleState {
       skipCount: 0,
     },
   ];
+  entries.push({
+    id: "sample-entry-7",
+    visitId: "sample-visit-7",
+    kind: "TRIAGE",
+    departmentId: null,
+    resourceId: null,
+    status: "WAITING",
+    priority: 3,
+    enqueuedAt: minutesAgo(3),
+    calledAt: null,
+    note: "Fever since yesterday, brought by her mother",
+    skipCount: 0,
+  });
   return {
     patients,
     appointments,
     visits,
     entries,
-    tokenCounters: { A: 2, W: 4 },
+    tokenCounters: { A: 2, W: 5 },
   };
 }
 
@@ -950,5 +988,71 @@ export function finishSampleVisit(visitId: string): Promise<void> {
       (candidate) => candidate.id === visit.appointmentId
     );
     if (appointment) appointment.status = "COMPLETED";
+  });
+}
+
+const PRIORITY_BY_BAND: Record<TriageBand, number> = {
+  RED: 1,
+  YELLOW: 2,
+  GREEN: 3,
+};
+
+export function getSamplePatientRecord(
+  patientId: string
+): Promise<PatientRecord> {
+  return wait(() => {
+    const patient = findPatient(patientId);
+    return {
+      id: patient.id,
+      dateOfBirth: patient.dateOfBirth,
+      dateOfBirthEstimated: patient.dateOfBirthEstimated,
+    };
+  });
+}
+
+/**
+ * Saves a triage as the API does: the band sets the visit's priority in every
+ * queue it is in. The sample has no roles, so overrides are allowed with a
+ * reason.
+ */
+export function recordSampleTriage(
+  visitId: string,
+  request: TriageRequest
+): Promise<TriageAssessment> {
+  return wait(() => {
+    const visit = findVisit(visitId);
+    if (!visit.isOpen) {
+      throw refusal("This visit has already ended.", "VISIT_NOT_OPEN");
+    }
+    const { band, overrideReason } = request;
+    const isAdult = isAssessedAsAdult(findPatient(visit.patientId).dateOfBirth);
+    const { dangerSigns, suggestedBand } = isAdult
+      ? assessDangerSigns(request)
+      : { dangerSigns: [], suggestedBand: null };
+    if (
+      needsOverride({ band, suggestedBand, currentBand: visit.triageBand }) &&
+      !overrideReason
+    ) {
+      throw new PlatformApiError(
+        "Say why the band is lower than RED.",
+        "VALIDATION_FAILED",
+        null,
+        400,
+        { overrideReason: "Say why the band is lower than emergency." },
+        null
+      );
+    }
+    visit.triageBand = band;
+    for (const entry of liveEntries()) {
+      if (entry.visitId === visitId) entry.priority = PRIORITY_BY_BAND[band];
+    }
+    return {
+      id: crypto.randomUUID(),
+      visitId,
+      band,
+      suggestedBand,
+      dangerSigns: dangerSigns.map((sign) => sign.code),
+      recordedAt: new Date().toISOString(),
+    };
   });
 }

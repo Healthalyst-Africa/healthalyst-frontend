@@ -157,6 +157,24 @@ export const patientSearchResultSchema = z.object({
   data: z.array(patientMatchSchema),
 });
 
+/** A saved triage (`POST /v1/visits/:visitId/triage`). */
+export const triageAssessmentSchema = z.object({
+  id: z.string(),
+  visitId: z.string(),
+  band: triageBandSchema,
+  /** What the danger signs suggested; null for children or none found. */
+  suggestedBand: z.enum(["RED", "YELLOW"]).nullable(),
+  dangerSigns: z.array(z.string()),
+  recordedAt: z.string(),
+});
+
+/** The parts of a patient's record triage needs (`GET /v1/patients/:id`). */
+export const patientRecordSchema = z.object({
+  id: z.string(),
+  dateOfBirth: z.string().nullable(),
+  dateOfBirthEstimated: z.boolean(),
+});
+
 export type QueueEntry = z.infer<typeof queueEntrySchema>;
 export type QueueKind = z.infer<typeof queueKindSchema>;
 export type QueueSummary = z.infer<
@@ -169,3 +187,5 @@ export type DayBoard = z.infer<typeof dayBoardSchema>;
 export type DayBoardAppointment = z.infer<typeof dayBoardAppointmentSchema>;
 export type PatientMatch = z.infer<typeof patientMatchSchema>;
 export type TriageBand = z.infer<typeof triageBandSchema>;
+export type TriageAssessment = z.infer<typeof triageAssessmentSchema>;
+export type PatientRecord = z.infer<typeof patientRecordSchema>;

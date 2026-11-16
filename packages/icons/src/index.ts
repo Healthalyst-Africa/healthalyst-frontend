@@ -76,4 +76,5 @@ export {
   IconArrowForwardUp as SendOnIcon,
   IconPlayerSkipForward as SkipPatientIcon,
   IconStethoscope as SeePatientIcon,
+  IconHeartbeat as VitalsIcon,
 } from "@tabler/icons-react";
