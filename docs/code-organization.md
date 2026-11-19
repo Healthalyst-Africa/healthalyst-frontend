@@ -81,7 +81,8 @@ public page an invitation link opens). Super Admin separates `staff-auth`,
 page for phones, tablets and the installed app; desktop browsers sign in at the hub), `organization-access` (links into the hub), `product-access` (the
 sign-in, application and product checks that choose the first screen), `branch-selection` (the branch the person is working at) and
 `schedule-setup` (calendars with weekly hours, time off and holidays, and
-appointment types). Workspace pages share the signed-in session, permissions
+appointment types) and `patient-flow` (front desk check-in and the queue
+boards staff call patients from). Workspace pages share the signed-in session, permissions
 and branch through `shared/workspace`.
 Its HealthSchedule API client is in `infrastructure/api`.
 

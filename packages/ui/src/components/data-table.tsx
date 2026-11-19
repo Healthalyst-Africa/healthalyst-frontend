@@ -17,6 +17,7 @@ import type { DataTableProperties } from "@healthalyst/ui/types/data-table";
 import { DataTableCardList } from "./data-table/data-table-card-list";
 import { DataTableCellContent } from "./data-table/data-table-cell-content";
 import { DataTableMessage } from "./data-table/data-table-message";
+import { ROW_EMPHASIS_CLASS_NAMES } from "./data-table/data-table-row-emphasis";
 
 const COLUMN_SIZES = {
   wide: "w-1/3 min-w-64",
@@ -38,6 +39,7 @@ export function DataTable<RowData>({
   getRowIdentifier,
   emptyState,
   rowAction,
+  getRowEmphasis,
 }: DataTableProperties<RowData>) {
   const hasRows =
     state.status === "loading" ||
@@ -54,6 +56,7 @@ export function DataTable<RowData>({
             state={state}
             getRowIdentifier={getRowIdentifier}
             rowAction={rowAction}
+            getRowEmphasis={getRowEmphasis}
           />
         </div>
       )}
@@ -140,7 +143,10 @@ export function DataTable<RowData>({
                         key={getRowIdentifier(row)}
                         className={cn(
                           "hover:bg-muted/25",
-                          rowAction && "cursor-pointer hover:bg-secondary/50"
+                          rowAction && "cursor-pointer hover:bg-secondary/50",
+                          ROW_EMPHASIS_CLASS_NAMES[
+                            getRowEmphasis?.(row) ?? "none"
+                          ]
                         )}
                         onClick={
                           rowAction ? () => rowAction.onSelect(row) : undefined
