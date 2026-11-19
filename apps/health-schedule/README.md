@@ -72,7 +72,7 @@ src/
       utilities/               Session-to-screen access rules and navigation
     branch-selection/          The branch the person is working at
     schedule-setup/            Calendars, weekly hours, time off and appointment types
-    patient-flow/              Front desk check-in and the queue boards staff call from
+    patient-flow/              Front desk check-in, triage and vitals, and the queue boards
   infrastructure/
     api/                       HealthSchedule API client
     auth/                      HealthAlyst session provider

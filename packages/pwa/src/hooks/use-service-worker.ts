@@ -7,6 +7,31 @@ import { Serwist } from "@serwist/window";
 /** Where every HealthAlyst app serves its built service worker. */
 const SERVICE_WORKER_ADDRESS = "/serwist/sw.js";
 
+/** The caches HealthAlyst workers create, by name prefix. */
+const WORKER_CACHE_PREFIXES = ["healthalyst-", "serwist-"] as const;
+
+/**
+ * Removes a worker left on this address by a production build, with its
+ * caches. Development registers none, but a leftover one keeps answering
+ * requests from its stored files and hides every code change. Reloads once
+ * when it was controlling the page, so the page comes fresh from the server.
+ */
+async function removeLeftoverServiceWorkers() {
+  const [registrations, cacheNames] = await Promise.all([
+    navigator.serviceWorker.getRegistrations(),
+    caches.keys(),
+  ]);
+  await Promise.all([
+    ...registrations.map((registration) => registration.unregister()),
+    ...cacheNames
+      .filter((cacheName) =>
+        WORKER_CACHE_PREFIXES.some((prefix) => cacheName.startsWith(prefix))
+      )
+      .map((cacheName) => caches.delete(cacheName)),
+  ]);
+  if (navigator.serviceWorker.controller) window.location.reload();
+}
+
 export type ServiceWorkerState = {
   /**
    * A new version is waiting, or has already taken over from another tab and
@@ -20,8 +45,9 @@ export type ServiceWorkerState = {
 
 /**
  * Registers the app's service worker in production builds and reports when
- * a new version is ready. Development builds stay without one, so cached
- * files never hide code changes.
+ * a new version is ready. Development builds stay without one, and remove
+ * any left by a production build on the same address, so cached files never
+ * hide code changes.
  */
 export function useServiceWorker({
   enabled = process.env.NODE_ENV === "production",
@@ -42,6 +68,17 @@ export function useServiceWorker({
   const isApplyingUpdateReference = useRef(false);
   const [isUpdateReady, setIsUpdateReady] = useState(false);
   const [isApplyingUpdate, setIsApplyingUpdate] = useState(false);
+
+  useEffect(() => {
+    if (
+      enabled ||
+      process.env.NODE_ENV !== "development" ||
+      !("serviceWorker" in navigator)
+    ) {
+      return;
+    }
+    void removeLeftoverServiceWorkers();
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled || !("serviceWorker" in navigator)) return;
