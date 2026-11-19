@@ -189,6 +189,7 @@ export function OrganizationMembers({
           id="owner-recovery-userId"
           label="New owner"
           name="userId"
+          required
           placeholder="Choose an active member"
           options={candidates.map((member) => ({
             value: member.userId,
@@ -213,6 +214,7 @@ export function OrganizationMembers({
           id="owner-recovery-confirmed"
           name="confirmed"
           label="I verified this request outside HealthAlyst, and no current owner can act."
+          required
           error={fieldErrors.confirmed}
         />
       </FormDialog>

@@ -15,7 +15,6 @@ import {
 } from "~/features/patient-flow/config/patient-flow";
 import { TRIAGE_PERMISSIONS } from "~/features/patient-flow/config/triage";
 import {
-  readPatientFlowDepartments,
   useDayBoard,
   useQueueEntries,
 } from "~/features/patient-flow/hooks/use-patient-flow";
@@ -105,10 +104,7 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
     waitingEntries[0] ??
     null;
   const doctorOptions = buildQueueTargetOptions(
-    readQueueTargetChoices(
-      dayBoardQuery.data,
-      readPatientFlowDepartments(branch)
-    )
+    readQueueTargetChoices(dayBoardQuery.data, branch.departments)
   ).filter((option) => option.value.startsWith(NEXT_FREE_DOCTOR));
 
   function openNextPatient() {

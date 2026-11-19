@@ -57,6 +57,7 @@ function ResendConfirmationForm() {
         id="verification-email-address"
         label="Work email address"
         name="emailAddress"
+        required
         type="email"
         error={fieldErrors.emailAddress}
         onChange={() => setFieldErrors({})}

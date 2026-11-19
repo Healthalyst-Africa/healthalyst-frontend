@@ -27,6 +27,13 @@ const COLUMN_SIZES = {
 
 const LOADING_ROW_IDENTIFIERS = ["first", "second", "third"] as const;
 
+const DEFAULT_MAXIMUM_VISIBLE_ROWS = 5;
+
+/** The heading row (2.75rem) and each data row (5rem with its border). */
+function readScrollHeight(maximumVisibleRows: number): string {
+  return `calc(2.75rem + ${maximumVisibleRows} * (5rem + 1px))`;
+}
+
 /**
  * A complete, standalone tabular data surface; applications supply records and
  * column content. It has no visible title: place any page or section heading
@@ -40,7 +47,10 @@ export function DataTable<RowData>({
   emptyState,
   rowAction,
   getRowEmphasis,
+  maximumVisibleRows = DEFAULT_MAXIMUM_VISIBLE_ROWS,
 }: DataTableProperties<RowData>) {
+  const isScrollable =
+    state.status === "ready" && state.rows.length > maximumVisibleRows;
   const hasRows =
     state.status === "loading" ||
     (state.status === "ready" && state.rows.length > 0);
@@ -93,7 +103,15 @@ export function DataTable<RowData>({
               aria-label={accessibleLabel}
               aria-busy={state.status === "loading" || undefined}
               tabIndex={0}
-              className="overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&>div]:overflow-visible"
+              className={cn(
+                "overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&>div]:overflow-visible",
+                isScrollable && "overflow-y-auto overscroll-contain"
+              )}
+              style={
+                isScrollable
+                  ? { maxHeight: readScrollHeight(maximumVisibleRows) }
+                  : undefined
+              }
             >
               {state.status === "loading" && (
                 <p role="status" className="sr-only">
@@ -101,8 +119,9 @@ export function DataTable<RowData>({
                 </p>
               )}
               <Table aria-label={accessibleLabel}>
-                <TableHeader className="bg-muted/50">
-                  <TableRow className="hover:bg-transparent">
+                {/* The headings stay in view while the rows scroll beneath. */}
+                <TableHeader className="sticky top-0 z-10 bg-card">
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
                     {columns.map((column) => (
                       <TableHead
                         key={column.key}

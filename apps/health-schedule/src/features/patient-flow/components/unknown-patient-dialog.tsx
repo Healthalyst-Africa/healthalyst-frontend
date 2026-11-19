@@ -105,6 +105,7 @@ export function UnknownPatientDialog({
       <TextField
         id="unknown-patient-label"
         label="Description"
+        required
         description="What staff will see until the patient is identified, such as “Unknown man, brought by ambulance”."
         maxLength={UNKNOWN_PATIENT_LABEL_LENGTH.maximum}
         autoComplete="off"
@@ -119,6 +120,7 @@ export function UnknownPatientDialog({
             <SelectField
               id="unknown-patient-sex"
               label="Sex"
+              required
               placeholder="Choose"
               options={PATIENT_SEX_OPTIONS}
               value={field.value}
@@ -129,7 +131,7 @@ export function UnknownPatientDialog({
         />
         <TextField
           id="unknown-patient-age"
-          label="Approximate age (optional)"
+          label="Approximate age"
           inputMode="numeric"
           autoComplete="off"
           error={errors.approximateAge?.message}

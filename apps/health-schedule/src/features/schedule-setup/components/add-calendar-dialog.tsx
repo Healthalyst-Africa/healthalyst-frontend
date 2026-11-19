@@ -138,6 +138,7 @@ export function AddCalendarDialog({
           <SelectField
             id="calendar-kind"
             label="What is booked"
+            required
             placeholder="Choose what is booked"
             options={kindOptions}
             value={field.value}
@@ -162,6 +163,7 @@ export function AddCalendarDialog({
               <SelectField
                 id="calendar-member"
                 label="Staff member"
+                required
                 placeholder={
                   candidatesQuery.isPending
                     ? "Loading staff…"
@@ -189,6 +191,7 @@ export function AddCalendarDialog({
           <TextField
             id="calendar-name"
             label="Name"
+            required
             placeholder={
               kind === "ROOM" ? "Consulting room 2" : "Ultrasound machine"
             }
@@ -202,6 +205,7 @@ export function AddCalendarDialog({
               <SelectField
                 id="calendar-branch"
                 label="Branch"
+                required
                 placeholder="Choose a branch"
                 options={branchOptions}
                 value={field.value}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   ExpectedArrivalsIcon,
   LongestWaitIcon,
@@ -24,8 +25,8 @@ import {
   type CheckInCandidate,
 } from "~/features/patient-flow/components/check-in-dialog";
 import { PatientFlowFrame } from "~/features/patient-flow/components/patient-flow-frame";
-import { RegisterPatientDialog } from "~/features/patient-flow/components/register-patient-dialog";
 import { UnknownPatientDialog } from "~/features/patient-flow/components/unknown-patient-dialog";
+import { RegisterPatientDialog } from "~/features/patients/components/register-patient-dialog";
 import {
   CLOCK_STATE_TONES,
   PATIENT_FLOW_PERMISSIONS,
@@ -33,10 +34,9 @@ import {
   QUEUE_ENTRY_STATUS_PRESENTATION,
   TRIAGE_BAND_PRESENTATION,
 } from "~/features/patient-flow/config/patient-flow";
-import { useDebouncedValue } from "~/features/patient-flow/hooks/use-debounced-value";
+import { useDebouncedValue } from "~/shared/hooks/use-debounced-value";
 import {
   useDayBoard,
-  readPatientFlowDepartments,
   usePatientSearch,
   useQueueSummaries,
   useVisitBoard,
@@ -65,6 +65,7 @@ import {
 } from "~/features/patient-flow/utilities/queue-targets";
 import { describeBranchClockTime } from "~/shared/time/branch-time";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
+import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 
 /** The receptionist's page: check patients in and see where everyone is. */
 export function FrontDeskPage() {
@@ -139,6 +140,8 @@ function FrontDeskWorkspace({
   const canSearchPatients = permissions.includes(
     PATIENT_FLOW_PERMISSIONS.readPatients
   );
+  const canReadPatients = canSearchPatients;
+  const router = useRouter();
   const canRegister = permissions.includes(
     PATIENT_FLOW_PERMISSIONS.registerPatients
   );
@@ -161,10 +164,7 @@ function FrontDeskWorkspace({
 
   const expectedArrivals = listExpectedArrivals(dayBoardQuery.data);
   const queueTargetOptions = buildQueueTargetOptions(
-    readQueueTargetChoices(
-      dayBoardQuery.data,
-      readPatientFlowDepartments(branch)
-    )
+    readQueueTargetChoices(dayBoardQuery.data, branch.departments)
   );
   const figures = summarizeFrontDesk({
     queues: queueSummariesQuery.data ?? [],
@@ -175,6 +175,7 @@ function FrontDeskWorkspace({
   function checkInExpectedArrival(appointment: ExpectedArrival) {
     setCheckInCandidate({
       arrival: { kind: "appointment", appointmentId: appointment.id },
+      patientId: appointment.patient.id,
       patientName: describePatientName(appointment.patient),
       details: `${appointment.patient.patientNumber} · Booked ${describeBranchClockTime(appointment.startsAt)} with ${appointment.resourceName} for ${appointment.appointmentTypeName}`,
     });
@@ -188,6 +189,7 @@ function FrontDeskWorkspace({
     }
     setCheckInCandidate({
       arrival: { kind: "walk-in", patientId: patient.id },
+      patientId: patient.id,
       patientName: describePatientMatchName(patient),
       details: `${patient.patientNumber} · Walk-in, no appointment today`,
     });
@@ -490,6 +492,18 @@ function FrontDeskWorkspace({
                     }
             }
             getRowIdentifier={(visit) => visit.visitId}
+            rowAction={
+              canReadPatients
+                ? {
+                    label: (visit) =>
+                      `Open ${describePatientName(visit.patient)}'s record`,
+                    onSelect: (visit) =>
+                      router.push(
+                        HEALTH_SCHEDULE_ROUTES.patient(visit.patient.id)
+                      ),
+                  }
+                : undefined
+            }
             getRowEmphasis={(visit) =>
               readFlowEmphasis({
                 triageBand: visit.triageBand,
@@ -523,7 +537,12 @@ function FrontDeskWorkspace({
             open={isRegistering}
             onOpenChange={setIsRegistering}
             initialName={searchText}
+            submitLabel="Register and check in"
             onRegistered={(patient) => {
+              setSearchText("");
+              checkInPatient(patient);
+            }}
+            onChooseExisting={(patient) => {
               setSearchText("");
               checkInPatient(patient);
             }}

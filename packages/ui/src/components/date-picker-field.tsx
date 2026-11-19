@@ -16,6 +16,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@healthalyst/ui/primitives/popover";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 /** Values are calendar dates written as `yyyy-MM-dd`, without a time zone. */
@@ -40,6 +41,8 @@ type DatePickerFieldProperties = {
   error?: string;
   /** The earliest date that can be chosen, as `yyyy-MM-dd`. */
   earliestDate?: string;
+  /** Marks the field with an asterisk and announces it as required. */
+  required?: boolean;
   disabled?: boolean;
   className?: string;
 };
@@ -57,6 +60,7 @@ export function DatePickerField({
   description,
   error,
   earliestDate,
+  required = false,
   disabled,
   className,
 }: DatePickerFieldProperties) {
@@ -77,7 +81,7 @@ export function DatePickerField({
       data-disabled={disabled || undefined}
     >
       <FieldLabel id={labelIdentifier} htmlFor={id}>
-        {label}
+        <FieldLabelText label={label} required={required} announceRequired />
       </FieldLabel>
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>

@@ -4,22 +4,13 @@ import {
   queueEntryListSchema,
   queueEntrySchema,
   queueSummaryListSchema,
+  visitDetailSchema,
   type QueueEntry,
+  type VisitDetail,
   type QueueSummary,
 } from "~/features/patient-flow/schemas/patient-flow-response-schemas";
 import type { TransferRequest } from "~/features/patient-flow/utilities/patient-flow-requests";
 import type { QueueTarget } from "~/features/patient-flow/utilities/queue-targets";
-import { isPatientFlowSampleDataEnabled } from "~/features/patient-flow/config/sample-data";
-import {
-  callNextSamplePatient,
-  callSamplePatient,
-  finishSampleVisit,
-  listSampleQueueEntries,
-  listSampleQueueSummaries,
-  sendSamplePatientOn,
-  skipSamplePatient,
-  startSeeingSamplePatient,
-} from "~/features/patient-flow/sample-data/sample-patient-flow";
 import { getHealthScheduleHttpClient } from "~/infrastructure/api/health-schedule-http-client";
 import { parseHealthScheduleResponse } from "~/shared/api/parse-health-schedule-response";
 
@@ -70,7 +61,6 @@ function toQueueParameters(target: QueueTarget) {
 export async function listQueueSummaries(
   branchId: string
 ): Promise<QueueSummary[]> {
-  if (isPatientFlowSampleDataEnabled()) return listSampleQueueSummaries();
   try {
     const response = await getHealthScheduleHttpClient().get<unknown>(
       PATIENT_FLOW_ENDPOINTS.queues,
@@ -91,7 +81,6 @@ export async function listQueueEntries(
   branchId: string,
   target: QueueTarget
 ): Promise<QueueEntry[]> {
-  if (isPatientFlowSampleDataEnabled()) return listSampleQueueEntries(target);
   try {
     const response = await getHealthScheduleHttpClient().get<unknown>(
       PATIENT_FLOW_ENDPOINTS.queueEntries,
@@ -133,7 +122,6 @@ export function callNextPatient(
   branchId: string,
   target: QueueTarget
 ): Promise<QueueEntry> {
-  if (isPatientFlowSampleDataEnabled()) return callNextSamplePatient(target);
   return postQueueAction(
     PATIENT_FLOW_ENDPOINTS.callNext,
     { branchId, ...toQueueParameters(target) },
@@ -143,7 +131,6 @@ export function callNextPatient(
 
 /** Calls this patient, or calls them again. Requires `queue:manage`. */
 export function callPatient(entryId: string): Promise<QueueEntry> {
-  if (isPatientFlowSampleDataEnabled()) return callSamplePatient(entryId);
   return postQueueAction(
     PATIENT_FLOW_ENDPOINTS.callEntry(entryId),
     {},
@@ -153,8 +140,6 @@ export function callPatient(entryId: string): Promise<QueueEntry> {
 
 /** The patient is now with staff. Requires `queue:manage`. */
 export function startSeeingPatient(entryId: string): Promise<QueueEntry> {
-  if (isPatientFlowSampleDataEnabled())
-    return startSeeingSamplePatient(entryId);
   return postQueueAction(
     PATIENT_FLOW_ENDPOINTS.startEntry(entryId),
     {},
@@ -164,7 +149,6 @@ export function startSeeingPatient(entryId: string): Promise<QueueEntry> {
 
 /** A called patient did not come: back to waiting. Requires `queue:manage`. */
 export function skipPatient(entryId: string): Promise<QueueEntry> {
-  if (isPatientFlowSampleDataEnabled()) return skipSamplePatient(entryId);
   return postQueueAction(
     PATIENT_FLOW_ENDPOINTS.skipEntry(entryId),
     {},
@@ -177,8 +161,6 @@ export function sendPatientOn(
   entryId: string,
   request: TransferRequest
 ): Promise<QueueEntry> {
-  if (isPatientFlowSampleDataEnabled())
-    return sendSamplePatientOn(entryId, request);
   return postQueueAction(
     PATIENT_FLOW_ENDPOINTS.transferEntry(entryId),
     request,
@@ -189,7 +171,6 @@ export function sendPatientOn(
 
 /** Ends the visit: the patient leaves every queue. Requires `queue:manage`. */
 export async function finishVisit(visitId: string): Promise<void> {
-  if (isPatientFlowSampleDataEnabled()) return finishSampleVisit(visitId);
   try {
     await getHealthScheduleHttpClient().post(
       PATIENT_FLOW_ENDPOINTS.completeVisit(visitId),
@@ -197,5 +178,42 @@ export async function finishVisit(visitId: string): Promise<void> {
     );
   } catch (error) {
     throw toPlatformApiError(error, "We could not finish the visit.");
+  }
+}
+
+/** A visit and every queue it went through. Requires `queue:read`. */
+export async function getVisitDetail(visitId: string): Promise<VisitDetail> {
+  try {
+    const response = await getHealthScheduleHttpClient().get<unknown>(
+      PATIENT_FLOW_ENDPOINTS.visit(visitId)
+    );
+    return parseHealthScheduleResponse(
+      visitDetailSchema,
+      response.data,
+      response.status
+    );
+  } catch (error) {
+    throw toPlatformApiError(error, "We could not load the visit.");
+  }
+}
+
+/** The patient left before being seen: the visit ends. Requires `queue:manage`. */
+export async function recordLeftWithoutBeingSeen(
+  visitId: string,
+  reason: string | undefined
+): Promise<void> {
+  try {
+    await getHealthScheduleHttpClient().post(
+      PATIENT_FLOW_ENDPOINTS.visitLeft(visitId),
+      reason ? { reason } : {}
+    );
+  } catch (error) {
+    throw toPlatformApiError(
+      error,
+      "We could not record that the patient left.",
+      {
+        reason: "reason",
+      }
+    );
   }
 }

@@ -126,7 +126,7 @@ export function EditMemberAccessDialog({
       />
       <TextField
         id="member-access-jobTitle"
-        label="Job title (optional)"
+        label="Job title"
         name="jobTitle"
         defaultValue={member.jobTitle ?? ""}
         maxLength={TEAM_FIELD_LIMITS.jobTitleMaximumLength}
@@ -134,7 +134,7 @@ export function EditMemberAccessDialog({
       />
       <SelectField
         id="member-access-specialty"
-        label="Specialty (optional)"
+        label="Specialty"
         name="specialty"
         placeholder="No specialty"
         options={SPECIALTY_OPTIONS}

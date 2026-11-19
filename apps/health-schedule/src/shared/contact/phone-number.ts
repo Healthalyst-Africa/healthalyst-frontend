@@ -1,4 +1,4 @@
-import { PHONE_COUNTRY_CODE } from "~/features/patient-flow/config/patient-flow";
+import { PHONE_COUNTRY_CODE } from "~/config/phone";
 
 /**
  * A phone number in the international format the API stores, such as

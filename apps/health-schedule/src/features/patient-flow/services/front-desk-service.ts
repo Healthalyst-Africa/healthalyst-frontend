@@ -16,18 +16,8 @@ import {
 } from "~/features/patient-flow/schemas/patient-flow-response-schemas";
 import type {
   CheckInRequest,
-  QuickPatientRequest,
   UnknownPatientRequest,
 } from "~/features/patient-flow/utilities/patient-flow-requests";
-import { isPatientFlowSampleDataEnabled } from "~/features/patient-flow/config/sample-data";
-import {
-  checkInSamplePatient,
-  getSampleDayBoard,
-  getSampleVisitBoard,
-  registerSampleQuickPatient,
-  registerSampleUnknownPatient,
-  searchSamplePatients,
-} from "~/features/patient-flow/sample-data/sample-patient-flow";
 import { getHealthScheduleHttpClient } from "~/infrastructure/api/health-schedule-http-client";
 import { parseHealthScheduleResponse } from "~/shared/api/parse-health-schedule-response";
 
@@ -61,14 +51,6 @@ export const FRONT_DESK_QUERY_KEYS = {
     ] as const,
 };
 
-/** The registration form's names for the API's fields. */
-const QUICK_PATIENT_FIELD_NAMES = {
-  firstName: "firstName",
-  lastName: "lastName",
-  sex: "sex",
-  phone: "phone",
-};
-
 const UNKNOWN_PATIENT_FIELD_NAMES = {
   sex: "sex",
   ageYears: "approximateAge",
@@ -88,7 +70,6 @@ export async function getDayBoard(
   branchId: string,
   date: string
 ): Promise<DayBoard> {
-  if (isPatientFlowSampleDataEnabled()) return getSampleDayBoard();
   try {
     const response = await getHealthScheduleHttpClient().get<unknown>(
       PATIENT_FLOW_ENDPOINTS.dayBoard,
@@ -106,7 +87,6 @@ export async function getDayBoard(
 
 /** Everyone checked in and not yet finished. Requires `queue:read`. */
 export async function getVisitBoard(branchId: string): Promise<VisitBoard> {
-  if (isPatientFlowSampleDataEnabled()) return getSampleVisitBoard();
   try {
     const response = await getHealthScheduleHttpClient().get<unknown>(
       PATIENT_FLOW_ENDPOINTS.visitBoard,
@@ -132,7 +112,6 @@ export async function getVisitBoard(branchId: string): Promise<VisitBoard> {
 export async function searchPatients(
   searchText: string
 ): Promise<PatientMatch[]> {
-  if (isPatientFlowSampleDataEnabled()) return searchSamplePatients(searchText);
   try {
     const response = await getHealthScheduleHttpClient().get<unknown>(
       PATIENT_FLOW_ENDPOINTS.patients,
@@ -153,37 +132,10 @@ export async function searchPatients(
   }
 }
 
-/** Name, sex and phone; the date of birth can follow. Requires `patient:create`. */
-export async function registerQuickPatient(
-  request: QuickPatientRequest & { id: string }
-): Promise<PatientMatch> {
-  if (isPatientFlowSampleDataEnabled())
-    return registerSampleQuickPatient(request);
-  try {
-    const response = await getHealthScheduleHttpClient().post<unknown>(
-      PATIENT_FLOW_ENDPOINTS.quickPatient,
-      request
-    );
-    return parseHealthScheduleResponse(
-      patientMatchSchema,
-      response.data,
-      response.status
-    );
-  } catch (error) {
-    throw toPlatformApiError(
-      error,
-      "We could not register the patient.",
-      QUICK_PATIENT_FIELD_NAMES
-    );
-  }
-}
-
 /** An unidentified patient, completed later. Requires `patient:create`. */
 export async function registerUnknownPatient(
   request: UnknownPatientRequest & { id: string }
 ): Promise<PatientMatch> {
-  if (isPatientFlowSampleDataEnabled())
-    return registerSampleUnknownPatient(request);
   try {
     const response = await getHealthScheduleHttpClient().post<unknown>(
       PATIENT_FLOW_ENDPOINTS.temporaryPatient,
@@ -205,7 +157,6 @@ export async function registerUnknownPatient(
 
 /** Opens a visit and puts the patient in their first queue. Requires `queue:check-in`. */
 export async function checkInPatient(request: CheckInRequest): Promise<Visit> {
-  if (isPatientFlowSampleDataEnabled()) return checkInSamplePatient(request);
   try {
     const response = await getHealthScheduleHttpClient().post<unknown>(
       PATIENT_FLOW_ENDPOINTS.checkIns,

@@ -138,6 +138,7 @@ export function RecoveryCodesPanel({
         id={confirmationIdentifier}
         className="border-t border-border pt-5"
         label="I have saved my recovery codes somewhere safe."
+        required
         checked={hasSavedCodes}
         onCheckedChange={onHasSavedCodesChange}
       />

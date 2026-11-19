@@ -1,21 +1,12 @@
 import type {
   CheckInFormValues,
-  QuickPatientFormValues,
   TransferFormValues,
   UnknownPatientFormValues,
 } from "~/features/patient-flow/schemas/patient-flow-form-schemas";
-import { toInternationalPhoneNumber } from "~/features/patient-flow/utilities/phone-number";
 import {
   decodeQueueTarget,
   type QueueTarget,
 } from "~/features/patient-flow/utilities/queue-targets";
-
-export type QuickPatientRequest = {
-  firstName: string;
-  lastName: string;
-  sex: string;
-  phone: string;
-};
 
 export type UnknownPatientRequest = {
   sex: string;
@@ -49,19 +40,6 @@ function readQueueTarget(value: string): QueueTarget {
 function readNote(note: string): string | undefined {
   const trimmedNote = note.trim();
   return trimmedNote === "" ? undefined : trimmedNote;
-}
-
-export function toQuickPatientRequest(
-  values: QuickPatientFormValues
-): QuickPatientRequest {
-  const phone = toInternationalPhoneNumber(values.phone);
-  if (!phone) throw new Error("Enter a phone number such as 0803 123 4567.");
-  return {
-    firstName: values.firstName.trim(),
-    lastName: values.lastName.trim(),
-    sex: values.sex,
-    phone,
-  };
 }
 
 export function toUnknownPatientRequest(

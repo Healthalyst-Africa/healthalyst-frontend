@@ -260,6 +260,7 @@ export function FindPartnerSheet({
           id="partnership-request-serviceCategory"
           label="Service"
           name="serviceCategory"
+          required
           placeholder="Choose the service"
           options={serviceChoices}
           defaultValue={preselectedService}
@@ -273,6 +274,7 @@ export function FindPartnerSheet({
         <TextField
           id="partnership-request-priority"
           label="Priority"
+          required
           description={`A number from ${PARTNER_FIELD_LIMITS.priorityMinimum} to ${PARTNER_FIELD_LIMITS.priorityMaximum}. Lower numbers are tried first.`}
           name="priority"
           type="number"

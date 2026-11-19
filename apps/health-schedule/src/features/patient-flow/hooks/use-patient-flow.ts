@@ -1,16 +1,12 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { WorkspaceBranch } from "~/features/branch-selection/schemas/branch-schema";
 import { PATIENT_FLOW_REFRESH_MILLISECONDS } from "~/features/patient-flow/config/patient-flow";
-import { isPatientFlowSampleDataEnabled } from "~/features/patient-flow/config/sample-data";
-import { SAMPLE_DEPARTMENTS } from "~/features/patient-flow/sample-data/sample-patient-flow";
 import {
   checkInPatient,
   FRONT_DESK_QUERY_KEYS,
   getDayBoard,
   getVisitBoard,
-  registerQuickPatient,
   registerUnknownPatient,
   searchPatients,
 } from "~/features/patient-flow/services/front-desk-service";
@@ -18,23 +14,23 @@ import {
   callNextPatient,
   callPatient,
   finishVisit,
+  getVisitDetail,
   listQueueEntries,
   listQueueSummaries,
   QUEUE_BOARD_QUERY_KEYS,
+  recordLeftWithoutBeingSeen,
   sendPatientOn,
   skipPatient,
   startSeeingPatient,
 } from "~/features/patient-flow/services/queue-board-service";
 import type {
   CheckInRequest,
-  QuickPatientRequest,
   TransferRequest,
   UnknownPatientRequest,
 } from "~/features/patient-flow/utilities/patient-flow-requests";
 import {
-  getPatientRecord,
+  getTriageHistory,
   recordTriage,
-  TRIAGE_QUERY_KEYS,
 } from "~/features/patient-flow/services/triage-service";
 import type { TriageRequest } from "~/features/patient-flow/utilities/triage-assessment";
 import {
@@ -107,13 +103,6 @@ export function usePatientSearch(searchText: string, isEnabled: boolean) {
     ),
     queryFn: () => searchPatients(searchText),
     enabled: isEnabled,
-  });
-}
-
-export function useRegisterQuickPatient() {
-  return useMutation({
-    mutationFn: (request: QuickPatientRequest & { id: string }) =>
-      registerQuickPatient(request),
   });
 }
 
@@ -202,27 +191,17 @@ export function useQueueActions(branchId: string) {
       mutationFn: (visitId: string) => finishVisit(visitId),
       ...mutationOptions,
     }),
+    left: useMutation({
+      mutationFn: ({
+        visitId,
+        reason,
+      }: {
+        visitId: string;
+        reason: string | undefined;
+      }) => recordLeftWithoutBeingSeen(visitId, reason),
+      ...mutationOptions,
+    }),
   };
-}
-
-/** The branch's departments, or made-up ones while sample data is on. */
-export function readPatientFlowDepartments(branch: WorkspaceBranch) {
-  return isPatientFlowSampleDataEnabled()
-    ? SAMPLE_DEPARTMENTS
-    : branch.departments;
-}
-
-/** The patient's date of birth, for whether adult danger signs apply. */
-export function usePatientRecord(patientId: string, isEnabled: boolean) {
-  const organizationIdentifier = useOrganizationIdentifier();
-  return useQuery({
-    queryKey: TRIAGE_QUERY_KEYS.patientRecord(
-      organizationIdentifier,
-      patientId
-    ),
-    queryFn: () => getPatientRecord(patientId),
-    enabled: isEnabled,
-  });
 }
 
 /** Saves vitals and the band; every queue and the front desk refresh. */
@@ -237,5 +216,33 @@ export function useRecordTriage() {
       request: TriageRequest;
     }) => recordTriage(visitId, request),
     onSettled: invalidatePatientFlow,
+  });
+}
+
+/** A visit's queue stops, for its journey through the day. */
+export function useVisitDetail(visitId: string, isEnabled: boolean) {
+  const organizationIdentifier = useOrganizationIdentifier();
+  return useQuery({
+    queryKey: [
+      ...QUEUE_BOARD_QUERY_KEYS.all(organizationIdentifier),
+      "visit",
+      visitId,
+    ],
+    queryFn: () => getVisitDetail(visitId),
+    enabled: isEnabled,
+  });
+}
+
+/** Earlier triage assessments of a visit, newest first. */
+export function useTriageHistory(visitId: string, isEnabled: boolean) {
+  const organizationIdentifier = useOrganizationIdentifier();
+  return useQuery({
+    queryKey: [
+      ...QUEUE_BOARD_QUERY_KEYS.all(organizationIdentifier),
+      "triage",
+      visitId,
+    ],
+    queryFn: () => getTriageHistory(visitId),
+    enabled: isEnabled,
   });
 }

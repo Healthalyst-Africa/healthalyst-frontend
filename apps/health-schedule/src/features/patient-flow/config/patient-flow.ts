@@ -3,7 +3,6 @@ import type { StatusTone } from "@healthalyst/ui/types/status-tone";
 /** HealthSchedule API paths for check-in, queues and today's appointments. */
 export const PATIENT_FLOW_ENDPOINTS = {
   patients: "/v1/patients",
-  quickPatient: "/v1/patients/quick",
   temporaryPatient: "/v1/patients/temporary",
   checkIns: "/v1/queue/check-ins",
   queues: "/v1/queues",
@@ -19,6 +18,9 @@ export const PATIENT_FLOW_ENDPOINTS = {
     `/v1/queue/entries/${encodeURIComponent(entryId)}/transfer`,
   completeVisit: (visitId: string) =>
     `/v1/visits/${encodeURIComponent(visitId)}/complete`,
+  visitLeft: (visitId: string) =>
+    `/v1/visits/${encodeURIComponent(visitId)}/left`,
+  visit: (visitId: string) => `/v1/visits/${encodeURIComponent(visitId)}`,
   visitBoard: "/v1/visits",
   dayBoard: "/v1/appointments/day-board",
 } as const;
@@ -78,7 +80,6 @@ export const PATIENT_SEX_OPTIONS = [
   { value: "unknown", label: "Not known" },
 ] as const;
 
-export const PATIENT_NAME_MAXIMUM_LENGTH = 100;
 export const CHECK_IN_NOTE_MAXIMUM_LENGTH = 500;
 export const UNKNOWN_PATIENT_LABEL_LENGTH = {
   minimum: 3,
@@ -86,5 +87,5 @@ export const UNKNOWN_PATIENT_LABEL_LENGTH = {
 } as const;
 export const PATIENT_AGE_MAXIMUM_YEARS = 130;
 
-/** Nigerian numbers are typed locally, such as 0803 123 4567. */
-export const PHONE_COUNTRY_CODE = "234";
+/** Why a patient left without being seen: optional, kept with the visit. */
+export const LEFT_REASON_MAXIMUM_LENGTH = 500;

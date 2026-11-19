@@ -82,9 +82,13 @@ page for phones, tablets and the installed app; desktop browsers sign in at the 
 sign-in, application and product checks that choose the first screen), `branch-selection` (the branch the person is working at) and
 `schedule-setup` (calendars with weekly hours, time off and holidays, and
 appointment types) and `patient-flow` (front desk check-in, triage and
-vitals, and the queue boards staff call patients from). Workspace pages share the signed-in session, permissions
+vitals, and the queue boards staff call patients from) and `patients` (registration
+with a duplicate check, the patient record with its tabs, allergies, insurance
+cover and card photos, family and contacts, consents, documents, and merging
+duplicate records). Workspace pages share the signed-in session, permissions
 and branch through `shared/workspace`.
-Its HealthSchedule API client is in `infrastructure/api`.
+Its HealthSchedule API client is in `infrastructure/api`, beside the storage
+client that sends document files to signed upload links.
 
 ### Dependency direction
 

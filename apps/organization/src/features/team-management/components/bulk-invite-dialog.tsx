@@ -145,6 +145,7 @@ export function BulkInviteDialog({
           id="bulk-invitation-people"
           label="People"
           name="people"
+          required
           rows={8}
           placeholder={
             "Amaka, Obi, amaka.obi@example.com, Nurse\nTunde, Bello, 08031234567"

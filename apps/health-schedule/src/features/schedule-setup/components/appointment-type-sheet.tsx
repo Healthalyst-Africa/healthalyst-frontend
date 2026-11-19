@@ -182,6 +182,7 @@ export function AppointmentTypeSheet({
           <TextField
             id="appointment-type-name"
             label="Name"
+            required
             placeholder="General consultation"
             error={errors.name?.message}
             {...form.register("name")}
@@ -190,13 +191,14 @@ export function AppointmentTypeSheet({
             <TextField
               id="appointment-type-duration"
               label="Length in minutes"
+              required
               inputMode="numeric"
               error={errors.durationMinutes?.message}
               {...form.register("durationMinutes")}
             />
             <TextField
               id="appointment-type-new-patient-duration"
-              label="Length for new patients (optional)"
+              label="Length for new patients"
               inputMode="numeric"
               description="Leave empty to use the same length."
               error={errors.newPatientDurationMinutes?.message}
@@ -205,6 +207,7 @@ export function AppointmentTypeSheet({
             <TextField
               id="appointment-type-buffer"
               label="Gap after each appointment, in minutes"
+              required
               inputMode="numeric"
               description={`Time to clean up or write notes, up to ${LIMITS.bufferMaximumMinutes}.`}
               error={errors.bufferMinutes?.message}
@@ -217,6 +220,7 @@ export function AppointmentTypeSheet({
                 <SelectField
                   id="appointment-type-modality"
                   label="How it happens"
+                  required
                   placeholder="Choose how it happens"
                   options={MODALITY_OPTIONS}
                   value={field.value}
@@ -231,7 +235,7 @@ export function AppointmentTypeSheet({
             />
             <TextField
               id="appointment-type-price"
-              label="Price in naira (optional)"
+              label="Price in naira"
               inputMode="decimal"
               placeholder="15000"
               error={errors.priceNaira?.message}
@@ -248,6 +252,7 @@ export function AppointmentTypeSheet({
             <TextField
               id="appointment-type-capacity"
               label="Patients per appointment"
+              required
               inputMode="numeric"
               description="More than 1 makes it a group session."
               error={errors.capacity?.message}
@@ -255,7 +260,7 @@ export function AppointmentTypeSheet({
             />
             <TextField
               id="appointment-type-daily-limit"
-              label="Most bookings a day (optional)"
+              label="Most bookings a day"
               inputMode="numeric"
               error={errors.dailyLimit?.message}
               {...form.register("dailyLimit")}
@@ -263,6 +268,7 @@ export function AppointmentTypeSheet({
             <TextField
               id="appointment-type-minimum-notice"
               label="Minimum notice, in hours"
+              required
               inputMode="numeric"
               description="0 allows booking right up to the start."
               error={errors.minimumNoticeHours?.message}
@@ -271,6 +277,7 @@ export function AppointmentTypeSheet({
             <TextField
               id="appointment-type-advance-days"
               label="Bookable up to, in days ahead"
+              required
               inputMode="numeric"
               error={errors.advanceBookingDays?.message}
               {...form.register("advanceBookingDays")}
@@ -278,6 +285,7 @@ export function AppointmentTypeSheet({
             <TextField
               id="appointment-type-overbooking"
               label="Overbooking, in percent"
+              required
               inputMode="numeric"
               description="Extra bookings allowed above capacity, for patients who do not come."
               error={errors.overbookingPercent?.message}
@@ -311,7 +319,7 @@ export function AppointmentTypeSheet({
           />
           <TextAreaField
             id="appointment-type-preparation"
-            label="Preparation notes (optional)"
+            label="Preparation notes"
             description="Shown when booking, such as fasting before a blood test."
             error={errors.preparationNotes?.message}
             {...form.register("preparationNotes")}

@@ -133,7 +133,7 @@ export function InviteMemberDialog({
       />
       <TextField
         id="invitation-phone"
-        label="Phone number (optional)"
+        label="Phone number"
         name="phone"
         type="tel"
         autoComplete="off"
@@ -150,7 +150,7 @@ export function InviteMemberDialog({
 
       <TextField
         id="invitation-jobTitle"
-        label="Job title (optional)"
+        label="Job title"
         name="jobTitle"
         maxLength={TEAM_FIELD_LIMITS.jobTitleMaximumLength}
         placeholder="For example, Medical officer"
@@ -158,7 +158,7 @@ export function InviteMemberDialog({
       />
       <SelectField
         id="invitation-specialty"
-        label="Specialty (optional)"
+        label="Specialty"
         name="specialty"
         placeholder="Choose a specialty"
         options={SPECIALTY_OPTIONS}

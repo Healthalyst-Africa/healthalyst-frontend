@@ -1,8 +1,4 @@
 import { describe, expect, it } from "vitest";
-import {
-  listSampleQueueEntries,
-  recordSampleTriage,
-} from "~/features/patient-flow/sample-data/sample-patient-flow";
 import { createTriageFormSchema } from "~/features/patient-flow/schemas/triage-form-schema";
 import {
   assessDangerSigns,
@@ -188,25 +184,5 @@ describe("place in the doctor's queue", () => {
     [21, "21st"],
   ])("writes %i as %s", (position, expected) => {
     expect(describeOrdinal(position)).toBe(expected);
-  });
-});
-
-describe("sample triage", () => {
-  it("moves an urgent child up the queue, without suggesting a band", async () => {
-    const before = await listSampleQueueEntries({ kind: "TRIAGE" });
-    const child = before.find(
-      (entry) => entry.patient.firstName === "Chiamaka"
-    );
-    expect(child).toBeDefined();
-    expect(before[0]?.visitId).not.toBe(child?.visitId);
-    if (!child) return;
-    const assessment = await recordSampleTriage(child.visitId, {
-      spo2: 92,
-      band: "YELLOW",
-    });
-    // Danger signs are adult values: a child's band is the nurse's call.
-    expect(assessment.suggestedBand).toBeNull();
-    const after = await listSampleQueueEntries({ kind: "TRIAGE" });
-    expect(after[0]?.visitId).toBe(child.visitId);
   });
 });

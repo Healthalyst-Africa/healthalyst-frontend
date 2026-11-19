@@ -69,6 +69,7 @@ export function TeamAccessFields({
         id={`${identifierPrefix}-roleIds`}
         label="Roles"
         name="roleIds"
+        required
         placeholder="Choose roles"
         searchPlaceholder="Search roles"
         options={roles.map((role) => ({
@@ -102,6 +103,7 @@ export function TeamAccessFields({
             id={`${identifierPrefix}-branchIds`}
             label="Branches"
             name="branchIds"
+            required
             placeholder="Choose branches"
             searchPlaceholder="Search branches"
             options={activeBranches.map((branch) => ({
@@ -119,7 +121,7 @@ export function TeamAccessFields({
           // Remount when the branches change so hidden departments drop out.
           key={departmentBranches.map((branch) => branch.id).join(",")}
           id={`${identifierPrefix}-departmentIds`}
-          label="Departments (optional)"
+          label="Departments"
           name="departmentIds"
           placeholder="Choose departments"
           searchPlaceholder="Search departments"

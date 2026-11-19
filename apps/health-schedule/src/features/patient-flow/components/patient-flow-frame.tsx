@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import { StateNotice } from "@healthalyst/ui/components/notice-banner";
 import { BranchSelectionNotice } from "~/features/branch-selection/components/branch-selection-notice";
 import type { WorkspaceBranch } from "~/features/branch-selection/schemas/branch-schema";
-import { isPatientFlowSampleDataEnabled } from "~/features/patient-flow/config/sample-data";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 
 /**
@@ -47,15 +46,6 @@ export function PatientFlowFrame({
         </div>
         {isReady && action}
       </div>
-      {isPatientFlowSampleDataEnabled() && (
-        <StateNotice tone="information" title="You are looking at sample data">
-          <p>
-            These patients are made up and kept in this browser tab only.
-            Nothing is sent to HealthSchedule, and reloading the page starts
-            again.
-          </p>
-        </StateNotice>
-      )}
       {!hasPermission ? (
         <StateNotice tone="information" title="Your role cannot open this page">
           <p>
