@@ -141,8 +141,9 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
     },
   ];
 
+  // Side by side only where the list and the three-column form both fit.
   return (
-    <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,24rem)_minmax(0,1fr)]">
+    <div className="grid items-start gap-6 2xl:grid-cols-[30rem_minmax(0,1fr)]">
       <ContentPanel
         heading="Waiting for vitals"
         headingLevel={2}
