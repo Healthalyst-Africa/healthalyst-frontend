@@ -44,7 +44,7 @@ export function PatientFlowFrame({
               : description}
           </p>
         </div>
-        {isReady && action}
+        {isReady && action && <div data-tour="page-actions">{action}</div>}
       </div>
       {!hasPermission ? (
         <StateNotice tone="information" title="Your role cannot open this page">

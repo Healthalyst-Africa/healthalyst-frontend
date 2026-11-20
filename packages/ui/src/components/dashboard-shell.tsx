@@ -73,6 +73,12 @@ type DashboardShellProperties = {
   contentClassName?: string;
 };
 
+/*
+ * Guided tours point at the shell's regions through these `data-tour`
+ * attributes: `shell-brand`, `shell-navigation`, `shell-toolbar` and
+ * `shell-actions`.
+ */
+
 /** The in-app item whose address is the longest prefix of the location. */
 function findCurrentHref(
   sections: readonly DashboardNavigationSection[],
@@ -182,11 +188,15 @@ function DashboardShellContent({
   return (
     <>
       <Sidebar variant="inset" collapsible="icon">
-        <SidebarHeader className="px-4 pt-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
+        <SidebarHeader
+          data-tour="shell-brand"
+          className="px-4 pt-4 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2"
+        >
           {brand}
         </SidebarHeader>
         <SidebarContent className="px-3 group-data-[collapsible=icon]:items-center group-data-[collapsible=icon]:px-2">
           <nav
+            data-tour="shell-navigation"
             aria-label={navigationLabel}
             className="flex flex-col gap-4 group-data-[collapsible=icon]:items-center"
           >
@@ -212,8 +222,10 @@ function DashboardShellContent({
       >
         <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center gap-3 rounded-t-xl border-b border-border bg-card px-3 sm:px-5">
           <SidebarTrigger />
-          <div className="min-w-0 flex-1">{toolbar}</div>
-          {actions}
+          <div data-tour="shell-toolbar" className="min-w-0 flex-1">
+            {toolbar}
+          </div>
+          {actions && <div data-tour="shell-actions">{actions}</div>}
         </header>
         <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-y-auto overscroll-contain">
           <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-7 p-4 sm:p-6 lg:px-10 lg:py-8">

@@ -1,8 +1,11 @@
 import {
+  AccessReviewIcon,
   AppointmentTypesIcon,
+  ConsultationIcon,
   DashboardIcon,
   FrontDeskIcon,
   HealthScheduleIcon,
+  NoteTemplatesIcon,
   OrganizationIcon,
   PatientRecordsIcon,
   QueueIcon,
@@ -27,8 +30,17 @@ const PATIENT_FLOW_PAGE_PERMISSIONS = {
   queues: "queue:read",
 } as const;
 
+/** Doctors see patients in the consultation workspace. */
+const CONSULTATION_PERMISSIONS = ["note:write", "queue:read"] as const;
+
 /** The HealthSchedule permission that shows patient records. */
 const PATIENT_RECORDS_PERMISSION = "patient:read";
+
+/** Managers review emergency access to restricted records. */
+const ACCESS_REVIEW_PERMISSION = "audit:read";
+
+/** Note templates are shown to people who read clinical notes. */
+const NOTE_TEMPLATES_PERMISSION = "note:read";
 
 /** The Platform API permission that shows each organisation page. */
 const ORGANIZATION_PAGE_PERMISSIONS = {
@@ -91,6 +103,37 @@ export function buildHealthScheduleNavigation({
           },
         ]
       : []),
+    ...(CONSULTATION_PERMISSIONS.every((permission) =>
+      permissions.includes(permission)
+    )
+      ? [
+          {
+            label: "Consultation",
+            href: HEALTH_SCHEDULE_ROUTES.consultation,
+            icon: ConsultationIcon,
+          },
+        ]
+      : []),
+  ];
+  const recordItems = [
+    ...(permissions.includes(PATIENT_RECORDS_PERMISSION)
+      ? [
+          {
+            label: "Patients",
+            href: HEALTH_SCHEDULE_ROUTES.patients,
+            icon: PatientRecordsIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(ACCESS_REVIEW_PERMISSION)
+      ? [
+          {
+            label: "Emergency access reviews",
+            href: HEALTH_SCHEDULE_ROUTES.accessReviews,
+            icon: AccessReviewIcon,
+          },
+        ]
+      : []),
   ];
   const sidebar: DashboardNavigationSection[] = [
     {
@@ -106,19 +149,8 @@ export function buildHealthScheduleNavigation({
     ...(patientFlowItems.length > 0
       ? [{ label: "Patients today", items: patientFlowItems }]
       : []),
-    ...(permissions.includes(PATIENT_RECORDS_PERMISSION)
-      ? [
-          {
-            label: "Records",
-            items: [
-              {
-                label: "Patients",
-                href: HEALTH_SCHEDULE_ROUTES.patients,
-                icon: PatientRecordsIcon,
-              },
-            ],
-          },
-        ]
+    ...(recordItems.length > 0
+      ? [{ label: "Records", items: recordItems }]
       : []),
     ...(permissions.includes(SCHEDULE_READ_PERMISSION)
       ? [
@@ -140,6 +172,15 @@ export function buildHealthScheduleNavigation({
                 href: HEALTH_SCHEDULE_ROUTES.scheduleAppointmentTypes,
                 icon: AppointmentTypesIcon,
               },
+              ...(permissions.includes(NOTE_TEMPLATES_PERMISSION)
+                ? [
+                    {
+                      label: "Note templates",
+                      href: HEALTH_SCHEDULE_ROUTES.scheduleNoteTemplates,
+                      icon: NoteTemplatesIcon,
+                    },
+                  ]
+                : []),
             ],
           },
         ]

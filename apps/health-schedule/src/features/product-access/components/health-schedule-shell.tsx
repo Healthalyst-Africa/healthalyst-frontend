@@ -17,6 +17,7 @@ import { useBranchSelection } from "~/features/branch-selection/hooks/use-branch
 import { getOrganizationAppLinks } from "~/features/organization-access/services/organization-app-links";
 import { buildHealthScheduleNavigation } from "~/features/product-access/utilities/build-health-schedule-navigation";
 import { useHealthScheduleSignOut } from "~/features/product-access/hooks/use-health-schedule-sign-out";
+import { PageHelpButton } from "~/features/guided-tours/components/page-help-button";
 import { useOrganizationSwitch } from "~/features/product-access/hooks/use-organization-switch";
 import { WorkspaceProvider } from "~/shared/workspace/workspace-context";
 
@@ -101,37 +102,40 @@ export function HealthScheduleShell({
         )
       }
       actions={
-        <AccountMenu
-          fullName={`${user.firstName} ${user.lastName}`}
-          emailAddress={user.email ?? ""}
-          error={signOutMutation.error?.message}
-          actions={[
-            // Account security is owned by the organisation hub. It opens in
-            // a new browser window, so an installed app stays where it was.
-            ...(organizationAppLinks
-              ? [
-                  {
-                    label: "Account security",
-                    icon: <AccountSecurityIcon aria-hidden="true" />,
-                    onSelect: () =>
-                      window.open(
-                        organizationAppLinks.accountSecurity,
-                        "_blank",
-                        "noopener"
-                      ),
-                  },
-                ]
-              : []),
-            {
-              label: "Sign out",
-              pendingLabel: "Signing out…",
-              isPending: signOutMutation.isPending,
-              icon: <SignOutIcon aria-hidden="true" />,
-              tone: "destructive",
-              onSelect: () => signOutMutation.mutate(),
-            },
-          ]}
-        />
+        <div className="flex items-center gap-2">
+          <PageHelpButton />
+          <AccountMenu
+            fullName={`${user.firstName} ${user.lastName}`}
+            emailAddress={user.email ?? ""}
+            error={signOutMutation.error?.message}
+            actions={[
+              // Account security is owned by the organisation hub. It opens in
+              // a new browser window, so an installed app stays where it was.
+              ...(organizationAppLinks
+                ? [
+                    {
+                      label: "Account security",
+                      icon: <AccountSecurityIcon aria-hidden="true" />,
+                      onSelect: () =>
+                        window.open(
+                          organizationAppLinks.accountSecurity,
+                          "_blank",
+                          "noopener"
+                        ),
+                    },
+                  ]
+                : []),
+              {
+                label: "Sign out",
+                pendingLabel: "Signing out…",
+                isPending: signOutMutation.isPending,
+                icon: <SignOutIcon aria-hidden="true" />,
+                tone: "destructive",
+                onSelect: () => signOutMutation.mutate(),
+              },
+            ]}
+          />
+        </div>
       }
     >
       <div className="flex flex-col gap-6">
