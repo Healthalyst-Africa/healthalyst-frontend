@@ -89,6 +89,7 @@ export function StaffSignInForm() {
             id="staff-email-address"
             label="Work email address"
             name="emailAddress"
+            required
             type="email"
             autoComplete="username"
             error={fieldErrors.emailAddress}
@@ -98,6 +99,7 @@ export function StaffSignInForm() {
             id="staff-password"
             label="Password"
             name="password"
+            required
             type="password"
             autoComplete="current-password"
             error={fieldErrors.password}

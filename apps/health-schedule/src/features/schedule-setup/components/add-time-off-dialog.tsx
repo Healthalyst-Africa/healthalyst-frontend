@@ -147,6 +147,7 @@ export function AddTimeOffDialog({
           <SelectField
             id="time-off-applies-to"
             label="Closes"
+            required
             placeholder="Choose what it closes"
             options={APPLIES_TO_OPTIONS}
             value={field.value}
@@ -169,6 +170,7 @@ export function AddTimeOffDialog({
             <SelectField
               id="time-off-calendar"
               label="Calendar"
+              required
               placeholder={
                 calendarOptions.length === 0
                   ? "No calendars are taking bookings"
@@ -189,6 +191,7 @@ export function AddTimeOffDialog({
             <SelectField
               id="time-off-branch"
               label="Branch"
+              required
               placeholder="Choose a branch"
               options={branchOptions}
               value={field.value}
@@ -205,6 +208,7 @@ export function AddTimeOffDialog({
           <SelectField
             id="time-off-kind"
             label="Reason for the closure"
+            required
             placeholder="Choose a reason"
             options={kindOptions}
             value={field.value}
@@ -235,6 +239,7 @@ export function AddTimeOffDialog({
             <DatePickerField
               id="time-off-start-date"
               label={allDay ? "First day" : "Starts on"}
+              required
               value={field.value}
               onValueChange={(value) => {
                 field.onChange(value);
@@ -251,6 +256,7 @@ export function AddTimeOffDialog({
             id="time-off-start-time"
             type="time"
             label="Start time"
+            required
             error={errors.startTime?.message}
             {...form.register("startTime")}
           />
@@ -262,6 +268,7 @@ export function AddTimeOffDialog({
             <DatePickerField
               id="time-off-end-date"
               label={allDay ? "Last day" : "Ends on"}
+              required
               value={field.value}
               onValueChange={field.onChange}
               earliestDate={startDate || today}
@@ -274,6 +281,7 @@ export function AddTimeOffDialog({
             id="time-off-end-time"
             type="time"
             label="End time"
+            required
             error={errors.endTime?.message}
             {...form.register("endTime")}
           />
@@ -281,7 +289,7 @@ export function AddTimeOffDialog({
       </div>
       <TextField
         id="time-off-reason"
-        label="Note (optional)"
+        label="Note"
         placeholder="Annual leave"
         description="Staff see this note. Do not include patient details."
         error={errors.reason?.message}

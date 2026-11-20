@@ -11,6 +11,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@healthalyst/ui/primitives/dialog";
+import { cn } from "@healthalyst/ui/lib/utilities";
 
 type FormDialogProperties = {
   open: boolean;
@@ -26,8 +27,15 @@ type FormDialogProperties = {
   tone?: "default" | "destructive";
   /** A form-level error, such as a failed request. */
   error?: string;
+  /** `wide` fits a longer form laid out in two columns, such as a registration. */
+  size?: "default" | "wide";
   onSubmit: (formEvent: FormEvent<HTMLFormElement>) => void;
 };
+
+const DIALOG_WIDTH_CLASS_NAMES = {
+  default: "max-w-lg",
+  wide: "max-w-3xl",
+} as const;
 
 /**
  * A dialog that collects a few fields and submits them, such as a decision
@@ -44,13 +52,24 @@ export function FormDialog({
   isSubmitting = false,
   tone = "default",
   error,
+  size = "default",
   onSubmit,
 }: FormDialogProperties) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-lg gap-0 rounded-2xl p-0 sm:rounded-2xl">
-        <form onSubmit={onSubmit} noValidate className="flex flex-col">
-          <DialogHeader className="gap-1 px-6 pb-2 pt-7 text-left sm:text-left">
+      {/* The title and buttons stay in view; only the fields scroll. */}
+      <DialogContent
+        className={cn(
+          "flex flex-col gap-0 overflow-hidden rounded-2xl p-0 sm:rounded-2xl",
+          DIALOG_WIDTH_CLASS_NAMES[size]
+        )}
+      >
+        <form
+          onSubmit={onSubmit}
+          noValidate
+          className="flex min-h-0 flex-1 flex-col"
+        >
+          <DialogHeader className="shrink-0 gap-1 border-b px-6 pb-4 pt-7 text-left sm:px-8 sm:text-left">
             <DialogTitle className="font-serif text-2xl font-normal leading-tight tracking-normal">
               {title}
             </DialogTitle>
@@ -60,11 +79,11 @@ export function FormDialog({
               </DialogDescription>
             )}
           </DialogHeader>
-          <div className="flex flex-col gap-5 px-6 py-5">
+          <div className="flex min-h-0 flex-1 flex-col gap-6 overflow-y-auto px-6 py-6 sm:px-8">
             {children}
             {error && <FormMessage tone="error">{error}</FormMessage>}
           </div>
-          <DialogFooter className="gap-3 border-t px-6 py-4 sm:space-x-0">
+          <DialogFooter className="shrink-0 gap-3 border-t px-6 py-4 sm:space-x-0 sm:px-8">
             <ActionButton
               type="button"
               variant="outline"

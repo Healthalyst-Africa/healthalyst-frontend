@@ -15,6 +15,7 @@ import { Input } from "@healthalyst/ui/primitives/input";
 import { PasswordInput } from "@healthalyst/ui/components/password-input";
 import { FieldStatusMessage } from "@healthalyst/ui/components/forms/field-status-message";
 import { isFocusLeaving } from "@healthalyst/ui/lib/focus";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import type { FieldStatus } from "@healthalyst/ui/types/field-status";
 
@@ -30,6 +31,11 @@ type TextFieldProperties = Omit<
   error?: string;
   /** Live feedback, such as a password's length, shown while there is no error. */
   status?: FieldStatus;
+  /**
+   * Marks the field with an asterisk and announces it as required. The
+   * form's own validation enforces it, so the browser's check stays off.
+   */
+  required?: boolean;
   /** Runs when focus leaves the whole field, not when it moves within it. */
   onFieldLeave?: () => void;
   className?: string;
@@ -51,6 +57,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProperties>(
       status,
       onFieldLeave,
       type = "text",
+      required = false,
       disabled,
       className,
       inputClassName,
@@ -79,6 +86,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProperties>(
       disabled,
       className: inputClassName,
       "aria-invalid": Boolean(error) || undefined,
+      "aria-required": required || undefined,
       "aria-describedby": describedBy,
     };
 
@@ -92,7 +100,7 @@ const TextField = forwardRef<HTMLInputElement, TextFieldProperties>(
         }}
       >
         <FieldLabel className={cn(hideLabel && "sr-only")} htmlFor={id}>
-          {label}
+          <FieldLabelText label={label} required={required} />
         </FieldLabel>
         {type === "password" ? (
           <PasswordInput {...controlProperties} visibilityLabel={label} />

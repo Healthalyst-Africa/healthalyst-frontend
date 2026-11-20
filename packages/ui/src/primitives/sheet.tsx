@@ -9,6 +9,7 @@ import {
 import { CloseIcon } from "@healthalyst/icons";
 
 import { cn } from "@healthalyst/ui/lib/utilities";
+import { useReturnFocus } from "@healthalyst/ui/hooks/use-return-focus";
 
 const Sheet = SheetPrimitive.Root;
 
@@ -79,26 +80,31 @@ const SheetContent = React.forwardRef<
       className,
       children,
       onOpenAutoFocus = focusSheetOnOpen,
+      onCloseAutoFocus,
       ...properties
     },
     elementReference
-  ) => (
-    <SheetPortal>
-      <SheetOverlay />
-      <SheetPrimitive.Content
-        ref={elementReference}
-        className={cn(sheetVariants({ side }), className)}
-        onOpenAutoFocus={onOpenAutoFocus}
-        {...properties}
-      >
-        <SheetPrimitive.Close className="absolute right-2 top-2 flex size-11 items-center justify-center rounded-full opacity-70 ring-offset-background transition-opacity hover:bg-secondary hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none sm:right-3 sm:top-3 sm:size-9">
-          <CloseIcon className="size-4" aria-hidden="true" />
-          <span className="sr-only">Close</span>
-        </SheetPrimitive.Close>
-        {children}
-      </SheetPrimitive.Content>
-    </SheetPortal>
-  )
+  ) => {
+    const focusHandlers = useReturnFocus({ onOpenAutoFocus, onCloseAutoFocus });
+    return (
+      <SheetPortal>
+        <SheetOverlay />
+        <SheetPrimitive.Content
+          ref={elementReference}
+          className={cn(sheetVariants({ side }), className)}
+          onOpenAutoFocus={focusHandlers.onOpenAutoFocus}
+          onCloseAutoFocus={focusHandlers.onCloseAutoFocus}
+          {...properties}
+        >
+          <SheetPrimitive.Close className="absolute right-2 top-2 flex size-11 items-center justify-center rounded-full opacity-70 ring-offset-background transition-opacity hover:bg-secondary hover:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none sm:right-3 sm:top-3 sm:size-9">
+            <CloseIcon className="size-4" aria-hidden="true" />
+            <span className="sr-only">Close</span>
+          </SheetPrimitive.Close>
+          {children}
+        </SheetPrimitive.Content>
+      </SheetPortal>
+    );
+  }
 );
 SheetContent.displayName = SheetPrimitive.Content.displayName;
 

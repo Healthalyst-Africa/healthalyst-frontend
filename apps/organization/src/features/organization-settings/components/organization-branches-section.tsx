@@ -207,7 +207,7 @@ export function OrganizationBranchesSection({
           id="branch-slug"
           label="Short name for links"
           name="slug"
-          description="Optional. Lowercase letters, numbers and hyphens. Leave it empty and HealthAlyst makes one from the name."
+          description="Lowercase letters, numbers and hyphens. Leave it empty and HealthAlyst makes one from the name."
           maxLength={BRANCH_FIELD_LIMITS.slugMaximumLength}
           placeholder="lekki"
           error={visibleFieldErrors.slug}

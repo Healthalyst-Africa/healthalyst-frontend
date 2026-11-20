@@ -77,4 +77,13 @@ export {
   IconPlayerSkipForward as SkipPatientIcon,
   IconStethoscope as SeePatientIcon,
   IconHeartbeat as VitalsIcon,
+  IconAddressBook as PatientRecordsIcon,
+  IconDoorExit as LeftWithoutBeingSeenIcon,
+  IconFileUpload as UploadDocumentIcon,
+  IconCamera as AddCardPhotoIcon,
+  IconArrowMerge as MergeRecordsIcon,
+  IconArrowBackUp as UndoIcon,
+  IconDots as MoreActionsIcon,
+  IconShieldSearch as EligibilityCheckIcon,
+  IconCircleMinus as EndCoverIcon,
 } from "@tabler/icons-react";

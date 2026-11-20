@@ -190,6 +190,7 @@ function RenameSection({ calendar }: { calendar: ScheduleCalendar }) {
       <TextField
         id={`calendar-name-${calendar.id}`}
         label="Name"
+        required
         className="flex-1"
         error={
           form.formState.errors.name?.message ??

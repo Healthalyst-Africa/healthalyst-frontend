@@ -4,6 +4,7 @@ import {
   FrontDeskIcon,
   HealthScheduleIcon,
   OrganizationIcon,
+  PatientRecordsIcon,
   QueueIcon,
   RolesIcon,
   ScheduleCalendarsIcon,
@@ -25,6 +26,9 @@ const PATIENT_FLOW_PAGE_PERMISSIONS = {
   triage: "triage:record",
   queues: "queue:read",
 } as const;
+
+/** The HealthSchedule permission that shows patient records. */
+const PATIENT_RECORDS_PERMISSION = "patient:read";
 
 /** The Platform API permission that shows each organisation page. */
 const ORGANIZATION_PAGE_PERMISSIONS = {
@@ -101,6 +105,20 @@ export function buildHealthScheduleNavigation({
     },
     ...(patientFlowItems.length > 0
       ? [{ label: "Patients today", items: patientFlowItems }]
+      : []),
+    ...(permissions.includes(PATIENT_RECORDS_PERMISSION)
+      ? [
+          {
+            label: "Records",
+            items: [
+              {
+                label: "Patients",
+                href: HEALTH_SCHEDULE_ROUTES.patients,
+                icon: PatientRecordsIcon,
+              },
+            ],
+          },
+        ]
       : []),
     ...(permissions.includes(SCHEDULE_READ_PERMISSION)
       ? [

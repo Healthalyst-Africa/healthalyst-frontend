@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   checkInFormSchema,
-  quickPatientFormSchema,
   unknownPatientFormSchema,
 } from "~/features/patient-flow/schemas/patient-flow-form-schemas";
 import type {
@@ -21,11 +20,10 @@ import {
 } from "~/features/patient-flow/utilities/front-desk";
 import {
   toCheckInRequest,
-  toQuickPatientRequest,
   toTransferRequest,
   toUnknownPatientRequest,
 } from "~/features/patient-flow/utilities/patient-flow-requests";
-import { toInternationalPhoneNumber } from "~/features/patient-flow/utilities/phone-number";
+import { toInternationalPhoneNumber } from "~/shared/contact/phone-number";
 import {
   buildQueueBoardOptions,
   buildQueueTargetOptions,
@@ -256,20 +254,7 @@ describe("check-in requests", () => {
     ).toEqual({ to: { kind: "CONSULTATION", resourceId: DOCTOR_BELLO } });
   });
 
-  it("shapes quick and unknown registrations", () => {
-    expect(
-      toQuickPatientRequest({
-        firstName: " Grace ",
-        lastName: "Okafor",
-        sex: "female",
-        phone: "0812 123 2280",
-      })
-    ).toEqual({
-      firstName: "Grace",
-      lastName: "Okafor",
-      sex: "female",
-      phone: "+2348121232280",
-    });
+  it("shapes unknown-patient registrations", () => {
     expect(
       toUnknownPatientRequest({
         sex: "male",
@@ -288,21 +273,6 @@ describe("check-in requests", () => {
 });
 
 describe("form rules", () => {
-  it("needs a name, sex and a usable phone number to register", () => {
-    const result = quickPatientFormSchema.safeParse({
-      firstName: "",
-      lastName: "Okafor",
-      sex: "",
-      phone: "12345",
-    });
-    expect(result.success).toBe(false);
-    expect(result.error?.issues.map((issue) => issue.path[0]).sort()).toEqual([
-      "firstName",
-      "phone",
-      "sex",
-    ]);
-  });
-
   it("accepts an unknown patient without an age, but not a made-up age", () => {
     expect(
       unknownPatientFormSchema.safeParse({

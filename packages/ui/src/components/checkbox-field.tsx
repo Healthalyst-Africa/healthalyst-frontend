@@ -8,6 +8,7 @@ import {
 } from "@healthalyst/ui/primitives/field";
 import { HintText } from "@healthalyst/ui/components/hint-text";
 import { Checkbox } from "@healthalyst/ui/primitives/checkbox";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 type CheckboxFieldProperties = {
@@ -57,7 +58,7 @@ export function CheckboxField({
           value={value}
           checked={checked}
           defaultChecked={defaultChecked}
-          required={required}
+          aria-required={required || undefined}
           disabled={disabled}
           aria-invalid={Boolean(error) || undefined}
           aria-describedby={
@@ -70,7 +71,7 @@ export function CheckboxField({
           }
         />
         <FieldLabel htmlFor={id} className="font-normal leading-5">
-          {label}
+          <FieldLabelText label={label} required={required} />
         </FieldLabel>
       </div>
       {description && (

@@ -22,12 +22,13 @@ import {
 } from "~/features/patient-flow/config/triage";
 import { PATIENT_FLOW_PERMISSIONS } from "~/features/patient-flow/config/patient-flow";
 import {
-  usePatientRecord,
   useQueueActions,
   useQueueEntries,
   useRecordTriage,
 } from "~/features/patient-flow/hooks/use-patient-flow";
 import { createTriageFormSchema } from "~/features/patient-flow/schemas/triage-form-schema";
+import { PatientAllergyLine } from "~/features/patients/components/patient-banner";
+import { usePatientDetail } from "~/features/patients/hooks/use-patients";
 import type {
   QueueEntry,
   TriageBand,
@@ -119,11 +120,11 @@ const NUMBER_FIELDS: readonly {
 const EXTRA_NUMBER_FIELDS: typeof NUMBER_FIELDS = [
   {
     name: "glucoseMmolL",
-    label: "Blood glucose (mmol/L, optional)",
+    label: "Blood glucose (mmol/L)",
     inputMode: "decimal",
   },
-  { name: "weightKg", label: "Weight (kg, optional)", inputMode: "decimal" },
-  { name: "heightCm", label: "Height (cm, optional)", inputMode: "decimal" },
+  { name: "weightKg", label: "Weight (kg)", inputMode: "decimal" },
+  { name: "heightCm", label: "Height (cm)", inputMode: "decimal" },
 ];
 
 const BAND_LABELS: Record<TriageBand, string> = {
@@ -160,7 +161,7 @@ export function VitalsForm({
     PATIENT_FLOW_PERMISSIONS.readPatients
   );
   const patientName = describePatientName(entry.patient);
-  const patientRecordQuery = usePatientRecord(
+  const patientRecordQuery = usePatientDetail(
     entry.patient.id,
     canReadPatients
   );
@@ -298,6 +299,11 @@ export function VitalsForm({
         className="flex flex-col gap-6"
         onSubmit={(formEvent) => void save(canSendOn)(formEvent)}
       >
+        {patientRecordQuery.data && (
+          <div className="rounded-lg border bg-muted/40 p-4 text-sm">
+            <PatientAllergyLine patient={patientRecordQuery.data} />
+          </div>
+        )}
         <TextField
           id={FIELD_IDENTIFIERS.complaint}
           label="Presenting complaint"
@@ -343,7 +349,7 @@ export function VitalsForm({
               render={({ field }) => (
                 <SelectField
                   id={FIELD_IDENTIFIERS.painScore}
-                  label="Pain score (optional)"
+                  label="Pain score"
                   placeholder="Choose 0 to 10"
                   options={PAIN_SCORE_OPTIONS}
                   value={field.value}
@@ -398,6 +404,7 @@ export function VitalsForm({
             <ChoiceCardGroup
               id={FIELD_IDENTIFIERS.band}
               legend="Triage band"
+              required
               description={
                 suggestedBand && !hasChosenBand
                   ? "Chosen from the danger signs. You can raise it at any time."
@@ -427,6 +434,7 @@ export function VitalsForm({
           <TextAreaField
             id={FIELD_IDENTIFIERS.overrideReason}
             label="Why is the band lower than emergency?"
+            required
             description="Recorded with the triage. Needed when red applies."
             rows={2}
             maxLength={TRIAGE_TEXT_LIMITS.overrideReason.maximum}
@@ -437,7 +445,7 @@ export function VitalsForm({
 
         <TextAreaField
           id={FIELD_IDENTIFIERS.notes}
-          label="Nursing note (optional)"
+          label="Nursing note"
           rows={3}
           maxLength={TRIAGE_TEXT_LIMITS.notes}
           error={errors.notes?.message}
@@ -448,6 +456,7 @@ export function VitalsForm({
           <div className="flex flex-col gap-2">
             <SelectField
               id="triage-send-to"
+              required
               label="Send to"
               placeholder="Choose a doctor"
               options={doctorOptions}

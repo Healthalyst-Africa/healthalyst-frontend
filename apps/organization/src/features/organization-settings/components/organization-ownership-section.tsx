@@ -187,6 +187,7 @@ export function OrganizationOwnershipSection({
           id="ownership-membershipId"
           label="New owner"
           name="membershipId"
+          required
           placeholder={
             membersQuery.isPending
               ? "Loading team members"
@@ -207,6 +208,7 @@ export function OrganizationOwnershipSection({
         <CheckboxField
           id="ownership-confirmed"
           name="confirmed"
+          required
           label="I understand I will become an administrator and lose owner-only actions, such as transferring ownership."
           error={fieldErrors.confirmed}
         />

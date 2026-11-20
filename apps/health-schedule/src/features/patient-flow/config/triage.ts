@@ -3,8 +3,6 @@ import type { StatusTone } from "@healthalyst/ui/types/status-tone";
 export const TRIAGE_ENDPOINTS = {
   triage: (visitId: string) =>
     `/v1/visits/${encodeURIComponent(visitId)}/triage`,
-  patient: (patientId: string) =>
-    `/v1/patients/${encodeURIComponent(patientId)}`,
 } as const;
 
 export const TRIAGE_PERMISSIONS = {

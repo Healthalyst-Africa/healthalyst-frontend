@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@healthalyst/ui/primitives/select";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 type SelectFieldOption = {
@@ -60,7 +61,7 @@ export function SelectField({
   name,
   value,
   defaultValue,
-  required,
+  required = false,
   disabled,
   error,
   className,
@@ -78,7 +79,7 @@ export function SelectField({
       data-disabled={disabled || undefined}
     >
       <FieldLabel className={cn(hideLabel && "sr-only")} htmlFor={id}>
-        {label}
+        <FieldLabelText label={label} required={required} />
       </FieldLabel>
       {presentation === "native" ? (
         <NativeSelect
@@ -87,9 +88,9 @@ export function SelectField({
           name={name}
           value={value}
           defaultValue={value === undefined ? (defaultValue ?? "") : undefined}
-          required={required}
           disabled={disabled}
           aria-invalid={Boolean(error) || undefined}
+          aria-required={required || undefined}
           aria-describedby={errorIdentifier}
           onChange={(changeEvent) =>
             onValueChange?.(changeEvent.currentTarget.value)
@@ -109,7 +110,6 @@ export function SelectField({
           name={name}
           value={value}
           defaultValue={defaultValue}
-          required={required}
           disabled={disabled}
           onValueChange={onValueChange}
         >
@@ -117,6 +117,7 @@ export function SelectField({
             id={id}
             className={cn(controlSizeClassName)}
             aria-invalid={Boolean(error) || undefined}
+            aria-required={required || undefined}
             aria-describedby={errorIdentifier}
           >
             <SelectValue placeholder={placeholder} />

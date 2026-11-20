@@ -58,6 +58,11 @@ export type DataTableProperties<RowData> = {
    * clickable, and a labelled button at the end of the row serves keyboards
    * and assistive technology.
    */
+  /**
+   * Rows shown before the table scrolls inside its own box, with its column
+   * headings kept in view. Defaults to 5.
+   */
+  maximumVisibleRows?: number;
   /** Highlights rows that need attention first, such as long waits. */
   getRowEmphasis?: (row: RowData) => DataTableRowEmphasis;
   rowAction?: {

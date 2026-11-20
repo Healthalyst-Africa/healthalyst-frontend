@@ -96,6 +96,7 @@ export function InvitePartnerDialog({
         id="partner-invitation-partnerType"
         label="Type of organisation"
         name="partnerType"
+        required
         placeholder="Choose the type"
         options={organizationTypeOptions}
         error={fieldErrors.partnerType}
@@ -104,6 +105,7 @@ export function InvitePartnerDialog({
         id="partner-invitation-serviceCategory"
         label="Service they will provide to you"
         name="serviceCategory"
+        required
         placeholder="Choose the service"
         options={SERVICE_CATEGORY_OPTIONS}
         error={fieldErrors.serviceCategory}
@@ -121,7 +123,6 @@ export function InvitePartnerDialog({
       <TextField
         id="partner-invitation-phone"
         label="Phone number"
-        description="Optional."
         name="phone"
         type="tel"
         autoComplete="tel"

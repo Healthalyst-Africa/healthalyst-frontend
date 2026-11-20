@@ -11,6 +11,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@healthalyst/ui/primitives/input-otp";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 type OneTimeCodeFieldProperties = {
@@ -95,7 +96,7 @@ const OneTimeCodeField = forwardRef<
         data-disabled={disabled || undefined}
       >
         <FieldLabel className="justify-center" htmlFor={id}>
-          {label}
+          <FieldLabelText label={label} required={required} />
         </FieldLabel>
         <InputOTP
           ref={elementReference}

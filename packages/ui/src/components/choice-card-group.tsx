@@ -11,6 +11,7 @@ import {
   RadioGroup,
   RadioGroupItem,
 } from "@healthalyst/ui/primitives/radio-group";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import type { StatusTone } from "@healthalyst/ui/types/status-tone";
 
@@ -33,6 +34,8 @@ type ChoiceCardGroupProperties = {
   value: string;
   onValueChange: (value: string) => void;
   error?: string;
+  /** Marks the group with an asterisk and announces it as required. */
+  required?: boolean;
   /** Cards side by side from tablet width, or always stacked. */
   layout?: "columns" | "stack";
   className?: string;
@@ -62,6 +65,7 @@ export function ChoiceCardGroup({
   value,
   onValueChange,
   error,
+  required = false,
   layout = "columns",
   className,
 }: ChoiceCardGroupProperties) {
@@ -71,7 +75,7 @@ export function ChoiceCardGroup({
   return (
     <FieldSet className={cn("gap-3", className)} data-invalid={Boolean(error)}>
       <FieldLegend variant="label" className="mb-0">
-        {legend}
+        <FieldLabelText label={legend} required={required} announceRequired />
       </FieldLegend>
       {description && (
         <HintText id={descriptionIdentifier}>{description}</HintText>
@@ -81,6 +85,7 @@ export function ChoiceCardGroup({
         value={value}
         onValueChange={onValueChange}
         aria-invalid={Boolean(error) || undefined}
+        aria-required={required || undefined}
         aria-describedby={
           [descriptionIdentifier, errorIdentifier].filter(Boolean).join(" ") ||
           undefined

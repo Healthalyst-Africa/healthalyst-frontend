@@ -16,6 +16,7 @@ import {
   QueueEntrySheet,
   type QueueEntryAction,
 } from "~/features/patient-flow/components/queue-entry-sheet";
+import { LeftWithoutBeingSeenDialog } from "~/features/patient-flow/components/left-without-being-seen-dialog";
 import { SendOnDialog } from "~/features/patient-flow/components/send-on-dialog";
 import {
   CLOCK_STATE_TONES,
@@ -24,7 +25,6 @@ import {
   TRIAGE_BAND_PRESENTATION,
 } from "~/features/patient-flow/config/patient-flow";
 import {
-  readPatientFlowDepartments,
   useDayBoard,
   useQueueActions,
   useQueueEntries,
@@ -75,6 +75,7 @@ function QueueBoard({ branch }: { branch: WorkspaceBranch }) {
   const [openEntry, setOpenEntry] = useState<QueueEntry | null>(null);
   const [sendingOnEntry, setSendingOnEntry] = useState<QueueEntry | null>(null);
   const [finishingEntry, setFinishingEntry] = useState<QueueEntry | null>(null);
+  const [leavingEntry, setLeavingEntry] = useState<QueueEntry | null>(null);
   const [pendingAction, setPendingAction] = useState<QueueEntryAction | null>(
     null
   );
@@ -87,7 +88,7 @@ function QueueBoard({ branch }: { branch: WorkspaceBranch }) {
 
   const choices = readQueueTargetChoices(
     dayBoardQuery.data,
-    readPatientFlowDepartments(branch)
+    branch.departments
   );
   const boardOptions = buildQueueBoardOptions(
     choices,
@@ -279,6 +280,18 @@ function QueueBoard({ branch }: { branch: WorkspaceBranch }) {
         onFinish={(entry) => {
           actions.finish.reset();
           setFinishingEntry(entry);
+        }}
+        onLeft={setLeavingEntry}
+      />
+      <LeftWithoutBeingSeenDialog
+        entry={leavingEntry}
+        onOpenChange={(open) => {
+          if (!open) setLeavingEntry(null);
+        }}
+        mutation={actions.left}
+        onRecorded={() => {
+          setLeavingEntry(null);
+          setOpenEntry(null);
         }}
       />
       <SendOnDialog

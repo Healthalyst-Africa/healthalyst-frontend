@@ -51,6 +51,7 @@ export function InternalNoteForm({
       <TextAreaField
         id="internal-note"
         label="Add an internal note"
+        required
         description="Only HealthAlyst staff can see internal notes."
         name="note"
         rows={3}

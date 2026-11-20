@@ -12,6 +12,7 @@ import {
 } from "@healthalyst/ui/primitives/field";
 import { HintText } from "@healthalyst/ui/components/hint-text";
 import { Textarea } from "@healthalyst/ui/primitives/textarea";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { cn } from "@healthalyst/ui/lib/utilities";
 
 type TextAreaFieldProperties = Omit<
@@ -23,13 +24,24 @@ type TextAreaFieldProperties = Omit<
   description?: ReactNode;
   /** Validation message shown below the control and linked to it. */
   error?: string;
+  /** Marks the field with an asterisk and announces it as required. */
+  required?: boolean;
   className?: string;
 };
 
 /** A labelled multi-line input with its description and validation message. */
 const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProperties>(
   (
-    { id, label, description, error, disabled, className, ...properties },
+    {
+      id,
+      label,
+      description,
+      error,
+      required = false,
+      disabled,
+      className,
+      ...properties
+    },
     elementReference
   ) => {
     const descriptionIdentifier = description ? `${id}-description` : "";
@@ -41,13 +53,16 @@ const TextAreaField = forwardRef<HTMLTextAreaElement, TextAreaFieldProperties>(
         data-invalid={Boolean(error)}
         data-disabled={disabled || undefined}
       >
-        <FieldLabel htmlFor={id}>{label}</FieldLabel>
+        <FieldLabel htmlFor={id}>
+          <FieldLabelText label={label} required={required} />
+        </FieldLabel>
         <Textarea
           {...properties}
           ref={elementReference}
           id={id}
           disabled={disabled}
           aria-invalid={Boolean(error) || undefined}
+          aria-required={required || undefined}
           aria-describedby={
             [descriptionIdentifier, errorIdentifier]
               .filter(Boolean)

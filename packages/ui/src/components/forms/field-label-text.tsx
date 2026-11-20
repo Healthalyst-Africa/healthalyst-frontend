@@ -1,5 +1,7 @@
 "use client";
 
+import type { ReactNode } from "react";
+
 /**
  * A field's label text, followed by an asterisk when the field is required.
  * Controls with a native `required` state already announce it, so the
@@ -11,7 +13,7 @@ export function FieldLabelText({
   required = false,
   announceRequired = false,
 }: {
-  label: string;
+  label: ReactNode;
   required?: boolean;
   announceRequired?: boolean;
 }) {

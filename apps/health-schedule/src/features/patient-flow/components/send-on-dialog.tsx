@@ -91,6 +91,7 @@ export function SendOnDialog({
           <SelectField
             id="send-on-queue"
             label="Send to"
+            required
             placeholder="Choose the next queue"
             options={queueTargetOptions}
             value={field.value}
@@ -101,7 +102,7 @@ export function SendOnDialog({
       />
       <TextAreaField
         id="send-on-note"
-        label="Note for the next team (optional)"
+        label="Note for the next team"
         description="For example: full blood count requested, or review with results."
         rows={3}
         maxLength={CHECK_IN_NOTE_MAXIMUM_LENGTH}

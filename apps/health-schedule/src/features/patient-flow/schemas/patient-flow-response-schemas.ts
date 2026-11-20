@@ -168,11 +168,35 @@ export const triageAssessmentSchema = z.object({
   recordedAt: z.string(),
 });
 
-/** The parts of a patient's record triage needs (`GET /v1/patients/:id`). */
-export const patientRecordSchema = z.object({
+/** A visit with every queue stop, oldest first (`GET /v1/visits/{id}`). */
+export const visitDetailSchema = z.object({
   id: z.string(),
-  dateOfBirth: z.string().nullable(),
-  dateOfBirthEstimated: z.boolean(),
+  token: z.string(),
+  status: z.enum(["OPEN", "COMPLETED", "LEFT"]),
+  checkedInAt: z.string(),
+  endedAt: z.string().nullable(),
+  leftReason: z.string().nullable(),
+  stops: z.array(queueEntrySchema),
+});
+
+/** A visit's triage assessments, newest first. */
+export const triageHistorySchema = z.object({
+  data: z.array(
+    triageAssessmentSchema.extend({
+      complaint: z.string().nullable(),
+      temperatureC: z.number().nullable(),
+      heartRate: z.number().nullable(),
+      respiratoryRate: z.number().nullable(),
+      systolicBp: z.number().nullable(),
+      diastolicBp: z.number().nullable(),
+      spo2: z.number().nullable(),
+      consciousness: z.string().nullable(),
+      glucoseMmolL: z.number().nullable(),
+      painScore: z.number().nullable(),
+      notes: z.string().nullable(),
+      overrideReason: z.string().nullable(),
+    })
+  ),
 });
 
 export type QueueEntry = z.infer<typeof queueEntrySchema>;
@@ -188,4 +212,5 @@ export type DayBoardAppointment = z.infer<typeof dayBoardAppointmentSchema>;
 export type PatientMatch = z.infer<typeof patientMatchSchema>;
 export type TriageBand = z.infer<typeof triageBandSchema>;
 export type TriageAssessment = z.infer<typeof triageAssessmentSchema>;
-export type PatientRecord = z.infer<typeof patientRecordSchema>;
+export type VisitDetail = z.infer<typeof visitDetailSchema>;
+export type TriageRecord = z.infer<typeof triageHistorySchema>["data"][number];

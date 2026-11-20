@@ -1,29 +1,49 @@
 "use client";
 
-import type { ReactNode } from "react";
+import Link from "next/link";
 import {
   CallPatientIcon,
   CheckIcon,
+  LeftWithoutBeingSeenIcon,
   SeePatientIcon,
   SendOnIcon,
   SkipPatientIcon,
 } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import {
+  DetailList,
+  type DetailListItem,
+} from "@healthalyst/ui/components/detail-list";
 import { DetailSheet } from "@healthalyst/ui/components/detail-sheet";
+import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import {
   QUEUE_ENTRY_STATUS_PRESENTATION,
   TRIAGE_BAND_PRESENTATION,
 } from "~/features/patient-flow/config/patient-flow";
-import type { QueueEntry } from "~/features/patient-flow/schemas/patient-flow-response-schemas";
+import type {
+  QueueEntry,
+  TriageRecord,
+} from "~/features/patient-flow/schemas/patient-flow-response-schemas";
 import {
   describeMinutes,
   describePatientName,
   isLiveEntryStatus,
 } from "~/features/patient-flow/utilities/front-desk";
 import { describeQueue } from "~/features/patient-flow/utilities/queue-targets";
+import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
+import {
+  CONSCIOUSNESS_OPTIONS,
+  TRIAGE_PERMISSIONS,
+} from "~/features/patient-flow/config/triage";
+import {
+  useTriageHistory,
+  useVisitDetail,
+} from "~/features/patient-flow/hooks/use-patient-flow";
+import { PATIENT_PERMISSIONS } from "~/features/patients/config/patients";
 import { describeBranchClockTime } from "~/shared/time/branch-time";
+import { useWorkspace } from "~/shared/workspace/workspace-context";
 
 export type QueueEntryAction = "call" | "start" | "skip";
 
@@ -41,6 +61,7 @@ export function QueueEntrySheet({
   onAction,
   onSendOn,
   onFinish,
+  onLeft,
 }: {
   entry: QueueEntry | null;
   onOpenChange: (open: boolean) => void;
@@ -51,9 +72,14 @@ export function QueueEntrySheet({
   onAction: (action: QueueEntryAction, entry: QueueEntry) => void;
   onSendOn: (entry: QueueEntry) => void;
   onFinish: (entry: QueueEntry) => void;
+  /** The patient went home before being seen. */
+  onLeft: (entry: QueueEntry) => void;
 }) {
+  const { permissions } = useWorkspace();
+  const canReadPatients = permissions.includes(PATIENT_PERMISSIONS.read);
+  const canReadTriage = permissions.includes(TRIAGE_PERMISSIONS.record);
   const isBusy = pendingAction !== null;
-  const details: { term: string; description: ReactNode }[] = entry
+  const details: DetailListItem[] = entry
     ? [
         { term: "Patient number", description: entry.patient.patientNumber },
         {
@@ -189,6 +215,17 @@ export function QueueEntrySheet({
                 Finish visit
               </ActionButton>
             )}
+            {entry.status !== "IN_SERVICE" && (
+              <ActionButton
+                type="button"
+                variant="outline"
+                disabled={isBusy}
+                leadingIcon={<LeftWithoutBeingSeenIcon className="size-4" />}
+                onClick={() => onLeft(entry)}
+              >
+                Left without being seen
+              </ActionButton>
+            )}
           </div>
         )
       }
@@ -199,15 +236,113 @@ export function QueueEntrySheet({
             {error}
           </NoticeBanner>
         )}
-        <dl className="grid gap-4 text-sm sm:grid-cols-[10rem_1fr]">
-          {details.map((detail) => (
-            <div key={detail.term} className="contents">
-              <dt className="text-muted-foreground">{detail.term}</dt>
-              <dd>{detail.description}</dd>
-            </div>
-          ))}
-        </dl>
+        {entry && canReadPatients && (
+          <Link
+            href={HEALTH_SCHEDULE_ROUTES.patient(entry.patient.id)}
+            className="w-fit text-sm text-primary underline-offset-4 hover:underline"
+          >
+            Open {describePatientName(entry.patient)}&apos;s record
+          </Link>
+        )}
+        <DetailList items={details} />
+        {entry && canReadTriage && entry.triageBand && (
+          <EarlierTriage visitId={entry.visitId} />
+        )}
+        {entry && <VisitJourney visitId={entry.visitId} />}
       </div>
     </DetailSheet>
+  );
+}
+
+/** "Temperature 38.6 °C · Pulse 96 · BP 120/80 · Oxygen 94%". */
+function describeVitals(record: TriageRecord): string {
+  const consciousness = CONSCIOUSNESS_OPTIONS.find(
+    (option) => option.value === record.consciousness
+  )?.label;
+  return [
+    record.temperatureC !== null
+      ? `Temperature ${record.temperatureC} °C`
+      : null,
+    record.heartRate !== null ? `Pulse ${record.heartRate}` : null,
+    record.respiratoryRate !== null
+      ? `Breathing ${record.respiratoryRate}`
+      : null,
+    record.systolicBp !== null
+      ? `BP ${record.systolicBp}${record.diastolicBp !== null ? `/${record.diastolicBp}` : ""}`
+      : null,
+    record.spo2 !== null ? `Oxygen ${record.spo2}%` : null,
+    record.glucoseMmolL !== null
+      ? `Glucose ${record.glucoseMmolL} mmol/L`
+      : null,
+    record.painScore !== null ? `Pain ${record.painScore}/10` : null,
+    consciousness ?? null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+/** The latest triage of the visit, for whoever calls the patient next. */
+function EarlierTriage({ visitId }: { visitId: string }) {
+  const historyQuery = useTriageHistory(visitId, true);
+  if (historyQuery.isPending) {
+    return (
+      <LoadingPlaceholder
+        label="Loading the triage"
+        rows={[{ shape: "text" }]}
+      />
+    );
+  }
+  if (historyQuery.isError) {
+    return (
+      <NoticeBanner tone="information" title="Triage details not shown">
+        {historyQuery.error.message}
+      </NoticeBanner>
+    );
+  }
+  const [latest, ...earlier] = historyQuery.data;
+  if (!latest) return null;
+  const vitals = describeVitals(latest);
+  return (
+    <section className="flex flex-col gap-2 text-sm">
+      <h3 className="flex flex-wrap items-center gap-2 font-medium">
+        Triage at {describeBranchClockTime(latest.recordedAt)}
+        {earlier.length > 0 ? ` (and ${earlier.length} earlier)` : ""}
+        <StatusLabel tone={TRIAGE_BAND_PRESENTATION[latest.band].tone}>
+          {TRIAGE_BAND_PRESENTATION[latest.band].label}
+        </StatusLabel>
+      </h3>
+      {latest.complaint && <p>Complaint: {latest.complaint}</p>}
+      {vitals && <p className="text-muted-foreground">{vitals}</p>}
+      {latest.notes && <p>Nursing note: {latest.notes}</p>}
+      {latest.overrideReason && (
+        <p className="text-muted-foreground">
+          Band chosen below emergency: {latest.overrideReason}
+        </p>
+      )}
+    </section>
+  );
+}
+
+/** Where the patient has been today, oldest first. */
+function VisitJourney({ visitId }: { visitId: string }) {
+  const visitQuery = useVisitDetail(visitId, true);
+  if (!visitQuery.isSuccess || visitQuery.data.stops.length < 2) return null;
+  return (
+    <section className="flex flex-col gap-2 text-sm">
+      <h3 className="font-medium">
+        Today, since check-in at{" "}
+        {describeBranchClockTime(visitQuery.data.checkedInAt)}
+      </h3>
+      <ol className="flex flex-col gap-1">
+        {visitQuery.data.stops.map((stop) => (
+          <li key={stop.id} className="flex gap-2">
+            <span className="w-20 shrink-0 text-muted-foreground">
+              {describeBranchClockTime(stop.enqueuedAt)}
+            </span>
+            <span>{describeQueue(stop)}</span>
+          </li>
+        ))}
+      </ol>
+    </section>
   );
 }

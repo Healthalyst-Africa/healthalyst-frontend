@@ -410,6 +410,7 @@ export function PartnershipSheet({
         <CheckboxField
           id="partnership-agreementAccepted"
           name="agreementAccepted"
+          required
           label={`On behalf of my organisation, I accept the HealthAlyst data-sharing agreement, version ${DATA_SHARING_AGREEMENT_VERSION}.`}
           error={fieldErrors.agreementAccepted}
         />
@@ -430,7 +431,7 @@ export function PartnershipSheet({
         <TextAreaField
           id="partnership-reason"
           label="Reason"
-          description={`Optional. ${partnerName || "Your partner"} may see it.`}
+          description={`${partnerName || "Your partner"} may see it.`}
           name="reason"
           rows={3}
           maxLength={PARTNER_FIELD_LIMITS.reasonMaximumLength}
@@ -462,6 +463,7 @@ export function PartnershipSheet({
           <TextField
             id="partnership-priority"
             label="Priority"
+            required
             description={`A number from ${PARTNER_FIELD_LIMITS.priorityMinimum} to ${PARTNER_FIELD_LIMITS.priorityMaximum}. Lower numbers are tried first.`}
             name="priority"
             type="number"

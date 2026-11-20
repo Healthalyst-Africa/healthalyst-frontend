@@ -3,6 +3,7 @@
 import { useState, type FormEvent } from "react";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { CheckboxField } from "@healthalyst/ui/components/checkbox-field";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { FeedbackDialog } from "@healthalyst/ui/components/feedback-dialog";
 import { FormDialog } from "@healthalyst/ui/components/form-dialog";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
@@ -223,7 +224,11 @@ export function OrganizationProductsSection({
             }
           >
             <legend className="mb-3 text-sm font-medium">
-              Products this organisation uses
+              <FieldLabelText
+                label="Products this organisation uses"
+                required
+                announceRequired
+              />
             </legend>
             {REVIEW_PRODUCTS.map((product) => (
               <CheckboxField

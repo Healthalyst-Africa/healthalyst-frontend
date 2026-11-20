@@ -100,6 +100,7 @@ export function MemberLicenceDialog({
         id="member-licence-licenceBody"
         label="Regulator"
         name="licenceBody"
+        required
         placeholder="Choose the regulator"
         options={LICENCE_BODY_OPTIONS}
         defaultValue={member.licence?.body}
@@ -109,6 +110,7 @@ export function MemberLicenceDialog({
         id="member-licence-licenceNumber"
         label="Licence number"
         name="licenceNumber"
+        required
         autoComplete="off"
         defaultValue={member.licence?.number ?? ""}
         maxLength={TEAM_FIELD_LIMITS.licenceNumberMaximumLength}
@@ -118,6 +120,7 @@ export function MemberLicenceDialog({
         id="member-licence-licenceExpiresOn"
         label="Expires on"
         name="licenceExpiresOn"
+        required
         type="date"
         defaultValue={member.licence?.expiresOn ?? ""}
         error={
@@ -193,13 +196,14 @@ export function LicenceVerificationDialog({
         id="licence-check-method"
         label="How did you confirm it?"
         name="method"
+        required
         placeholder="Choose how"
         options={LICENCE_VERIFICATION_METHOD_OPTIONS}
         error={visibleFieldErrors.method}
       />
       <TextField
         id="licence-check-reference"
-        label="Reference (optional)"
+        label="Reference"
         name="reference"
         autoComplete="off"
         maxLength={TEAM_FIELD_LIMITS.verificationReferenceMaximumLength}
