@@ -10,6 +10,9 @@ import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placehold
 import { StateNotice } from "@healthalyst/ui/components/notice-banner";
 import { RecordTabs } from "@healthalyst/ui/components/record-tabs";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
+import { NotesSection } from "~/features/clinical-record/components/notes-section";
+import { ProblemsSection } from "~/features/clinical-record/components/problems-section";
+import { TimelineSection } from "~/features/clinical-record/components/timeline-section";
 import { AllergiesSection } from "~/features/patients/components/allergies-section";
 import { ConsentsSection } from "~/features/patients/components/consents-section";
 import { CoverageSection } from "~/features/patients/components/coverage-section";
@@ -19,6 +22,7 @@ import { FamilySection } from "~/features/patients/components/family-section";
 import { PatientBanner } from "~/features/patients/components/patient-banner";
 import { PatientDetailsSection } from "~/features/patients/components/patient-details-section";
 import {
+  CLINICAL_SECTIONS_PERMISSION,
   PATIENT_PERMISSIONS,
   PATIENT_RECORD_SECTIONS,
 } from "~/features/patients/config/patients";
@@ -28,6 +32,8 @@ import {
 } from "~/features/patients/hooks/use-patient-record-sections";
 import { usePatientDetail } from "~/features/patients/hooks/use-patients";
 import { readRecordSection } from "~/features/patients/utilities/record-section";
+import { RecordAccessGate } from "~/features/sensitive-records/components/record-access-gate";
+import { SensitivityPanel } from "~/features/sensitive-records/components/sensitivity-panel";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 
 const NOT_FOUND_CODES = ["PATIENT_NOT_FOUND", "NOT_FOUND"];
@@ -42,8 +48,17 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParameters = useSearchParams();
-  const section = readRecordSection(searchParameters.get("section"));
   const canRead = permissions.includes(PATIENT_PERMISSIONS.read);
+  const canReadClinical = permissions.includes(CLINICAL_SECTIONS_PERMISSION);
+  const recordSections = PATIENT_RECORD_SECTIONS.filter(
+    (recordSection) => !("clinical" in recordSection) || canReadClinical
+  );
+  const requestedSection = readRecordSection(searchParameters.get("section"));
+  const section = recordSections.some(
+    (recordSection) => recordSection.value === requestedSection
+  )
+    ? requestedSection
+    : PATIENT_RECORD_SECTIONS[0].value;
   const patientQuery = usePatientDetail(patientId, canRead);
   const isRecordOpen = canRead && patientQuery.isSuccess;
   const relationshipsQuery = useRelationships(patientId, isRecordOpen);
@@ -152,43 +167,60 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
   return (
     <div className="flex flex-col gap-6">
       {backLink}
-      <PatientBanner patient={patientQuery.data} />
-      <RecordTabs
-        accessibleLabel="Patient record sections"
-        value={section}
-        onValueChange={openSection}
-        tabs={PATIENT_RECORD_SECTIONS.map((recordSection) => ({
-          value: recordSection.value,
-          label: recordSection.label,
-          count:
-            recordSection.value === "family"
-              ? relationshipsQuery.data?.length
-              : recordSection.value === "documents"
-                ? documentsQuery.data?.filter(
-                    (document) => document.status !== "REMOVED"
-                  ).length
-                : undefined,
-          content:
-            recordSection.value === "family" ? (
-              <FamilySection patientId={patientId} />
-            ) : recordSection.value === "consents" ? (
-              <ConsentsSection patient={patientQuery.data} />
-            ) : recordSection.value === "documents" ? (
-              <DocumentsSection patientId={patientId} />
-            ) : (
-              <div className="flex flex-col gap-6">
-                <DuplicatesPanel patient={patientQuery.data} />
-                <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-                  <PatientDetailsSection patient={patientQuery.data} />
-                  <div className="flex flex-col gap-6">
-                    <AllergiesSection patientId={patientId} />
-                    <CoverageSection patientId={patientId} />
+      <div data-tour="patient-banner">
+        <PatientBanner patient={patientQuery.data} />
+      </div>
+      <div data-tour="patient-sections">
+        <RecordTabs
+          accessibleLabel="Patient record sections"
+          value={section}
+          onValueChange={openSection}
+          tabs={recordSections.map((recordSection) => ({
+            value: recordSection.value,
+            label: recordSection.label,
+            count:
+              recordSection.value === "family"
+                ? relationshipsQuery.data?.length
+                : recordSection.value === "documents"
+                  ? documentsQuery.data?.filter(
+                      (document) => document.status !== "REMOVED"
+                    ).length
+                  : undefined,
+            content:
+              recordSection.value === "notes" ? (
+                <RecordAccessGate patientId={patientId}>
+                  <NotesSection patientId={patientId} />
+                </RecordAccessGate>
+              ) : recordSection.value === "problems" ? (
+                <RecordAccessGate patientId={patientId}>
+                  <ProblemsSection patientId={patientId} />
+                </RecordAccessGate>
+              ) : recordSection.value === "timeline" ? (
+                <TimelineSection patientId={patientId} />
+              ) : recordSection.value === "family" ? (
+                <FamilySection patientId={patientId} />
+              ) : recordSection.value === "consents" ? (
+                <ConsentsSection patient={patientQuery.data} />
+              ) : recordSection.value === "documents" ? (
+                <DocumentsSection patientId={patientId} />
+              ) : (
+                <div className="flex flex-col gap-6">
+                  <DuplicatesPanel patient={patientQuery.data} />
+                  <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+                    <PatientDetailsSection patient={patientQuery.data} />
+                    <div className="flex flex-col gap-6">
+                      <AllergiesSection patientId={patientId} />
+                      <CoverageSection patientId={patientId} />
+                      {canReadClinical && (
+                        <SensitivityPanel patientId={patientId} />
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ),
-        }))}
-      />
+              ),
+          }))}
+        />
+      </div>
     </div>
   );
 }

@@ -50,6 +50,40 @@ describe("HealthSchedule navigation", () => {
     ]);
   });
 
+  it("adds the consultation, access reviews and note templates for the roles that use them", () => {
+    const navigation = buildHealthScheduleNavigation({
+      permissions: [
+        "queue:read",
+        "note:write",
+        "note:read",
+        "patient:read",
+        "audit:read",
+        "schedule:read",
+      ],
+      organizationAppLinks: HUB_LINKS,
+    });
+    const sidebar = describeSections(navigation.sidebar);
+    expect(
+      sidebar.find((section) => section.label === "Patients today")?.items
+    ).toEqual(["Queues", "Consultation"]);
+    expect(
+      sidebar.find((section) => section.label === "Records")?.items
+    ).toEqual(["Patients", "Emergency access reviews"]);
+    expect(
+      sidebar.find((section) => section.label === "Schedule setup")?.items
+    ).toContain("Note templates");
+  });
+
+  it("keeps the consultation from people who cannot write doctors' notes", () => {
+    const navigation = buildHealthScheduleNavigation({
+      permissions: ["queue:read", "note:read"],
+      organizationAppLinks: HUB_LINKS,
+    });
+    expect(
+      describeSections(navigation.sidebar).flatMap((section) => section.items)
+    ).not.toContain("Consultation");
+  });
+
   it("puts the other app and the organisation's pages in the switcher", () => {
     const { switcher } = buildHealthScheduleNavigation({
       permissions: ["staff:read", "role:read"],

@@ -3,6 +3,7 @@
 import { EmptyState } from "@healthalyst/ui/components/empty-state";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { BranchSelectionNotice } from "~/features/branch-selection/components/branch-selection-notice";
+import { TourOffer } from "~/features/guided-tours/components/tour-offer";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 
 /** The workspace's first page: a welcome and the branch being worked at. */
@@ -21,6 +22,7 @@ export function WorkspaceOverview() {
             : `${organizationName} is set up for HealthSchedule.`}
         </p>
       </div>
+      <TourOffer />
       {branchSelection.status === "selected" ? (
         <EmptyState
           surface="panel"

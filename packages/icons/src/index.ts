@@ -86,4 +86,10 @@ export {
   IconDots as MoreActionsIcon,
   IconShieldSearch as EligibilityCheckIcon,
   IconCircleMinus as EndCoverIcon,
+  IconClipboardHeart as ConsultationIcon,
+  IconLockAccess as AccessReviewIcon,
+  IconTemplate as NoteTemplatesIcon,
+  IconCircleCheck as ResolvedIcon,
+  IconRotate2 as ReopenIcon,
+  IconHelpCircle as GuidedTourIcon,
 } from "@tabler/icons-react";

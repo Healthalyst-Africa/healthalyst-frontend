@@ -95,3 +95,13 @@ export function describeTimeOfDay(timeValue: string): string {
   const [hours = 0, minutes = 0] = timeValue.split(":").map(Number);
   return format(new Date(2000, 0, 1, hours, minutes), CLOCK_TIME_FORMAT);
 }
+
+/** A date-time as the branch's date, such as "Mon 9 Nov 2026". */
+export function describeBranchDate(dateTime: string): string {
+  return format(inBranchTime(dateTime), "EEE d MMM yyyy");
+}
+
+/** A date-time with the branch's date and clock time, such as "Mon 9 Nov 2026, 9:30 am". */
+export function describeBranchDateTime(dateTime: string): string {
+  return format(inBranchTime(dateTime), `EEE d MMM yyyy, ${CLOCK_TIME_FORMAT}`);
+}

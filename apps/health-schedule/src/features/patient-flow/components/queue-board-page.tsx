@@ -200,18 +200,21 @@ function QueueBoard({ branch }: { branch: WorkspaceBranch }) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <ToolbarSelect
-          label="Queue"
-          placeholder="Choose a queue"
-          value={queueValue}
-          options={boardOptions}
-          onValueChange={(value) => {
-            setQueueValue(value);
-            actions.callNext.reset();
-          }}
-        />
+        <div data-tour="queue-choice">
+          <ToolbarSelect
+            label="Queue"
+            placeholder="Choose a queue"
+            value={queueValue}
+            options={boardOptions}
+            onValueChange={(value) => {
+              setQueueValue(value);
+              actions.callNext.reset();
+            }}
+          />
+        </div>
         {canManage && (
           <ActionButton
+            data-tour="queue-call-next"
             type="button"
             isLoading={actions.callNext.isPending}
             loadingText="Calling"
@@ -228,41 +231,43 @@ function QueueBoard({ branch }: { branch: WorkspaceBranch }) {
           {actions.callNext.error.message}
         </NoticeBanner>
       )}
-      <DataTable
-        accessibleLabel={`${queueLabel} queue`}
-        columns={columns}
-        state={
-          entriesQuery.isPending
-            ? { status: "loading", label: "Loading the queue" }
-            : entriesQuery.isError
-              ? {
-                  status: "error",
-                  title: "We could not load this queue",
-                  description: entriesQuery.error.message,
-                  retryLabel: "Try again",
-                  onRetry: () => void entriesQuery.refetch(),
-                }
-              : { status: "ready", rows: entriesQuery.data }
-        }
-        getRowIdentifier={(entry) => entry.id}
-        getRowEmphasis={(entry) =>
-          readFlowEmphasis({
-            triageBand: entry.triageBand,
-            waitState: entry.waitState,
-          })
-        }
-        rowAction={{
-          label: (entry) =>
-            `Open ${entry.token}, ${describePatientName(entry.patient)}`,
-          onSelect: openPatient,
-        }}
-        emptyState={{
-          illustration: <EmptyReviewQueueIllustration />,
-          title: "Nobody is in this queue",
-          description:
-            "Patients appear here when they are checked in or sent on. The list updates on its own.",
-        }}
-      />
+      <div data-tour="queue-list">
+        <DataTable
+          accessibleLabel={`${queueLabel} queue`}
+          columns={columns}
+          state={
+            entriesQuery.isPending
+              ? { status: "loading", label: "Loading the queue" }
+              : entriesQuery.isError
+                ? {
+                    status: "error",
+                    title: "We could not load this queue",
+                    description: entriesQuery.error.message,
+                    retryLabel: "Try again",
+                    onRetry: () => void entriesQuery.refetch(),
+                  }
+                : { status: "ready", rows: entriesQuery.data }
+          }
+          getRowIdentifier={(entry) => entry.id}
+          getRowEmphasis={(entry) =>
+            readFlowEmphasis({
+              triageBand: entry.triageBand,
+              waitState: entry.waitState,
+            })
+          }
+          rowAction={{
+            label: (entry) =>
+              `Open ${entry.token}, ${describePatientName(entry.patient)}`,
+            onSelect: openPatient,
+          }}
+          emptyState={{
+            illustration: <EmptyReviewQueueIllustration />,
+            title: "Nobody is in this queue",
+            description:
+              "Patients appear here when they are checked in or sent on. The list updates on its own.",
+          }}
+        />
+      </div>
 
       <QueueEntrySheet
         entry={openEntry}
