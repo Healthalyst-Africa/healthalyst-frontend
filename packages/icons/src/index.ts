@@ -95,4 +95,5 @@ export {
   IconCircleCheckFilled as CompletedStepIcon,
   IconCircleDashed as UpcomingStepIcon,
   IconCircleDot as CurrentStepIcon,
+  IconSettings as OrganizationSettingsIcon,
 } from "@tabler/icons-react";

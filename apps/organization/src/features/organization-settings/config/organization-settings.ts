@@ -6,6 +6,7 @@ export const ORGANIZATION_SETTINGS_PERMISSIONS = {
   manageBranches: "branch:manage",
   transferOwnership: "org:transfer-ownership",
   readStaff: "staff:read",
+  readRoles: "role:read",
 } as const;
 
 /** The Platform API's codes for an edit made against an older version. */

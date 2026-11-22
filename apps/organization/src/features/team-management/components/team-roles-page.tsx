@@ -324,7 +324,10 @@ export function TeamRolesPage() {
                 linkComponent={Link}
                 trail={[
                   { label: "Products", href: ORGANIZATION_ROUTES.products },
-                  { label: "Team", href: ORGANIZATION_ROUTES.team },
+                  {
+                    label: "Organisation settings",
+                    href: ORGANIZATION_ROUTES.organizationSettings,
+                  },
                 ]}
                 currentPage="Roles and permissions"
               />

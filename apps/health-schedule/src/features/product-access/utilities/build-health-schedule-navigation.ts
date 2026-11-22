@@ -9,7 +9,6 @@ import {
   OrganizationIcon,
   PatientRecordsIcon,
   QueueIcon,
-  RolesIcon,
   ScheduleCalendarsIcon,
   TeamIcon,
   TimeOffIcon,
@@ -45,7 +44,6 @@ const NOTE_TEMPLATES_PERMISSION = "note:read";
 /** The Platform API permission that shows each organisation page. */
 const ORGANIZATION_PAGE_PERMISSIONS = {
   team: "staff:read",
-  roles: "role:read",
 } as const;
 
 export type HealthScheduleNavigation = {
@@ -223,11 +221,13 @@ export function buildHealthScheduleNavigation({
           },
         ],
       },
-      {
-        label: "Manage your organisation",
-        items: [
-          ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.team)
-            ? [
+      // Organisation settings, with roles and permissions inside them, open
+      // from the account menu; only the team is offered here.
+      ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.team)
+        ? [
+            {
+              label: "Manage your organisation",
+              items: [
                 {
                   label: "Team",
                   href: organizationAppLinks.team,
@@ -235,28 +235,10 @@ export function buildHealthScheduleNavigation({
                   opensAnotherApp: true,
                   opensInNewWindow: true,
                 },
-              ]
-            : []),
-          ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.roles)
-            ? [
-                {
-                  label: "Roles and permissions",
-                  href: organizationAppLinks.teamRoles,
-                  icon: RolesIcon,
-                  opensAnotherApp: true,
-                  opensInNewWindow: true,
-                },
-              ]
-            : []),
-          {
-            label: "Settings",
-            href: organizationAppLinks.organizationSettings,
-            icon: OrganizationIcon,
-            opensAnotherApp: true,
-            opensInNewWindow: true,
-          },
-        ],
-      },
+              ],
+            },
+          ]
+        : []),
       ...organizationSection,
     ],
   };
