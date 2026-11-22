@@ -22,7 +22,8 @@ type DayScheduleState =
 
 /**
  * One day of bookings, calendar by calendar: each doctor, room or machine
- * with its hours and its appointments in time order.
+ * with its hours and its appointments in time order. A day with nothing
+ * booked shows `emptyState` once instead of every calendar.
  */
 export function DaySchedule({
   accessibleLabel,
@@ -64,7 +65,8 @@ export function DaySchedule({
       />
     );
   }
-  if (state.calendars.length === 0) {
+  // Nothing booked anywhere: one message for the day, not one per calendar.
+  if (state.calendars.every((calendar) => calendar.entries.length === 0)) {
     return <EmptyState {...emptyState} />;
   }
 
@@ -90,7 +92,11 @@ export function DaySchedule({
             <p className="text-sm text-muted-foreground">{calendar.hours}</p>
           </div>
           {calendar.entries.length === 0 ? (
-            <p className="text-sm text-muted-foreground">No appointments.</p>
+            <EmptyState
+              surface="plain"
+              className="min-h-0 py-4"
+              title="Nothing booked"
+            />
           ) : (
             <ScheduleEntryList entries={calendar.entries} />
           )}

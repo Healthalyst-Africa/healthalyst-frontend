@@ -78,7 +78,6 @@ export function AppointmentsPage() {
             branch={branch}
             canBook={canBook}
             buildActions={workflows.buildActions}
-            onBook={() => workflows.startBooking(null)}
           />
           <WaitlistPanel
             branch={branch}
@@ -96,12 +95,10 @@ function AppointmentsDay({
   branch,
   canBook,
   buildActions,
-  onBook,
 }: {
   branch: WorkspaceBranch;
   canBook: boolean;
   buildActions: ReturnType<typeof useAppointmentWorkflows>["buildActions"];
-  onBook: () => void;
 }) {
   const today = branchToday();
   const [date, setDate] = useState(today);
@@ -201,14 +198,8 @@ function AppointmentsDay({
         }
         emptyState={{
           illustration: <EmptyCalendarDayIllustration />,
-          title: "No calendar is open this day",
-          description:
-            "Nobody has hours at this branch on this day, and nothing is booked. Choose another day, or add hours under Calendars.",
-          action: canBook && date >= today && (
-            <ActionButton type="button" variant="outline" onClick={onBook}>
-              Book on another day
-            </ActionButton>
-          ),
+          title: "Nothing booked this day",
+          description: "Nobody has an appointment at this branch on this day.",
         }}
       />
     </ContentPanel>

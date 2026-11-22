@@ -12,6 +12,7 @@ import {
   WaitingPatientsIcon,
 } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { ActionMenu } from "@healthalyst/ui/components/action-menu";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { DataTable } from "@healthalyst/ui/components/data-table";
 import { MetricSummary } from "@healthalyst/ui/components/metric-summary";
@@ -103,23 +104,25 @@ export function FrontDeskPage() {
               </ActionButton>
             )}
             {canRegister && (
-              <>
-                <ActionButton
-                  type="button"
-                  variant="outline"
-                  leadingIcon={<UnknownPatientIcon className="size-4" />}
-                  onClick={() => setIsRegisteringUnknown(true)}
-                >
-                  Register without a name
-                </ActionButton>
-                <ActionButton
-                  type="button"
-                  leadingIcon={<RegisterPatientIcon className="size-4" />}
-                  onClick={() => setIsRegistering(true)}
-                >
-                  Register a new patient
-                </ActionButton>
-              </>
+              <ActionMenu
+                accessibleLabel="Register a patient"
+                trigger={{
+                  label: "Register a patient",
+                  icon: <RegisterPatientIcon className="size-4" />,
+                }}
+                items={[
+                  {
+                    label: "New patient",
+                    icon: <RegisterPatientIcon />,
+                    onSelect: () => setIsRegistering(true),
+                  },
+                  {
+                    label: "Without a name",
+                    icon: <UnknownPatientIcon />,
+                    onSelect: () => setIsRegisteringUnknown(true),
+                  },
+                ]}
+              />
             )}
           </div>
         )

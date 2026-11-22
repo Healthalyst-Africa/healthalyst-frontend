@@ -4,7 +4,9 @@ import { useState } from "react";
 import { BookAppointmentIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { EmptyState } from "@healthalyst/ui/components/empty-state";
 import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
+import { EmptyCalendarDayIllustration } from "@healthalyst/ui/illustrations/empty-calendar-day-illustration";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { ScheduleEntryList } from "@healthalyst/ui/components/schedule-entry-list";
 import { useAppointmentWorkflows } from "~/features/appointments/components/appointment-workflows";
@@ -116,7 +118,16 @@ export function PatientAppointments({ patient }: { patient: BookingPatient }) {
       ) : (
         <div className="flex flex-col gap-3">
           {upcoming.length === 0 ? (
-            <p className="text-sm text-muted-foreground">Nothing booked.</p>
+            <EmptyState
+              surface="plain"
+              illustration={<EmptyCalendarDayIllustration />}
+              title="No appointments booked"
+              description={
+                canBook
+                  ? "Book the patient's next appointment when they need one."
+                  : undefined
+              }
+            />
           ) : (
             <ScheduleEntryList
               timeColumn="date-time"

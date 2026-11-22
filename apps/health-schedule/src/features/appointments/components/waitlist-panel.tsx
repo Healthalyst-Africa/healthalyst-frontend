@@ -4,7 +4,9 @@ import { useState } from "react";
 import { BookAppointmentIcon, DeleteIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { EmptyState } from "@healthalyst/ui/components/empty-state";
 import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
+import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { ScheduleEntryList } from "@healthalyst/ui/components/schedule-entry-list";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
@@ -89,10 +91,12 @@ export function WaitlistPanel({
           {waitlistQuery.error.message}
         </NoticeBanner>
       ) : entries.length === 0 ? (
-        <p className="text-sm text-muted-foreground">
-          Nobody is waiting. When no time suits a patient, add them to the
-          waitlist from the booking screen.
-        </p>
+        <EmptyState
+          surface="plain"
+          illustration={<EmptyReviewQueueIllustration />}
+          title="Nobody is waiting"
+          description="When no time suits a patient, add them to the waitlist from the booking screen."
+        />
       ) : (
         <ScheduleEntryList
           timeColumn="date-time"
