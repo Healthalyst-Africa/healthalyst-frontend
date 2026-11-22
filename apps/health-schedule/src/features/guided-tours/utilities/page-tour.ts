@@ -4,6 +4,7 @@ import type { HealthSchedulePage } from "~/features/guided-tours/config/page-gui
 const PAGES_BY_PATH: Record<string, HealthSchedulePage> = {
   [HEALTH_SCHEDULE_ROUTES.overview]: "workspace",
   [HEALTH_SCHEDULE_ROUTES.frontDesk]: "frontDesk",
+  [HEALTH_SCHEDULE_ROUTES.appointments]: "appointments",
   [HEALTH_SCHEDULE_ROUTES.triage]: "triage",
   [HEALTH_SCHEDULE_ROUTES.queues]: "queues",
   [HEALTH_SCHEDULE_ROUTES.consultation]: "consultation",

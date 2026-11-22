@@ -11,6 +11,7 @@ import type {
 } from "@healthalyst/ui/types/data-table";
 import { DataTableCellContent } from "./data-table-cell-content";
 import { CARD_EMPHASIS_CLASS_NAMES } from "./data-table-row-emphasis";
+import { DataTableRowActions } from "./data-table-row-actions";
 
 const LOADING_CARD_IDENTIFIERS = ["first", "second", "third"] as const;
 
@@ -50,6 +51,8 @@ export function DataTableCardList<RowData>({
   state,
   getRowIdentifier,
   rowAction,
+  getRowActions,
+  getRowActionsLabel,
   getRowEmphasis,
 }: Pick<
   DataTableProperties<RowData>,
@@ -57,6 +60,8 @@ export function DataTableCardList<RowData>({
   | "columns"
   | "getRowIdentifier"
   | "rowAction"
+  | "getRowActions"
+  | "getRowActionsLabel"
   | "getRowEmphasis"
 > & {
   state: Extract<
@@ -116,6 +121,12 @@ export function DataTableCardList<RowData>({
                 <StatusLabel tone={statusEntry.cell.tone}>
                   {statusEntry.cell.label}
                 </StatusLabel>
+              )}
+              {getRowActions && !rowAction && (
+                <DataTableRowActions
+                  items={getRowActions(row)}
+                  accessibleLabel={getRowActionsLabel?.(row) ?? "Actions"}
+                />
               )}
             </div>
             {detailEntries.length > 0 && (

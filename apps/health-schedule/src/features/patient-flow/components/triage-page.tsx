@@ -137,9 +137,10 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
     },
   ];
 
-  // Side by side only where the list and the three-column form both fit.
+  // The list across the page, then the open patient's form beneath it: side
+  // by side, the list was too narrow for its columns.
   return (
-    <div className="grid items-start gap-6 2xl:grid-cols-[30rem_minmax(0,1fr)]">
+    <div className="flex flex-col gap-6">
       <ContentPanel
         data-tour="triage-waiting"
         heading="Waiting for vital signs"

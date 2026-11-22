@@ -73,6 +73,18 @@ describe("HealthSchedule navigation", () => {
     ).toContain("Note templates");
   });
 
+  it("puts appointments after the front desk for people who can see bookings", () => {
+    const navigation = buildHealthScheduleNavigation({
+      permissions: ["queue:check-in", "appointment:read", "queue:read"],
+      organizationAppLinks: HUB_LINKS,
+    });
+    expect(
+      describeSections(navigation.sidebar).find(
+        (section) => section.label === "Patient visits"
+      )?.items
+    ).toEqual(["Front desk", "Appointments", "Queues"]);
+  });
+
   it("keeps the consultation from people who cannot write doctors' notes", () => {
     const navigation = buildHealthScheduleNavigation({
       permissions: ["queue:read", "note:read"],

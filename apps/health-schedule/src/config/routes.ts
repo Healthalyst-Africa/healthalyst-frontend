@@ -2,6 +2,7 @@
 export const HEALTH_SCHEDULE_ROUTES = {
   overview: "/",
   frontDesk: "/front-desk",
+  appointments: "/appointments",
   triage: "/triage",
   queues: "/queues",
   consultation: "/consultation",

@@ -89,7 +89,10 @@ cover and card photos, family and contacts, consents, documents, and merging
 duplicate records) and `clinical-record` (clinical notes with templates,
 addenda and earlier versions, the problem list with ICD-11 search, and the
 timeline) and `sensitive-records` (the access gate on restricted records,
-emergency access and its review, and sensitivity labels) and `consultation`
+emergency access and its review, and sensitivity labels) and `appointments`
+(booking with five-minute holds on free times, moving, cancelling and "did
+not come", the day of bookings by calendar, the patient's appointments and
+the waitlist) and `consultation`
 (the doctor's queue beside the patient being seen) and `guided-tours` (page
 help and short page tours: a small question-mark icon in the header opens an
 "About this page" dialog for every page, which offers a tour where the page

@@ -105,3 +105,8 @@ export function describeBranchDate(dateTime: string): string {
 export function describeBranchDateTime(dateTime: string): string {
   return format(inBranchTime(dateTime), `EEE d MMM yyyy, ${CLOCK_TIME_FORMAT}`);
 }
+
+/** A date without the year, such as "Tue 24 Nov", for lists. */
+export function describeBranchShortDate(dateTime: string): string {
+  return format(inBranchTime(dateTime), "EEE d MMM");
+}

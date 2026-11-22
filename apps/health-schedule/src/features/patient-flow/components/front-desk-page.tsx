@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  BookAppointmentIcon,
   ExpectedArrivalsIcon,
   LongestWaitIcon,
   OverTargetIcon,
@@ -11,6 +12,7 @@ import {
   WaitingPatientsIcon,
 } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { ActionMenu } from "@healthalyst/ui/components/action-menu";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { DataTable } from "@healthalyst/ui/components/data-table";
 import { MetricSummary } from "@healthalyst/ui/components/metric-summary";
@@ -25,6 +27,8 @@ import {
   type CheckInCandidate,
 } from "~/features/patient-flow/components/check-in-dialog";
 import { PatientFlowFrame } from "~/features/patient-flow/components/patient-flow-frame";
+import { useAppointmentWorkflows } from "~/features/appointments/components/appointment-workflows";
+import { BOOKING_PERMISSIONS } from "~/features/appointments/config/appointments";
 import { UnknownPatientDialog } from "~/features/patient-flow/components/unknown-patient-dialog";
 import { RegisterPatientDialog } from "~/features/patients/components/register-patient-dialog";
 import {
@@ -67,12 +71,18 @@ import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 
 /** The receptionist's page: check patients in and see where everyone is. */
 export function FrontDeskPage() {
-  const { permissions } = useWorkspace();
+  const { permissions, branchSelection } = useWorkspace();
   const canRegister = permissions.includes(
     PATIENT_FLOW_PERMISSIONS.registerPatients
   );
+  const canBook = BOOKING_PERMISSIONS.every((permission) =>
+    permissions.includes(permission)
+  );
   const [isRegistering, setIsRegistering] = useState(false);
   const [isRegisteringUnknown, setIsRegisteringUnknown] = useState(false);
+  const appointmentWorkflows = useAppointmentWorkflows(
+    branchSelection.status === "selected" ? branchSelection.branch : null
+  );
 
   return (
     <PatientFlowFrame
@@ -81,35 +91,54 @@ export function FrontDeskPage() {
       requiredPermission={PATIENT_FLOW_PERMISSIONS.checkIn}
       missingPermissionName="Check patients in and issue queue tokens"
       action={
-        canRegister && (
+        (canRegister || canBook) && (
           <div className="flex flex-wrap gap-2">
-            <ActionButton
-              type="button"
-              variant="outline"
-              leadingIcon={<UnknownPatientIcon className="size-4" />}
-              onClick={() => setIsRegisteringUnknown(true)}
-            >
-              Register without a name
-            </ActionButton>
-            <ActionButton
-              type="button"
-              leadingIcon={<RegisterPatientIcon className="size-4" />}
-              onClick={() => setIsRegistering(true)}
-            >
-              Register a new patient
-            </ActionButton>
+            {canBook && (
+              <ActionButton
+                type="button"
+                variant="outline"
+                leadingIcon={<BookAppointmentIcon className="size-4" />}
+                onClick={() => appointmentWorkflows.startBooking(null)}
+              >
+                Book an appointment
+              </ActionButton>
+            )}
+            {canRegister && (
+              <ActionMenu
+                accessibleLabel="Register a patient"
+                trigger={{
+                  label: "Register a patient",
+                  icon: <RegisterPatientIcon className="size-4" />,
+                }}
+                items={[
+                  {
+                    label: "New patient",
+                    icon: <RegisterPatientIcon />,
+                    onSelect: () => setIsRegistering(true),
+                  },
+                  {
+                    label: "Without a name",
+                    icon: <UnknownPatientIcon />,
+                    onSelect: () => setIsRegisteringUnknown(true),
+                  },
+                ]}
+              />
+            )}
           </div>
         )
       }
     >
       {(branch) => (
-        <FrontDeskWorkspace
-          branch={branch}
-          isRegistering={isRegistering}
-          setIsRegistering={setIsRegistering}
-          isRegisteringUnknown={isRegisteringUnknown}
-          setIsRegisteringUnknown={setIsRegisteringUnknown}
-        />
+        <>
+          {appointmentWorkflows.dialogs}
+          <FrontDeskWorkspace
+            branch={branch}
+            isRegistering={isRegistering}
+            setIsRegistering={setIsRegistering}
+            isRegisteringUnknown={isRegisteringUnknown}
+            setIsRegisteringUnknown={setIsRegisteringUnknown}
+          />
+        </>
       )}
     </PatientFlowFrame>
   );

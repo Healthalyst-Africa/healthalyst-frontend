@@ -1,5 +1,6 @@
 import {
   AccessReviewIcon,
+  AppointmentsIcon,
   AppointmentTypesIcon,
   ConsultationIcon,
   DashboardIcon,
@@ -25,6 +26,7 @@ const SCHEDULE_READ_PERMISSION = "schedule:read";
 /** The HealthSchedule permissions that show the front desk and queue boards. */
 const PATIENT_FLOW_PAGE_PERMISSIONS = {
   frontDesk: "queue:check-in",
+  appointments: "appointment:read",
   triage: "triage:record",
   queues: "queue:read",
 } as const;
@@ -80,6 +82,15 @@ export function buildHealthScheduleNavigation({
             label: "Front desk",
             href: HEALTH_SCHEDULE_ROUTES.frontDesk,
             icon: FrontDeskIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.appointments)
+      ? [
+          {
+            label: "Appointments",
+            href: HEALTH_SCHEDULE_ROUTES.appointments,
+            icon: AppointmentsIcon,
           },
         ]
       : []),
