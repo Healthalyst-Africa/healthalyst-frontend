@@ -24,7 +24,7 @@ export const SCHEDULE_PERMISSIONS = {
 } as const;
 
 export const CALENDAR_KIND_OPTIONS = [
-  { value: "PRACTITIONER", label: "Practitioner" },
+  { value: "PRACTITIONER", label: "Staff member" },
   { value: "ROOM", label: "Room" },
   { value: "EQUIPMENT", label: "Equipment" },
 ] as const;

@@ -150,7 +150,8 @@ export function CheckInDialog({
           render={({ field }) => (
             <SelectField
               id="check-in-queue"
-              label="Send to"
+              label="Where the patient goes first"
+              description="Most patients see a nurse for vital signs (temperature, blood pressure, pulse) before the doctor."
               required
               placeholder="Choose where the patient goes first"
               options={queueTargetOptions}
@@ -218,7 +219,10 @@ function CheckInPatientSummary({
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-muted/40 p-4 text-sm">
-      <PatientAllergyLine patient={patient} />
+      <PatientAllergyLine
+        patient={patient}
+        whenUnknown="Allergies are not recorded yet. The nurse will ask when taking vital signs."
+      />
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-muted-foreground">Pays:</span>
         {coverage && eligibility ? (

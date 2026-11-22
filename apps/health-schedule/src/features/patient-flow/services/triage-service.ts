@@ -30,7 +30,7 @@ export async function recordTriage(
       response.status
     );
   } catch (error) {
-    throw toPlatformApiError(error, "We could not save the vitals.");
+    throw toPlatformApiError(error, "We could not save the vital signs.");
   }
 }
 

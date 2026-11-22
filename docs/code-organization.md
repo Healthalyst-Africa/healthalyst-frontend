@@ -79,7 +79,8 @@ roles), `partner-network`, `product-launcher` and `invitation-acceptance` (the
 public page an invitation link opens). Super Admin separates `staff-auth`,
 `staff-workspace`, `organization-oversight`, `staff-management` and `audit-log`. HealthSchedule has `sign-in` (its own sign-in
 page for phones, tablets and the installed app; desktop browsers sign in at the hub), `organization-access` (links into the hub), `product-access` (the
-sign-in, application and product checks that choose the first screen), `branch-selection` (the branch the person is working at) and
+sign-in, application and product checks that choose the first screen, and
+the overview of today's work with its setup checklist), `branch-selection` (the branch the person is working at) and
 `schedule-setup` (calendars with weekly hours, time off and holidays, and
 appointment types) and `patient-flow` (front desk check-in, triage and
 vitals, and the queue boards staff call patients from) and `patients` (registration
@@ -96,7 +97,8 @@ has one, and the overview offers a tour once; steps point at `data-tour`
 attributes, the shared `PageGuideDialog` shows the guide, and the shared
 `useGuidedTour` hook in `packages/ui` wraps driver.js). Workspace pages share the
 signed-in session, permissions and branch through `shared/workspace`; staff
-names for authors and reviewers come from `shared/staff`.
+names for authors and reviewers come from `shared/staff`. The journeys each
+screen serves are in [HealthSchedule user journeys](health-schedule-user-journeys.md).
 Its HealthSchedule API client is in `infrastructure/api`, beside the storage
 client that sends document files to signed upload links.
 

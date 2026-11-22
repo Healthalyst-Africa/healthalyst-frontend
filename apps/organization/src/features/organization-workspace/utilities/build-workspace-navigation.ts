@@ -3,7 +3,6 @@ import {
   OrganizationIcon,
   PartnersIcon,
   ProductsIcon,
-  RolesIcon,
   TeamIcon,
 } from "@healthalyst/icons";
 import type { DashboardNavigationSection } from "@healthalyst/ui/components/dashboard-shell";
@@ -17,7 +16,6 @@ import {
 /** The Platform API permission that shows each organisation page. */
 const ORGANIZATION_PAGE_PERMISSIONS = {
   team: "staff:read",
-  roles: "role:read",
   partners: "partner:read",
 } as const;
 
@@ -89,15 +87,6 @@ export function buildOrganizationWorkspaceNavigation({
                   label: "Team",
                   href: ORGANIZATION_ROUTES.team,
                   icon: TeamIcon,
-                },
-              ]
-            : []),
-          ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.roles)
-            ? [
-                {
-                  label: "Roles and permissions",
-                  href: ORGANIZATION_ROUTES.teamRoles,
-                  icon: RolesIcon,
                 },
               ]
             : []),

@@ -103,8 +103,8 @@ export function PatientsPage() {
             Patients
           </h1>
           <p className="text-body text-muted-foreground">
-            Find a patient's record, or register someone new. Every record
-            opened is kept in the patient access log.
+            Find a patient's record, or register someone new. Each record you
+            open is logged, to protect patients' privacy.
           </p>
         </div>
         {canRegister && (
@@ -126,75 +126,82 @@ export function PatientsPage() {
           </p>
         </StateNotice>
       ) : (
-        <ContentPanel
-          data-tour="patients-search"
-          heading={isSearching ? "Search results" : "Registrations to complete"}
-          headingLevel={2}
-          description={
-            isSearching
-              ? undefined
-              : "Patients registered by phone or brought in unidentified, newest first. Search above to find anyone else."
-          }
-        >
-          <SearchField
-            aria-label="Search patients"
-            placeholder="Name, phone, patient or folder number"
-            value={searchText}
-            onChange={(changeEvent) => setSearchText(changeEvent.target.value)}
-            autoComplete="off"
-          />
-          {isSearching ? (
-            <DataTable
-              accessibleLabel={`Patients matching ${debouncedSearchText}`}
-              columns={COLUMNS}
-              state={
-                searchQuery.isPending
-                  ? { status: "loading", label: "Searching patients" }
-                  : searchQuery.isError
-                    ? {
-                        status: "error",
-                        title: "We could not search for patients",
-                        description: searchQuery.error.message,
-                        retryLabel: "Try again",
-                        onRetry: () => void searchQuery.refetch(),
-                      }
-                    : { status: "ready", rows: searchQuery.data }
+        <>
+          <div data-tour="patients-search" className="max-w-2xl">
+            <SearchField
+              aria-label="Find a patient"
+              placeholder="Search by name, phone, patient or folder number"
+              value={searchText}
+              onChange={(changeEvent) =>
+                setSearchText(changeEvent.target.value)
               }
-              getRowIdentifier={(patient) => patient.id}
-              rowAction={rowAction}
-              emptyState={{
-                illustration: <EmptySearchIllustration />,
-                title: `No patient matches “${debouncedSearchText}”`,
-                description:
-                  "Check the spelling, or try a phone, patient or folder number.",
-              }}
+              autoComplete="off"
             />
-          ) : (
-            <DataTable
-              accessibleLabel="Registrations to complete"
-              columns={COLUMNS}
-              state={
-                incompleteQuery.isPending
-                  ? { status: "loading", label: "Loading registrations" }
-                  : incompleteQuery.isError
-                    ? {
-                        status: "error",
-                        title: "We could not load the registrations",
-                        description: incompleteQuery.error.message,
-                        retryLabel: "Try again",
-                        onRetry: () => void incompleteQuery.refetch(),
-                      }
-                    : { status: "ready", rows: incompleteQuery.data }
-              }
-              getRowIdentifier={(patient) => patient.id}
-              rowAction={rowAction}
-              emptyState={{
-                illustration: <DocumentsCompleteIllustration />,
-                title: "Every registration is complete",
-              }}
-            />
-          )}
-        </ContentPanel>
+          </div>
+          <ContentPanel
+            heading={
+              isSearching ? "Search results" : "Registrations to complete"
+            }
+            headingLevel={2}
+            description={
+              isSearching
+                ? undefined
+                : "Patients registered by phone, or brought in before anyone knew their name. Add their missing details when they next visit."
+            }
+          >
+            {isSearching ? (
+              <DataTable
+                accessibleLabel={`Patients matching ${debouncedSearchText}`}
+                columns={COLUMNS}
+                state={
+                  searchQuery.isPending
+                    ? { status: "loading", label: "Searching patients" }
+                    : searchQuery.isError
+                      ? {
+                          status: "error",
+                          title: "We could not search for patients",
+                          description: searchQuery.error.message,
+                          retryLabel: "Try again",
+                          onRetry: () => void searchQuery.refetch(),
+                        }
+                      : { status: "ready", rows: searchQuery.data }
+                }
+                getRowIdentifier={(patient) => patient.id}
+                rowAction={rowAction}
+                emptyState={{
+                  illustration: <EmptySearchIllustration />,
+                  title: `No patient matches “${debouncedSearchText}”`,
+                  description:
+                    "Check the spelling, or try a phone, patient or folder number.",
+                }}
+              />
+            ) : (
+              <DataTable
+                accessibleLabel="Registrations to complete"
+                columns={COLUMNS}
+                state={
+                  incompleteQuery.isPending
+                    ? { status: "loading", label: "Loading registrations" }
+                    : incompleteQuery.isError
+                      ? {
+                          status: "error",
+                          title: "We could not load the registrations",
+                          description: incompleteQuery.error.message,
+                          retryLabel: "Try again",
+                          onRetry: () => void incompleteQuery.refetch(),
+                        }
+                      : { status: "ready", rows: incompleteQuery.data }
+                }
+                getRowIdentifier={(patient) => patient.id}
+                rowAction={rowAction}
+                emptyState={{
+                  illustration: <DocumentsCompleteIllustration />,
+                  title: "Every registration is complete",
+                }}
+              />
+            )}
+          </ContentPanel>
+        </>
       )}
 
       {canRead && canMerge && !isSearching && <RecentMergesPanel />}

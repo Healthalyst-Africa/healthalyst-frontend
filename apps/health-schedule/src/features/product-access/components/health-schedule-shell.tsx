@@ -5,7 +5,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { PlatformSession } from "@healthalyst/platform-api/authentication-service";
-import { AccountSecurityIcon, SignOutIcon } from "@healthalyst/icons";
+import {
+  AccountSecurityIcon,
+  OrganizationSettingsIcon,
+  SignOutIcon,
+} from "@healthalyst/icons";
 import { AccountMenu } from "@healthalyst/ui/components/account-menu";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { DashboardShell } from "@healthalyst/ui/components/dashboard-shell";
@@ -19,7 +23,19 @@ import { buildHealthScheduleNavigation } from "~/features/product-access/utiliti
 import { useHealthScheduleSignOut } from "~/features/product-access/hooks/use-health-schedule-sign-out";
 import { PageHelpButton } from "~/features/guided-tours/components/page-help-button";
 import { useOrganizationSwitch } from "~/features/product-access/hooks/use-organization-switch";
+import { describeRoles } from "~/shared/workspace/role-names";
 import { WorkspaceProvider } from "~/shared/workspace/workspace-context";
+
+/**
+ * People who can change something in organisation settings: its profile,
+ * branches, roles and permissions, or ownership.
+ */
+const ORGANIZATION_SETTINGS_PERMISSIONS = [
+  "org:update",
+  "branch:manage",
+  "role:read",
+  "org:transfer-ownership",
+] as const;
 
 /**
  * The frame around every HealthSchedule page for an approved organisation:
@@ -43,6 +59,10 @@ export function HealthScheduleShell({
   const permissions = useMemo(
     () => platformSession.activeContext.permissions ?? [],
     [platformSession]
+  );
+  const roleNames = describeRoles(platformSession.activeContext.roles ?? []);
+  const canOpenOrganizationSettings = ORGANIZATION_SETTINGS_PERMISSIONS.some(
+    (permission) => permissions.includes(permission)
   );
   const [switchingTo, setSwitchingTo] = useState<string | null>(null);
   const organizationAppLinks = getOrganizationAppLinks();
@@ -107,10 +127,28 @@ export function HealthScheduleShell({
           <AccountMenu
             fullName={`${user.firstName} ${user.lastName}`}
             emailAddress={user.email ?? ""}
+            roleDescription={
+              roleNames ? `${roleNames} at ${organizationName}` : undefined
+            }
             error={signOutMutation.error?.message}
             actions={[
-              // Account security is owned by the organisation hub. It opens in
-              // a new browser window, so an installed app stays where it was.
+              // Organisation settings and account security are owned by the
+              // organisation hub. They open in a new browser window, so an
+              // installed app stays where it was.
+              ...(organizationAppLinks && canOpenOrganizationSettings
+                ? [
+                    {
+                      label: "Organisation settings",
+                      icon: <OrganizationSettingsIcon aria-hidden="true" />,
+                      onSelect: () =>
+                        window.open(
+                          organizationAppLinks.organizationSettings,
+                          "_blank",
+                          "noopener"
+                        ),
+                    },
+                  ]
+                : []),
               ...(organizationAppLinks
                 ? [
                     {

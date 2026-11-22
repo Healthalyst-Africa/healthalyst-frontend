@@ -358,6 +358,8 @@ export function NoteTemplatesPage() {
         <DataTable
           accessibleLabel="Note templates"
           columns={COLUMNS}
+          // Ten rows, so every built-in template shows without scrolling.
+          maximumVisibleRows={10}
           state={
             templatesQuery.isPending
               ? { status: "loading", label: "Loading templates" }
