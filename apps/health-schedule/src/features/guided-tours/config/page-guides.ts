@@ -20,6 +20,14 @@ export const PAGE_GUIDES = {
       "Checking in gives the patient a token and puts them in their first queue. The list of who is in the building shows the most urgent first and updates every few seconds.",
     ],
   },
+  appointments: {
+    title: "Appointments",
+    paragraphs: [
+      "A day of bookings at this branch, calendar by calendar: each doctor, room or machine with its hours and who is booked when. Move between days with the arrows or pick a date.",
+      "Book, move or cancel an appointment from here. A warning appears on a booking that no longer fits, for example because the doctor took leave after it was booked: call the patient and move it.",
+      "Patients waiting for a time to come free are listed under the day. Book one when a time suits them.",
+    ],
+  },
   triage: {
     title: "Vital signs",
     paragraphs: [

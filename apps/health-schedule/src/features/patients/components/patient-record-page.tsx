@@ -22,6 +22,8 @@ import { FamilySection } from "~/features/patients/components/family-section";
 import { PatientBanner } from "~/features/patients/components/patient-banner";
 import { PatientDetailsSection } from "~/features/patients/components/patient-details-section";
 import { TodaysVisit } from "~/features/patients/components/todays-visit";
+import { PatientAppointments } from "~/features/appointments/components/patient-appointments";
+import { describePatientFullName } from "~/features/patients/utilities/patient-presentation";
 import {
   CLINICAL_SECTIONS_PERMISSION,
   PATIENT_PERMISSIONS,
@@ -172,6 +174,13 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
         <PatientBanner patient={patientQuery.data} />
       </div>
       <TodaysVisit patientId={patientQuery.data.id} />
+      <PatientAppointments
+        patient={{
+          id: patientQuery.data.id,
+          name: describePatientFullName(patientQuery.data),
+          details: patientQuery.data.patientNumber,
+        }}
+      />
       <div data-tour="patient-sections">
         <RecordTabs
           accessibleLabel="Patient record sections"

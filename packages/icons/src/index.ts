@@ -96,4 +96,10 @@ export {
   IconCircleDashed as UpcomingStepIcon,
   IconCircleDot as CurrentStepIcon,
   IconSettings as OrganizationSettingsIcon,
+  IconCalendarWeek as AppointmentsIcon,
+  IconCalendarPlus as BookAppointmentIcon,
+  IconCalendarRepeat as RescheduleAppointmentIcon,
+  IconCalendarX as CancelAppointmentIcon,
+  IconUserX as NoShowIcon,
+  IconClipboardList as WaitlistIcon,
 } from "@tabler/icons-react";

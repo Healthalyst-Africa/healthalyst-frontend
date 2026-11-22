@@ -15,6 +15,7 @@ const STEP_STATE_NAMES = {
 /**
  * Where a patient is on their visit, such as checked in, vital signs, then
  * the doctor, so anyone can see what has happened and what comes next.
+ * The steps always stack one per line, in the order they happen.
  */
 export function VisitProgress({
   steps,
@@ -22,14 +23,9 @@ export function VisitProgress({
   steps: readonly VisitProgressStep[];
 }) {
   return (
-    <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs leading-5">
-      {steps.map((step, stepIndex) => (
-        <li key={step.label} className="flex items-center gap-1">
-          {stepIndex > 0 && (
-            <span aria-hidden="true" className="text-muted-foreground/60">
-              ›
-            </span>
-          )}
+    <ol className="flex flex-col items-start gap-1 text-xs leading-5">
+      {steps.map((step) => (
+        <li key={step.label} className="flex items-center gap-1.5">
           {step.state === "done" ? (
             <CompletedStepIcon
               aria-hidden="true"

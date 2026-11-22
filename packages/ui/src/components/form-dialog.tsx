@@ -21,6 +21,8 @@ type FormDialogProperties = {
   /** The form's fields. */
   children: ReactNode;
   submitLabel: string;
+  /** The button that closes without submitting; "Cancel" unless that would be confusing. */
+  dismissLabel?: string;
   submittingLabel?: string;
   isSubmitting?: boolean;
   /** `destructive` colours the submit button for irreversible actions. */
@@ -48,6 +50,7 @@ export function FormDialog({
   description,
   children,
   submitLabel,
+  dismissLabel = "Cancel",
   submittingLabel,
   isSubmitting = false,
   tone = "default",
@@ -90,7 +93,7 @@ export function FormDialog({
               disabled={isSubmitting}
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {dismissLabel}
             </ActionButton>
             <ActionButton
               type="submit"

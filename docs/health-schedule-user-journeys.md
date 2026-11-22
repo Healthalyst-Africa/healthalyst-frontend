@@ -47,11 +47,26 @@ permissions they hold.
 - **Consistency:** one empty state per section, grouped queue list, missing
   details in grey, a patient search at the top of Patients.
 
+## Booking (phase 2)
+
+- **One booking screen, opened where the work is:** "Book an appointment"
+  on the front desk, on the Appointments page and on a patient's record.
+  Choose what it is for, then a free time from a week of days grouped by
+  doctor or room. The time is kept for five minutes, with a countdown,
+  so no other desk takes it while the booking is confirmed.
+- **Appointments page:** a day at the branch, calendar by calendar, with
+  each calendar's hours, leave and bookings. A booking that leave or
+  changed hours no longer fits is flagged "call the patient to move it".
+- **On the patient record:** their coming appointments, with move, cancel
+  and "did not come", and recent ones. A past booking that was never
+  checked in or recorded as missed says "Outcome not recorded".
+- **Waitlist:** when no time suits, the patient goes on the waitlist with
+  the dates and time of day they could come. Waiting patients are listed
+  on the Appointments page to book when a time comes free.
+
 ## Still to do
 
-- **Booking** (phase 2) belongs in the receptionist's journey: book from
-  check-in and from a patient's record, not on a separate page.
-- **A day view of each calendar,** so "Calendars" shows people's days, not
-  only their weekly hours.
-- **Today's booking on the patient record,** once the appointments list is
-  connected.
+- **Booking above capacity or outside hours** (`appointment:override`) is
+  not offered yet.
+- **Offering a freed time to waiting patients** straight after a
+  cancellation (`GET /v1/waitlist/matches`) is not shown yet.
