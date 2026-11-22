@@ -1,8 +1,5 @@
 import type { StatusTone } from "@healthalyst/ui/types/status-tone";
-import {
-  APPOINTMENT_ISSUE_PRESENTATION,
-  APPOINTMENT_STATUS_PRESENTATION,
-} from "~/features/appointments/config/appointments";
+import { APPOINTMENT_STATUS_PRESENTATION } from "~/features/appointments/config/appointments";
 import type {
   Appointment,
   DayBoardCalendar,
@@ -63,7 +60,8 @@ export function needsFreshSlots(code: string | null): boolean {
 
 /**
  * A booking's status. One still marked booked after it ended was never
- * checked in or recorded as missed, so it says so.
+ * checked in or recorded as missed. That is common on past days, so it is
+ * said plainly without a warning colour.
  */
 export function describeAppointmentStatus(
   appointment: Pick<Appointment, "status" | "endsAt">,
@@ -73,7 +71,7 @@ export function describeAppointmentStatus(
     appointment.status === "BOOKED" &&
     new Date(appointment.endsAt).getTime() <= now.getTime()
   ) {
-    return { label: "Outcome not recorded", tone: "warning" };
+    return { label: "Not checked in", tone: "neutral" };
   }
   return APPOINTMENT_STATUS_PRESENTATION[appointment.status];
 }
@@ -83,12 +81,6 @@ export function describeAppointmentPeriod(
   appointment: Pick<Appointment, "startsAt" | "endsAt">
 ): string {
   return `${describeBranchClockTime(appointment.startsAt)} – ${describeBranchClockTime(appointment.endsAt)}`;
-}
-
-export function describeAppointmentIssue(
-  issue: keyof typeof APPOINTMENT_ISSUE_PRESENTATION | null
-): string | undefined {
-  return issue ? APPOINTMENT_ISSUE_PRESENTATION[issue] : undefined;
 }
 
 /** A calendar's day, such as "Open 8:00 am – 4:00 pm" or "Closed today". */

@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { ActionMenuItem } from "@healthalyst/ui/types/action-menu";
 import type { StatusTone } from "@healthalyst/ui/types/status-tone";
 import type { VisitProgressStep } from "@healthalyst/ui/types/visit-progress";
 
@@ -67,6 +68,13 @@ export type DataTableProperties<RowData> = {
   maximumVisibleRows?: number;
   /** Highlights rows that need attention first, such as long waits. */
   getRowEmphasis?: (row: RowData) => DataTableRowEmphasis;
+  /**
+   * Several actions for a row, such as moving or cancelling a booking, behind
+   * a menu at the end of the row. Return none for rows with nothing to do.
+   */
+  getRowActions?: (row: RowData) => readonly ActionMenuItem[];
+  /** Names a row's menu for assistive technology, such as its patient. */
+  getRowActionsLabel?: (row: RowData) => string;
   rowAction?: {
     /** The button's accessible name, such as "Review HealthAlyst". */
     label: (row: RowData) => string;

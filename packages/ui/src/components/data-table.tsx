@@ -17,6 +17,7 @@ import type { DataTableProperties } from "@healthalyst/ui/types/data-table";
 import { DataTableCardList } from "./data-table/data-table-card-list";
 import { DataTableCellContent } from "./data-table/data-table-cell-content";
 import { DataTableMessage } from "./data-table/data-table-message";
+import { DataTableRowActions } from "./data-table/data-table-row-actions";
 import { ROW_EMPHASIS_CLASS_NAMES } from "./data-table/data-table-row-emphasis";
 
 const COLUMN_SIZES = {
@@ -46,6 +47,8 @@ export function DataTable<RowData>({
   getRowIdentifier,
   emptyState,
   rowAction,
+  getRowActions,
+  getRowActionsLabel,
   getRowEmphasis,
   maximumVisibleRows = DEFAULT_MAXIMUM_VISIBLE_ROWS,
 }: DataTableProperties<RowData>) {
@@ -66,6 +69,8 @@ export function DataTable<RowData>({
             state={state}
             getRowIdentifier={getRowIdentifier}
             rowAction={rowAction}
+            getRowActions={getRowActions}
+            getRowActionsLabel={getRowActionsLabel}
             getRowEmphasis={getRowEmphasis}
           />
         </div>
@@ -134,7 +139,7 @@ export function DataTable<RowData>({
                         {column.label}
                       </TableHead>
                     ))}
-                    {rowAction && (
+                    {(rowAction || getRowActions) && (
                       <TableHead scope="col" className="w-14 px-3">
                         <span className="sr-only">Actions</span>
                       </TableHead>
@@ -153,7 +158,9 @@ export function DataTable<RowData>({
                             <Skeleton className="h-4 w-3/4 motion-reduce:animate-none" />
                           </TableCell>
                         ))}
-                        {rowAction && <TableCell className="px-3" />}
+                        {(rowAction || getRowActions) && (
+                          <TableCell className="px-3" />
+                        )}
                       </TableRow>
                     ))}
                   {state.status === "ready" &&
@@ -179,6 +186,16 @@ export function DataTable<RowData>({
                             <DataTableCellContent cell={column.getCell(row)} />
                           </TableCell>
                         ))}
+                        {getRowActions && !rowAction && (
+                          <TableCell className="px-3 py-4 text-right">
+                            <DataTableRowActions
+                              items={getRowActions(row)}
+                              accessibleLabel={
+                                getRowActionsLabel?.(row) ?? "Actions"
+                              }
+                            />
+                          </TableCell>
+                        )}
                         {rowAction && (
                           <TableCell className="px-3 py-4 text-right">
                             {rowAction.visibleLabel ? (

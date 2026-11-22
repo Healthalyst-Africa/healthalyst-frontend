@@ -59,13 +59,6 @@ export const APPOINTMENT_STATUS_PRESENTATION = {
   RELEASED: { label: "Not booked", tone: "neutral" },
 } as const satisfies Record<string, { label: string; tone: StatusTone }>;
 
-/** Why a booking no longer fits the day it is on. */
-export const APPOINTMENT_ISSUE_PRESENTATION = {
-  CLOSED: "The calendar is closed then. Call the patient to move it.",
-  OUTSIDE_HOURS:
-    "The hours changed since it was booked. Call the patient to move it.",
-} as const;
-
 export const CANCELLED_BY_OPTIONS = [
   {
     value: "PATIENT",

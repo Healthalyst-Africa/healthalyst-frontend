@@ -54,12 +54,14 @@ permissions they hold.
   Choose what it is for, then a free time from a week of days grouped by
   doctor or room. The time is kept for five minutes, with a countdown,
   so no other desk takes it while the booking is confirmed.
-- **Appointments page:** a day at the branch, calendar by calendar, with
-  each calendar's hours, leave and bookings. A booking that leave or
-  changed hours no longer fits is flagged "call the patient to move it".
+- **Appointments page:** a table of everyone booked at the branch on a
+  day, in time order, with who or which room each is with. "With" narrows
+  the day to one doctor or room and shows their hours. A booking that leave
+  or changed hours no longer fits is highlighted as "Needs moving". Each
+  row's menu moves, cancels or records that the patient did not come.
 - **On the patient record:** their coming appointments, with move, cancel
   and "did not come", and recent ones. A past booking that was never
-  checked in or recorded as missed says "Outcome not recorded".
+  checked in or recorded as missed says "Not checked in".
 - **Waitlist:** when no time suits, the patient goes on the waitlist with
   the dates and time of day they could come. Waiting patients are listed
   on the Appointments page to book when a time comes free.

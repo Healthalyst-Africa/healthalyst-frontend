@@ -11,9 +11,12 @@ import {
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
 import { DayNavigator } from "@healthalyst/ui/components/day-navigator";
-import { DaySchedule } from "@healthalyst/ui/components/day-schedule";
+import { DataTable } from "@healthalyst/ui/components/data-table";
 import { MetricSummary } from "@healthalyst/ui/components/metric-summary";
+import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
+import { ToolbarSelect } from "@healthalyst/ui/components/toolbar-select";
 import { EmptyCalendarDayIllustration } from "@healthalyst/ui/illustrations/empty-calendar-day-illustration";
+import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import { useAppointmentWorkflows } from "~/features/appointments/components/appointment-workflows";
 import { WaitlistPanel } from "~/features/appointments/components/waitlist-panel";
 import {
@@ -21,14 +24,18 @@ import {
   BOOKING_PERMISSIONS,
 } from "~/features/appointments/config/appointments";
 import { useDayBoardForDate } from "~/features/appointments/hooks/use-appointments";
-import type { DayBoard } from "~/features/appointments/schemas/appointment-response-schemas";
 import {
-  describeAppointmentIssue,
-  describeAppointmentPeriod,
   describeAppointmentStatus,
   describeCalendarDay,
-  sortDayAppointments,
 } from "~/features/appointments/utilities/appointment-presentation";
+import {
+  buildCalendarFilterOptions,
+  describeWith,
+  EVERY_CALENDAR,
+  findChosenCalendar,
+  listDayAppointments,
+  type DaySheetAppointment,
+} from "~/features/appointments/utilities/day-sheet";
 import { shiftDate } from "~/features/appointments/utilities/slot-choices";
 import type { WorkspaceBranch } from "~/features/branch-selection/schemas/branch-schema";
 import { PatientFlowFrame } from "~/features/patient-flow/components/patient-flow-frame";
@@ -102,47 +109,63 @@ function AppointmentsDay({
 }) {
   const today = branchToday();
   const [date, setDate] = useState(today);
+  const [calendarChoice, setCalendarChoice] = useState(EVERY_CALENDAR);
   const dayBoardQuery = useDayBoardForDate(branch.id, date, true);
-  const summary = dayBoardQuery.data?.summary;
+  const dayBoard = dayBoardQuery.data;
+  const summary = dayBoard?.summary;
+  const chosenCalendar = findChosenCalendar(dayBoard, calendarChoice);
+  // A calendar chosen on another day may not be on this one: show everyone.
+  const visibleChoice = chosenCalendar ? calendarChoice : EVERY_CALENDAR;
   const now = new Date();
+  const dayName = describeBranchDate(toBranchDateTime(date, "12:00"));
 
-  function describeCalendars(dayBoard: DayBoard) {
-    return dayBoard.calendars.map((calendar) => ({
-      id: calendar.resourceId,
-      name: calendar.name,
-      hours: describeCalendarDay(calendar),
-      entries: sortDayAppointments(calendar.appointments).map((appointment) => {
-        const patientName = appointment.patient
-          ? describePatientName(appointment.patient)
-          : "Patient not recorded";
-        return {
-          id: appointment.id,
-          time: describeBranchClockTime(appointment.startsAt),
-          period: describeAppointmentPeriod(appointment),
-          title: patientName,
-          details: [
-            appointment.appointmentTypeName,
-            appointment.patient?.patientNumber,
-            appointment.patient?.phone,
-          ]
-            .filter(Boolean)
-            .join(" · "),
-          status: describeAppointmentStatus(appointment, now),
-          attention:
-            appointment.status === "BOOKED"
-              ? describeAppointmentIssue(appointment.issue)
-              : undefined,
-          isInactive: appointment.status === "CANCELLED",
-          actions: canBook ? buildActions(appointment, now) : [],
-        };
+  const columns: readonly DataTableColumn<DaySheetAppointment>[] = [
+    {
+      key: "time",
+      label: "Time",
+      size: "compact",
+      getCell: (appointment) => ({
+        kind: "text",
+        primary: describeBranchClockTime(appointment.startsAt),
+        secondary: `until ${describeBranchClockTime(appointment.endsAt)}`,
       }),
-    }));
-  }
+    },
+    {
+      key: "patient",
+      label: "Patient",
+      size: "wide",
+      getCell: (appointment) => ({
+        kind: "text",
+        primary: appointment.patient
+          ? describePatientName(appointment.patient)
+          : "Patient not recorded",
+        secondary: appointment.patient?.phone ?? undefined,
+      }),
+    },
+    {
+      key: "with",
+      label: "With",
+      getCell: (appointment) => ({
+        kind: "text",
+        primary: appointment.calendar.name,
+        secondary: appointment.appointmentTypeName,
+      }),
+    },
+    {
+      key: "status",
+      label: "Status",
+      size: "compact",
+      getCell: (appointment) =>
+        appointment.status === "BOOKED" && appointment.issue
+          ? { kind: "status", label: "Needs moving", tone: "warning" }
+          : { kind: "status", ...describeAppointmentStatus(appointment, now) },
+    },
+  ];
 
   return (
     <ContentPanel
       data-tour="appointments-day"
-      heading="Bookings by calendar"
+      heading="The day's appointments"
       headingLevel={2}
       headingAccessory={
         <DayNavigator
@@ -179,27 +202,64 @@ function AppointmentsDay({
           },
         ]}
       />
-      <DaySchedule
-        accessibleLabel={`Appointments on ${describeBranchDate(toBranchDateTime(date, "12:00"))}`}
+      <ToolbarSelect
+        label="With"
+        placeholder="Everyone"
+        value={visibleChoice}
+        options={buildCalendarFilterOptions(dayBoard)}
+        onValueChange={setCalendarChoice}
+        className="self-start"
+      />
+      {(summary?.needsAttention ?? 0) > 0 && (
+        <NoticeBanner tone="warning" title="Some bookings need moving">
+          Leave or new hours now clash with them. Call each patient marked
+          “Needs moving” and move the appointment to another time.
+        </NoticeBanner>
+      )}
+      {chosenCalendar && (
+        <p className="text-sm text-muted-foreground">
+          {describeCalendarDay(chosenCalendar)}
+        </p>
+      )}
+      <DataTable
+        accessibleLabel={`Appointments on ${dayName}`}
+        columns={columns}
         state={
           dayBoardQuery.isPending
-            ? { status: "loading" }
+            ? { status: "loading", label: "Loading the day's appointments" }
             : dayBoardQuery.isError
               ? {
                   status: "error",
                   title: "We could not load the day's appointments",
                   description: dayBoardQuery.error.message,
+                  retryLabel: "Try again",
                   onRetry: () => void dayBoardQuery.refetch(),
                 }
               : {
                   status: "ready",
-                  calendars: describeCalendars(dayBoardQuery.data),
+                  rows: listDayAppointments(dayBoardQuery.data, visibleChoice),
                 }
+        }
+        getRowIdentifier={(appointment) => appointment.id}
+        getRowEmphasis={(appointment) =>
+          appointment.status === "BOOKED" && appointment.issue
+            ? "attention"
+            : "none"
+        }
+        getRowActions={(appointment) =>
+          canBook ? buildActions(appointment, now) : []
+        }
+        getRowActionsLabel={(appointment) =>
+          `Actions for ${appointment.patient ? describePatientName(appointment.patient) : "the patient"} at ${describeBranchClockTime(appointment.startsAt)}`
         }
         emptyState={{
           illustration: <EmptyCalendarDayIllustration />,
-          title: "Nothing booked this day",
-          description: "Nobody has an appointment at this branch on this day.",
+          title: chosenCalendar
+            ? `Nothing booked ${describeWith(chosenCalendar)}`
+            : "Nothing booked this day",
+          description: chosenCalendar
+            ? "Choose everyone to see the rest of the branch."
+            : "Nobody has an appointment at this branch on this day.",
         }}
       />
     </ContentPanel>

@@ -4,11 +4,9 @@ import { useState } from "react";
 import { BookAppointmentIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
-import { EmptyState } from "@healthalyst/ui/components/empty-state";
-import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
+import { DataTable } from "@healthalyst/ui/components/data-table";
 import { EmptyCalendarDayIllustration } from "@healthalyst/ui/illustrations/empty-calendar-day-illustration";
-import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
-import { ScheduleEntryList } from "@healthalyst/ui/components/schedule-entry-list";
+import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import { useAppointmentWorkflows } from "~/features/appointments/components/appointment-workflows";
 import {
   APPOINTMENT_PERMISSIONS,
@@ -29,8 +27,6 @@ import {
   describeBranchShortDate,
 } from "~/shared/time/branch-time";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
-
-const PAST_APPOINTMENTS_SHOWN = 5;
 
 /**
  * The patient's coming appointments, with booking, moving and cancelling
@@ -55,24 +51,54 @@ export function PatientAppointments({ patient }: { patient: BookingPatient }) {
   const upcoming = listUpcomingAppointments(appointments, now);
   const past = listPastAppointments(appointments, now);
 
-  function toEntry(appointment: Appointment) {
-    const status = describeAppointmentStatus(appointment, now);
-    return {
-      id: appointment.id,
-      day: describeBranchShortDate(appointment.startsAt),
-      time: describeBranchClockTime(appointment.startsAt),
-      period: `${describeBranchDate(appointment.startsAt)}, ${describeAppointmentPeriod(appointment)}`,
-      title: appointment.resourceName,
-      details: appointment.cancelReason
-        ? `${appointment.appointmentTypeName} · ${appointment.cancelReason}`
-        : appointment.notes
-          ? `${appointment.appointmentTypeName} · ${appointment.notes}`
-          : appointment.appointmentTypeName,
-      status,
-      isInactive: appointment.status === "CANCELLED",
-      actions: canBook ? workflows.buildActions(appointment, now) : [],
-    };
-  }
+  const columns: readonly DataTableColumn<Appointment>[] = [
+    {
+      key: "when",
+      label: "When",
+      getCell: (appointment) => ({
+        kind: "text",
+        primary: describeBranchShortDate(appointment.startsAt),
+        secondary: describeAppointmentPeriod(appointment),
+      }),
+    },
+    {
+      key: "with",
+      label: "With",
+      size: "wide",
+      getCell: (appointment) => ({
+        kind: "text",
+        primary: appointment.resourceName,
+        secondary: appointment.appointmentTypeName,
+      }),
+    },
+    {
+      key: "status",
+      label: "Status",
+      size: "compact",
+      getCell: (appointment) => ({
+        kind: "status",
+        ...describeAppointmentStatus(appointment, now),
+      }),
+    },
+  ];
+  const tableState = (rows: readonly Appointment[]) =>
+    appointmentsQuery.isPending
+      ? { status: "loading" as const, label: "Loading appointments" }
+      : appointmentsQuery.isError
+        ? {
+            status: "error" as const,
+            title: "We could not load the appointments",
+            description: appointmentsQuery.error.message,
+            retryLabel: "Try again",
+            onRetry: () => void appointmentsQuery.refetch(),
+          }
+        : { status: "ready" as const, rows };
+  const rowActions = {
+    getRowActions: (appointment: Appointment) =>
+      canBook ? workflows.buildActions(appointment, now) : [],
+    getRowActionsLabel: (appointment: Appointment) =>
+      `Actions for the appointment on ${describeBranchDate(appointment.startsAt)} at ${describeBranchClockTime(appointment.startsAt)}`,
+  };
 
   return (
     <ContentPanel
@@ -93,72 +119,43 @@ export function PatientAppointments({ patient }: { patient: BookingPatient }) {
         )
       }
     >
-      {appointmentsQuery.isPending ? (
-        <LoadingPlaceholder
-          label="Loading appointments"
-          rows={[{ shape: "text" }, { shape: "text" }]}
-        />
-      ) : appointmentsQuery.isError ? (
-        <NoticeBanner
-          tone="error"
-          title="We could not load the appointments"
-          action={
-            <ActionButton
-              type="button"
-              variant="outline"
-              size="compact"
-              onClick={() => void appointmentsQuery.refetch()}
-            >
-              Try again
-            </ActionButton>
-          }
+      <DataTable
+        accessibleLabel="Coming appointments"
+        columns={columns}
+        state={tableState(upcoming)}
+        getRowIdentifier={(appointment) => appointment.id}
+        {...rowActions}
+        emptyState={{
+          illustration: <EmptyCalendarDayIllustration />,
+          title: "No appointments booked",
+          description: canBook
+            ? "Book the patient's next appointment when they need one."
+            : undefined,
+        }}
+      />
+      {past.length > 0 && (
+        <ActionButton
+          type="button"
+          variant="link"
+          size="unstyled"
+          className="w-fit text-sm"
+          aria-expanded={isShowingPast}
+          onClick={() => setIsShowingPast((current) => !current)}
         >
-          {appointmentsQuery.error.message}
-        </NoticeBanner>
-      ) : (
-        <div className="flex flex-col gap-3">
-          {upcoming.length === 0 ? (
-            <EmptyState
-              surface="plain"
-              illustration={<EmptyCalendarDayIllustration />}
-              title="No appointments booked"
-              description={
-                canBook
-                  ? "Book the patient's next appointment when they need one."
-                  : undefined
-              }
-            />
-          ) : (
-            <ScheduleEntryList
-              timeColumn="date-time"
-              entries={upcoming.map((appointment) => toEntry(appointment))}
-            />
-          )}
-          {past.length > 0 && (
-            <div className="flex flex-col gap-2">
-              <ActionButton
-                type="button"
-                variant="link"
-                size="unstyled"
-                className="w-fit text-sm"
-                aria-expanded={isShowingPast}
-                onClick={() => setIsShowingPast((current) => !current)}
-              >
-                {isShowingPast
-                  ? "Hide recent appointments"
-                  : "Show recent appointments"}
-              </ActionButton>
-              {isShowingPast && (
-                <ScheduleEntryList
-                  timeColumn="date-time"
-                  entries={past
-                    .slice(0, PAST_APPOINTMENTS_SHOWN)
-                    .map((appointment) => toEntry(appointment))}
-                />
-              )}
-            </div>
-          )}
-        </div>
+          {isShowingPast
+            ? "Hide earlier appointments"
+            : "Show earlier appointments"}
+        </ActionButton>
+      )}
+      {isShowingPast && past.length > 0 && (
+        <DataTable
+          accessibleLabel="Earlier appointments"
+          columns={columns}
+          state={tableState(past)}
+          getRowIdentifier={(appointment) => appointment.id}
+          {...rowActions}
+          emptyState={{ title: "No earlier appointments" }}
+        />
       )}
       {workflows.dialogs}
     </ContentPanel>

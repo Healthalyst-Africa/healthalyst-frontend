@@ -2,14 +2,11 @@
 
 import { useState } from "react";
 import { BookAppointmentIcon, DeleteIcon } from "@healthalyst/icons";
-import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
-import { EmptyState } from "@healthalyst/ui/components/empty-state";
-import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
+import { DataTable } from "@healthalyst/ui/components/data-table";
 import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
-import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
-import { ScheduleEntryList } from "@healthalyst/ui/components/schedule-entry-list";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
+import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import {
   APPOINTMENT_TEXT_LIMITS,
   TIME_OF_DAY_OPTIONS,
@@ -26,22 +23,62 @@ import {
 import type { WorkspaceBranch } from "~/features/branch-selection/schemas/branch-schema";
 import { describePatientName } from "~/features/patient-flow/utilities/front-desk";
 import { ReasonDialog } from "~/shared/forms/reason-dialog";
-import { describeBranchDate } from "~/shared/time/branch-time";
 
-function describeWaitingFor(entry: WaitlistEntry): string {
-  const timeOfDay =
+function describeTimeOfDay(entry: WaitlistEntry): string {
+  return (
     TIME_OF_DAY_OPTIONS.find((option) => option.value === entry.timeOfDay)
-      ?.label ?? "Any time";
-  return [
-    entry.appointmentTypeName,
-    entry.resourceName ? `with ${entry.resourceName}` : null,
-    `${describeShortDate(entry.fromDate)} – ${describeShortDate(entry.toDate)}`,
-    timeOfDay.toLowerCase(),
-    entry.patient.phone,
-  ]
-    .filter(Boolean)
-    .join(" · ");
+      ?.label ?? "Any time"
+  );
 }
+
+const WAITLIST_COLUMNS: readonly DataTableColumn<WaitlistEntry>[] = [
+  {
+    key: "patient",
+    label: "Patient",
+    size: "wide",
+    getCell: (entry) => ({
+      kind: "text",
+      primary: describePatientName(entry.patient),
+      secondary: entry.patient.phone ?? undefined,
+    }),
+  },
+  {
+    key: "for",
+    label: "Waiting for",
+    getCell: (entry) => ({
+      kind: "text",
+      primary: entry.appointmentTypeName,
+      secondary: entry.resourceName ? `with ${entry.resourceName}` : "Anyone",
+    }),
+  },
+  {
+    key: "when",
+    label: "Could come",
+    getCell: (entry) => ({
+      kind: "text",
+      primary: `${describeShortDate(entry.fromDate)} – ${describeShortDate(entry.toDate)}`,
+      secondary: describeTimeOfDay(entry),
+    }),
+  },
+  {
+    key: "since",
+    label: "Waiting since",
+    size: "compact",
+    getCell: (entry) => ({
+      kind: "text",
+      primary: describeShortDate(slotDate(entry.waitingSince)),
+    }),
+  },
+  {
+    key: "status",
+    label: "Status",
+    size: "compact",
+    getCell: (entry) =>
+      entry.isExpired
+        ? { kind: "status", label: "Dates passed", tone: "warning" }
+        : { kind: "status", label: "Waiting", tone: "information" },
+  },
+];
 
 /**
  * Patients waiting for a time to come free at the branch, longest waiting
@@ -59,7 +96,6 @@ export function WaitlistPanel({
   const waitlistQuery = useWaitlist(branch.id, true);
   const removeMutation = useRemoveFromWaitlist();
   const [removing, setRemoving] = useState<WaitlistEntry | null>(null);
-  const entries = waitlistQuery.data ?? [];
 
   return (
     <ContentPanel
@@ -68,67 +104,51 @@ export function WaitlistPanel({
       headingLevel={2}
       description="Patients waiting for a time to come free. When someone cancels, check here first."
     >
-      {waitlistQuery.isPending ? (
-        <LoadingPlaceholder
-          label="Loading the waitlist"
-          rows={[{ shape: "text" }, { shape: "text" }]}
-        />
-      ) : waitlistQuery.isError ? (
-        <NoticeBanner
-          tone="error"
-          title="We could not load the waitlist"
-          action={
-            <ActionButton
-              type="button"
-              variant="outline"
-              size="compact"
-              onClick={() => void waitlistQuery.refetch()}
-            >
-              Try again
-            </ActionButton>
-          }
-        >
-          {waitlistQuery.error.message}
-        </NoticeBanner>
-      ) : entries.length === 0 ? (
-        <EmptyState
-          surface="plain"
-          illustration={<EmptyReviewQueueIllustration />}
-          title="Nobody is waiting"
-          description="When no time suits a patient, add them to the waitlist from the booking screen."
-        />
-      ) : (
-        <ScheduleEntryList
-          timeColumn="date-time"
-          entries={entries.map((entry) => ({
-            id: entry.id,
-            time: `Since ${describeShortDate(slotDate(entry.waitingSince))}`,
-            period: `Waiting since ${describeBranchDate(entry.waitingSince)}`,
-            title: describePatientName(entry.patient),
-            details: describeWaitingFor(entry),
-            status: entry.isExpired
-              ? { label: "Dates passed", tone: "warning" }
-              : { label: "Waiting", tone: "information" },
-            attention: entry.notes ?? undefined,
-            actions: canBook
-              ? [
-                  {
-                    label: "Book a time",
-                    icon: <BookAppointmentIcon />,
-                    onSelect: () => onBook(entry),
-                  },
-                  {
-                    label: "Take off the waitlist",
-                    icon: <DeleteIcon />,
-                    tone: "destructive",
-                    separatedAbove: true,
-                    onSelect: () => setRemoving(entry),
-                  },
-                ]
-              : [],
-          }))}
-        />
-      )}
+      <DataTable
+        accessibleLabel="Patients on the waitlist"
+        columns={WAITLIST_COLUMNS}
+        state={
+          waitlistQuery.isPending
+            ? { status: "loading", label: "Loading the waitlist" }
+            : waitlistQuery.isError
+              ? {
+                  status: "error",
+                  title: "We could not load the waitlist",
+                  description: waitlistQuery.error.message,
+                  retryLabel: "Try again",
+                  onRetry: () => void waitlistQuery.refetch(),
+                }
+              : { status: "ready", rows: waitlistQuery.data }
+        }
+        getRowIdentifier={(entry) => entry.id}
+        getRowActions={(entry) =>
+          canBook
+            ? [
+                {
+                  label: "Book a time",
+                  icon: <BookAppointmentIcon />,
+                  onSelect: () => onBook(entry),
+                },
+                {
+                  label: "Take off the waitlist",
+                  icon: <DeleteIcon />,
+                  tone: "destructive",
+                  separatedAbove: true,
+                  onSelect: () => setRemoving(entry),
+                },
+              ]
+            : []
+        }
+        getRowActionsLabel={(entry) =>
+          `Actions for ${describePatientName(entry.patient)}`
+        }
+        emptyState={{
+          illustration: <EmptyReviewQueueIllustration />,
+          title: "Nobody is waiting",
+          description:
+            "When no time suits a patient, add them to the waitlist from the booking screen.",
+        }}
+      />
       <ReasonDialog
         open={removing !== null}
         onOpenChange={(open) => {

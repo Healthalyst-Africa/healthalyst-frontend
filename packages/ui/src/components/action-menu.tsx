@@ -15,18 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@healthalyst/ui/primitives/dropdown-menu";
 import { cn } from "@healthalyst/ui/lib/utilities";
-
-type ActionMenuItem = {
-  label: string;
-  icon?: ReactNode;
-  onSelect: () => void;
-  /** Destructive actions, such as ending something, show in red. */
-  tone?: "default" | "destructive";
-  /** Draws a dividing line above the item, to set it apart. */
-  separatedAbove?: boolean;
-  isPending?: boolean;
-  pendingLabel?: string;
-};
+import type { ActionMenuItem } from "@healthalyst/ui/types/action-menu";
 
 /**
  * Secondary actions for one item, such as a card, behind an ellipsis button.

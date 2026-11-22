@@ -23,7 +23,7 @@ export const PAGE_GUIDES = {
   appointments: {
     title: "Appointments",
     paragraphs: [
-      "A day of bookings at this branch, calendar by calendar: each doctor, room or machine with its hours and who is booked when. Move between days with the arrows or pick a date.",
+      "Everyone booked at this branch on a day, in time order, with who or which room each appointment is with. Choose one doctor or room under With to see only theirs and their hours. Move between days with the arrows or pick a date.",
       "Book, move or cancel an appointment from here. A warning appears on a booking that no longer fits, for example because the doctor took leave after it was booked: call the patient and move it.",
       "Patients waiting for a time to come free are listed under the day. Book one when a time suits them.",
     ],
