@@ -9,8 +9,8 @@ export const PAGE_GUIDES = {
   workspace: {
     title: "Overview",
     paragraphs: [
-      "Your starting point in HealthSchedule, for the branch shown at the top of the page. Patients today, queues and calendars all belong to that branch.",
-      "The pages in the sidebar depend on your role. Team, roles and organisation settings open from the menu under the HealthSchedule name.",
+      "Your work today at the branch shown at the top of the page: one card for each job your role does, with how many patients are waiting. Open a card to start.",
+      "If something still needs setting up before patients can be booked, such as doctors' weekly hours, it is listed here first. Team, roles and organisation settings open from the menu under the HealthSchedule name.",
     ],
   },
   frontDesk: {
@@ -21,9 +21,9 @@ export const PAGE_GUIDES = {
     ],
   },
   triage: {
-    title: "Triage and vitals",
+    title: "Vital signs",
     paragraphs: [
-      "Nurses record vital signs here and set how urgently each patient should be seen, then send them to their doctor.",
+      "Nurses record each new patient's vital signs here (temperature, blood pressure, pulse and breathing), decide how urgently they need a doctor, then send them on. Deciding urgency is called triage.",
       "For adults, danger signs suggest a triage band as you type. Patients under 16 are left to your judgement. Lowering an emergency band needs the override permission and a reason.",
     ],
   },

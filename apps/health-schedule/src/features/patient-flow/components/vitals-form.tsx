@@ -233,7 +233,7 @@ export function VitalsForm({
         },
         onError: (error) =>
           setSendFailure(
-            `The vitals are saved, but ${patientName} was not sent on: ${error.message}`
+            `The vital signs are saved, but ${patientName} was not sent on: ${error.message}`
           ),
       }
     );
@@ -290,7 +290,7 @@ export function VitalsForm({
 
   return (
     <ContentPanel
-      heading={`Vitals for ${patientName}`}
+      heading={`Vital signs for ${patientName}`}
       headingLevel={2}
       description={`${entry.token} · ${entry.patient.patientNumber}${entry.note ? ` · ${entry.note}` : ""}`}
     >
@@ -473,7 +473,7 @@ export function VitalsForm({
         )}
 
         {recordMutation.isError && Object.keys(errors).length === 0 && (
-          <NoticeBanner tone="error" title="The vitals were not saved">
+          <NoticeBanner tone="error" title="The vital signs were not saved">
             {recordMutation.error.message}
           </NoticeBanner>
         )}
@@ -504,7 +504,7 @@ export function VitalsForm({
                   canSendOn ? <SendOnIcon className="size-4" /> : undefined
                 }
               >
-                {canSendOn ? sendLabel : "Save vitals"}
+                {canSendOn ? sendLabel : "Save vital signs"}
               </ActionButton>
               {canSendOn && (
                 <ActionButton

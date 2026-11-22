@@ -181,22 +181,37 @@ export function DataTable<RowData>({
                         ))}
                         {rowAction && (
                           <TableCell className="px-3 py-4 text-right">
-                            <ActionButton
-                              type="button"
-                              size="icon"
-                              variant="ghost"
-                              className="size-9 text-muted-foreground"
-                              aria-label={rowAction.label(row)}
-                              onClick={(clickEvent) => {
-                                clickEvent.stopPropagation();
-                                rowAction.onSelect(row);
-                              }}
-                            >
-                              <ChevronRightIcon
-                                aria-hidden="true"
-                                className="size-4"
-                              />
-                            </ActionButton>
+                            {rowAction.visibleLabel ? (
+                              <ActionButton
+                                type="button"
+                                size="compact"
+                                variant="outline"
+                                aria-label={rowAction.label(row)}
+                                onClick={(clickEvent) => {
+                                  clickEvent.stopPropagation();
+                                  rowAction.onSelect(row);
+                                }}
+                              >
+                                {rowAction.visibleLabel}
+                              </ActionButton>
+                            ) : (
+                              <ActionButton
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="size-9 text-muted-foreground"
+                                aria-label={rowAction.label(row)}
+                                onClick={(clickEvent) => {
+                                  clickEvent.stopPropagation();
+                                  rowAction.onSelect(row);
+                                }}
+                              >
+                                <ChevronRightIcon
+                                  aria-hidden="true"
+                                  className="size-4"
+                                />
+                              </ActionButton>
+                            )}
                           </TableCell>
                         )}
                       </TableRow>

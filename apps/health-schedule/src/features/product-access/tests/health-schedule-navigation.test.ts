@@ -12,7 +12,6 @@ const HUB_LINKS: OrganizationAppLinks = {
   accountSecurity: `${HUB_ADDRESS}/account/security?product=healthschedule`,
   organizationSettings: `${HUB_ADDRESS}/settings`,
   team: `${HUB_ADDRESS}/team`,
-  teamRoles: `${HUB_ADDRESS}/team/roles`,
   products: `${HUB_ADDRESS}/products`,
 };
 
@@ -44,7 +43,7 @@ describe("HealthSchedule navigation", () => {
     expect(describeSections(navigation.sidebar)).toEqual([
       { label: "HealthSchedule", items: ["Overview"] },
       {
-        label: "Schedule setup",
+        label: "Setup",
         items: ["Calendars", "Time off and holidays", "Appointment types"],
       },
     ]);
@@ -64,13 +63,13 @@ describe("HealthSchedule navigation", () => {
     });
     const sidebar = describeSections(navigation.sidebar);
     expect(
-      sidebar.find((section) => section.label === "Patients today")?.items
+      sidebar.find((section) => section.label === "Patient visits")?.items
     ).toEqual(["Queues", "Consultation"]);
     expect(
-      sidebar.find((section) => section.label === "Records")?.items
-    ).toEqual(["Patients", "Emergency access reviews"]);
+      sidebar.find((section) => section.label === "Patients")?.items
+    ).toEqual(["Patients", "Access reviews"]);
     expect(
-      sidebar.find((section) => section.label === "Schedule setup")?.items
+      sidebar.find((section) => section.label === "Setup")?.items
     ).toContain("Note templates");
   });
 
@@ -93,7 +92,7 @@ describe("HealthSchedule navigation", () => {
       { label: "Apps", items: ["HealthSchedule", "Organisation"] },
       {
         label: "Manage your organisation",
-        items: ["Team", "Roles and permissions", "Settings"],
+        items: ["Team"],
       },
     ]);
     expect(switcher[0]?.items[0]?.isCurrent).toBe(true);
@@ -117,7 +116,7 @@ describe("HealthSchedule navigation", () => {
       permissions: [],
       organizationAppLinks: HUB_LINKS,
     });
-    expect(switcher[1]?.items.map((item) => item.label)).toEqual(["Settings"]);
+    expect(switcher.map((section) => section.label)).toEqual(["Apps"]);
   });
 
   it("offers nowhere else to go without a hub address", () => {

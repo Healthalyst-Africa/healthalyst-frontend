@@ -10,7 +10,18 @@ export type QueueTarget =
   | { kind: "CONSULTATION"; resourceId?: string }
   | { kind: "DEPARTMENT"; departmentId: string };
 
-export type QueueTargetOption = { value: string; label: string };
+export type QueueTargetOption = {
+  value: string;
+  label: string;
+  /** Nurses, doctors or departments, so a long list reads in groups. */
+  group: string;
+};
+
+const QUEUE_GROUPS = {
+  triage: "Nurses",
+  doctors: "Doctors",
+  departments: "Departments",
+} as const;
 
 export type QueueTargetChoices = {
   practitioners: readonly { resourceId: string; name: string }[];
@@ -80,14 +91,23 @@ export function buildQueueTargetOptions(
   choices: QueueTargetChoices
 ): QueueTargetOption[] {
   return [
-    { value: TRIAGE_VALUE, label: "Triage (vitals first)" },
-    { value: ANY_DOCTOR_VALUE, label: "Next free doctor" },
+    {
+      value: TRIAGE_VALUE,
+      label: "Vital signs with a nurse first",
+      group: QUEUE_GROUPS.triage,
+    },
+    {
+      value: ANY_DOCTOR_VALUE,
+      label: "Next free doctor",
+      group: QUEUE_GROUPS.doctors,
+    },
     ...choices.practitioners.map((practitioner) => ({
       value: encodeQueueTarget({
         kind: "CONSULTATION",
         resourceId: practitioner.resourceId,
       }),
       label: practitioner.name,
+      group: QUEUE_GROUPS.doctors,
     })),
     ...choices.departments.map((department) => ({
       value: encodeQueueTarget({
@@ -95,17 +115,18 @@ export function buildQueueTargetOptions(
         departmentId: department.id,
       }),
       label: department.name,
+      group: QUEUE_GROUPS.departments,
     })),
   ];
 }
 
-/** Where a patient is, such as "Triage", "Dr Bello" or "Laboratory". */
+/** Where a patient is, such as "Vital signs", "Dr Bello" or "Laboratory". */
 export function describeQueue(queue: {
   kind: QueueKind;
   departmentName: string | null;
   resourceName: string | null;
 }): string {
-  if (queue.kind === "TRIAGE") return "Triage";
+  if (queue.kind === "TRIAGE") return "Vital signs";
   if (queue.kind === "DEPARTMENT") return queue.departmentName ?? "Department";
   return queue.resourceName ?? "Next free doctor";
 }
@@ -131,7 +152,7 @@ function withWaitingCount(label: string, waiting: number): string {
 }
 
 /**
- * The queues a member of staff can work from: triage, all doctors, each
+ * The queues a member of staff can work from: vital signs, any doctor, each
  * doctor working today (with patients for the next free doctor) and each
  * department, with how many are waiting in each.
  */
@@ -143,16 +164,18 @@ export function buildQueueBoardOptions(
     {
       value: encodeQueueTarget({ kind: "TRIAGE" }),
       label: withWaitingCount(
-        "Triage",
+        "Vital signs",
         countWaiting(summaries, (summary) => summary.kind === "TRIAGE")
       ),
+      group: QUEUE_GROUPS.triage,
     },
     {
       value: encodeQueueTarget({ kind: "CONSULTATION" }),
       label: withWaitingCount(
-        "All doctors",
+        "Any doctor",
         countWaiting(summaries, (summary) => summary.kind === "CONSULTATION")
       ),
+      group: QUEUE_GROUPS.doctors,
     },
     ...choices.practitioners.map((practitioner) => ({
       value: encodeQueueTarget({
@@ -169,6 +192,7 @@ export function buildQueueBoardOptions(
               summary.resourceId === null)
         )
       ),
+      group: QUEUE_GROUPS.doctors,
     })),
     ...choices.departments.map((department) => ({
       value: encodeQueueTarget({
@@ -184,6 +208,7 @@ export function buildQueueBoardOptions(
             summary.departmentId === department.id
         )
       ),
+      group: QUEUE_GROUPS.departments,
     })),
   ];
 }

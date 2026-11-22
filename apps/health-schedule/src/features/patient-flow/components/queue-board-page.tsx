@@ -55,7 +55,7 @@ export function QueueBoardPage() {
   return (
     <PatientFlowFrame
       title="Queues"
-      description="Call patients in order: the most urgent first, then whoever came first."
+      description="Choose your queue, then call patients one at a time: the most urgent first, then whoever came first."
       requiredPermission={PATIENT_FLOW_PERMISSIONS.readQueues}
       missingPermissionName="View queues and patient flow"
     >

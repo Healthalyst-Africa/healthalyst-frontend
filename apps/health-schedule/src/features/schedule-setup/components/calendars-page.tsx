@@ -18,7 +18,10 @@ import {
   describeCalendarPlace,
   resolveHoursBranch,
 } from "~/features/schedule-setup/utilities/describe-calendar";
-import { summarizeWeeklyHours } from "~/features/schedule-setup/utilities/weekly-hours";
+import {
+  NO_HOURS_SUMMARY,
+  summarizeWeeklyHours,
+} from "~/features/schedule-setup/utilities/weekly-hours";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 
 const STATUS_FILTER_OPTIONS = [
@@ -52,7 +55,7 @@ export function CalendarsPage() {
   return (
     <ScheduleSetupFrame
       title="Calendars"
-      description="Each practitioner, room and piece of equipment that patients book has a calendar. Its weekly hours decide when it can be booked."
+      description="Every doctor, room and machine that patients book has a calendar. Its weekly hours decide when patients can book it."
       action={({ canManage }) =>
         canManage && (
           <ActionButton
@@ -140,18 +143,28 @@ function CalendarsWorkspace({
       label: selectedBranch
         ? `Hours at ${selectedBranch.name}`
         : "Weekly hours",
-      size: "wide",
       getCell: (calendar) => {
         const hoursBranch = resolveHoursBranch(
           calendar,
           selectedBranch?.id ?? null
         );
+        if (calendar.availability.length === 0) {
+          return {
+            kind: "text",
+            primary: "No hours yet",
+            secondary: "Set weekly hours so patients can book",
+          };
+        }
+        const hours = summarizeWeeklyHours(
+          calendar.availability,
+          hoursBranch ?? undefined
+        );
         return {
           kind: "text",
-          primary: summarizeWeeklyHours(
-            calendar.availability,
-            hoursBranch ?? undefined
-          ),
+          primary:
+            hours === NO_HOURS_SUMMARY && selectedBranch
+              ? `No hours at ${selectedBranch.name}`
+              : hours,
         };
       },
     },
@@ -159,11 +172,12 @@ function CalendarsWorkspace({
       key: "status",
       label: "Status",
       size: "compact",
-      getCell: (calendar) => ({
-        kind: "status",
-        label: calendar.isActive ? "Taking bookings" : "Paused",
-        tone: calendar.isActive ? "positive" : "neutral",
-      }),
+      getCell: (calendar) =>
+        !calendar.isActive
+          ? { kind: "status", label: "Paused", tone: "neutral" }
+          : calendar.availability.length === 0
+            ? { kind: "status", label: "Needs hours", tone: "warning" }
+            : { kind: "status", label: "Taking bookings", tone: "positive" },
     },
   ];
 

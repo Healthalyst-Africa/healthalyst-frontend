@@ -15,6 +15,7 @@ import {
 import { SelectField } from "@healthalyst/ui/components/select-field";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
+import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import type { WorkspaceBranch } from "~/features/branch-selection/schemas/branch-schema";
@@ -69,17 +70,17 @@ function TriageSummary({ visitId }: { visitId: string }) {
     <ContentPanel heading="Triage" headingLevel={2}>
       {triageQuery.isPending && (
         <p role="status" className="text-sm text-muted-foreground">
-          Loading triage
+          Loading vital signs
         </p>
       )}
       {triageQuery.isError && (
-        <NoticeBanner tone="error" title="We could not load triage">
+        <NoticeBanner tone="error" title="We could not load the vital signs">
           {triageQuery.error.message}
         </NoticeBanner>
       )}
       {triageQuery.isSuccess && !latest && (
         <p className="text-sm text-muted-foreground">
-          Not triaged on this visit.
+          Vital signs were not taken on this visit.
         </p>
       )}
       {latest && (
@@ -383,6 +384,13 @@ function ConsultationBoard({ branch }: { branch: WorkspaceBranch }) {
         <SelectField
           id="consultation-queue"
           label="Queue"
+          description={
+            !calendarsQuery.isSuccess
+              ? undefined
+              : ownCalendar
+                ? "My queue holds patients booked with you or sent to you. Next free doctor holds patients any doctor can see."
+                : "You have no calendar of your own, so you see patients waiting for any doctor."
+          }
           placeholder="Choose a queue"
           options={queueOptions}
           value={chosenQueueValue}
@@ -428,7 +436,12 @@ function ConsultationBoard({ branch }: { branch: WorkspaceBranch }) {
             {entriesQuery.error.message}
           </NoticeBanner>
         ) : entries.length === 0 ? (
-          <p className="text-sm text-muted-foreground">Nobody is waiting.</p>
+          <EmptyState
+            surface="panel"
+            illustration={<DocumentsCompleteIllustration />}
+            title="Nobody is waiting"
+            description="Patients appear here when the nurse sends them to a doctor after their vital signs."
+          />
         ) : (
           <ul className="flex flex-col gap-2">
             {entries.map((entry) => {
@@ -498,8 +511,8 @@ function ConsultationBoard({ branch }: { branch: WorkspaceBranch }) {
             title="Choose a patient"
             description={
               canManageQueue
-                ? "Call the next patient, or choose one from the queue to see their triage, write the consultation note and record diagnoses."
-                : "Choose a patient from the queue to see their triage, notes and diagnoses."
+                ? "Call the next patient, or choose one from the queue, to see their vital signs and allergies and write the note for their visit."
+                : "Choose a patient from the queue to see their vital signs, notes and diagnoses."
             }
           />
         )}
@@ -531,7 +544,7 @@ export function ConsultationPage() {
   return (
     <PatientFlowFrame
       title="Consultation"
-      description="See your patients in order, write the consultation note and record diagnoses."
+      description="See patients waiting for a doctor one at a time: read their vital signs and allergies, write the note for the visit and record diagnoses."
       requiredPermission={CONSULTATION_PERMISSIONS.readQueues}
       missingPermissionName="View queues and patient flow"
     >

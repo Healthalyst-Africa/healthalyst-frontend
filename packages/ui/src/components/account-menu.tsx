@@ -27,6 +27,8 @@ type AccountMenuAction = {
 type AccountMenuProperties = {
   fullName: string;
   emailAddress: string;
+  /** What the person is here, such as "Doctor at Abuja General Hospital". */
+  roleDescription?: string;
   actions: readonly AccountMenuAction[];
   /** A failure from the last action, announced inside the menu. */
   error?: string;
@@ -36,6 +38,7 @@ type AccountMenuProperties = {
 export function AccountMenu({
   fullName,
   emailAddress,
+  roleDescription,
   actions,
   error,
 }: AccountMenuProperties) {
@@ -64,6 +67,11 @@ export function AccountMenu({
           <span className="block truncate text-xs text-muted-foreground">
             {emailAddress}
           </span>
+          {roleDescription && (
+            <span className="mt-1 block text-xs text-muted-foreground">
+              {roleDescription}
+            </span>
+          )}
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         {error && (

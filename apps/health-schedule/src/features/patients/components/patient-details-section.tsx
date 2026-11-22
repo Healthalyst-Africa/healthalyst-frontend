@@ -109,7 +109,7 @@ export function PatientDetailsSection({ patient }: { patient: PatientDetail }) {
             description: patient.folderNumber,
           },
           {
-            term: "NIN",
+            term: "National ID number (NIN)",
             description: canSeeNin
               ? patient.nin
               : patient.hasNin

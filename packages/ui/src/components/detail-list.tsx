@@ -3,21 +3,16 @@ import { cn } from "@healthalyst/ui/lib/utilities";
 
 type DetailListItem = {
   term: string;
-  /** Null when nothing is recorded: shown as a red "N/A". */
+  /** Null when nothing is recorded: shown as a quiet "Not recorded". */
   description: ReactNode | null;
 };
 
 /**
- * A value that was never recorded. Screen readers hear the full words rather
- * than the letters.
+ * A value that was never recorded. It is quiet rather than red: a missing
+ * email is not an error.
  */
 function MissingValue() {
-  return (
-    <span className="font-medium text-destructive">
-      <span aria-hidden="true">N/A</span>
-      <span className="sr-only">Not recorded</span>
-    </span>
-  );
+  return <span className="text-muted-foreground">Not recorded</span>;
 }
 
 /**

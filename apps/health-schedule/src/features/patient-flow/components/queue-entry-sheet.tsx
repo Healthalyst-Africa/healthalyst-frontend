@@ -37,11 +37,9 @@ import {
   CONSCIOUSNESS_OPTIONS,
   TRIAGE_PERMISSIONS,
 } from "~/features/patient-flow/config/triage";
-import {
-  useTriageHistory,
-  useVisitDetail,
-} from "~/features/patient-flow/hooks/use-patient-flow";
+import { useTriageHistory } from "~/features/patient-flow/hooks/use-patient-flow";
 import { PATIENT_PERMISSIONS } from "~/features/patients/config/patients";
+import { VisitProgressPanel } from "~/features/patient-flow/components/visit-progress-panel";
 import { describeBranchClockTime } from "~/shared/time/branch-time";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 
@@ -248,7 +246,7 @@ export function QueueEntrySheet({
         {entry && canReadTriage && entry.triageBand && (
           <EarlierTriage visitId={entry.visitId} />
         )}
-        {entry && <VisitJourney visitId={entry.visitId} />}
+        {entry && <VisitProgressPanel visitId={entry.visitId} />}
       </div>
     </DetailSheet>
   );
@@ -319,30 +317,6 @@ function EarlierTriage({ visitId }: { visitId: string }) {
           Band chosen below emergency: {latest.overrideReason}
         </p>
       )}
-    </section>
-  );
-}
-
-/** Where the patient has been today, oldest first. */
-function VisitJourney({ visitId }: { visitId: string }) {
-  const visitQuery = useVisitDetail(visitId, true);
-  if (!visitQuery.isSuccess || visitQuery.data.stops.length < 2) return null;
-  return (
-    <section className="flex flex-col gap-2 text-sm">
-      <h3 className="font-medium">
-        Today, since check-in at{" "}
-        {describeBranchClockTime(visitQuery.data.checkedInAt)}
-      </h3>
-      <ol className="flex flex-col gap-1">
-        {visitQuery.data.stops.map((stop) => (
-          <li key={stop.id} className="flex gap-2">
-            <span className="w-20 shrink-0 text-muted-foreground">
-              {describeBranchClockTime(stop.enqueuedAt)}
-            </span>
-            <span>{describeQueue(stop)}</span>
-          </li>
-        ))}
-      </ol>
     </section>
   );
 }

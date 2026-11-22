@@ -21,6 +21,7 @@ import { DuplicatesPanel } from "~/features/patients/components/duplicates-panel
 import { FamilySection } from "~/features/patients/components/family-section";
 import { PatientBanner } from "~/features/patients/components/patient-banner";
 import { PatientDetailsSection } from "~/features/patients/components/patient-details-section";
+import { TodaysVisit } from "~/features/patients/components/todays-visit";
 import {
   CLINICAL_SECTIONS_PERMISSION,
   PATIENT_PERMISSIONS,
@@ -170,6 +171,7 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
       <div data-tour="patient-banner">
         <PatientBanner patient={patientQuery.data} />
       </div>
+      <TodaysVisit patientId={patientQuery.data.id} />
       <div data-tour="patient-sections">
         <RecordTabs
           accessibleLabel="Patient record sections"

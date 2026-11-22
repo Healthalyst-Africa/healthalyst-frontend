@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { VisitProgressStep } from "@healthalyst/ui/types/visit-progress";
 
 export type DataTableCell =
   | { kind: "text"; primary: string; secondary?: string }
@@ -8,7 +9,8 @@ export type DataTableCell =
       kind: "status";
       label: string;
       tone: StatusTone;
-    };
+    }
+  | { kind: "progress"; steps: readonly VisitProgressStep[] };
 
 /**
  * How much a row needs attention. `attention` and `critical` tint the row
@@ -68,6 +70,12 @@ export type DataTableProperties<RowData> = {
   rowAction?: {
     /** The button's accessible name, such as "Review HealthAlyst". */
     label: (row: RowData) => string;
+    /**
+     * A short word shown on the button on wide screens, such as "Check in",
+     * for actions people come to the list to take. Without it the button is
+     * an arrow that opens the row.
+     */
+    visibleLabel?: string;
     onSelect: (row: RowData) => void;
   };
 };

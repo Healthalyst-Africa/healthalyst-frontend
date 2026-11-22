@@ -176,6 +176,29 @@ code, repository policies, or branding into it.
 - Applications import illustrations only through
   `@healthalyst/ui/illustrations/<name>` and put the meaning in nearby text.
 
+### Illustration meaning
+
+- Every illustration must show the action or state it accompanies, so a
+  person could guess the label from the picture alone: a doorway for
+  checking in, a stethoscope for seeing a doctor, people queueing for a
+  queue. A picture that is merely related, such as GitLab's chart for vital
+  signs or its merge train for a queue, is wrong.
+- Choose in this order:
+  1. A GitLab illustration that already shows the meaning.
+  2. A GitLab illustration modified until it does.
+  3. A new illustration drawn in the same style: the 72 or 144 px disc
+     (`ILLUSTRATION_COLOURS.base`), square-capped 2 px strokes
+     (`ILLUSTRATION_STROKE`), white shapes and gold accents from
+     `illustration-colours.ts`, with no text inside the artwork.
+- Follow the icon rules for marks inside an illustration: a tick only for
+  complete or approved, never for something still waiting.
+- Name the component after what it shows, such as `StethoscopeIllustration`,
+  not after a GitLab file. Its comment says "Adapted from GitLab SVGs
+  `<name>`" or "Drawn for HealthAlyst in the style of GitLab SVGs".
+- Before finishing, look at each illustration at the size it is shown and
+  enlarged, and check it against its label. Use one illustration per
+  meaning on a screen; never reuse one for different actions.
+
 ## Repository structure and tooling
 
 | Location                                | Responsibility                                                              |
