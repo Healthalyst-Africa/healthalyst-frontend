@@ -141,6 +141,7 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
   return (
     <div className="grid items-start gap-6 2xl:grid-cols-[30rem_minmax(0,1fr)]">
       <ContentPanel
+        data-tour="triage-waiting"
         heading="Waiting for vitals"
         headingLevel={2}
         description="Most urgent first, then by arrival. It updates on its own."

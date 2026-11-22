@@ -127,6 +127,7 @@ export function PatientsPage() {
         </StateNotice>
       ) : (
         <ContentPanel
+          data-tour="patients-search"
           heading={isSearching ? "Search results" : "Registrations to complete"}
           headingLevel={2}
           description={

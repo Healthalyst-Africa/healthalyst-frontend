@@ -12,6 +12,8 @@ function Toaster(properties: ToasterProperties) {
     <Sonner
       theme="light"
       className="toaster group"
+      // Sonner sets its own system font; toasts use the app's font instead.
+      style={{ fontFamily: "inherit" }}
       toastOptions={{
         classNames: {
           toast:

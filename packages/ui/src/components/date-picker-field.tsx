@@ -41,6 +41,8 @@ type DatePickerFieldProperties = {
   error?: string;
   /** The earliest date that can be chosen, as `yyyy-MM-dd`. */
   earliestDate?: string;
+  /** The latest date that can be chosen, as `yyyy-MM-dd`, such as today for a past event. */
+  latestDate?: string;
   /** Marks the field with an asterisk and announces it as required. */
   required?: boolean;
   disabled?: boolean;
@@ -60,6 +62,7 @@ export function DatePickerField({
   description,
   error,
   earliestDate,
+  latestDate,
   required = false,
   disabled,
   className,
@@ -67,6 +70,11 @@ export function DatePickerField({
   const [open, setOpen] = useState(false);
   const selectedDate = readDateValue(value);
   const earliest = earliestDate ? readDateValue(earliestDate) : undefined;
+  const latest = latestDate ? readDateValue(latestDate) : undefined;
+  const disabledDays = [
+    ...(earliest ? [{ before: earliest }] : []),
+    ...(latest ? [{ after: latest }] : []),
+  ];
   const descriptionIdentifier = description ? `${id}-description` : "";
   const errorIdentifier = error ? `${id}-error` : "";
   const labelIdentifier = `${id}-label`;
@@ -109,9 +117,9 @@ export function DatePickerField({
           <Calendar
             mode="single"
             selected={selectedDate}
-            defaultMonth={selectedDate ?? earliest}
+            defaultMonth={selectedDate ?? earliest ?? latest}
             weekStartsOn={1}
-            disabled={earliest ? { before: earliest } : undefined}
+            disabled={disabledDays.length > 0 ? disabledDays : undefined}
             onSelect={(date) => {
               onValueChange(date ? format(date, DATE_VALUE_FORMAT) : "");
               setOpen(false);

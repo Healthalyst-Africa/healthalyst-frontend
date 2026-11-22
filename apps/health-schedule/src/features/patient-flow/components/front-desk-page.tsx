@@ -367,6 +367,7 @@ function FrontDeskWorkspace({
       )}
 
       <ContentPanel
+        data-tour="front-desk-check-in"
         heading="Check a patient in"
         headingLevel={2}
         description={
@@ -427,7 +428,7 @@ function FrontDeskWorkspace({
             }}
           />
         ) : canReadAppointments ? (
-          <div className="flex flex-col gap-3">
+          <div data-tour="front-desk-bookings" className="flex flex-col gap-3">
             <h3 className="text-sm font-medium">
               Booked for today, not arrived
             </h3>
@@ -465,6 +466,7 @@ function FrontDeskWorkspace({
 
       {canReadQueues && (
         <ContentPanel
+          data-tour="front-desk-in-building"
           heading="In the building now"
           headingLevel={2}
           description="Everyone checked in and not yet finished: emergencies first, then urgent and routine patients, then those not yet triaged, the longest visits first within each. Emergencies are marked red; urgent patients and waits past the target are marked amber. It updates on its own."

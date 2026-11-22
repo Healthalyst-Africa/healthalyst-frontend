@@ -242,10 +242,16 @@ export const INCOMPLETE_PATIENT_LIMIT = 20;
 /** The patient record's tabs; the address keeps the open one as `?section=`. */
 export const PATIENT_RECORD_SECTIONS = [
   { value: "overview", label: "Overview" },
+  { value: "notes", label: "Notes", clinical: true },
+  { value: "problems", label: "Problems", clinical: true },
+  { value: "timeline", label: "Timeline", clinical: true },
   { value: "family", label: "Family and contacts" },
   { value: "consents", label: "Consents" },
   { value: "documents", label: "Documents" },
 ] as const;
+
+/** The permission that shows the clinical tabs: notes, problems and the timeline. */
+export const CLINICAL_SECTIONS_PERMISSION = "note:read";
 
 /** Read as "this person is the patient's …". */
 export const RELATIONSHIP_TYPE_OPTIONS = [
