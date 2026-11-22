@@ -139,6 +139,7 @@ export function TeamRoleDialog({
       <LabelledControlGroup
         id="team-role-permissions"
         title="Permissions"
+        required
         message={
           visibleFieldErrors.permissions ??
           "You can only give permissions you hold yourself."

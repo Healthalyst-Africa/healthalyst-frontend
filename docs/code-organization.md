@@ -79,11 +79,31 @@ roles), `partner-network`, `product-launcher` and `invitation-acceptance` (the
 public page an invitation link opens). Super Admin separates `staff-auth`,
 `staff-workspace`, `organization-oversight`, `staff-management` and `audit-log`. HealthSchedule has `sign-in` (its own sign-in
 page for phones, tablets and the installed app; desktop browsers sign in at the hub), `organization-access` (links into the hub), `product-access` (the
-sign-in, application and product checks that choose the first screen), `branch-selection` (the branch the person is working at) and
+sign-in, application and product checks that choose the first screen, and
+the overview of today's work with its setup checklist), `branch-selection` (the branch the person is working at) and
 `schedule-setup` (calendars with weekly hours, time off and holidays, and
-appointment types). Workspace pages share the signed-in session, permissions
-and branch through `shared/workspace`.
-Its HealthSchedule API client is in `infrastructure/api`.
+appointment types) and `patient-flow` (front desk check-in, triage and
+vitals, and the queue boards staff call patients from) and `patients` (registration
+with a duplicate check, the patient record with its tabs, allergies, insurance
+cover and card photos, family and contacts, consents, documents, and merging
+duplicate records) and `clinical-record` (clinical notes with templates,
+addenda and earlier versions, the problem list with ICD-11 search, and the
+timeline) and `sensitive-records` (the access gate on restricted records,
+emergency access and its review, and sensitivity labels) and `appointments`
+(booking with five-minute holds on free times, moving, cancelling and "did
+not come", the day of bookings by calendar, the patient's appointments and
+the waitlist) and `consultation`
+(the doctor's queue beside the patient being seen) and `guided-tours` (page
+help and short page tours: a small question-mark icon in the header opens an
+"About this page" dialog for every page, which offers a tour where the page
+has one, and the overview offers a tour once; steps point at `data-tour`
+attributes, the shared `PageGuideDialog` shows the guide, and the shared
+`useGuidedTour` hook in `packages/ui` wraps driver.js). Workspace pages share the
+signed-in session, permissions and branch through `shared/workspace`; staff
+names for authors and reviewers come from `shared/staff`. The journeys each
+screen serves are in [HealthSchedule user journeys](health-schedule-user-journeys.md).
+Its HealthSchedule API client is in `infrastructure/api`, beside the storage
+client that sends document files to signed upload links.
 
 ### Dependency direction
 

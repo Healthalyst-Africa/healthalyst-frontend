@@ -18,8 +18,8 @@ import {
   type CreateCalendarFormValues,
 } from "~/features/schedule-setup/schemas/schedule-form-schemas";
 import type { ScheduleCalendar } from "~/features/schedule-setup/schemas/schedule-response-schemas";
-import { applyFieldErrors } from "~/features/schedule-setup/utilities/apply-field-errors";
-import { focusFirstInvalidField } from "~/features/schedule-setup/utilities/focus-first-invalid-field";
+import { applyFieldErrors } from "~/shared/forms/apply-field-errors";
+import { focusFirstInvalidField } from "~/shared/forms/focus-first-invalid-field";
 import { toCreateCalendarRequest } from "~/features/schedule-setup/utilities/schedule-requests";
 
 type BranchOption = { value: string; label: string };
@@ -138,6 +138,7 @@ export function AddCalendarDialog({
           <SelectField
             id="calendar-kind"
             label="What is booked"
+            required
             placeholder="Choose what is booked"
             options={kindOptions}
             value={field.value}
@@ -162,6 +163,7 @@ export function AddCalendarDialog({
               <SelectField
                 id="calendar-member"
                 label="Staff member"
+                required
                 placeholder={
                   candidatesQuery.isPending
                     ? "Loading staff…"
@@ -189,6 +191,7 @@ export function AddCalendarDialog({
           <TextField
             id="calendar-name"
             label="Name"
+            required
             placeholder={
               kind === "ROOM" ? "Consulting room 2" : "Ultrasound machine"
             }
@@ -202,6 +205,7 @@ export function AddCalendarDialog({
               <SelectField
                 id="calendar-branch"
                 label="Branch"
+                required
                 placeholder="Choose a branch"
                 options={branchOptions}
                 value={field.value}

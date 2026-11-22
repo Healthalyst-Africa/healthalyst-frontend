@@ -2,7 +2,7 @@ import type { z } from "zod";
 import { PlatformApiError } from "@healthalyst/platform-api/api-error";
 
 /** Validates a HealthSchedule or Platform response before a screen uses it. */
-export function parseScheduleResponse<ResponseSchema extends z.ZodType>(
+export function parseHealthScheduleResponse<ResponseSchema extends z.ZodType>(
   schema: ResponseSchema,
   data: unknown,
   status: number

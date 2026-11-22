@@ -1,9 +1,14 @@
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
+import { VisitProgress } from "@healthalyst/ui/components/visit-progress";
 import type { DataTableCell } from "@healthalyst/ui/types/data-table";
 
 export function DataTableCellContent({ cell }: { cell: DataTableCell }) {
   if (cell.kind === "status") {
     return <StatusLabel tone={cell.tone}>{cell.label}</StatusLabel>;
+  }
+
+  if (cell.kind === "progress") {
+    return <VisitProgress steps={cell.steps} />;
   }
 
   if (cell.kind === "date") {

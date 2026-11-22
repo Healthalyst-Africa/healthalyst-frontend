@@ -17,6 +17,8 @@ import type { DataTableProperties } from "@healthalyst/ui/types/data-table";
 import { DataTableCardList } from "./data-table/data-table-card-list";
 import { DataTableCellContent } from "./data-table/data-table-cell-content";
 import { DataTableMessage } from "./data-table/data-table-message";
+import { DataTableRowActions } from "./data-table/data-table-row-actions";
+import { ROW_EMPHASIS_CLASS_NAMES } from "./data-table/data-table-row-emphasis";
 
 const COLUMN_SIZES = {
   wide: "w-1/3 min-w-64",
@@ -25,6 +27,13 @@ const COLUMN_SIZES = {
 } as const;
 
 const LOADING_ROW_IDENTIFIERS = ["first", "second", "third"] as const;
+
+const DEFAULT_MAXIMUM_VISIBLE_ROWS = 5;
+
+/** The heading row (2.75rem) and each data row (5rem with its border). */
+function readScrollHeight(maximumVisibleRows: number): string {
+  return `calc(2.75rem + ${maximumVisibleRows} * (5rem + 1px))`;
+}
 
 /**
  * A complete, standalone tabular data surface; applications supply records and
@@ -38,7 +47,13 @@ export function DataTable<RowData>({
   getRowIdentifier,
   emptyState,
   rowAction,
+  getRowActions,
+  getRowActionsLabel,
+  getRowEmphasis,
+  maximumVisibleRows = DEFAULT_MAXIMUM_VISIBLE_ROWS,
 }: DataTableProperties<RowData>) {
+  const isScrollable =
+    state.status === "ready" && state.rows.length > maximumVisibleRows;
   const hasRows =
     state.status === "loading" ||
     (state.status === "ready" && state.rows.length > 0);
@@ -54,6 +69,9 @@ export function DataTable<RowData>({
             state={state}
             getRowIdentifier={getRowIdentifier}
             rowAction={rowAction}
+            getRowActions={getRowActions}
+            getRowActionsLabel={getRowActionsLabel}
+            getRowEmphasis={getRowEmphasis}
           />
         </div>
       )}
@@ -90,7 +108,15 @@ export function DataTable<RowData>({
               aria-label={accessibleLabel}
               aria-busy={state.status === "loading" || undefined}
               tabIndex={0}
-              className="overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&>div]:overflow-visible"
+              className={cn(
+                "overflow-x-auto outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring [&>div]:overflow-visible",
+                isScrollable && "overflow-y-auto overscroll-contain"
+              )}
+              style={
+                isScrollable
+                  ? { maxHeight: readScrollHeight(maximumVisibleRows) }
+                  : undefined
+              }
             >
               {state.status === "loading" && (
                 <p role="status" className="sr-only">
@@ -98,8 +124,9 @@ export function DataTable<RowData>({
                 </p>
               )}
               <Table aria-label={accessibleLabel}>
-                <TableHeader className="bg-muted/50">
-                  <TableRow className="hover:bg-transparent">
+                {/* The headings stay in view while the rows scroll beneath. */}
+                <TableHeader className="sticky top-0 z-10 bg-card">
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
                     {columns.map((column) => (
                       <TableHead
                         key={column.key}
@@ -112,7 +139,7 @@ export function DataTable<RowData>({
                         {column.label}
                       </TableHead>
                     ))}
-                    {rowAction && (
+                    {(rowAction || getRowActions) && (
                       <TableHead scope="col" className="w-14 px-3">
                         <span className="sr-only">Actions</span>
                       </TableHead>
@@ -131,7 +158,9 @@ export function DataTable<RowData>({
                             <Skeleton className="h-4 w-3/4 motion-reduce:animate-none" />
                           </TableCell>
                         ))}
-                        {rowAction && <TableCell className="px-3" />}
+                        {(rowAction || getRowActions) && (
+                          <TableCell className="px-3" />
+                        )}
                       </TableRow>
                     ))}
                   {state.status === "ready" &&
@@ -140,7 +169,10 @@ export function DataTable<RowData>({
                         key={getRowIdentifier(row)}
                         className={cn(
                           "hover:bg-muted/25",
-                          rowAction && "cursor-pointer hover:bg-secondary/50"
+                          rowAction && "cursor-pointer hover:bg-secondary/50",
+                          ROW_EMPHASIS_CLASS_NAMES[
+                            getRowEmphasis?.(row) ?? "none"
+                          ]
                         )}
                         onClick={
                           rowAction ? () => rowAction.onSelect(row) : undefined
@@ -154,24 +186,49 @@ export function DataTable<RowData>({
                             <DataTableCellContent cell={column.getCell(row)} />
                           </TableCell>
                         ))}
+                        {getRowActions && !rowAction && (
+                          <TableCell className="px-3 py-4 text-right">
+                            <DataTableRowActions
+                              items={getRowActions(row)}
+                              accessibleLabel={
+                                getRowActionsLabel?.(row) ?? "Actions"
+                              }
+                            />
+                          </TableCell>
+                        )}
                         {rowAction && (
                           <TableCell className="px-3 py-4 text-right">
-                            <ActionButton
-                              type="button"
-                              size="icon"
-                              variant="ghost"
-                              className="size-9 text-muted-foreground"
-                              aria-label={rowAction.label(row)}
-                              onClick={(clickEvent) => {
-                                clickEvent.stopPropagation();
-                                rowAction.onSelect(row);
-                              }}
-                            >
-                              <ChevronRightIcon
-                                aria-hidden="true"
-                                className="size-4"
-                              />
-                            </ActionButton>
+                            {rowAction.visibleLabel ? (
+                              <ActionButton
+                                type="button"
+                                size="compact"
+                                variant="outline"
+                                aria-label={rowAction.label(row)}
+                                onClick={(clickEvent) => {
+                                  clickEvent.stopPropagation();
+                                  rowAction.onSelect(row);
+                                }}
+                              >
+                                {rowAction.visibleLabel}
+                              </ActionButton>
+                            ) : (
+                              <ActionButton
+                                type="button"
+                                size="icon"
+                                variant="ghost"
+                                className="size-9 text-muted-foreground"
+                                aria-label={rowAction.label(row)}
+                                onClick={(clickEvent) => {
+                                  clickEvent.stopPropagation();
+                                  rowAction.onSelect(row);
+                                }}
+                              >
+                                <ChevronRightIcon
+                                  aria-hidden="true"
+                                  className="size-4"
+                                />
+                              </ActionButton>
+                            )}
                           </TableCell>
                         )}
                       </TableRow>

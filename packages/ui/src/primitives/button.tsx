@@ -27,6 +27,8 @@ const buttonVariants = createClassVariants(
         unstyled: "",
         default: "h-10 px-4 py-2",
         small: "h-9 px-4",
+        // Secondary actions inside a panel; still a 32 px touch target.
+        compact: "h-8 gap-1.5 px-3 text-xs [&_svg]:size-3.5",
         // Full-width form actions wrap a long label instead of widening the page.
         large: "min-h-11 whitespace-normal px-8 py-2 text-center",
         icon: "size-10",

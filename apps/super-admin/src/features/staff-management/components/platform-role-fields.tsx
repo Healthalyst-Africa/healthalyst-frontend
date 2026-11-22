@@ -12,11 +12,14 @@ export function PlatformRoleFields({
   defaultRoles = [],
   message,
   messageTone,
+  required = false,
 }: {
   identifier: string;
   defaultRoles?: readonly GrantablePlatformRole[];
   message?: string;
   messageTone?: "status" | "error";
+  /** Adding staff needs at least one role; editing may remove them all. */
+  required?: boolean;
 }) {
   return (
     <LabelledControlGroup
@@ -24,6 +27,7 @@ export function PlatformRoleFields({
       title="Roles"
       message={message}
       messageTone={messageTone}
+      required={required}
     >
       <div className="flex flex-col gap-3">
         {GRANTABLE_PLATFORM_ROLES.map((role) => (

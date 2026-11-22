@@ -5,6 +5,7 @@ import { OpenDocumentIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { BrandLoader } from "@healthalyst/ui/components/brand-loader";
 import { CheckboxField } from "@healthalyst/ui/components/checkbox-field";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { DetailSheet } from "@healthalyst/ui/components/detail-sheet";
 import { FeedbackDialog } from "@healthalyst/ui/components/feedback-dialog";
 import { FileActionList } from "@healthalyst/ui/components/file-action-list";
@@ -420,6 +421,7 @@ export function ReviewApplicationSheet({
               id={`approval-${checklistItem.name}`}
               name={checklistItem.name}
               label={checklistItem.label}
+              required
               checked={review.checklist[checklistItem.name]}
               onCheckedChange={(isChecked) =>
                 review.updateChecklistItem(checklistItem.name, isChecked)
@@ -429,7 +431,11 @@ export function ReviewApplicationSheet({
         </fieldset>
         <fieldset className="flex flex-col gap-3">
           <legend className="mb-3 text-sm font-medium">
-            Products to enable
+            <FieldLabelText
+              label="Products to enable"
+              required
+              announceRequired
+            />
           </legend>
           {REVIEW_PRODUCTS.map((product) => (
             <CheckboxField
@@ -448,7 +454,7 @@ export function ReviewApplicationSheet({
         <TextAreaField
           id="approval-note"
           label="Internal note"
-          description="Optional. Only HealthAlyst staff can see this."
+          description="Only HealthAlyst staff can see this."
           name="approvalNote"
           rows={3}
           maxLength={REVIEW_VALIDATION_LIMITS.noteMaximumLength}

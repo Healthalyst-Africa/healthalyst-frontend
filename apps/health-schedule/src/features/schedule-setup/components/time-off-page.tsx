@@ -25,7 +25,7 @@ import type { TimeOffEntry } from "~/features/schedule-setup/schemas/schedule-re
 import {
   describeBranchPeriod,
   upcomingBranchPeriod,
-} from "~/features/schedule-setup/utilities/branch-time";
+} from "~/shared/time/branch-time";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 
 const [DEFAULT_PERIOD_OPTION, ...LONGER_PERIOD_OPTIONS] =

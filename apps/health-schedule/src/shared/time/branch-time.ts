@@ -1,8 +1,10 @@
 import { TZDate } from "@date-fns/tz";
 import { addDays, format, parse } from "date-fns";
-import { BRANCH_TIME_ZONE } from "~/features/schedule-setup/config/schedule-setup";
+import { BRANCH_TIME_ZONE } from "~/config/branch-time";
 
 const DATE_VALUE_FORMAT = "yyyy-MM-dd";
+/** Times read as 12-hour clock times, such as "9:30 am". */
+const CLOCK_TIME_FORMAT = "h:mm aaa";
 
 function readDateParts(dateValue: string) {
   const date = parse(dateValue, DATE_VALUE_FORMAT, new Date());
@@ -77,8 +79,34 @@ export function describeBranchPeriod(startsAt: string, endsAt: string): string {
       ? `${firstDayText}, all day`
       : `${format(start, "EEE d MMM")} – ${format(lastDay, "EEE d MMM yyyy")}`;
   }
-  const startText = format(start, "EEE d MMM yyyy, HH:mm");
+  const startText = format(start, `EEE d MMM yyyy, ${CLOCK_TIME_FORMAT}`);
   return format(start, "yyyy-MM-dd") === format(end, "yyyy-MM-dd")
-    ? `${startText} – ${format(end, "HH:mm")}`
-    : `${startText} – ${format(end, "EEE d MMM yyyy, HH:mm")}`;
+    ? `${startText} – ${format(end, CLOCK_TIME_FORMAT)}`
+    : `${startText} – ${format(end, `EEE d MMM yyyy, ${CLOCK_TIME_FORMAT}`)}`;
+}
+
+/** A date-time as the branch's clock time, such as "9:30 am". */
+export function describeBranchClockTime(dateTime: string): string {
+  return format(inBranchTime(dateTime), CLOCK_TIME_FORMAT);
+}
+
+/** An `HH:MM` time of day, such as "16:00", as "4:00 pm". */
+export function describeTimeOfDay(timeValue: string): string {
+  const [hours = 0, minutes = 0] = timeValue.split(":").map(Number);
+  return format(new Date(2000, 0, 1, hours, minutes), CLOCK_TIME_FORMAT);
+}
+
+/** A date-time as the branch's date, such as "Mon 9 Nov 2026". */
+export function describeBranchDate(dateTime: string): string {
+  return format(inBranchTime(dateTime), "EEE d MMM yyyy");
+}
+
+/** A date-time with the branch's date and clock time, such as "Mon 9 Nov 2026, 9:30 am". */
+export function describeBranchDateTime(dateTime: string): string {
+  return format(inBranchTime(dateTime), `EEE d MMM yyyy, ${CLOCK_TIME_FORMAT}`);
+}
+
+/** A date without the year, such as "Tue 24 Nov", for lists. */
+export function describeBranchShortDate(dateTime: string): string {
+  return format(inBranchTime(dateTime), "EEE d MMM");
 }

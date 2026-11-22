@@ -134,7 +134,7 @@ describe("weekly hours summary", () => {
       rule(weekday, "08:00", "16:00")
     );
     expect(summarizeWeeklyHours([...weekdays, rule(6, "09:00", "13:00")])).toBe(
-      "Mon–Fri 08:00–16:00; Sat 09:00–13:00"
+      "Mon–Fri 8:00 am – 4:00 pm; Sat 9:00 am – 1:00 pm"
     );
   });
 
@@ -144,7 +144,7 @@ describe("weekly hours summary", () => {
         [rule(1, "08:00", "16:00"), rule(3, "09:00", "12:00", ABUJA)],
         ABUJA
       )
-    ).toBe("Wed 09:00–12:00");
+    ).toBe("Wed 9:00 am – 12:00 pm");
   });
 
   it("says when there are no hours", () => {

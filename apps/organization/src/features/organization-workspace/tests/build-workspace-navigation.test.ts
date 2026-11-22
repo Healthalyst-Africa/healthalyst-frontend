@@ -14,9 +14,7 @@ describe("organisation hub navigation", () => {
       enabledProductCodes: ["HEALTHSCHEDULE"],
       productAddresses: { HEALTHSCHEDULE: HEALTH_SCHEDULE_ADDRESS },
     });
-    expect(labels(sidebar)).toEqual([
-      ["Products", "Team", "Roles and permissions", "Settings"],
-    ]);
+    expect(labels(sidebar)).toEqual([["Products", "Team", "Settings"]]);
   });
 
   it("shows partners to people who may read them", () => {

@@ -1,6 +1,7 @@
 import type { WeeklyHoursDay } from "@healthalyst/ui/components/weekly-hours-editor";
 import { WEEKDAY_NAMES } from "~/features/schedule-setup/config/schedule-setup";
 import type { AvailabilityRule } from "~/features/schedule-setup/schemas/schedule-response-schemas";
+import { describeTimeOfDay } from "~/shared/time/branch-time";
 
 /** The request body's rule shape; dates are left out when not limited. */
 export type AvailabilityRuleRequest = {
@@ -128,8 +129,12 @@ export function findWorkingPeriodProblems(
   return problems;
 }
 
+/** What a calendar with no hours shows. */
+export const NO_HOURS_SUMMARY = "No hours set";
+
 /**
- * Short hours for a list, such as "Mon–Fri 08:00–16:00, Sat 09:00–13:00".
+ * Short hours for a list, such as "Mon–Fri 8:00 am – 4:00 pm; Sat 9:00 am –
+ * 1:00 pm".
  * With a branch, only that branch's hours count.
  */
 export function summarizeWeeklyHours(
@@ -143,7 +148,10 @@ export function summarizeWeeklyHours(
     relevantRules
       .filter((rule) => rule.weekday === weekdayIndex + 1)
       .sort(compareStartTimes)
-      .map((rule) => `${rule.startTime}–${rule.endTime}`)
+      .map(
+        (rule) =>
+          `${describeTimeOfDay(rule.startTime)} – ${describeTimeOfDay(rule.endTime)}`
+      )
       .join(", ")
   );
   const groups: { first: number; last: number; pattern: string }[] = [];
@@ -160,7 +168,7 @@ export function summarizeWeeklyHours(
       groups.push({ first: weekdayIndex, last: weekdayIndex, pattern });
     }
   });
-  if (groups.length === 0) return "No hours set";
+  if (groups.length === 0) return NO_HOURS_SUMMARY;
   return groups
     .map((group) => {
       const firstName = SHORT_WEEKDAY_NAMES[group.first];

@@ -33,6 +33,7 @@ export default function TurnstileChallenge({
     <LabelledControlGroup
       id="registration-captcha"
       title="Human verification"
+      required
       message={
         siteKey
           ? statusMessage

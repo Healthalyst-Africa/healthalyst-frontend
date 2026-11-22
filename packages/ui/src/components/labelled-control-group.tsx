@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import {
   Field,
   FieldDescription,
@@ -13,6 +14,8 @@ type LabelledControlGroupProperties = {
   message?: ReactNode;
   /** `error` announces the message immediately; `status` announces it politely. */
   messageTone?: "status" | "error";
+  /** Marks the group's title with an asterisk and announces it as required. */
+  required?: boolean;
   children?: ReactNode;
 };
 
@@ -25,6 +28,7 @@ export function LabelledControlGroup({
   title,
   message,
   messageTone = "status",
+  required = false,
   children,
 }: LabelledControlGroupProperties) {
   const titleIdentifier = `${id}-title`;
@@ -36,7 +40,9 @@ export function LabelledControlGroup({
       aria-labelledby={titleIdentifier}
       aria-describedby={message ? messageIdentifier : undefined}
     >
-      <FieldTitle id={titleIdentifier}>{title}</FieldTitle>
+      <FieldTitle id={titleIdentifier}>
+        <FieldLabelText label={title} required={required} announceRequired />
+      </FieldTitle>
       {children}
       {message &&
         (messageTone === "error" && !children ? (

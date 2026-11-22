@@ -59,7 +59,7 @@ sets it host-only, with `path=/v1/auth` and `SameSite=Strict`:
 src/
   app/                         Route entry points, root layout, styles
   components/ui/               App-wide branded wrappers
-  config/                      Hub address, routes, brand and web app settings
+  config/                      Hub address, routes, brand, branch time and web app settings
   features/
     sign-in/                   Signed-out page: password and code steps, own validation
     organization-access/
@@ -72,13 +72,47 @@ src/
       utilities/               Session-to-screen access rules and navigation
     branch-selection/          The branch the person is working at
     schedule-setup/            Calendars, weekly hours, time off and appointment types
+    patient-flow/              Front desk check-in, triage and vitals, and the queue boards
+    patients/                  Patient records: registration, details, allergies, cover,
+                               family and contacts, consents, documents and merging duplicates
   infrastructure/
-    api/                       HealthSchedule API client
+    api/                       HealthSchedule API client, and the storage client that sends
+                               document files to the signed upload links (no token or cookies)
     auth/                      HealthAlyst session provider
     pwa/                       Service worker registration and app status notices
     query/                     Query client and provider
-  shared/workspace/            Signed-in session, permissions and branch for workspace pages
+  shared/
+    api/                       Checks HealthSchedule responses before screens use them
+    contact/                   Phone numbers in the international format the API stores
+    forms/                     API field errors and focusing the first invalid field
+    hooks/                     Small hooks shared by features, such as debouncing
+    time/                      Branch dates and times
+    workspace/                 Signed-in session, permissions and branch for workspace pages
 ```
+
+## Patient records
+
+A patient's record opens with the banner, then four tabs: Overview (details,
+allergies, cover and, for staff who can merge, possible duplicates), Family
+and contacts, Consents and Documents. The open tab is kept in the address as
+`?section=family`, `consents` or `documents`.
+
+- **Documents** go straight to storage: the API signs a short-lived upload
+  link, the browser sends the file with only its content type, then the API
+  checks its type and scans it for viruses (a busy scanner is retried three
+  times). Referral letters and results from elsewhere open for staff with
+  `triage:record` only. Each opening asks for a new five-minute link; links
+  are never stored. If document storage is not set up, uploads are hidden
+  with a notice.
+- **Insurance card photos** are documents of the `HMO_CARD` kind linked to
+  their cover, added and opened from the cover itself.
+- **Consents** are a checklist of treatment, sharing records, reminders,
+  marketing and research. Recording and withdrawing need `patient:consent`; a
+  guardian's consent names one of the patient's guardians.
+- **Merging** needs `patient:merge`. Staff choose the record that stays and,
+  for each detail that differs, which value to keep. The Patients page lists
+  merges of the last 90 days; a merge can be undone for 30 days while
+  neither record has changed.
 
 Keep product workflows in their own `features/<workflow>` folder, and use
 `packages` for stable, product-neutral capabilities shared across applications.

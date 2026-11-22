@@ -23,11 +23,8 @@ export const SCHEDULE_PERMISSIONS = {
   staffRead: "staff:read",
 } as const;
 
-/** Branch times are Lagos time; the API uses it for every branch for now. */
-export const BRANCH_TIME_ZONE = "Africa/Lagos";
-
 export const CALENDAR_KIND_OPTIONS = [
-  { value: "PRACTITIONER", label: "Practitioner" },
+  { value: "PRACTITIONER", label: "Staff member" },
   { value: "ROOM", label: "Room" },
   { value: "EQUIPMENT", label: "Equipment" },
 ] as const;

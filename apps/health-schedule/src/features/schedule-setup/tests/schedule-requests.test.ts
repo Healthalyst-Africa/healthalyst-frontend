@@ -9,7 +9,7 @@ import {
   branchToday,
   describeBranchPeriod,
   upcomingBranchPeriod,
-} from "~/features/schedule-setup/utilities/branch-time";
+} from "~/shared/time/branch-time";
 import {
   formatNaira,
   koboToNairaText,
@@ -90,7 +90,7 @@ describe("branch time", () => {
         "2026-12-24T09:00:00.000+01:00",
         "2026-12-24T17:00:00.000+01:00"
       )
-    ).toBe("Thu 24 Dec 2026, 09:00 – 17:00");
+    ).toBe("Thu 24 Dec 2026, 9:00 am – 5:00 pm");
   });
 
   it("uses the branch's date, not the device's, for today", () => {

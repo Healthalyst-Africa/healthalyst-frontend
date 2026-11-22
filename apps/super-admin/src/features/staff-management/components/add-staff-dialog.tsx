@@ -133,6 +133,7 @@ export function AddStaffDialog({
           error={fieldErrors.email}
         />
         <PlatformRoleFields
+          required
           identifier="add-staff"
           message={fieldErrors.roles}
           messageTone="error"

@@ -1,12 +1,19 @@
 import {
+  AccessReviewIcon,
+  AppointmentsIcon,
   AppointmentTypesIcon,
+  ConsultationIcon,
   DashboardIcon,
+  FrontDeskIcon,
   HealthScheduleIcon,
+  NoteTemplatesIcon,
   OrganizationIcon,
-  RolesIcon,
+  PatientRecordsIcon,
+  QueueIcon,
   ScheduleCalendarsIcon,
   TeamIcon,
   TimeOffIcon,
+  VitalsIcon,
 } from "@healthalyst/icons";
 import type { DashboardNavigationSection } from "@healthalyst/ui/components/dashboard-shell";
 import type { WorkspaceSwitcherSection } from "@healthalyst/ui/components/workspace-switcher";
@@ -16,10 +23,29 @@ import type { OrganizationAppLinks } from "~/features/organization-access/servic
 /** The HealthSchedule permission that shows the schedule setup pages. */
 const SCHEDULE_READ_PERMISSION = "schedule:read";
 
+/** The HealthSchedule permissions that show the front desk and queue boards. */
+const PATIENT_FLOW_PAGE_PERMISSIONS = {
+  frontDesk: "queue:check-in",
+  appointments: "appointment:read",
+  triage: "triage:record",
+  queues: "queue:read",
+} as const;
+
+/** Doctors see patients in the consultation workspace. */
+const CONSULTATION_PERMISSIONS = ["note:write", "queue:read"] as const;
+
+/** The HealthSchedule permission that shows patient records. */
+const PATIENT_RECORDS_PERMISSION = "patient:read";
+
+/** Managers review emergency access to restricted records. */
+const ACCESS_REVIEW_PERMISSION = "audit:read";
+
+/** Note templates are shown to people who read clinical notes. */
+const NOTE_TEMPLATES_PERMISSION = "note:read";
+
 /** The Platform API permission that shows each organisation page. */
 const ORGANIZATION_PAGE_PERMISSIONS = {
   team: "staff:read",
-  roles: "role:read",
 } as const;
 
 export type HealthScheduleNavigation = {
@@ -49,6 +75,75 @@ export function buildHealthScheduleNavigation({
   currentOrganizationId?: string | null;
   switchOrganization?: (organization: WorkspaceOrganization) => void;
 }): HealthScheduleNavigation {
+  const patientFlowItems = [
+    ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.frontDesk)
+      ? [
+          {
+            label: "Front desk",
+            href: HEALTH_SCHEDULE_ROUTES.frontDesk,
+            icon: FrontDeskIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.appointments)
+      ? [
+          {
+            label: "Appointments",
+            href: HEALTH_SCHEDULE_ROUTES.appointments,
+            icon: AppointmentsIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.triage)
+      ? [
+          {
+            label: "Vital signs",
+            href: HEALTH_SCHEDULE_ROUTES.triage,
+            icon: VitalsIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.queues)
+      ? [
+          {
+            label: "Queues",
+            href: HEALTH_SCHEDULE_ROUTES.queues,
+            icon: QueueIcon,
+          },
+        ]
+      : []),
+    ...(CONSULTATION_PERMISSIONS.every((permission) =>
+      permissions.includes(permission)
+    )
+      ? [
+          {
+            label: "Consultation",
+            href: HEALTH_SCHEDULE_ROUTES.consultation,
+            icon: ConsultationIcon,
+          },
+        ]
+      : []),
+  ];
+  const recordItems = [
+    ...(permissions.includes(PATIENT_RECORDS_PERMISSION)
+      ? [
+          {
+            label: "Patients",
+            href: HEALTH_SCHEDULE_ROUTES.patients,
+            icon: PatientRecordsIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(ACCESS_REVIEW_PERMISSION)
+      ? [
+          {
+            label: "Access reviews",
+            href: HEALTH_SCHEDULE_ROUTES.accessReviews,
+            icon: AccessReviewIcon,
+          },
+        ]
+      : []),
+  ];
   const sidebar: DashboardNavigationSection[] = [
     {
       label: "HealthSchedule",
@@ -60,10 +155,16 @@ export function buildHealthScheduleNavigation({
         },
       ],
     },
+    ...(patientFlowItems.length > 0
+      ? [{ label: "Patient visits", items: patientFlowItems }]
+      : []),
+    ...(recordItems.length > 0
+      ? [{ label: "Patients", items: recordItems }]
+      : []),
     ...(permissions.includes(SCHEDULE_READ_PERMISSION)
       ? [
           {
-            label: "Schedule setup",
+            label: "Setup",
             items: [
               {
                 label: "Calendars",
@@ -80,6 +181,15 @@ export function buildHealthScheduleNavigation({
                 href: HEALTH_SCHEDULE_ROUTES.scheduleAppointmentTypes,
                 icon: AppointmentTypesIcon,
               },
+              ...(permissions.includes(NOTE_TEMPLATES_PERMISSION)
+                ? [
+                    {
+                      label: "Note templates",
+                      href: HEALTH_SCHEDULE_ROUTES.scheduleNoteTemplates,
+                      icon: NoteTemplatesIcon,
+                    },
+                  ]
+                : []),
             ],
           },
         ]
@@ -122,11 +232,13 @@ export function buildHealthScheduleNavigation({
           },
         ],
       },
-      {
-        label: "Manage your organisation",
-        items: [
-          ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.team)
-            ? [
+      // Organisation settings, with roles and permissions inside them, open
+      // from the account menu; only the team is offered here.
+      ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.team)
+        ? [
+            {
+              label: "Manage your organisation",
+              items: [
                 {
                   label: "Team",
                   href: organizationAppLinks.team,
@@ -134,28 +246,10 @@ export function buildHealthScheduleNavigation({
                   opensAnotherApp: true,
                   opensInNewWindow: true,
                 },
-              ]
-            : []),
-          ...(permissions.includes(ORGANIZATION_PAGE_PERMISSIONS.roles)
-            ? [
-                {
-                  label: "Roles and permissions",
-                  href: organizationAppLinks.teamRoles,
-                  icon: RolesIcon,
-                  opensAnotherApp: true,
-                  opensInNewWindow: true,
-                },
-              ]
-            : []),
-          {
-            label: "Settings",
-            href: organizationAppLinks.organizationSettings,
-            icon: OrganizationIcon,
-            opensAnotherApp: true,
-            opensInNewWindow: true,
-          },
-        ],
-      },
+              ],
+            },
+          ]
+        : []),
       ...organizationSection,
     ],
   };

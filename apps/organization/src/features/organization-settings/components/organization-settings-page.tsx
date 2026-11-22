@@ -7,6 +7,7 @@ import { OrganizationBranchesSection } from "~/features/organization-settings/co
 import { OrganizationOwnershipSection } from "~/features/organization-settings/components/organization-ownership-section";
 import { OrganizationProfileSection } from "~/features/organization-settings/components/organization-profile-section";
 import { OrganizationSettingsFrame } from "~/features/organization-settings/components/organization-settings-frame";
+import { RolesAndPermissionsSection } from "~/features/organization-settings/components/roles-and-permissions-section";
 import { ORGANIZATION_SETTINGS_PERMISSIONS } from "~/features/organization-settings/config/organization-settings";
 
 /** An approved organisation's profile and its list of branches. */
@@ -40,6 +41,9 @@ export function OrganizationSettingsPage() {
             userId={settings.userId}
             canManage={settings.canManageBranches}
           />
+          {settings.permissions.includes(
+            ORGANIZATION_SETTINGS_PERMISSIONS.readRoles
+          ) && <RolesAndPermissionsSection />}
           <OrganizationOwnershipSection
             organizationId={settings.organizationId}
             userId={settings.userId}

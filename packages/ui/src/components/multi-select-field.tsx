@@ -8,6 +8,7 @@ import {
 } from "@healthalyst/ui/primitives/field";
 import { HintText } from "@healthalyst/ui/components/hint-text";
 import { MultiSelect } from "@healthalyst/ui/components/multi-select";
+import { FieldLabelText } from "@healthalyst/ui/components/forms/field-label-text";
 import { cn } from "@healthalyst/ui/lib/utilities";
 import type { FormOption } from "@healthalyst/ui/types/form-definition";
 
@@ -26,6 +27,8 @@ type MultiSelectFieldProperties = {
   emptyMessage?: string;
   maximumSelections?: number;
   disabled?: boolean;
+  /** Marks the field with an asterisk and announces it as required. */
+  required?: boolean;
   className?: string;
   onValueChange?: (values: string[]) => void;
 };
@@ -47,6 +50,7 @@ export function MultiSelectField({
   emptyMessage,
   maximumSelections,
   disabled = false,
+  required = false,
   className,
   onValueChange,
 }: MultiSelectFieldProperties) {
@@ -62,7 +66,9 @@ export function MultiSelectField({
       data-invalid={Boolean(error)}
       data-disabled={disabled || undefined}
     >
-      <FieldLabel htmlFor={id}>{label}</FieldLabel>
+      <FieldLabel htmlFor={id}>
+        <FieldLabelText label={label} required={required} announceRequired />
+      </FieldLabel>
       <MultiSelect
         identifier={id}
         name={name}

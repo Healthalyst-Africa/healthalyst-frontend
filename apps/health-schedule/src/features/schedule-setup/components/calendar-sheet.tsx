@@ -28,7 +28,7 @@ import {
   type RenameCalendarFormValues,
 } from "~/features/schedule-setup/schemas/schedule-form-schemas";
 import type { ScheduleCalendar } from "~/features/schedule-setup/schemas/schedule-response-schemas";
-import { applyFieldErrors } from "~/features/schedule-setup/utilities/apply-field-errors";
+import { applyFieldErrors } from "~/shared/forms/apply-field-errors";
 import {
   describeCalendarKind,
   describeCalendarPlace,
@@ -190,6 +190,7 @@ function RenameSection({ calendar }: { calendar: ScheduleCalendar }) {
       <TextField
         id={`calendar-name-${calendar.id}`}
         label="Name"
+        required
         className="flex-1"
         error={
           form.formState.errors.name?.message ??

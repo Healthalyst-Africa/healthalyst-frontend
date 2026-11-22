@@ -5,7 +5,7 @@ import {
   timeOffListSchema,
   type TimeOffEntry,
 } from "~/features/schedule-setup/schemas/schedule-response-schemas";
-import { parseScheduleResponse } from "~/features/schedule-setup/services/parse-schedule-response";
+import { parseHealthScheduleResponse } from "~/shared/api/parse-health-schedule-response";
 import type { CreateTimeOffRequest } from "~/features/schedule-setup/utilities/schedule-requests";
 import { getHealthScheduleHttpClient } from "~/infrastructure/api/health-schedule-http-client";
 
@@ -35,7 +35,7 @@ export async function listTimeOff(period: {
       SCHEDULE_ENDPOINTS.timeOff,
       { params: period }
     );
-    return parseScheduleResponse(
+    return parseHealthScheduleResponse(
       timeOffListSchema,
       response.data,
       response.status
@@ -54,7 +54,7 @@ export async function createTimeOff(
       SCHEDULE_ENDPOINTS.timeOff,
       request
     );
-    return parseScheduleResponse(
+    return parseHealthScheduleResponse(
       timeOffEntrySchema,
       response.data,
       response.status
