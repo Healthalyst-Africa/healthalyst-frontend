@@ -129,6 +129,9 @@ export function findWorkingPeriodProblems(
   return problems;
 }
 
+/** What a calendar with no hours shows. */
+export const NO_HOURS_SUMMARY = "No hours set";
+
 /**
  * Short hours for a list, such as "Mon–Fri 8:00 am – 4:00 pm; Sat 9:00 am –
  * 1:00 pm".
@@ -165,7 +168,7 @@ export function summarizeWeeklyHours(
       groups.push({ first: weekdayIndex, last: weekdayIndex, pattern });
     }
   });
-  if (groups.length === 0) return "No hours set";
+  if (groups.length === 0) return NO_HOURS_SUMMARY;
   return groups
     .map((group) => {
       const firstName = SHORT_WEEKDAY_NAMES[group.first];

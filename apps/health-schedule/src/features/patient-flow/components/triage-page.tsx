@@ -64,8 +64,8 @@ function findBookedDoctor(
 export function TriagePage() {
   return (
     <PatientFlowFrame
-      title="Triage and vitals"
-      description="Take vitals in order of arrival, then send each patient to the doctor at the right priority."
+      title="Vital signs"
+      description="Record each new patient's temperature, blood pressure and pulse, decide how urgently they need a doctor, then send them on."
       requiredPermission={TRIAGE_PERMISSIONS.record}
       missingPermissionName="Record vitals and set the triage band"
     >
@@ -91,8 +91,8 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
       <StateNotice tone="information" title="Your role cannot see the queues">
         <p>
           Ask an organisation administrator to add the “View queues and patient
-          flow” permission to your role, so the patients waiting for vitals are
-          listed.
+          flow” permission to your role, so the patients waiting for vital signs
+          are listed.
         </p>
       </StateNotice>
     );
@@ -142,21 +142,24 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
     <div className="grid items-start gap-6 2xl:grid-cols-[30rem_minmax(0,1fr)]">
       <ContentPanel
         data-tour="triage-waiting"
-        heading="Waiting for vitals"
+        heading="Waiting for vital signs"
         headingLevel={2}
         description="Most urgent first, then by arrival. It updates on its own."
         spacing="compact"
       >
         <DataTable
-          accessibleLabel="Waiting for vitals"
+          accessibleLabel="Waiting for vital signs"
           columns={columns}
           state={
             entriesQuery.isPending
-              ? { status: "loading", label: "Loading the triage queue" }
+              ? {
+                  status: "loading",
+                  label: "Loading patients waiting for vital signs",
+                }
               : entriesQuery.isError
                 ? {
                     status: "error",
-                    title: "We could not load the triage queue",
+                    title: "We could not load the patients waiting",
                     description: entriesQuery.error.message,
                     retryLabel: "Try again",
                     onRetry: () => void entriesQuery.refetch(),
@@ -172,13 +175,14 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
           }
           rowAction={{
             label: (entry) =>
-              `Take vitals for ${describePatientName(entry.patient)}`,
+              `Take vital signs for ${describePatientName(entry.patient)}`,
             onSelect: (entry) => setChosenEntryId(entry.id),
           }}
           emptyState={{
             illustration: <DocumentsCompleteIllustration />,
-            title: "Nobody is waiting for vitals",
-            description: "Patients appear here as soon as they are checked in.",
+            title: "Nobody is waiting for vital signs",
+            description:
+              "Patients appear here as soon as the front desk checks them in.",
           }}
         />
       </ContentPanel>
@@ -195,13 +199,7 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
           }
           onFinished={openNextPatient}
         />
-      ) : (
-        entriesQuery.isSuccess && (
-          <StateNotice tone="success" title="Everyone has been triaged">
-            <p>New patients appear in the list once they are checked in.</p>
-          </StateNotice>
-        )
-      )}
+      ) : null}
     </div>
   );
 }

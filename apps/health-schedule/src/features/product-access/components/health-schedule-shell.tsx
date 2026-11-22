@@ -19,6 +19,7 @@ import { buildHealthScheduleNavigation } from "~/features/product-access/utiliti
 import { useHealthScheduleSignOut } from "~/features/product-access/hooks/use-health-schedule-sign-out";
 import { PageHelpButton } from "~/features/guided-tours/components/page-help-button";
 import { useOrganizationSwitch } from "~/features/product-access/hooks/use-organization-switch";
+import { describeRoles } from "~/shared/workspace/role-names";
 import { WorkspaceProvider } from "~/shared/workspace/workspace-context";
 
 /**
@@ -44,6 +45,7 @@ export function HealthScheduleShell({
     () => platformSession.activeContext.permissions ?? [],
     [platformSession]
   );
+  const roleNames = describeRoles(platformSession.activeContext.roles ?? []);
   const [switchingTo, setSwitchingTo] = useState<string | null>(null);
   const organizationAppLinks = getOrganizationAppLinks();
   const navigation = buildHealthScheduleNavigation({
@@ -107,6 +109,9 @@ export function HealthScheduleShell({
           <AccountMenu
             fullName={`${user.firstName} ${user.lastName}`}
             emailAddress={user.email ?? ""}
+            roleDescription={
+              roleNames ? `${roleNames} at ${organizationName}` : undefined
+            }
             error={signOutMutation.error?.message}
             actions={[
               // Account security is owned by the organisation hub. It opens in

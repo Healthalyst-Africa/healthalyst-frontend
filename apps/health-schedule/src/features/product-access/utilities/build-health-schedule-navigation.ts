@@ -88,7 +88,7 @@ export function buildHealthScheduleNavigation({
     ...(permissions.includes(PATIENT_FLOW_PAGE_PERMISSIONS.triage)
       ? [
           {
-            label: "Triage and vitals",
+            label: "Vital signs",
             href: HEALTH_SCHEDULE_ROUTES.triage,
             icon: VitalsIcon,
           },
@@ -128,7 +128,7 @@ export function buildHealthScheduleNavigation({
     ...(permissions.includes(ACCESS_REVIEW_PERMISSION)
       ? [
           {
-            label: "Emergency access reviews",
+            label: "Access reviews",
             href: HEALTH_SCHEDULE_ROUTES.accessReviews,
             icon: AccessReviewIcon,
           },
@@ -147,15 +147,15 @@ export function buildHealthScheduleNavigation({
       ],
     },
     ...(patientFlowItems.length > 0
-      ? [{ label: "Patients today", items: patientFlowItems }]
+      ? [{ label: "Patient visits", items: patientFlowItems }]
       : []),
     ...(recordItems.length > 0
-      ? [{ label: "Records", items: recordItems }]
+      ? [{ label: "Patients", items: recordItems }]
       : []),
     ...(permissions.includes(SCHEDULE_READ_PERMISSION)
       ? [
           {
-            label: "Schedule setup",
+            label: "Setup",
             items: [
               {
                 label: "Calendars",

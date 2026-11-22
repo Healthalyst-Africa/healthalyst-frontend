@@ -147,13 +147,15 @@ describe("queue targets", () => {
     const options = buildQueueTargetOptions(
       readQueueTargetChoices(DAY_BOARD, DEPARTMENTS)
     );
-    expect(options.map((option) => option.label)).toEqual([
-      "Triage (vitals first)",
-      "Next free doctor",
-      "Dr Adeyemi",
-      "Dr Bello",
-      "Laboratory",
-    ]);
+    expect(options.map((option) => `${option.group}: ${option.label}`)).toEqual(
+      [
+        "Nurses: Vital signs with a nurse first",
+        "Doctors: Next free doctor",
+        "Doctors: Dr Adeyemi",
+        "Doctors: Dr Bello",
+        "Departments: Laboratory",
+      ]
+    );
   });
 
   it("counts a doctor's own patients and those for the next free doctor", () => {
@@ -181,13 +183,15 @@ describe("queue targets", () => {
         },
       ]
     );
-    expect(options.map((option) => option.label)).toEqual([
-      "Triage · 3 waiting",
-      "All doctors · 3 waiting",
-      "Dr Adeyemi · 2 waiting",
-      "Dr Bello · 3 waiting",
-      "Laboratory",
-    ]);
+    expect(options.map((option) => `${option.group}: ${option.label}`)).toEqual(
+      [
+        "Nurses: Vital signs · 3 waiting",
+        "Doctors: Any doctor · 3 waiting",
+        "Doctors: Dr Adeyemi · 2 waiting",
+        "Doctors: Dr Bello · 3 waiting",
+        "Departments: Laboratory",
+      ]
+    );
   });
 
   it("names where a patient is", () => {

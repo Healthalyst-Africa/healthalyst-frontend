@@ -90,8 +90,8 @@ export function UnknownPatientDialog({
     <FormDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Register an unknown patient"
-      description="For someone who cannot be identified yet. Care starts now; their name and contact details are added later."
+      title="Register someone without a name"
+      description="For someone who needs care now but cannot tell you who they are, such as a patient brought in unconscious. Add their name and details when they are known."
       submitLabel="Register and check in"
       submittingLabel="Registering"
       isSubmitting={registerMutation.isPending}

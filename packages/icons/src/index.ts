@@ -92,4 +92,7 @@ export {
   IconCircleCheck as ResolvedIcon,
   IconRotate2 as ReopenIcon,
   IconHelpCircle as GuidedTourIcon,
+  IconCircleCheckFilled as CompletedStepIcon,
+  IconCircleDashed as UpcomingStepIcon,
+  IconCircleDot as CurrentStepIcon,
 } from "@tabler/icons-react";

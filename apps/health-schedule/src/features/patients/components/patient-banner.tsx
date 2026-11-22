@@ -66,20 +66,44 @@ export function readPatientStatuses(
     });
   }
   if (!patient.messaging.canMessage) {
-    statuses.push({ key: "messages", label: "No messages", tone: "neutral" });
+    statuses.push({
+      key: "messages",
+      label: "No text reminders",
+      tone: "neutral",
+    });
   }
   return statuses;
 }
+
+const DEFAULT_UNKNOWN_ALLERGY_MESSAGE =
+  "Allergies not asked yet. Ask the patient and record the answer.";
 
 /**
  * Allergies come first on every clinical screen: in red when recorded, and a
  * prompt when nobody has asked yet.
  */
-export function PatientAllergyLine({ patient }: { patient: PatientDetail }) {
+export function PatientAllergyLine({
+  patient,
+  whenUnknown = DEFAULT_UNKNOWN_ALLERGY_MESSAGE,
+}: {
+  patient: PatientDetail;
+  /**
+   * What to say when nobody has asked yet, for the person reading it. A
+   * custom message is information for someone who is not asked to act, so
+   * it is quiet rather than a warning.
+   */
+  whenUnknown?: string;
+}) {
   if (patient.allergyStatus === "UNKNOWN") {
     return (
-      <p className="font-medium text-status-warning">
-        Allergies not asked yet. Ask the patient and record the answer.
+      <p
+        className={
+          whenUnknown === DEFAULT_UNKNOWN_ALLERGY_MESSAGE
+            ? "font-medium text-status-warning"
+            : "text-muted-foreground"
+        }
+      >
+        {whenUnknown}
       </p>
     );
   }

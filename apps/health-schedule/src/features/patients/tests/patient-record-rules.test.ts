@@ -369,7 +369,7 @@ describe("presenting a patient", () => {
       "Reliance HMO, Gold: Cover expired",
       "Restricted record",
       "Add date of birth or age",
-      "No messages",
+      "No text reminders",
     ]);
     expect(
       readPatientStatuses({ ...PATIENT, primaryCoverage: null })[0]?.label

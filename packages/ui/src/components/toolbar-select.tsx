@@ -15,7 +15,24 @@ import { cn } from "@healthalyst/ui/lib/utilities";
 type ToolbarSelectOption = {
   value: string;
   label: string;
+  /** Options sharing a group are listed together under its name. */
+  group?: string;
 };
+
+/** Consecutive options of the same group, keeping their order. */
+function groupOptions(options: readonly ToolbarSelectOption[]) {
+  const groups: { name: string | undefined; options: ToolbarSelectOption[] }[] =
+    [];
+  for (const option of options) {
+    const lastGroup = groups.at(-1);
+    if (lastGroup && lastGroup.name === option.group) {
+      lastGroup.options.push(option);
+    } else {
+      groups.push({ name: option.group, options: [option] });
+    }
+  }
+  return groups;
+}
 
 type ToolbarSelectProperties = {
   /** What is being chosen, such as "Branch". */
@@ -45,6 +62,7 @@ export function ToolbarSelect({
   className,
 }: ToolbarSelectProperties) {
   const selectedOption = options.find((option) => option.value === value);
+  const hasGroups = options.some((option) => option.group !== undefined);
 
   if (selectedOption && options.length === 1) {
     return (
@@ -77,22 +95,43 @@ export function ToolbarSelect({
           />
         </ActionButton>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align={align} className="w-64">
-        <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
-          {label}
-        </DropdownMenuLabel>
+      <DropdownMenuContent
+        align={align}
+        className="max-h-[min(28rem,var(--radix-dropdown-menu-content-available-height))] w-64 overflow-y-auto"
+      >
+        {!hasGroups && (
+          <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+            {label}
+          </DropdownMenuLabel>
+        )}
         <DropdownMenuRadioGroup
           value={value ?? ""}
           onValueChange={onValueChange}
         >
-          {options.map((option) => (
-            <DropdownMenuRadioItem
-              key={option.value}
-              value={option.value}
-              className="min-h-10 cursor-pointer"
+          {groupOptions(options).map((group, groupIndex) => (
+            <div
+              key={group.name ?? `group-${groupIndex}`}
+              role="group"
+              aria-label={group.name}
+              className={cn(
+                groupIndex > 0 && hasGroups && "mt-1 border-t pt-1"
+              )}
             >
-              {option.label}
-            </DropdownMenuRadioItem>
+              {group.name && (
+                <DropdownMenuLabel className="text-xs font-medium text-muted-foreground">
+                  {group.name}
+                </DropdownMenuLabel>
+              )}
+              {group.options.map((option) => (
+                <DropdownMenuRadioItem
+                  key={option.value}
+                  value={option.value}
+                  className="min-h-10 cursor-pointer"
+                >
+                  {option.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </div>
           ))}
         </DropdownMenuRadioGroup>
       </DropdownMenuContent>

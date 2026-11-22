@@ -26,7 +26,7 @@ export const GUIDED_TOURS = {
         element: anchor("shell-toolbar"),
         title: "The branch you work at",
         description:
-          "Patients today, queues and calendars belong to a branch. Change it here when you move between branches.",
+          "Patient visits, queues and calendars belong to a branch. Change it here when you move between branches.",
         placement: "bottom",
       },
       {
@@ -64,9 +64,9 @@ export const GUIDED_TOURS = {
       },
       {
         element: anchor("page-actions"),
-        title: "New and unknown patients",
+        title: "New patients",
         description:
-          "Register someone who is not on the system yet, or an unknown patient in an emergency.",
+          "Register someone who is not on the system yet, or someone whose name is not known yet, such as a patient brought in unconscious.",
         placement: "bottom",
       },
       {
@@ -85,7 +85,7 @@ export const GUIDED_TOURS = {
         element: anchor("queue-choice"),
         title: "Choose a queue",
         description:
-          "Triage, a doctor or a department. The number waiting is shown beside each.",
+          "Vital signs, a doctor or a department, grouped by who serves them. The number waiting is shown beside each.",
         placement: "bottom",
       },
       {
@@ -109,15 +109,15 @@ export const GUIDED_TOURS = {
     steps: [
       {
         element: anchor("triage-waiting"),
-        title: "Waiting for vitals",
+        title: "Waiting for vital signs",
         description:
-          "Patients who need vitals, the most urgent first. Choose one to record their vital signs.",
+          "Patients who need vital signs taken, the most urgent first. Choose one to record their vital signs.",
         placement: "right",
       },
       {
         title: "Danger signs and the band",
         description:
-          "As you enter vitals, danger signs show straight away and suggest a band for adults. Saving sends the patient to their doctor.",
+          "As you enter vital signs, danger signs show straight away and suggest a band for adults. Saving sends the patient to their doctor.",
       },
     ],
   },
@@ -141,7 +141,7 @@ export const GUIDED_TOURS = {
         element: anchor("consultation-patient"),
         title: "The patient you are seeing",
         description:
-          "Triage and allergies sit beside the consultation note. Sign the note and record diagnoses before you finish the visit.",
+          "Vital signs and allergies sit beside the consultation note. Sign the note and record diagnoses before you finish the visit.",
         placement: "left",
       },
     ],

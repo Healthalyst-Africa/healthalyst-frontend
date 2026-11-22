@@ -31,7 +31,6 @@ import {
   CLOCK_STATE_TONES,
   PATIENT_FLOW_PERMISSIONS,
   PATIENT_SEARCH_CONFIGURATION,
-  QUEUE_ENTRY_STATUS_PRESENTATION,
   TRIAGE_BAND_PRESENTATION,
 } from "~/features/patient-flow/config/patient-flow";
 import { useDebouncedValue } from "~/shared/hooks/use-debounced-value";
@@ -54,15 +53,14 @@ import {
   listExpectedArrivals,
   readFlowEmphasis,
   sortByTriage,
-  describeWait,
   summarizeFrontDesk,
   type ExpectedArrival,
 } from "~/features/patient-flow/utilities/front-desk";
 import {
   buildQueueTargetOptions,
-  describeQueue,
   readQueueTargetChoices,
 } from "~/features/patient-flow/utilities/queue-targets";
+import { describeVisitProgress } from "~/features/patient-flow/utilities/visit-progress";
 import { describeBranchClockTime } from "~/shared/time/branch-time";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
@@ -91,7 +89,7 @@ export function FrontDeskPage() {
               leadingIcon={<UnknownPatientIcon className="size-4" />}
               onClick={() => setIsRegisteringUnknown(true)}
             >
-              Unknown patient
+              Register without a name
             </ActionButton>
             <ActionButton
               type="button"
@@ -286,28 +284,22 @@ function FrontDeskWorkspace({
       }),
     },
     {
-      key: "where",
-      label: "Where now",
-      getCell: (visit) =>
-        visit.current
-          ? {
-              kind: "text",
-              primary: describeQueue(visit.current),
-              secondary:
-                visit.current.status === "WAITING"
-                  ? `Waiting ${describeWait(visit.current.minutes, visit.current.state)}`
-                  : QUEUE_ENTRY_STATUS_PRESENTATION[visit.current.status].label,
-            }
-          : { kind: "text", primary: "Between queues" },
+      key: "visit",
+      label: "Visit so far",
+      size: "wide",
+      getCell: (visit) => ({
+        kind: "progress",
+        steps: describeVisitProgress(visit),
+      }),
     },
     {
-      key: "triage",
-      label: "Triage",
+      key: "urgency",
+      label: "Urgency",
       size: "compact",
       getCell: (visit) =>
         visit.triageBand
           ? { kind: "status", ...TRIAGE_BAND_PRESENTATION[visit.triageBand] }
-          : { kind: "status", label: "Not yet", tone: "neutral" },
+          : { kind: "status", label: "Not checked yet", tone: "neutral" },
     },
     {
       key: "time",
@@ -349,7 +341,7 @@ function FrontDeskWorkspace({
               icon: <LongestWaitIcon />,
             },
             {
-              label: "Over the visit target",
+              label: "Here longer than the target",
               value: figures.overVisitTarget,
               icon: <OverTargetIcon />,
             },
@@ -368,11 +360,13 @@ function FrontDeskWorkspace({
 
       <ContentPanel
         data-tour="front-desk-check-in"
+        // On phones the search comes before the figures above it.
+        className="max-md:-order-1"
         heading="Check a patient in"
         headingLevel={2}
         description={
           canSearchPatients
-            ? "Search by name, phone number, patient number or folder number. Names that sound alike are found too."
+            ? "Find the patient by name, phone, patient number or folder number, then check them in. Names that sound alike are found too."
             : undefined
         }
       >
@@ -416,6 +410,7 @@ function FrontDeskWorkspace({
             rowAction={{
               label: (patient) =>
                 `Check in ${describePatientMatchName(patient)}`,
+              visibleLabel: "Check in",
               onSelect: checkInPatient,
             }}
             emptyState={{
@@ -452,6 +447,7 @@ function FrontDeskWorkspace({
               rowAction={{
                 label: (appointment) =>
                   `Check in ${describePatientName(appointment.patient)}`,
+                visibleLabel: "Check in",
                 onSelect: checkInExpectedArrival,
               }}
               emptyState={{
@@ -469,7 +465,7 @@ function FrontDeskWorkspace({
           data-tour="front-desk-in-building"
           heading="In the building now"
           headingLevel={2}
-          description="Everyone checked in and not yet finished: emergencies first, then urgent and routine patients, then those not yet triaged, the longest visits first within each. Emergencies are marked red; urgent patients and waits past the target are marked amber. It updates on its own."
+          description="Everyone checked in and not yet finished, the most urgent first, and where each one is on their visit."
         >
           <DataTable
             accessibleLabel="Patients in the building"

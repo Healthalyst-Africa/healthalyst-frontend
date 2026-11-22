@@ -135,10 +135,10 @@ export function AllergiesSection({ patientId }: { patientId: string }) {
       ) : (
         <>
           {allergiesQuery.data.status === "UNKNOWN" && (
-            <NoticeBanner tone="warning" title="Nobody has asked yet">
+            <p className="text-sm text-muted-foreground">
               Ask the patient whether they are allergic to any medicine, food or
               anything else, and record the answer.
-            </NoticeBanner>
+            </p>
           )}
           {activeAllergies.length > 0 && (
             <ul className="flex flex-col gap-3">

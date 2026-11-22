@@ -10,9 +10,11 @@ import {
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { ActionMenu } from "@healthalyst/ui/components/action-menu";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
+import { EmptyState } from "@healthalyst/ui/components/empty-state";
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
+import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { AddProblemDialog } from "~/features/clinical-record/components/add-problem-dialog";
 import {
   CLINICAL_RECORD_LIMITS as LIMITS,
@@ -81,6 +83,7 @@ export function ProblemsSection({
     <ContentPanel
       heading="Problem list"
       headingLevel={headingLevel}
+      description="The patient's conditions and diagnoses, coded so they mean the same to every clinician."
       headingAccessory={
         canWrite && (
           <ActionButton
@@ -124,7 +127,12 @@ export function ProblemsSection({
         </NoticeBanner>
       )}
       {problemsQuery.isSuccess && problems.length === 0 && (
-        <p className="text-sm text-muted-foreground">No problems recorded.</p>
+        <EmptyState
+          surface="plain"
+          illustration={<DocumentsCompleteIllustration />}
+          title="No problems recorded"
+          description="Long-term conditions and diagnoses, such as diabetes or asthma, are listed here so every visit starts with them."
+        />
       )}
       {problems.length > 0 && (
         <ul className="flex flex-col divide-y divide-border">
