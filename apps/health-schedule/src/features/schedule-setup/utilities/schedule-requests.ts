@@ -11,10 +11,7 @@ import type {
   TimeOffKind,
 } from "~/features/schedule-setup/schemas/schedule-response-schemas";
 import { toBranchDateTime, toEndOfBranchDay } from "~/shared/time/branch-time";
-import {
-  koboToNairaText,
-  nairaTextToKobo,
-} from "~/features/schedule-setup/utilities/naira-amount";
+import { koboToNairaText, nairaTextToKobo } from "~/shared/money/naira-amount";
 
 export type CreateCalendarRequest =
   | { kind: "PRACTITIONER"; memberId: string }

@@ -32,6 +32,11 @@ function readDateValue(value: string): Date | undefined {
 type DatePickerFieldProperties = {
   id: string;
   label: string;
+  /**
+   * Keeps the label for screen readers only, where the surrounding controls
+   * already make the field's purpose clear, such as a day with arrows.
+   */
+  hideLabel?: boolean;
   /** The chosen date as `yyyy-MM-dd`, or an empty string. */
   value: string;
   onValueChange: (value: string) => void;
@@ -64,6 +69,7 @@ export function DatePickerField({
   earliestDate,
   latestDate,
   required = false,
+  hideLabel = false,
   disabled,
   className,
 }: DatePickerFieldProperties) {
@@ -88,7 +94,11 @@ export function DatePickerField({
       data-invalid={Boolean(error)}
       data-disabled={disabled || undefined}
     >
-      <FieldLabel id={labelIdentifier} htmlFor={id}>
+      <FieldLabel
+        id={labelIdentifier}
+        htmlFor={id}
+        className={cn(hideLabel && "sr-only")}
+      >
         <FieldLabelText label={label} required={required} announceRequired />
       </FieldLabel>
       <Popover open={open} onOpenChange={setOpen}>

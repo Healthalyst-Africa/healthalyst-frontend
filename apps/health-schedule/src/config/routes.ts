@@ -13,4 +13,6 @@ export const HEALTH_SCHEDULE_ROUTES = {
   scheduleTimeOff: "/schedule/time-off",
   scheduleAppointmentTypes: "/schedule/appointment-types",
   scheduleNoteTemplates: "/schedule/note-templates",
+  scheduleTestsAndScans: "/schedule/tests-and-scans",
+  results: "/results",
 } as const;

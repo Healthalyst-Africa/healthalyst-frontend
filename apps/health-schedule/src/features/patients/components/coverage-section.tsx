@@ -29,6 +29,7 @@ import { SelectField } from "@healthalyst/ui/components/select-field";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
+import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import {
   COVERAGE_RELATIONSHIP_OPTIONS,
   ELIGIBILITY_PRESENTATION,
@@ -179,159 +180,166 @@ export function CoverageSection({ patientId }: { patientId: string }) {
           {endedCount > 0 ? ` (${endedCount} ended)` : ""}.
         </p>
       ) : (
-        <ul className="flex flex-col gap-4">
-          {activeCoverage.map((coverage) => {
-            const eligibility = coverage.isExpired
-              ? { label: "Cover expired", tone: "negative" as const }
-              : ELIGIBILITY_PRESENTATION[coverage.eligibility];
-            return (
-              <li
-                key={coverage.id}
-                className="flex flex-col gap-4 rounded-lg border p-4"
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex min-w-0 flex-wrap items-center gap-2">
-                    <span className="font-medium">
-                      {describeCoverage(coverage)}
-                    </span>
-                    {coverage.isPrimary && (
-                      <StatusLabel tone="information">Primary</StatusLabel>
-                    )}
-                    <StatusLabel tone={eligibility.tone}>
-                      {eligibility.label}
-                    </StatusLabel>
-                  </div>
-                  {canEdit && (
-                    <ActionMenu
-                      accessibleLabel={`Actions for ${describeCoverage(coverage)}`}
-                      className="-mr-2 -mt-1"
-                      items={[
-                        {
-                          label: "Record a cover check",
-                          icon: <EligibilityCheckIcon />,
-                          onSelect: () => setCheckingCoverage(coverage),
-                        },
-                        {
-                          label: cardPhotoByCoverage.has(coverage.id)
-                            ? "Replace card photo"
-                            : "Add card photo",
-                          icon: <AddCardPhotoIcon />,
-                          onSelect: () => setPhotographingCoverage(coverage),
-                        },
-                        {
-                          label: "Edit",
-                          icon: <EditIcon />,
-                          onSelect: () => {
-                            actions.update.reset();
-                            setEditing({ kind: "existing", coverage });
-                          },
-                        },
-                        ...(coverage.isPrimary
-                          ? []
-                          : [
-                              {
-                                label: "Make primary",
-                                icon: <PreferredIcon />,
-                                onSelect: () => makePrimary(coverage),
-                                isPending:
-                                  actions.update.isPending &&
-                                  actions.update.variables.coverage.id ===
-                                    coverage.id,
-                                pendingLabel: "Saving",
-                              },
-                            ]),
-                        {
-                          label: "End cover",
-                          icon: <EndCoverIcon />,
-                          tone: "destructive",
-                          separatedAbove: true,
-                          onSelect: () => {
-                            actions.update.reset();
-                            setEndingCoverage(coverage);
-                          },
-                        },
-                      ]}
-                    />
-                  )}
-                </div>
-                <DetailList
-                  items={[
-                    {
-                      term: "Kind",
-                      description:
-                        labelOf(PAYER_TYPE_OPTIONS, coverage.payerType) ??
-                        coverage.payerType,
-                    },
-                    {
-                      term: "Member number",
-                      description: coverage.memberNumber,
-                    },
-                    {
-                      term: "Covered as",
-                      description: `${
-                        labelOf(
-                          COVERAGE_RELATIONSHIP_OPTIONS,
-                          coverage.relationship
-                        ) ?? coverage.relationship
-                      }${coverage.principalName ? ` (${coverage.principalName})` : ""}`,
-                    },
-                    ...(coverage.employerName
-                      ? [
+        <ScrollRegion accessibleLabel="Insurance cover" size="large">
+          <ul className="flex flex-col gap-4">
+            {activeCoverage.map((coverage) => {
+              const eligibility = coverage.isExpired
+                ? { label: "Cover expired", tone: "negative" as const }
+                : ELIGIBILITY_PRESENTATION[coverage.eligibility];
+              return (
+                <li
+                  key={coverage.id}
+                  className="flex flex-col gap-4 rounded-lg border p-4"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
+                      <span className="font-medium">
+                        {describeCoverage(coverage)}
+                      </span>
+                      {coverage.isPrimary && (
+                        <StatusLabel tone="information">Primary</StatusLabel>
+                      )}
+                      <StatusLabel tone={eligibility.tone}>
+                        {eligibility.label}
+                      </StatusLabel>
+                    </div>
+                    {canEdit && (
+                      <ActionMenu
+                        accessibleLabel={`Actions for ${describeCoverage(coverage)}`}
+                        className="-mr-2 -mt-1"
+                        items={[
                           {
-                            term: "Employer",
-                            description: coverage.employerName,
+                            label: "Record a cover check",
+                            icon: <EligibilityCheckIcon />,
+                            onSelect: () => setCheckingCoverage(coverage),
                           },
-                        ]
-                      : []),
-                    { term: "Valid", description: describeValidity(coverage) },
-                    {
-                      term: "Last check",
-                      description: describeEligibilityCheck(coverage),
-                    },
-                    {
-                      term: "Card photo",
-                      description: cardPhotoByCoverage.has(coverage.id) ? (
-                        <ActionButton
-                          type="button"
-                          variant="link"
-                          size="small"
-                          className="h-auto p-0"
-                          leadingIcon={<OpenDocumentIcon className="size-4" />}
-                          isLoading={
-                            openMutation.isPending &&
-                            openMutation.variables ===
-                              cardPhotoByCoverage.get(coverage.id)?.id
-                          }
-                          loadingText="Opening"
-                          onClick={() => {
-                            const cardPhoto = cardPhotoByCoverage.get(
-                              coverage.id
-                            );
-                            if (cardPhoto) openDocument(cardPhoto.id);
-                          }}
-                        >
-                          Open card photo
-                        </ActionButton>
-                      ) : (
-                        NOT_RECORDED
-                      ),
-                    },
-                  ]}
-                />
-                {openMutation.isError &&
-                  openMutation.variables ===
-                    cardPhotoByCoverage.get(coverage.id)?.id && (
-                    <NoticeBanner
-                      tone="error"
-                      title="The card photo did not open"
-                    >
-                      {openMutation.error.message}
-                    </NoticeBanner>
-                  )}
-              </li>
-            );
-          })}
-        </ul>
+                          {
+                            label: cardPhotoByCoverage.has(coverage.id)
+                              ? "Replace card photo"
+                              : "Add card photo",
+                            icon: <AddCardPhotoIcon />,
+                            onSelect: () => setPhotographingCoverage(coverage),
+                          },
+                          {
+                            label: "Edit",
+                            icon: <EditIcon />,
+                            onSelect: () => {
+                              actions.update.reset();
+                              setEditing({ kind: "existing", coverage });
+                            },
+                          },
+                          ...(coverage.isPrimary
+                            ? []
+                            : [
+                                {
+                                  label: "Make primary",
+                                  icon: <PreferredIcon />,
+                                  onSelect: () => makePrimary(coverage),
+                                  isPending:
+                                    actions.update.isPending &&
+                                    actions.update.variables.coverage.id ===
+                                      coverage.id,
+                                  pendingLabel: "Saving",
+                                },
+                              ]),
+                          {
+                            label: "End cover",
+                            icon: <EndCoverIcon />,
+                            tone: "destructive",
+                            separatedAbove: true,
+                            onSelect: () => {
+                              actions.update.reset();
+                              setEndingCoverage(coverage);
+                            },
+                          },
+                        ]}
+                      />
+                    )}
+                  </div>
+                  <DetailList
+                    items={[
+                      {
+                        term: "Kind",
+                        description:
+                          labelOf(PAYER_TYPE_OPTIONS, coverage.payerType) ??
+                          coverage.payerType,
+                      },
+                      {
+                        term: "Member number",
+                        description: coverage.memberNumber,
+                      },
+                      {
+                        term: "Covered as",
+                        description: `${
+                          labelOf(
+                            COVERAGE_RELATIONSHIP_OPTIONS,
+                            coverage.relationship
+                          ) ?? coverage.relationship
+                        }${coverage.principalName ? ` (${coverage.principalName})` : ""}`,
+                      },
+                      ...(coverage.employerName
+                        ? [
+                            {
+                              term: "Employer",
+                              description: coverage.employerName,
+                            },
+                          ]
+                        : []),
+                      {
+                        term: "Valid",
+                        description: describeValidity(coverage),
+                      },
+                      {
+                        term: "Last check",
+                        description: describeEligibilityCheck(coverage),
+                      },
+                      {
+                        term: "Card photo",
+                        description: cardPhotoByCoverage.has(coverage.id) ? (
+                          <ActionButton
+                            type="button"
+                            variant="link"
+                            size="small"
+                            className="h-auto p-0"
+                            leadingIcon={
+                              <OpenDocumentIcon className="size-4" />
+                            }
+                            isLoading={
+                              openMutation.isPending &&
+                              openMutation.variables ===
+                                cardPhotoByCoverage.get(coverage.id)?.id
+                            }
+                            loadingText="Opening"
+                            onClick={() => {
+                              const cardPhoto = cardPhotoByCoverage.get(
+                                coverage.id
+                              );
+                              if (cardPhoto) openDocument(cardPhoto.id);
+                            }}
+                          >
+                            Open card photo
+                          </ActionButton>
+                        ) : (
+                          NOT_RECORDED
+                        ),
+                      },
+                    ]}
+                  />
+                  {openMutation.isError &&
+                    openMutation.variables ===
+                      cardPhotoByCoverage.get(coverage.id)?.id && (
+                      <NoticeBanner
+                        tone="error"
+                        title="The card photo did not open"
+                      >
+                        {openMutation.error.message}
+                      </NoticeBanner>
+                    )}
+                </li>
+              );
+            })}
+          </ul>
+        </ScrollRegion>
       )}
       {actions.update.isError && !editing && !endingCoverage && (
         <NoticeBanner tone="error" title="That was not saved">

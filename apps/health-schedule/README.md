@@ -75,6 +75,8 @@ src/
     patient-flow/              Front desk check-in, triage and vitals, and the queue boards
     patients/                  Patient records: registration, details, allergies, cover,
                                family and contacts, consents, documents and merging duplicates
+    orders/                    Ordering tests and scans, results to review, the patient's
+                               tests and results, and the tests-and-scans catalogue setup
   infrastructure/
     api/                       HealthSchedule API client, and the storage client that sends
                                document files to the signed upload links (no token or cookies)
@@ -85,6 +87,7 @@ src/
     api/                       Checks HealthSchedule responses before screens use them
     contact/                   Phone numbers in the international format the API stores
     forms/                     API field errors and focusing the first invalid field
+    money/                     Naira amounts: kobo to text and back
     hooks/                     Small hooks shared by features, such as debouncing
     time/                      Branch dates and times
     workspace/                 Signed-in session, permissions and branch for workspace pages

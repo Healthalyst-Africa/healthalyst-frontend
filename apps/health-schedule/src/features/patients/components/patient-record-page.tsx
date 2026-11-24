@@ -13,6 +13,9 @@ import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import { NotesSection } from "~/features/clinical-record/components/notes-section";
 import { ProblemsSection } from "~/features/clinical-record/components/problems-section";
 import { TimelineSection } from "~/features/clinical-record/components/timeline-section";
+import { OrderTestsPanel } from "~/features/orders/components/order-tests-panel";
+import { PatientOrdersSection } from "~/features/orders/components/patient-orders-section";
+import { ORDER_PERMISSIONS } from "~/features/orders/config/orders";
 import { AllergiesSection } from "~/features/patients/components/allergies-section";
 import { ConsentsSection } from "~/features/patients/components/consents-section";
 import { CoverageSection } from "~/features/patients/components/coverage-section";
@@ -53,6 +56,7 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
   const searchParameters = useSearchParams();
   const canRead = permissions.includes(PATIENT_PERMISSIONS.read);
   const canReadClinical = permissions.includes(CLINICAL_SECTIONS_PERMISSION);
+  const canOrder = permissions.includes(ORDER_PERMISSIONS.create);
   const recordSections = PATIENT_RECORD_SECTIONS.filter(
     (recordSection) => !("clinical" in recordSection) || canReadClinical
   );
@@ -174,13 +178,6 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
         <PatientBanner patient={patientQuery.data} />
       </div>
       <TodaysVisit patientId={patientQuery.data.id} />
-      <PatientAppointments
-        patient={{
-          id: patientQuery.data.id,
-          name: describePatientFullName(patientQuery.data),
-          details: patientQuery.data.patientNumber,
-        }}
-      />
       <div data-tour="patient-sections">
         <RecordTabs
           accessibleLabel="Patient record sections"
@@ -205,6 +202,13 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
               ) : recordSection.value === "problems" ? (
                 <RecordAccessGate patientId={patientId}>
                   <ProblemsSection patientId={patientId} />
+                </RecordAccessGate>
+              ) : recordSection.value === "results" ? (
+                <RecordAccessGate patientId={patientId}>
+                  <div className="flex flex-col gap-6">
+                    <PatientOrdersSection patientId={patientId} />
+                    {canOrder && <OrderTestsPanel patientId={patientId} />}
+                  </div>
                 </RecordAccessGate>
               ) : recordSection.value === "timeline" ? (
                 <TimelineSection patientId={patientId} />
@@ -232,6 +236,13 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
           }))}
         />
       </div>
+      <PatientAppointments
+        patient={{
+          id: patientQuery.data.id,
+          name: describePatientFullName(patientQuery.data),
+          details: patientQuery.data.patientNumber,
+        }}
+      />
     </div>
   );
 }

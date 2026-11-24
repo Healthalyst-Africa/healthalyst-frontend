@@ -116,6 +116,7 @@ export function PatientPicker({
             id={`${inputIdentifier}-matches`}
             legend="Matching patients"
             layout="stack"
+            maximumVisibleOptions={4}
             value=""
             onValueChange={(patientId) => {
               const match = matches.find(

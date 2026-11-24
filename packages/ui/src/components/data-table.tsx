@@ -40,6 +40,14 @@ function readScrollHeight(maximumVisibleRows: number): string {
  * column content. It has no visible title: place any page or section heading
  * outside the table, and name the table with `accessibleLabel`.
  */
+/**
+ * Phones show rows as cards, about this tall with the gap after them, and at
+ * most this many before the cards scroll inside their own box: a phone
+ * screen holds about three.
+ */
+const CARD_HEIGHT_REM = 9;
+const MAXIMUM_VISIBLE_CARDS = 3;
+
 export function DataTable<RowData>({
   accessibleLabel,
   columns,
@@ -62,7 +70,19 @@ export function DataTable<RowData>({
     <>
       {/* Phones show the rows as cards; wider screens show the table. */}
       {hasRows && (state.status === "loading" || state.status === "ready") && (
-        <div className="sm:hidden">
+        <div
+          className={cn(
+            "sm:hidden",
+            isScrollable && "-m-1 overflow-y-auto overscroll-contain p-1"
+          )}
+          style={
+            isScrollable
+              ? {
+                  maxHeight: `${(Math.min(maximumVisibleRows, MAXIMUM_VISIBLE_CARDS) + 0.5) * CARD_HEIGHT_REM}rem`,
+                }
+              : undefined
+          }
+        >
           <DataTableCardList
             accessibleLabel={accessibleLabel}
             columns={columns}
@@ -140,7 +160,13 @@ export function DataTable<RowData>({
                       </TableHead>
                     ))}
                     {(rowAction || getRowActions) && (
-                      <TableHead scope="col" className="w-14 px-3">
+                      <TableHead
+                        scope="col"
+                        className={cn(
+                          "px-3",
+                          rowAction && getRowActions ? "w-24" : "w-14"
+                        )}
+                      >
                         <span className="sr-only">Actions</span>
                       </TableHead>
                     )}
@@ -186,49 +212,50 @@ export function DataTable<RowData>({
                             <DataTableCellContent cell={column.getCell(row)} />
                           </TableCell>
                         ))}
-                        {getRowActions && !rowAction && (
+                        {(rowAction || getRowActions) && (
                           <TableCell className="px-3 py-4 text-right">
-                            <DataTableRowActions
-                              items={getRowActions(row)}
-                              accessibleLabel={
-                                getRowActionsLabel?.(row) ?? "Actions"
-                              }
-                            />
-                          </TableCell>
-                        )}
-                        {rowAction && (
-                          <TableCell className="px-3 py-4 text-right">
-                            {rowAction.visibleLabel ? (
-                              <ActionButton
-                                type="button"
-                                size="compact"
-                                variant="outline"
-                                aria-label={rowAction.label(row)}
-                                onClick={(clickEvent) => {
-                                  clickEvent.stopPropagation();
-                                  rowAction.onSelect(row);
-                                }}
-                              >
-                                {rowAction.visibleLabel}
-                              </ActionButton>
-                            ) : (
-                              <ActionButton
-                                type="button"
-                                size="icon"
-                                variant="ghost"
-                                className="size-9 text-muted-foreground"
-                                aria-label={rowAction.label(row)}
-                                onClick={(clickEvent) => {
-                                  clickEvent.stopPropagation();
-                                  rowAction.onSelect(row);
-                                }}
-                              >
-                                <ChevronRightIcon
-                                  aria-hidden="true"
-                                  className="size-4"
+                            <span className="inline-flex items-center justify-end gap-1">
+                              {getRowActions && (
+                                <DataTableRowActions
+                                  items={getRowActions(row)}
+                                  accessibleLabel={
+                                    getRowActionsLabel?.(row) ?? "Actions"
+                                  }
                                 />
-                              </ActionButton>
-                            )}
+                              )}
+                              {rowAction &&
+                                (rowAction.visibleLabel ? (
+                                  <ActionButton
+                                    type="button"
+                                    size="compact"
+                                    variant="outline"
+                                    aria-label={rowAction.label(row)}
+                                    onClick={(clickEvent) => {
+                                      clickEvent.stopPropagation();
+                                      rowAction.onSelect(row);
+                                    }}
+                                  >
+                                    {rowAction.visibleLabel}
+                                  </ActionButton>
+                                ) : (
+                                  <ActionButton
+                                    type="button"
+                                    size="icon"
+                                    variant="ghost"
+                                    className="size-9 text-muted-foreground"
+                                    aria-label={rowAction.label(row)}
+                                    onClick={(clickEvent) => {
+                                      clickEvent.stopPropagation();
+                                      rowAction.onSelect(row);
+                                    }}
+                                  >
+                                    <ChevronRightIcon
+                                      aria-hidden="true"
+                                      className="size-4"
+                                    />
+                                  </ActionButton>
+                                ))}
+                            </span>
                           </TableCell>
                         )}
                       </TableRow>

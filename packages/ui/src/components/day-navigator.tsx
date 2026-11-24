@@ -25,7 +25,7 @@ export function DayNavigator({
   shiftDay: (value: string, days: number) => string;
 }) {
   return (
-    <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-end gap-2 sm:flex sm:w-auto">
+    <div className="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:w-auto">
       <ActionButton
         type="button"
         variant="outline"
@@ -39,6 +39,7 @@ export function DayNavigator({
       <DatePickerField
         id={id}
         label="Day"
+        hideLabel
         value={value}
         onValueChange={onValueChange}
         className="sm:w-48"

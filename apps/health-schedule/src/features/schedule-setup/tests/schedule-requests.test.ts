@@ -14,7 +14,7 @@ import {
   formatNaira,
   koboToNairaText,
   nairaTextToKobo,
-} from "~/features/schedule-setup/utilities/naira-amount";
+} from "~/shared/money/naira-amount";
 import {
   toAppointmentTypeFormValues,
   toAppointmentTypeRequest,

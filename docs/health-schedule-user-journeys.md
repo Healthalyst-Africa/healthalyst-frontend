@@ -29,7 +29,7 @@ permissions they hold.
 | **New owner or administrator**                                     | Get the hospital ready to see patients                                | Overview, setup checklist | Choose a branch → set doctors' and rooms' weekly hours → set what patients can book and its price → invite the team (hub) |
 | **Receptionist** (front desk)                                      | Check patients in and know who is still here                          | Check-in                  | Find the patient or register them → check in → see everyone in the building and where they are                            |
 | **Nurse** (triage nurse)                                           | Take each new arrival's vital signs and decide how urgent they are    | Vital signs               | Take the next patient → record temperature, blood pressure and pulse → choose how urgent → send to a doctor               |
-| **Doctor**                                                         | See patients one after another and write the visit down               | Consultations             | Call the next patient → read vital signs and allergies → write and sign the note → send on or finish                      |
+| **Doctor**                                                         | See patients one after another and write the visit down               | Consultations             | Call the next patient → read vital signs and allergies → write and sign the note → order tests → send on or finish        |
 | **Department staff** (lab, radiology, pharmacy, cashier, HMO desk) | Serve the patients sent to their department                           | Queues, their department  | Call the next patient → serve them → send on or finish                                                                    |
 | **Manager**                                                        | Keep the day running and check restricted records were opened rightly | Overview                  | See waits and patients in the building → review emergency openings of restricted records                                  |
 
@@ -66,9 +66,35 @@ permissions they hold.
   the dates and time of day they could come. Waiting patients are listed
   on the Appointments page to book when a time comes free.
 
+## Tests and results (phase 3)
+
+- **Ordering, in the consultation:** search the facility's tests and scans
+  by name or code, or tap a common one (full blood count, malaria tests,
+  glucose, urinalysis, chest X-ray). Chosen tests collect in one order with
+  a priority (routine, urgent or STAT) and the clinical question for the lab
+  or radiologist. The same panel is on the patient record's "Tests and
+  results" tab.
+- **No accidental repeats:** a chosen test that was resulted in the last 7
+  days, or is already ordered and not finished, says so beside it, with the
+  earlier result one click away. Nothing is blocked.
+- **Results come back to the doctor:** "Results to review" lists released
+  results of their orders, critical first; patients with results waiting
+  are marked "Results ready" in the consultation queue; the overview has a
+  "Review results" card. Opening a result shows each value with its flag
+  and reference range; "Mark as seen" takes it off the list. A result
+  amended after release comes back, with its earlier versions.
+- **Never called normal without ranges:** the starter tests have no
+  reference ranges until the laboratory sets them, so an unflagged result
+  reads "Nothing flagged", not "Normal".
+- **Setup, Tests and scans:** administrators add the starter list and switch
+  off tests the facility does not offer.
+
 ## Still to do
 
 - **Booking above capacity or outside hours** (`appointment:override`) is
   not offered yet.
 - **Offering a freed time to waiting patients** straight after a
   cancellation (`GET /v1/waitlist/matches`) is not shown yet.
+- **Lab and radiology worklists** (phase 4): collecting samples, entering
+  and releasing results, and editing a test's result fields and reference
+  ranges. Until then results are entered through the API.

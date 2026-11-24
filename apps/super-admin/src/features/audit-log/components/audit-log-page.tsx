@@ -14,6 +14,7 @@ import { SectionHeading } from "@healthalyst/ui/components/section-heading";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import { EmptySearchIllustration } from "@healthalyst/ui/illustrations/empty-search-illustration";
 import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
+import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import { AuditEventSheet } from "~/features/audit-log/components/audit-event-sheet";
 import {
   AUDIT_ACTOR_TYPE_LABELS,
@@ -410,20 +411,22 @@ function IntegrityCheck({
             tone="error"
             title={`The audit log has ${report.problems.length} ${report.problems.length === 1 ? "problem" : "problems"}`}
           >
-            <ul className="flex flex-col gap-2">
-              {report.problems.map((problem) => (
-                <li
-                  key={`${problem.chain}-${problem.problem}-${problem.eventId ?? "none"}`}
-                >
-                  <span className="font-medium">
-                    {AUDIT_CHAIN_PROBLEM_LABELS[problem.problem]}
-                  </span>{" "}
-                  in chain {problem.chain}
-                  {problem.eventId && `, event ${problem.eventId}`}.{" "}
-                  {problem.detail}
-                </li>
-              ))}
-            </ul>
+            <ScrollRegion accessibleLabel="Audit log problems" size="small">
+              <ul className="flex flex-col gap-2">
+                {report.problems.map((problem) => (
+                  <li
+                    key={`${problem.chain}-${problem.problem}-${problem.eventId ?? "none"}`}
+                  >
+                    <span className="font-medium">
+                      {AUDIT_CHAIN_PROBLEM_LABELS[problem.problem]}
+                    </span>{" "}
+                    in chain {problem.chain}
+                    {problem.eventId && `, event ${problem.eventId}`}.{" "}
+                    {problem.detail}
+                  </li>
+                ))}
+              </ul>
+            </ScrollRegion>
           </StateNotice>
         )
       ) : null}

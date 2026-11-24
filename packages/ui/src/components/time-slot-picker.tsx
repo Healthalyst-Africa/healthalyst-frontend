@@ -182,7 +182,9 @@ export function TimeSlotPicker({
               value={value}
               onValueChange={onValueChange}
               disabled={disabled}
-              className="gap-4"
+              // A day with many calendars has many times: they scroll inside
+              // this box instead of stretching the dialog.
+              className="max-h-80 gap-4 overflow-y-auto overscroll-contain p-1"
             >
               {groups.map((group) => (
                 <div

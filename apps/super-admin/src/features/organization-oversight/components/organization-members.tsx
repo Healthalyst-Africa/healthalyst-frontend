@@ -11,6 +11,7 @@ import { SummaryDetailList } from "@healthalyst/ui/components/review-summary";
 import { SelectField } from "@healthalyst/ui/components/select-field";
 import { StepUpDialog } from "@healthalyst/ui/components/step-up-dialog";
 import { TextAreaField } from "@healthalyst/ui/components/text-area-field";
+import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import {
   MEMBER_STATUS_LABELS,
   OWNER_RECOVERY,
@@ -136,16 +137,18 @@ export function OrganizationMembers({
   return (
     <div className="flex flex-col gap-4">
       {sortedMembers.length > 0 ? (
-        <SummaryDetailList
-          details={sortedMembers.map((member) => ({
-            label: member.name || "Unnamed member",
-            value: `${
-              member.roles.length > 0
-                ? member.roles.map(describeRoleCode).join(", ")
-                : "No roles"
-            } · ${MEMBER_STATUS_LABELS[member.status]}`,
-          }))}
-        />
+        <ScrollRegion accessibleLabel="Members" size="medium">
+          <SummaryDetailList
+            details={sortedMembers.map((member) => ({
+              label: member.name || "Unnamed member",
+              value: `${
+                member.roles.length > 0
+                  ? member.roles.map(describeRoleCode).join(", ")
+                  : "No roles"
+              } · ${MEMBER_STATUS_LABELS[member.status]}`,
+            }))}
+          />
+        </ScrollRegion>
       ) : (
         <HintText>No members yet.</HintText>
       )}

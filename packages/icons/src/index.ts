@@ -102,4 +102,10 @@ export {
   IconCalendarX as CancelAppointmentIcon,
   IconUserX as NoShowIcon,
   IconClipboardList as WaitlistIcon,
+  IconReportMedical as ReviewResultsIcon,
+  IconTestPipe as TestsAndScansIcon,
+  IconFileX as CancelOrderIcon,
+  IconToggleRight as SwitchOnIcon,
+  IconToggleLeft as SwitchOffIcon,
+  IconUserCheck as FinishVisitIcon,
 } from "@tabler/icons-react";
