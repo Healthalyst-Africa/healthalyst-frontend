@@ -93,7 +93,10 @@ emergency access and its review, and sensitivity labels) and `appointments`
 (booking with five-minute holds on free times, moving, cancelling and "did
 not come", the day of bookings by calendar, the patient's appointments and
 the waitlist) and `consultation`
-(the doctor's queue beside the patient being seen) and `guided-tours` (page
+(the doctor's queue beside the patient being seen) and `orders` (ordering
+tests and scans with a check for recent results, results to review with
+marking as seen, the patient's tests and results, and the tests-and-scans
+catalogue setup) and `guided-tours` (page
 help and short page tours: a small question-mark icon in the header opens an
 "About this page" dialog for every page, which offers a tour where the page
 has one, and the overview offers a tour once; steps point at `data-tour`

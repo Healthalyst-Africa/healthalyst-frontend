@@ -122,7 +122,7 @@ export function DataTableCardList<RowData>({
                   {statusEntry.cell.label}
                 </StatusLabel>
               )}
-              {getRowActions && !rowAction && (
+              {getRowActions && (
                 <DataTableRowActions
                   items={getRowActions(row)}
                   accessibleLabel={getRowActionsLabel?.(row) ?? "Actions"}

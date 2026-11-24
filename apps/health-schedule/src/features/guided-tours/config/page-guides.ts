@@ -47,6 +47,15 @@ export const PAGE_GUIDES = {
     paragraphs: [
       "Your queue sits beside the patient you are seeing, with their triage, vital signs and allergies.",
       "Notes stay as drafts, visible only to you, until you sign them. A signed note can be changed for 24 hours; after that, add an addendum.",
+      "Order tests and scans below the diagnoses. A test the patient had in the last week shows its result first, so you can use it instead of repeating it.",
+    ],
+  },
+  results: {
+    title: "Results to review",
+    paragraphs: [
+      "Results of the tests and scans you ordered come here once the department releases them. Critical results come first and are marked in red.",
+      "Open a result to see each value with its flag and reference range. Mark it as seen once you have acted on it; it then leaves this list.",
+      "A result the department changes after release comes back until you see it again. Patients with results waiting are also marked in your consultation queue.",
     ],
   },
   patients: {
@@ -59,7 +68,7 @@ export const PAGE_GUIDES = {
   patientRecord: {
     title: "Patient record",
     paragraphs: [
-      "One patient's details, notes, problems, visits, family, consents and documents, in tabs under their name.",
+      "One patient's details, notes, problems, tests and results, visits, family, consents and documents, in tabs under their name.",
       "Check the name, age and numbers at the top before you record anything. On a restricted record, clinical tabs are locked to anyone outside the care team.",
     ],
   },
@@ -97,6 +106,13 @@ export const PAGE_GUIDES = {
     paragraphs: [
       "The sections clinical notes are written in. Built-in templates, such as SOAP for consultations, cannot be changed.",
       "Add your own for local needs, and switch them off when they are no longer used.",
+    ],
+  },
+  scheduleTestsAndScans: {
+    title: "Tests and scans",
+    paragraphs: [
+      "The tests and scans doctors can order here. Start with the starter list of common lab tests and scans.",
+      "Switch off anything this facility does not offer; orders already placed are not affected. The laboratory sets reference ranges and critical limits for its own methods.",
     ],
   },
 } as const satisfies Record<string, PageGuide>;

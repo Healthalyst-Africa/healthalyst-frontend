@@ -10,8 +10,10 @@ import {
   OrganizationIcon,
   PatientRecordsIcon,
   QueueIcon,
+  ReviewResultsIcon,
   ScheduleCalendarsIcon,
   TeamIcon,
+  TestsAndScansIcon,
   TimeOffIcon,
   VitalsIcon,
 } from "@healthalyst/icons";
@@ -33,6 +35,12 @@ const PATIENT_FLOW_PAGE_PERMISSIONS = {
 
 /** Doctors see patients in the consultation workspace. */
 const CONSULTATION_PERMISSIONS = ["note:write", "queue:read"] as const;
+
+/** Doctors review the results of the tests and scans they order. */
+const RESULTS_PERMISSION = "order:create";
+
+/** The test catalogue is listed for people who can see patients. */
+const TESTS_AND_SCANS_PERMISSION = "patient:read";
 
 /** The HealthSchedule permission that shows patient records. */
 const PATIENT_RECORDS_PERMISSION = "patient:read";
@@ -123,6 +131,15 @@ export function buildHealthScheduleNavigation({
           },
         ]
       : []),
+    ...(permissions.includes(RESULTS_PERMISSION)
+      ? [
+          {
+            label: "Results to review",
+            href: HEALTH_SCHEDULE_ROUTES.results,
+            icon: ReviewResultsIcon,
+          },
+        ]
+      : []),
   ];
   const recordItems = [
     ...(permissions.includes(PATIENT_RECORDS_PERMISSION)
@@ -187,6 +204,15 @@ export function buildHealthScheduleNavigation({
                       label: "Note templates",
                       href: HEALTH_SCHEDULE_ROUTES.scheduleNoteTemplates,
                       icon: NoteTemplatesIcon,
+                    },
+                  ]
+                : []),
+              ...(permissions.includes(TESTS_AND_SCANS_PERMISSION)
+                ? [
+                    {
+                      label: "Tests and scans",
+                      href: HEALTH_SCHEDULE_ROUTES.scheduleTestsAndScans,
+                      icon: TestsAndScansIcon,
                     },
                   ]
                 : []),

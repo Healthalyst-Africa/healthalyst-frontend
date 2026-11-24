@@ -38,8 +38,17 @@ type ChoiceCardGroupProperties = {
   required?: boolean;
   /** Cards side by side from tablet width, or always stacked. */
   layout?: "columns" | "stack";
+  /**
+   * For long lists, such as search results: stacked cards beyond this many
+   * scroll inside their own box instead of stretching the page or dialog.
+   */
+  maximumVisibleOptions?: number;
   className?: string;
 };
+
+/** A stacked card with a label and one line of description, and its gap. */
+const STACKED_CARD_HEIGHT_REM = 4.75;
+const CARD_GAP_REM = 0.75;
 
 const CHOSEN_TONE_CLASS_NAMES: Record<StatusTone, string> = {
   neutral: "has-[[data-state=checked]]:border-status-neutral",
@@ -67,9 +76,13 @@ export function ChoiceCardGroup({
   error,
   required = false,
   layout = "columns",
+  maximumVisibleOptions,
   className,
 }: ChoiceCardGroupProperties) {
   const descriptionIdentifier = description ? `${id}-description` : "";
+  const scrolls =
+    maximumVisibleOptions !== undefined &&
+    options.length > maximumVisibleOptions;
   const errorIdentifier = error ? `${id}-error` : "";
 
   return (
@@ -93,8 +106,20 @@ export function ChoiceCardGroup({
         className={cn(
           "gap-3",
           layout === "columns" &&
-            "sm:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))]"
+            !scrolls &&
+            "sm:grid-cols-[repeat(auto-fit,minmax(10rem,1fr))]",
+          // Room on every side for the focus ring and the chosen card's
+          // thicker border inside the scrolling box.
+          scrolls && "overflow-y-auto overscroll-contain rounded-lg p-1"
         )}
+        style={
+          scrolls && maximumVisibleOptions !== undefined
+            ? {
+                // Half of the next card shows, so it is clear there is more.
+                maxHeight: `${(maximumVisibleOptions + 0.5) * (STACKED_CARD_HEIGHT_REM + CARD_GAP_REM)}rem`,
+              }
+            : undefined
+        }
       >
         {options.map((option) => {
           const optionIdentifier = `${id}-${option.value}`;

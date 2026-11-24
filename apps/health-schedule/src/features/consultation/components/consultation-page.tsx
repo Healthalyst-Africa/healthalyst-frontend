@@ -1,13 +1,20 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
+import {
+  FinishVisitIcon,
+  PatientRecordsIcon,
+  SendOnIcon,
+} from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
+import { ActionMenu } from "@healthalyst/ui/components/action-menu";
 import { ContentPanel } from "@healthalyst/ui/components/content-panel";
-import { DetailList } from "@healthalyst/ui/components/detail-list";
 import { EmptyState } from "@healthalyst/ui/components/empty-state";
 import { FormDialog } from "@healthalyst/ui/components/form-dialog";
 import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placeholder";
+import { ReadingGrid } from "@healthalyst/ui/components/reading-grid";
+import { RecordTabs } from "@healthalyst/ui/components/record-tabs";
 import {
   NoticeBanner,
   StateNotice,
@@ -17,6 +24,7 @@ import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
+import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import type { WorkspaceBranch } from "~/features/branch-selection/schemas/branch-schema";
 import { NotesSection } from "~/features/clinical-record/components/notes-section";
@@ -53,6 +61,11 @@ import {
   encodeQueueTarget,
   readQueueTargetChoices,
 } from "~/features/patient-flow/utilities/queue-targets";
+import { OrderTestsPanel } from "~/features/orders/components/order-tests-panel";
+import { PatientOrdersSection } from "~/features/orders/components/patient-orders-section";
+import { ORDER_PERMISSIONS } from "~/features/orders/config/orders";
+import { useResultsInbox } from "~/features/orders/hooks/use-orders";
+import { readPatientsWithResults } from "~/features/orders/utilities/order-rules";
 import { AllergiesSection } from "~/features/patients/components/allergies-section";
 import { PatientBanner } from "~/features/patients/components/patient-banner";
 import { usePatientDetail } from "~/features/patients/hooks/use-patients";
@@ -93,17 +106,24 @@ function TriageSummary({ visitId }: { visitId: string }) {
               Recorded {describeBranchClockTime(latest.recordedAt)}
             </span>
           </p>
-          <DetailList
-            items={[
-              ...(latest.complaint
-                ? [{ term: "Complaint", description: latest.complaint }]
-                : []),
-              ...describeVitalSigns(latest),
-              ...(latest.notes
-                ? [{ term: "Nurse's notes", description: latest.notes }]
-                : []),
-            ]}
+          {latest.complaint && (
+            <p className="text-sm">
+              <span className="font-medium">Complaint: </span>
+              {latest.complaint}
+            </p>
+          )}
+          <ReadingGrid
+            readings={describeVitalSigns(latest).map((vitalSign) => ({
+              label: vitalSign.term,
+              value: vitalSign.description,
+            }))}
           />
+          {latest.notes && (
+            <p className="text-sm">
+              <span className="font-medium">Nurse&apos;s notes: </span>
+              {latest.notes}
+            </p>
+          )}
         </div>
       )}
     </ContentPanel>
@@ -121,18 +141,22 @@ function PatientWorkspace({
   sendOnOptions: ReturnType<typeof buildQueueTargetOptions>;
 }) {
   const { permissions } = useWorkspace();
+  const router = useRouter();
   const canManageQueue = permissions.includes(
     CONSULTATION_PERMISSIONS.manageQueues
   );
+  const canOrder = permissions.includes(ORDER_PERMISSIONS.create);
+  const canReadResults = permissions.includes(ORDER_PERMISSIONS.readResults);
   const patientQuery = usePatientDetail(entry.patient.id);
   const actions = useQueueActions(branch.id);
   const [isSendingOn, setIsSendingOn] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [section, setSection] = useState("note");
   const isWithDoctor = entry.status === "IN_SERVICE";
 
-  const queueActions = canManageQueue && (
-    <div className="flex flex-wrap gap-2">
-      {!isWithDoctor && (
+  const queueActions = (
+    <div className="flex flex-wrap items-center gap-2">
+      {canManageQueue && !isWithDoctor && (
         <ActionButton
           type="button"
           isLoading={actions.start.isPending}
@@ -149,28 +173,42 @@ function PatientWorkspace({
           Start consultation
         </ActionButton>
       )}
-      <ActionButton
-        type="button"
-        variant="outline"
-        onClick={() => {
-          actions.sendOn.reset();
-          setIsSendingOn(true);
-        }}
-      >
-        Send on
-      </ActionButton>
-      {isWithDoctor && (
-        <ActionButton
-          type="button"
-          variant="outline"
-          onClick={() => {
-            actions.finish.reset();
-            setIsFinishing(true);
-          }}
-        >
-          Finish visit
-        </ActionButton>
-      )}
+      <ActionMenu
+        accessibleLabel={`More for ${describePatientName(entry.patient)}`}
+        items={[
+          ...(canManageQueue
+            ? [
+                {
+                  label: "Send on",
+                  icon: <SendOnIcon />,
+                  onSelect: () => {
+                    actions.sendOn.reset();
+                    setIsSendingOn(true);
+                  },
+                },
+                ...(isWithDoctor
+                  ? [
+                      {
+                        label: "Finish visit",
+                        icon: <FinishVisitIcon />,
+                        onSelect: () => {
+                          actions.finish.reset();
+                          setIsFinishing(true);
+                        },
+                      },
+                    ]
+                  : []),
+              ]
+            : []),
+          {
+            label: "Open full record",
+            icon: <PatientRecordsIcon />,
+            separatedAbove: canManageQueue,
+            onSelect: () =>
+              router.push(HEALTH_SCHEDULE_ROUTES.patient(entry.patient.id)),
+          },
+        ]}
+      />
     </div>
   );
 
@@ -210,42 +248,68 @@ function PatientWorkspace({
           {actions.start.error?.message ?? actions.finish.error?.message}
         </NoticeBanner>
       )}
-      <div className="grid items-start gap-6 xl:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
-        <div className="flex min-w-0 flex-col gap-6">
-          <RecordAccessGate patientId={entry.patient.id}>
-            <section
-              className="flex flex-col gap-3"
-              aria-labelledby="consultation-note-heading"
-            >
-              <h2
-                id="consultation-note-heading"
-                className="font-serif text-xl font-normal"
-              >
-                Consultation note
-              </h2>
-              <NotesSection
-                patientId={entry.patient.id}
-                visitId={entry.visitId}
-                newNoteType="CONSULTATION"
-              />
-            </section>
-            <ProblemsSection
-              patientId={entry.patient.id}
-              visitId={entry.visitId}
-            />
-          </RecordAccessGate>
-        </div>
-        <div className="flex min-w-0 flex-col gap-6">
-          <TriageSummary visitId={entry.visitId} />
-          <AllergiesSection patientId={entry.patient.id} />
-          <Link
-            href={HEALTH_SCHEDULE_ROUTES.patient(entry.patient.id)}
-            className="w-fit text-sm font-medium text-primary underline underline-offset-4"
-          >
-            Open the full record
-          </Link>
-        </div>
-      </div>
+      <TriageSummary visitId={entry.visitId} />
+      <RecordTabs
+        accessibleLabel={`${describePatientName(entry.patient)}'s consultation`}
+        value={section}
+        onValueChange={setSection}
+        tabs={[
+          {
+            value: "note",
+            label: "Note",
+            content: (
+              <RecordAccessGate patientId={entry.patient.id}>
+                <h2 className="sr-only">Consultation note</h2>
+                <NotesSection
+                  patientId={entry.patient.id}
+                  visitId={entry.visitId}
+                  newNoteType="CONSULTATION"
+                />
+              </RecordAccessGate>
+            ),
+          },
+          {
+            value: "diagnoses",
+            label: "Diagnoses",
+            content: (
+              <RecordAccessGate patientId={entry.patient.id}>
+                <ProblemsSection
+                  patientId={entry.patient.id}
+                  visitId={entry.visitId}
+                />
+              </RecordAccessGate>
+            ),
+          },
+          ...(canOrder || canReadResults
+            ? [
+                {
+                  value: "tests",
+                  label: "Tests and results",
+                  content: (
+                    <RecordAccessGate patientId={entry.patient.id}>
+                      <div className="flex flex-col gap-6">
+                        {canOrder && (
+                          <OrderTestsPanel
+                            patientId={entry.patient.id}
+                            visitId={entry.visitId}
+                          />
+                        )}
+                        {canReadResults && (
+                          <PatientOrdersSection patientId={entry.patient.id} />
+                        )}
+                      </div>
+                    </RecordAccessGate>
+                  ),
+                },
+              ]
+            : []),
+          {
+            value: "allergies",
+            label: "Allergies",
+            content: <AllergiesSection patientId={entry.patient.id} />,
+          },
+        ]}
+      />
       <SendOnDialog
         entry={isSendingOn ? entry : null}
         onOpenChange={setIsSendingOn}
@@ -331,6 +395,12 @@ function ConsultationBoard({ branch }: { branch: WorkspaceBranch }) {
   };
   const entriesQuery = useQueueEntries(branch.id, queue, true);
   const actions = useQueueActions(branch.id);
+  const resultsInboxQuery = useResultsInbox(
+    permissions.includes(ORDER_PERMISSIONS.create)
+  );
+  const patientsWithResults = readPatientsWithResults(
+    resultsInboxQuery.data ?? []
+  );
   const [selectedEntryIdentifier, setSelectedEntryIdentifier] = useState<
     string | null
   >(null);
@@ -372,7 +442,7 @@ function ConsultationBoard({ branch }: { branch: WorkspaceBranch }) {
   );
 
   return (
-    <div className="grid items-start gap-6 lg:grid-cols-[18rem_minmax(0,1fr)]">
+    <div className="grid items-start gap-6 lg:grid-cols-[16rem_minmax(0,1fr)]">
       <aside
         data-tour="consultation-queue"
         className="flex flex-col gap-4"
@@ -443,53 +513,64 @@ function ConsultationBoard({ branch }: { branch: WorkspaceBranch }) {
             description="Patients appear here when the nurse sends them to a doctor after their vital signs."
           />
         ) : (
-          <ul className="flex flex-col gap-2">
-            {entries.map((entry) => {
-              const status =
-                entry.status in QUEUE_ENTRY_STATUS_PRESENTATION
-                  ? QUEUE_ENTRY_STATUS_PRESENTATION[
-                      entry.status as keyof typeof QUEUE_ENTRY_STATUS_PRESENTATION
-                    ]
+          <ScrollRegion accessibleLabel="Patients waiting" size="large">
+            <ul className="flex flex-col gap-2">
+              {entries.map((entry) => {
+                const status =
+                  entry.status in QUEUE_ENTRY_STATUS_PRESENTATION
+                    ? QUEUE_ENTRY_STATUS_PRESENTATION[
+                        entry.status as keyof typeof QUEUE_ENTRY_STATUS_PRESENTATION
+                      ]
+                    : null;
+                const band = entry.triageBand
+                  ? TRIAGE_BAND_PRESENTATION[entry.triageBand]
                   : null;
-              const band = entry.triageBand
-                ? TRIAGE_BAND_PRESENTATION[entry.triageBand]
-                : null;
-              return (
-                <li key={entry.id}>
-                  <button
-                    type="button"
-                    aria-current={
-                      entry.id === selectedEntryIdentifier ? "true" : undefined
-                    }
-                    onClick={() => setSelectedEntryIdentifier(entry.id)}
-                    className="flex w-full flex-col gap-1 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-[current=true]:border-primary aria-[current=true]:bg-accent"
-                  >
-                    <span className="flex items-center justify-between gap-2">
-                      <span className="font-medium">
-                        {describePatientName(entry.patient)}
+                return (
+                  <li key={entry.id}>
+                    <button
+                      type="button"
+                      aria-current={
+                        entry.id === selectedEntryIdentifier
+                          ? "true"
+                          : undefined
+                      }
+                      onClick={() => setSelectedEntryIdentifier(entry.id)}
+                      className="flex w-full flex-col gap-1 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-[current=true]:border-primary aria-[current=true]:bg-accent"
+                    >
+                      <span className="flex items-center justify-between gap-2">
+                        <span className="font-medium">
+                          {describePatientName(entry.patient)}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {entry.token}
+                        </span>
                       </span>
-                      <span className="text-xs text-muted-foreground">
-                        {entry.token}
+                      <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                        {band && (
+                          <StatusLabel tone={band.tone}>
+                            {band.label}
+                          </StatusLabel>
+                        )}
+                        {status && (
+                          <StatusLabel tone={status.tone}>
+                            {status.label}
+                          </StatusLabel>
+                        )}
+                        {patientsWithResults.has(entry.patient.id) && (
+                          <StatusLabel tone="information">
+                            Results ready
+                          </StatusLabel>
+                        )}
+                        <span>
+                          {describeWait(entry.waitingMinutes, entry.waitState)}
+                        </span>
                       </span>
-                    </span>
-                    <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      {band && (
-                        <StatusLabel tone={band.tone}>{band.label}</StatusLabel>
-                      )}
-                      {status && (
-                        <StatusLabel tone={status.tone}>
-                          {status.label}
-                        </StatusLabel>
-                      )}
-                      <span>
-                        {describeWait(entry.waitingMinutes, entry.waitState)}
-                      </span>
-                    </span>
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </ScrollRegion>
         )}
       </aside>
       <section
@@ -544,7 +625,7 @@ export function ConsultationPage() {
   return (
     <PatientFlowFrame
       title="Consultation"
-      description="See patients waiting for a doctor one at a time: read their vital signs and allergies, write the note for the visit and record diagnoses."
+      description="See patients waiting for a doctor one at a time: read their vital signs and allergies, write the note for the visit, record diagnoses and order tests and scans."
       requiredPermission={CONSULTATION_PERMISSIONS.readQueues}
       missingPermissionName="View queues and patient flow"
     >

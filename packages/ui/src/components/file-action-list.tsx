@@ -4,6 +4,7 @@ import {
   FileTile,
 } from "@healthalyst/ui/components/file-display/file-display";
 import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import { cn } from "@healthalyst/ui/lib/utilities";
 
 type FileActionListItem = {
   key: string;
@@ -18,13 +19,33 @@ type FileActionListItem = {
 };
 
 /** Files with their status and an action each, on subtle backgrounds. */
+/** One file row (a 48 px tile with padding) and the gap after it. */
+const FILE_ROW_HEIGHT_REM = 4.5 + 0.5;
+
 export function FileActionList({
   items,
+  maximumVisibleItems,
 }: {
   items: readonly FileActionListItem[];
+  /** Beyond this many files, the list scrolls inside its own box. */
+  maximumVisibleItems?: number;
 }) {
+  const scrolls =
+    maximumVisibleItems !== undefined && items.length > maximumVisibleItems;
   return (
-    <ul className="flex flex-col gap-2">
+    <ul
+      className={cn(
+        "flex flex-col gap-2",
+        scrolls && "overflow-y-auto overscroll-contain pr-1"
+      )}
+      style={
+        scrolls && maximumVisibleItems !== undefined
+          ? {
+              maxHeight: `${(maximumVisibleItems + 0.5) * FILE_ROW_HEIGHT_REM}rem`,
+            }
+          : undefined
+      }
+    >
       {items.map((item) => (
         <li
           key={item.key}

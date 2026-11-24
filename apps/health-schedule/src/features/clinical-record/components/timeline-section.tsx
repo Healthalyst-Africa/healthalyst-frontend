@@ -8,6 +8,7 @@ import {
   StateNotice,
 } from "@healthalyst/ui/components/notice-banner";
 import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
+import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import { TIMELINE_KIND_LABELS } from "~/features/clinical-record/config/clinical-record";
 import { useTimeline } from "~/features/clinical-record/hooks/use-clinical-record";
 import type { TimelineEntry } from "~/features/clinical-record/schemas/clinical-record-response-schemas";
@@ -78,36 +79,40 @@ export function TimelineSection({ patientId }: { patientId: string }) {
           description="Visits, triage, notes and documents appear here as they happen."
         />
       ) : (
-        groupByDate(entries).map((group) => (
-          <section key={group.date} className="flex flex-col gap-2">
-            <h3 className="text-sm font-semibold">{group.date}</h3>
-            <ol className="flex flex-col divide-y divide-border rounded-xl border border-border">
-              {group.entries.map((entry) => (
-                <li
-                  key={`${entry.kind}-${entry.id}`}
-                  className="grid gap-1 px-4 py-3 sm:grid-cols-[6rem_7rem_1fr] sm:gap-4"
-                >
-                  <span className="text-sm text-muted-foreground">
-                    {describeBranchClockTime(entry.at)}
-                  </span>
-                  <span className="text-sm font-medium">
-                    {TIMELINE_KIND_LABELS[entry.kind]}
-                  </span>
-                  <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="text-sm">{entry.title}</span>
-                    {(entry.detail || entry.status) && (
-                      <span className="text-xs text-muted-foreground">
-                        {[entry.detail, entry.status]
-                          .filter(Boolean)
-                          .join(" · ")}
+        <ScrollRegion accessibleLabel="Timeline" size="large">
+          <div className="flex flex-col gap-6">
+            {groupByDate(entries).map((group) => (
+              <section key={group.date} className="flex flex-col gap-2">
+                <h3 className="text-sm font-semibold">{group.date}</h3>
+                <ol className="flex flex-col divide-y divide-border rounded-xl border border-border">
+                  {group.entries.map((entry) => (
+                    <li
+                      key={`${entry.kind}-${entry.id}`}
+                      className="grid gap-1 px-4 py-3 sm:grid-cols-[6rem_7rem_1fr] sm:gap-4"
+                    >
+                      <span className="text-sm text-muted-foreground">
+                        {describeBranchClockTime(entry.at)}
                       </span>
-                    )}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          </section>
-        ))
+                      <span className="text-sm font-medium">
+                        {TIMELINE_KIND_LABELS[entry.kind]}
+                      </span>
+                      <span className="flex min-w-0 flex-col gap-0.5">
+                        <span className="text-sm">{entry.title}</span>
+                        {(entry.detail || entry.status) && (
+                          <span className="text-xs text-muted-foreground">
+                            {[entry.detail, entry.status]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
+                        )}
+                      </span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
+            ))}
+          </div>
+        </ScrollRegion>
       )}
       {timelineQuery.hasNextPage && (
         <ActionButton

@@ -221,6 +221,7 @@ export function AddProblemDialog({
                   id="problem-diagnosis"
                   legend="Matching diagnoses"
                   layout="stack"
+                  maximumVisibleOptions={4}
                   options={diagnoses.map((diagnosis) => ({
                     value: diagnosis.code,
                     label: diagnosis.title,

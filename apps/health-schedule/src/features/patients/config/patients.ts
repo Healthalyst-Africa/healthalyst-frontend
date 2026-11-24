@@ -244,6 +244,7 @@ export const PATIENT_RECORD_SECTIONS = [
   { value: "overview", label: "Overview" },
   { value: "notes", label: "Notes", clinical: true },
   { value: "problems", label: "Problems", clinical: true },
+  { value: "results", label: "Tests and results", clinical: true },
   { value: "timeline", label: "Timeline", clinical: true },
   { value: "family", label: "Family and contacts" },
   { value: "consents", label: "Consents" },
