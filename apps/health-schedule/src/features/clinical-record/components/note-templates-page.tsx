@@ -7,6 +7,7 @@ import { AddIcon, DeleteIcon } from "@healthalyst/icons";
 import { ActionButton } from "@healthalyst/ui/components/action-button";
 import { CheckboxField } from "@healthalyst/ui/components/checkbox-field";
 import { DataTable } from "@healthalyst/ui/components/data-table";
+import { FilterBar } from "@healthalyst/ui/components/filter-bar";
 import { DetailSheet } from "@healthalyst/ui/components/detail-sheet";
 import { FormMessage } from "@healthalyst/ui/components/form-message";
 import { StateNotice } from "@healthalyst/ui/components/notice-banner";
@@ -14,6 +15,7 @@ import { SelectField } from "@healthalyst/ui/components/select-field";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
 import { EmptyOrganizationsIllustration } from "@healthalyst/ui/illustrations/empty-organizations-illustration";
+import { EmptySearchIllustration } from "@healthalyst/ui/illustrations/empty-search-illustration";
 import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import {
   CLINICAL_RECORD_LIMITS as LIMITS,
@@ -30,7 +32,10 @@ import {
   type NoteTemplateFormValues,
 } from "~/features/clinical-record/schemas/clinical-record-form-schemas";
 import type { NoteTemplate } from "~/features/clinical-record/schemas/clinical-record-response-schemas";
-import { describeNoteType } from "~/features/clinical-record/utilities/note-rules";
+import {
+  describeNoteType,
+  filterNoteTemplates,
+} from "~/features/clinical-record/utilities/note-rules";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 
 const EMPTY_TEMPLATE: NoteTemplateFormValues = {
@@ -39,6 +44,17 @@ const EMPTY_TEMPLATE: NoteTemplateFormValues = {
   sections: [{ label: "", hint: "" }],
   isActive: true,
 };
+
+const TYPE_FILTER_OPTIONS = NOTE_TYPE_OPTIONS.map((option) => ({
+  value: option.value,
+  label: option.label,
+}));
+
+const STATUS_FILTER_OPTIONS = [
+  { value: "built-in", label: "Built in" },
+  { value: "offered", label: "Your own, offered" },
+  { value: "off", label: "Switched off" },
+];
 
 const COLUMNS: readonly DataTableColumn<NoteTemplate>[] = [
   {
@@ -318,6 +334,17 @@ export function NoteTemplatesPage() {
   const [editor, setEditor] = useState<{
     template: NoteTemplate | null;
   } | null>(null);
+  const [searchText, setSearchText] = useState("");
+  const [noteType, setNoteType] = useState("");
+  const [status, setStatus] = useState("");
+  const allTemplates = templatesQuery.data ?? [];
+  const isFiltered =
+    searchText.trim() !== "" || noteType !== "" || status !== "";
+  const shownTemplates = filterNoteTemplates(allTemplates, {
+    searchText,
+    type: noteType,
+    status,
+  });
   const [viewedTemplate, setViewedTemplate] = useState<NoteTemplate | null>(
     null
   );
@@ -355,40 +382,85 @@ export function NoteTemplatesPage() {
           </p>
         </StateNotice>
       ) : (
-        <DataTable
-          accessibleLabel="Note templates"
-          columns={COLUMNS}
-          // Ten rows, so every built-in template shows without scrolling.
-          maximumVisibleRows={10}
-          state={
-            templatesQuery.isPending
-              ? { status: "loading", label: "Loading templates" }
-              : templatesQuery.isError
+        <div className="flex flex-col gap-4">
+          {allTemplates.length > 0 && (
+            <FilterBar
+              accessibleLabel="Filter note templates"
+              identifier="note-template-filters"
+              search={{
+                label: "Search templates",
+                placeholder: "Name or section, such as plan",
+                value: searchText,
+                onValueChange: setSearchText,
+              }}
+              filters={[
+                {
+                  key: "type",
+                  label: "Note type",
+                  options: TYPE_FILTER_OPTIONS,
+                  allOptionsLabel: "All note types",
+                  value: noteType,
+                  onValueChange: setNoteType,
+                },
+                {
+                  key: "status",
+                  label: "Status",
+                  options: STATUS_FILTER_OPTIONS,
+                  allOptionsLabel: "All statuses",
+                  value: status,
+                  onValueChange: setStatus,
+                },
+              ]}
+            />
+          )}
+          {isFiltered && allTemplates.length > 0 && (
+            <p role="status" className="text-sm text-muted-foreground">
+              Showing {shownTemplates.length} of {allTemplates.length}
+            </p>
+          )}
+          <DataTable
+            accessibleLabel="Note templates"
+            columns={COLUMNS}
+            // Ten rows, so every built-in template shows without scrolling.
+            maximumVisibleRows={10}
+            state={
+              templatesQuery.isPending
+                ? { status: "loading", label: "Loading templates" }
+                : templatesQuery.isError
+                  ? {
+                      status: "error",
+                      title: "We could not load the templates",
+                      description: templatesQuery.error.message,
+                      retryLabel: "Try again",
+                      onRetry: () => void templatesQuery.refetch(),
+                    }
+                  : { status: "ready", rows: shownTemplates }
+            }
+            getRowIdentifier={(template) => template.id}
+            rowAction={{
+              label: (template) =>
+                canManage && !template.builtIn
+                  ? `Edit ${template.name}`
+                  : `View ${template.name}`,
+              onSelect: (template) =>
+                canManage && !template.builtIn
+                  ? setEditor({ template })
+                  : setViewedTemplate(template),
+            }}
+            emptyState={
+              isFiltered && allTemplates.length > 0
                 ? {
-                    status: "error",
-                    title: "We could not load the templates",
-                    description: templatesQuery.error.message,
-                    retryLabel: "Try again",
-                    onRetry: () => void templatesQuery.refetch(),
+                    illustration: <EmptySearchIllustration />,
+                    title: "No templates match",
+                    description: "Try another word, or clear the filters.",
                   }
-                : { status: "ready", rows: templatesQuery.data }
-          }
-          getRowIdentifier={(template) => template.id}
-          rowAction={{
-            label: (template) =>
-              canManage && !template.builtIn
-                ? `Edit ${template.name}`
-                : `View ${template.name}`,
-            onSelect: (template) =>
-              canManage && !template.builtIn
-                ? setEditor({ template })
-                : setViewedTemplate(template),
-          }}
-          emptyState={{
-            illustration: <EmptyOrganizationsIllustration />,
-            title: "No templates yet",
-          }}
-        />
+                : {
+                    illustration: <EmptyOrganizationsIllustration />,
+                    title: "No templates yet",
+                  }
+            }
+          />
+        </div>
       )}
       <TemplateView
         template={viewedTemplate}

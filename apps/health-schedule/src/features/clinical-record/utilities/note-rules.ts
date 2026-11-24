@@ -116,3 +116,47 @@ export function canAddAddendum(
 export function visibleNotes(notes: readonly ClinicalNote[]): ClinicalNote[] {
   return notes.filter((note) => note.status !== "DISCARDED");
 }
+
+export type NoteTemplateFilters = {
+  searchText: string;
+  /** A note type, or empty for every type. */
+  type: string;
+  /** "built-in", "offered", "off", or empty for every status. */
+  status: string;
+};
+
+/**
+ * Templates narrowed for the setup page: by name or section, note type and
+ * status; grouped by note type in the order types are offered, built-in
+ * ones first within each type.
+ */
+export function filterNoteTemplates(
+  templates: readonly NoteTemplate[],
+  filters: NoteTemplateFilters
+): NoteTemplate[] {
+  const query = filters.searchText.trim().toLowerCase();
+  const typeOrder = NOTE_TYPE_OPTIONS.map((option) => option.value);
+  return templates
+    .filter((template) => {
+      const status = template.builtIn
+        ? "built-in"
+        : template.isActive
+          ? "offered"
+          : "off";
+      return (
+        (query === "" ||
+          template.name.toLowerCase().includes(query) ||
+          template.sections.some((section) =>
+            section.label.toLowerCase().includes(query)
+          )) &&
+        (filters.type === "" || template.type === filters.type) &&
+        (filters.status === "" || status === filters.status)
+      );
+    })
+    .sort(
+      (first, second) =>
+        typeOrder.indexOf(first.type) - typeOrder.indexOf(second.type) ||
+        Number(second.builtIn) - Number(first.builtIn) ||
+        first.name.localeCompare(second.name)
+    );
+}

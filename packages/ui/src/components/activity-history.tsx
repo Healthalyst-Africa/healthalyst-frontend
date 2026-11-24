@@ -14,12 +14,32 @@ type ActivityHistoryEntry = {
 export function ActivityHistory({
   entries,
   accessibleLabel,
+  scrollsAfter,
 }: {
   entries: readonly ActivityHistoryEntry[];
   accessibleLabel: string;
+  /**
+   * Beyond this many entries the history scrolls inside a box about that
+   * many entries tall, newest at the top.
+   */
+  scrollsAfter?: number;
 }) {
+  const scrolls = scrollsAfter !== undefined && entries.length > scrollsAfter;
   return (
-    <ol aria-label={accessibleLabel} className="flex flex-col gap-2">
+    <ol
+      aria-label={accessibleLabel}
+      tabIndex={scrolls ? 0 : undefined}
+      className={
+        scrolls
+          ? "flex flex-col gap-2 overflow-y-auto overscroll-contain rounded-lg pr-1 outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          : "flex flex-col gap-2"
+      }
+      style={
+        scrolls && scrollsAfter !== undefined
+          ? { maxHeight: `${(scrollsAfter + 0.5) * 5.5}rem` }
+          : undefined
+      }
+    >
       {entries.map((entry) => (
         <li
           key={entry.key}

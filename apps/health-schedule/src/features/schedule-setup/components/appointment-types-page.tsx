@@ -15,7 +15,11 @@ import {
   useScheduleCalendars,
 } from "~/features/schedule-setup/hooks/use-schedule-setup";
 import type { AppointmentType } from "~/features/schedule-setup/schemas/schedule-response-schemas";
-import { formatNaira } from "~/features/schedule-setup/utilities/naira-amount";
+import {
+  filterAppointmentTypes,
+  readOfferingCalendarOptions,
+} from "~/features/schedule-setup/utilities/appointment-type-filters";
+import { formatNaira } from "~/shared/money/naira-amount";
 
 const STATUS_FILTER_OPTIONS = [
   { value: "active", label: "Bookable" },
@@ -143,19 +147,20 @@ function AppointmentTypesWorkspace({
   const calendarsQuery = useScheduleCalendars();
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState("active");
-  const normalizedSearch = searchText.trim().toLowerCase();
-  const visibleTypes = (appointmentTypesQuery.data ?? [])
-    .filter(
-      (appointmentType) =>
-        (statusFilter === "" ||
-          (statusFilter === "active") === appointmentType.isActive) &&
-        (!normalizedSearch ||
-          appointmentType.name.toLowerCase().includes(normalizedSearch))
-    )
-    .sort((firstType, secondType) =>
-      firstType.name.localeCompare(secondType.name)
-    );
-  const hasTypes = (appointmentTypesQuery.data ?? []).length > 0;
+  const [calendarFilter, setCalendarFilter] = useState("");
+  const [modalityFilter, setModalityFilter] = useState("");
+  const allTypes = appointmentTypesQuery.data ?? [];
+  const visibleTypes = filterAppointmentTypes(allTypes, {
+    searchText,
+    status: statusFilter,
+    calendarId: calendarFilter,
+    modality: modalityFilter,
+  });
+  const hasTypes = allTypes.length > 0;
+  const calendarOptions = readOfferingCalendarOptions(
+    calendarsQuery.data ?? [],
+    allTypes
+  );
 
   return (
     <div className="flex flex-col gap-4">
@@ -170,6 +175,22 @@ function AppointmentTypesWorkspace({
         }}
         filters={[
           {
+            key: "calendar",
+            label: "Offered by",
+            options: calendarOptions,
+            allOptionsLabel: "Every calendar",
+            value: calendarFilter,
+            onValueChange: setCalendarFilter,
+          },
+          {
+            key: "modality",
+            label: "How it happens",
+            options: MODALITY_OPTIONS,
+            allOptionsLabel: "Every way",
+            value: modalityFilter,
+            onValueChange: setModalityFilter,
+          },
+          {
             key: "status",
             label: "Status",
             options: STATUS_FILTER_OPTIONS,
@@ -179,6 +200,11 @@ function AppointmentTypesWorkspace({
           },
         ]}
       />
+      {hasTypes && visibleTypes.length !== allTypes.length && (
+        <p role="status" className="text-sm text-muted-foreground">
+          Showing {visibleTypes.length} of {allTypes.length}
+        </p>
+      )}
       <DataTable
         accessibleLabel="Appointment types"
         columns={COLUMNS}

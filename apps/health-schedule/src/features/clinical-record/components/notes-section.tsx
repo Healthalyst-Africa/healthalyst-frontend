@@ -8,6 +8,7 @@ import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placehold
 import { StateNotice } from "@healthalyst/ui/components/notice-banner";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
+import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import { NOTE_STATUS_PRESENTATION } from "~/features/clinical-record/config/clinical-record";
 import {
   NoteEditorSheet,
@@ -110,43 +111,47 @@ export function NotesSection({
           action={newNoteButton || undefined}
         />
       ) : (
-        <ul className="flex flex-col gap-3">
-          {notes.map((note) => {
-            const status = NOTE_STATUS_PRESENTATION[note.status];
-            return (
-              <li key={note.id}>
-                <button
-                  type="button"
-                  onClick={() => setOpenNote(note)}
-                  className="flex w-full flex-col gap-2 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                >
-                  <span className="flex flex-wrap items-center justify-between gap-2">
-                    <span
-                      className={
-                        note.status === "ENTERED_IN_ERROR"
-                          ? "font-medium line-through"
-                          : "font-medium"
-                      }
-                    >
-                      {describeNoteTitle(note)}
+        <ScrollRegion accessibleLabel="Notes" size="large">
+          <ul className="flex flex-col gap-3">
+            {notes.map((note) => {
+              const status = NOTE_STATUS_PRESENTATION[note.status];
+              return (
+                <li key={note.id}>
+                  <button
+                    type="button"
+                    onClick={() => setOpenNote(note)}
+                    className="flex w-full flex-col gap-2 rounded-xl border border-border bg-card p-4 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                  >
+                    <span className="flex flex-wrap items-center justify-between gap-2">
+                      <span
+                        className={
+                          note.status === "ENTERED_IN_ERROR"
+                            ? "font-medium line-through"
+                            : "font-medium"
+                        }
+                      >
+                        {describeNoteTitle(note)}
+                      </span>
+                      <StatusLabel tone={status.tone}>
+                        {status.label}
+                      </StatusLabel>
                     </span>
-                    <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
-                  </span>
-                  <span className="text-xs text-muted-foreground">
-                    {describeNoteType(note.type)} ·{" "}
-                    {describeStaff(note.authorId)} ·{" "}
-                    {describeBranchDateTime(note.signedAt ?? note.updatedAt)}
-                    {note.addenda.length > 0 &&
-                      ` · ${note.addenda.length} ${note.addenda.length === 1 ? "addendum" : "addenda"}`}
-                  </span>
-                  <span className="line-clamp-2 text-sm text-muted-foreground">
-                    {previewNote(note)}
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+                    <span className="text-xs text-muted-foreground">
+                      {describeNoteType(note.type)} ·{" "}
+                      {describeStaff(note.authorId)} ·{" "}
+                      {describeBranchDateTime(note.signedAt ?? note.updatedAt)}
+                      {note.addenda.length > 0 &&
+                        ` · ${note.addenda.length} ${note.addenda.length === 1 ? "addendum" : "addenda"}`}
+                    </span>
+                    <span className="line-clamp-2 text-sm text-muted-foreground">
+                      {previewNote(note)}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </ScrollRegion>
       )}
       {notesQuery.hasNextPage && (
         <ActionButton

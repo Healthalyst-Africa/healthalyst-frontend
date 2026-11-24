@@ -11,10 +11,13 @@ import { HeartPulseIllustration } from "@healthalyst/ui/illustrations/heart-puls
 import { PersonSearchIllustration } from "@healthalyst/ui/illustrations/person-search-illustration";
 import { RestrictedRecordIllustration } from "@healthalyst/ui/illustrations/restricted-record-illustration";
 import { StethoscopeIllustration } from "@healthalyst/ui/illustrations/stethoscope-illustration";
+import { TestTubesIllustration } from "@healthalyst/ui/illustrations/test-tubes-illustration";
 import { WaitingLineIllustration } from "@healthalyst/ui/illustrations/waiting-line-illustration";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import { BranchSelectionNotice } from "~/features/branch-selection/components/branch-selection-notice";
 import { TourOffer } from "~/features/guided-tours/components/tour-offer";
+import { ORDER_PERMISSIONS } from "~/features/orders/config/orders";
+import { useResultsInbox } from "~/features/orders/hooks/use-orders";
 import { PATIENT_FLOW_PERMISSIONS } from "~/features/patient-flow/config/patient-flow";
 import {
   useDayBoard,
@@ -71,6 +74,8 @@ export function WorkspaceOverview() {
     branch !== null && canReadQueues
   );
   const accessGrantsQuery = useEmergencyAccessGrants(true, canReviewAccess);
+  const canOrder = can(ORDER_PERMISSIONS.create);
+  const resultsInboxQuery = useResultsInbox(canOrder);
   const calendarsQuery = useScheduleCalendars();
   const appointmentTypesQuery = useAppointmentTypes();
 
@@ -116,6 +121,23 @@ export function WorkspaceOverview() {
       illustration: <StethoscopeIllustration />,
       needsAttention: doctorWaiting > 0,
       isLoading: queuesLoading,
+    });
+  }
+  if (canOrder) {
+    const results = resultsInboxQuery.data ?? [];
+    const criticalResults = results.filter((item) => item.critical).length;
+    workCards.push({
+      title: "Review results",
+      status:
+        results.length === 0
+          ? "No results waiting"
+          : criticalResults > 0
+            ? `${results.length} waiting, ${criticalResults} critical`
+            : `${results.length} waiting`,
+      href: HEALTH_SCHEDULE_ROUTES.results,
+      illustration: <TestTubesIllustration />,
+      needsAttention: results.length > 0,
+      isLoading: resultsInboxQuery.isPending,
     });
   }
   if (canReadQueues) {

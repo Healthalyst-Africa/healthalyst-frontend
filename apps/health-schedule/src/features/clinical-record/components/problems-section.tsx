@@ -15,6 +15,7 @@ import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
+import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import { AddProblemDialog } from "~/features/clinical-record/components/add-problem-dialog";
 import {
   CLINICAL_RECORD_LIMITS as LIMITS,
@@ -135,74 +136,78 @@ export function ProblemsSection({
         />
       )}
       {problems.length > 0 && (
-        <ul className="flex flex-col divide-y divide-border">
-          {problems.map((problem) => {
-            const status = PROBLEM_STATUS_PRESENTATION[problem.status];
-            const code = describeProblemCode(problem);
-            const dates = describeProblemDates(problem);
-            return (
-              <li
-                key={problem.id}
-                className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
-              >
-                <div className="flex min-w-0 flex-col gap-1">
-                  <p
-                    className={
-                      problem.status === "ENTERED_IN_ERROR"
-                        ? "font-medium line-through"
-                        : "font-medium"
-                    }
-                  >
-                    {problem.title}
-                  </p>
-                  <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                    <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
-                    {code && <span>{code}</span>}
-                    {dates && <span>{dates}</span>}
-                  </p>
-                  {problem.notes && (
-                    <p className="text-sm text-muted-foreground">
-                      {problem.notes}
+        <ScrollRegion accessibleLabel="Problems" size="medium">
+          <ul className="flex flex-col divide-y divide-border">
+            {problems.map((problem) => {
+              const status = PROBLEM_STATUS_PRESENTATION[problem.status];
+              const code = describeProblemCode(problem);
+              const dates = describeProblemDates(problem);
+              return (
+                <li
+                  key={problem.id}
+                  className="flex items-start justify-between gap-3 py-3 first:pt-0 last:pb-0"
+                >
+                  <div className="flex min-w-0 flex-col gap-1">
+                    <p
+                      className={
+                        problem.status === "ENTERED_IN_ERROR"
+                          ? "font-medium line-through"
+                          : "font-medium"
+                      }
+                    >
+                      {problem.title}
                     </p>
-                  )}
-                  {problem.errorReason && (
-                    <p className="text-sm text-muted-foreground">
-                      Entered in error: {problem.errorReason}
+                    <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                      <StatusLabel tone={status.tone}>
+                        {status.label}
+                      </StatusLabel>
+                      {code && <span>{code}</span>}
+                      {dates && <span>{dates}</span>}
                     </p>
-                  )}
-                </div>
-                {canWrite && problem.status !== "ENTERED_IN_ERROR" && (
-                  <ActionMenu
-                    accessibleLabel={`Actions for ${problem.title}`}
-                    items={[
-                      problem.status === "ACTIVE"
-                        ? {
-                            label: "Mark as resolved",
-                            icon: <ResolvedIcon className="size-4" />,
-                            onSelect: () => changeStatus(problem, "RESOLVED"),
-                          }
-                        : {
-                            label: "Reopen",
-                            icon: <ReopenIcon className="size-4" />,
-                            onSelect: () => changeStatus(problem, "ACTIVE"),
+                    {problem.notes && (
+                      <p className="text-sm text-muted-foreground">
+                        {problem.notes}
+                      </p>
+                    )}
+                    {problem.errorReason && (
+                      <p className="text-sm text-muted-foreground">
+                        Entered in error: {problem.errorReason}
+                      </p>
+                    )}
+                  </div>
+                  {canWrite && problem.status !== "ENTERED_IN_ERROR" && (
+                    <ActionMenu
+                      accessibleLabel={`Actions for ${problem.title}`}
+                      items={[
+                        problem.status === "ACTIVE"
+                          ? {
+                              label: "Mark as resolved",
+                              icon: <ResolvedIcon className="size-4" />,
+                              onSelect: () => changeStatus(problem, "RESOLVED"),
+                            }
+                          : {
+                              label: "Reopen",
+                              icon: <ReopenIcon className="size-4" />,
+                              onSelect: () => changeStatus(problem, "ACTIVE"),
+                            },
+                        {
+                          label: "Mark entered in error",
+                          icon: <DeleteIcon className="size-4" />,
+                          tone: "destructive",
+                          separatedAbove: true,
+                          onSelect: () => {
+                            actions.markEnteredInError.reset();
+                            setProblemInError(problem);
                           },
-                      {
-                        label: "Mark entered in error",
-                        icon: <DeleteIcon className="size-4" />,
-                        tone: "destructive",
-                        separatedAbove: true,
-                        onSelect: () => {
-                          actions.markEnteredInError.reset();
-                          setProblemInError(problem);
                         },
-                      },
-                    ]}
-                  />
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                      ]}
+                    />
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        </ScrollRegion>
       )}
       {canWrite && (
         <>

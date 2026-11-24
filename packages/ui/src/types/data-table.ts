@@ -71,6 +71,7 @@ export type DataTableProperties<RowData> = {
   /**
    * Several actions for a row, such as moving or cancelling a booking, behind
    * a menu at the end of the row. Return none for rows with nothing to do.
+   * With `rowAction` too, the menu sits beside the button that opens the row.
    */
   getRowActions?: (row: RowData) => readonly ActionMenuItem[];
   /** Names a row's menu for assistive technology, such as its patient. */

@@ -143,6 +143,7 @@ export function DocumentsSection({ patientId }: { patientId: string }) {
             </NoticeBanner>
           )}
           <FileActionList
+            maximumVisibleItems={5}
             items={documents.map((document) => ({
               key: document.id,
               title: describeDocumentTitle(document),

@@ -24,6 +24,7 @@ import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { TextField } from "@healthalyst/ui/components/text-field";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
 import { EmptyOrganizationsIllustration } from "@healthalyst/ui/illustrations/empty-organizations-illustration";
+import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import {
   PATIENT_FIELD_LIMITS,
@@ -126,19 +127,21 @@ export function FamilySection({ patientId }: { patientId: string }) {
           </p>
         </StateNotice>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {relationships.map((relationship) => (
-            <RelationshipItem
-              key={relationship.id}
-              relationship={relationship}
-              canEnd={canEdit && !relationship.inverse}
-              onEnd={() => {
-                actions.end.reset();
-                setEndingRelationship(relationship);
-              }}
-            />
-          ))}
-        </ul>
+        <ScrollRegion accessibleLabel="Family and contacts" size="medium">
+          <ul className="flex flex-col gap-3">
+            {relationships.map((relationship) => (
+              <RelationshipItem
+                key={relationship.id}
+                relationship={relationship}
+                canEnd={canEdit && !relationship.inverse}
+                onEnd={() => {
+                  actions.end.reset();
+                  setEndingRelationship(relationship);
+                }}
+              />
+            ))}
+          </ul>
+        </ScrollRegion>
       )}
       {canEdit && (
         <>
@@ -432,6 +435,7 @@ function AddRelationshipDialog({
                   id="relationship-patient"
                   legend="Matching patients"
                   layout="stack"
+                  maximumVisibleOptions={4}
                   options={searchResults.slice(0, 5).map((patient) => ({
                     value: patient.id,
                     label: describePatientFullName(patient),

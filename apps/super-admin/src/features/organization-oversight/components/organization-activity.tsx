@@ -97,5 +97,11 @@ export function OrganizationHistory({
 
   const entries = describeOrganizationHistory(history);
 
-  return <ActivityHistory accessibleLabel="Status history" entries={entries} />;
+  return (
+    <ActivityHistory
+      accessibleLabel="Status history"
+      entries={entries}
+      scrollsAfter={5}
+    />
+  );
 }
