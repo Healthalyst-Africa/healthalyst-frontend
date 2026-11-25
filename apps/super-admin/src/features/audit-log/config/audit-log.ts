@@ -1,4 +1,5 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
+import { CompletedIcon, RefusedIcon } from "@healthalyst/icons";
 
 /** Platform roles the API accepts for reading and checking the audit log. */
 export const AUDIT_LOG_ROLES = ["SUPER_ADMIN", "READ_ONLY_AUDITOR"] as const;
@@ -34,10 +35,10 @@ export const AUDIT_ACTOR_TYPE_LABELS = {
 
 export const AUDIT_OUTCOME_PRESENTATION: Record<
   "SUCCESS" | "FAILURE",
-  { label: string; tone: StatusTone }
+  StatusPresentation
 > = {
-  SUCCESS: { label: "Succeeded", tone: "positive" },
-  FAILURE: { label: "Failed", tone: "negative" },
+  SUCCESS: { label: "Succeeded", tone: "positive", icon: CompletedIcon },
+  FAILURE: { label: "Failed", tone: "negative", icon: RefusedIcon },
 };
 
 export const AUDIT_CHAIN_PROBLEM_LABELS = {

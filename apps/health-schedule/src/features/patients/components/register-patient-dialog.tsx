@@ -11,6 +11,7 @@ import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import {
   DUPLICATE_CHECK_DELAY_MILLISECONDS,
   DUPLICATE_SCORES,
+  DUPLICATE_TAGS,
   PATIENT_PERMISSIONS,
 } from "~/features/patients/config/patients";
 import {
@@ -204,7 +205,7 @@ export function RegisterPatientDialog({
                   <span className="flex flex-wrap items-center gap-2 font-medium text-foreground">
                     {describePatientFullName(candidate.patient)}
                     {candidate.score >= DUPLICATE_SCORES.likely && (
-                      <StatusLabel tone="warning">Likely the same</StatusLabel>
+                      <StatusLabel {...DUPLICATE_TAGS.likelyShort} />
                     )}
                   </span>
                   <span>

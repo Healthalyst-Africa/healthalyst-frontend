@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 
 type SignedInSession = {
   key: string;
@@ -19,12 +20,12 @@ type SignedInSession = {
 export function SignedInSessionList({
   sessions,
   accessibleLabel,
-  currentSessionLabel,
+  currentSessionTag,
 }: {
   sessions: readonly SignedInSession[];
   accessibleLabel: string;
-  /** Marks the device being used now, such as "This device". */
-  currentSessionLabel: string;
+  /** The tag marking the device being used now, such as "This device". */
+  currentSessionTag: StatusPresentation;
 }) {
   return (
     <ul aria-label={accessibleLabel} className="flex flex-col gap-2">
@@ -36,11 +37,7 @@ export function SignedInSessionList({
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <p className="flex flex-wrap items-center gap-2 text-body font-medium">
               {session.title}
-              {session.isCurrent && (
-                <StatusLabel tone="information">
-                  {currentSessionLabel}
-                </StatusLabel>
-              )}
+              {session.isCurrent && <StatusLabel {...currentSessionTag} />}
             </p>
             <p className="text-caption text-muted-foreground">
               {session.details}

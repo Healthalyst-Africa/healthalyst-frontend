@@ -222,11 +222,7 @@ export function TeamMemberSheet({
         open={selectedMember !== null}
         onOpenChange={(isOpen) => !isOpen && onClose()}
         title={fullName}
-        titleAccessory={
-          <StatusLabel tone={statusPresentation.tone}>
-            {statusPresentation.label}
-          </StatusLabel>
-        }
+        titleAccessory={<StatusLabel {...statusPresentation} />}
         description={[member.jobTitle, member.email ?? member.phone]
           .filter(Boolean)
           .join(" · ")}
@@ -370,11 +366,7 @@ export function TeamMemberSheet({
 
           <DetailSection
             heading="Clinical licence"
-            action={
-              <StatusLabel tone={licencePresentation.tone}>
-                {licencePresentation.label}
-              </StatusLabel>
-            }
+            action={<StatusLabel {...licencePresentation} />}
           >
             <p className="text-sm text-muted-foreground">
               {licencePresentation.description}

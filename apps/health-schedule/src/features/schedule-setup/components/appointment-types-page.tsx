@@ -9,7 +9,10 @@ import { EmptyOrganizationsIllustration } from "@healthalyst/ui/illustrations/em
 import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import { AppointmentTypeSheet } from "~/features/schedule-setup/components/appointment-type-sheet";
 import { ScheduleSetupFrame } from "~/features/schedule-setup/components/schedule-setup-frame";
-import { MODALITY_OPTIONS } from "~/features/schedule-setup/config/schedule-setup";
+import {
+  MODALITY_OPTIONS,
+  SCHEDULE_TAGS,
+} from "~/features/schedule-setup/config/schedule-setup";
 import {
   useAppointmentTypes,
   useScheduleCalendars,
@@ -93,8 +96,9 @@ const COLUMNS: readonly DataTableColumn<AppointmentType>[] = [
     size: "compact",
     getCell: (appointmentType) => ({
       kind: "status",
-      label: appointmentType.isActive ? "Bookable" : "Switched off",
-      tone: appointmentType.isActive ? "positive" : "neutral",
+      ...(appointmentType.isActive
+        ? SCHEDULE_TAGS.bookable
+        : SCHEDULE_TAGS.switchedOff),
     }),
   },
 ];

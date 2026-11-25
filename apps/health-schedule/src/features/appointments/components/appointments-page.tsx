@@ -22,6 +22,7 @@ import { WaitlistPanel } from "~/features/appointments/components/waitlist-panel
 import {
   APPOINTMENT_PERMISSIONS,
   BOOKING_PERMISSIONS,
+  BOOKING_TAGS,
 } from "~/features/appointments/config/appointments";
 import { useDayBoardForDate } from "~/features/appointments/hooks/use-appointments";
 import {
@@ -157,7 +158,7 @@ function AppointmentsDay({
       size: "compact",
       getCell: (appointment) =>
         appointment.status === "BOOKED" && appointment.issue
-          ? { kind: "status", label: "Needs moving", tone: "warning" }
+          ? { kind: "status", ...BOOKING_TAGS.needsMoving }
           : { kind: "status", ...describeAppointmentStatus(appointment, now) },
     },
   ];

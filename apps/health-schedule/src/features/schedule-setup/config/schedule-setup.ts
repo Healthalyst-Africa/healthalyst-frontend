@@ -1,3 +1,11 @@
+import {
+  NeedsHoursIcon,
+  PauseIcon,
+  PlayIcon,
+  SwitchOffIcon,
+  SwitchOnIcon,
+} from "@healthalyst/icons";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 /** HealthSchedule API paths for schedule setup. */
 export const SCHEDULE_ENDPOINTS = {
   calendars: "/v1/schedule/resources",
@@ -96,3 +104,16 @@ export const APPOINTMENT_TYPE_DEFAULTS = {
   overbookingPercent: "0",
   modality: "IN_PERSON",
 } as const;
+
+/** Whether a calendar or appointment type can be booked. */
+export const SCHEDULE_TAGS = {
+  takingBookings: {
+    label: "Taking bookings",
+    tone: "positive",
+    icon: PlayIcon,
+  },
+  paused: { label: "Paused", tone: "neutral", icon: PauseIcon },
+  needsHours: { label: "Needs hours", tone: "warning", icon: NeedsHoursIcon },
+  bookable: { label: "Bookable", tone: "positive", icon: SwitchOnIcon },
+  switchedOff: { label: "Switched off", tone: "neutral", icon: SwitchOffIcon },
+} as const satisfies Record<string, StatusPresentation>;

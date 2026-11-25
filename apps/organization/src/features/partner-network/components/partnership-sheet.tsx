@@ -262,11 +262,7 @@ export function PartnershipSheet({
         onOpenChange={(isOpen) => !isOpen && onClose()}
         title={partnerName}
         titleAccessory={
-          statusPresentation && (
-            <StatusLabel tone={statusPresentation.tone}>
-              {statusPresentation.label}
-            </StatusLabel>
-          )
+          statusPresentation && <StatusLabel {...statusPresentation} />
         }
         description={
           partnership

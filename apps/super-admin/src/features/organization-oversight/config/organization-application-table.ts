@@ -7,16 +7,38 @@ import type {
   OrganizationApplication,
   RegistrationStatus,
 } from "~/features/organization-oversight/types/organization-types";
+import {
+  ApprovedIcon,
+  ChangesRequestedIcon,
+  DeactivatedIcon,
+  DraftIcon,
+  PauseIcon,
+  PendingIcon,
+  RefusedIcon,
+  UnderReviewIcon,
+} from "@healthalyst/icons";
 
 export const APPLICATION_STATUS_PRESENTATION = {
-  DRAFT: { label: "Draft", tone: "highlight" },
-  PENDING_VERIFICATION: { label: "Pending review", tone: "information" },
-  UNDER_REVIEW: { label: "Under review", tone: "information" },
-  CHANGES_REQUESTED: { label: "Changes requested", tone: "warning" },
-  ACTIVE: { label: "Active", tone: "positive" },
-  SUSPENDED: { label: "Suspended", tone: "negative" },
-  REJECTED: { label: "Rejected", tone: "negative" },
-  DEACTIVATED: { label: "Deactivated", tone: "neutral" },
+  DRAFT: { label: "Draft", tone: "highlight", icon: DraftIcon },
+  PENDING_VERIFICATION: {
+    label: "Pending review",
+    tone: "information",
+    icon: PendingIcon,
+  },
+  UNDER_REVIEW: {
+    label: "Under review",
+    tone: "information",
+    icon: UnderReviewIcon,
+  },
+  CHANGES_REQUESTED: {
+    label: "Changes requested",
+    tone: "warning",
+    icon: ChangesRequestedIcon,
+  },
+  ACTIVE: { label: "Active", tone: "positive", icon: ApprovedIcon },
+  SUSPENDED: { label: "Suspended", tone: "negative", icon: PauseIcon },
+  REJECTED: { label: "Rejected", tone: "negative", icon: RefusedIcon },
+  DEACTIVATED: { label: "Deactivated", tone: "neutral", icon: DeactivatedIcon },
 } as const satisfies Record<
   RegistrationStatus,
   Omit<Extract<DataTableCell, { kind: "status" }>, "kind">

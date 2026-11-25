@@ -1,6 +1,9 @@
 import { Badge } from "@healthalyst/ui/primitives/badge";
 import { cn } from "@healthalyst/ui/lib/utilities";
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type {
+  StatusPresentation,
+  StatusTone,
+} from "@healthalyst/ui/types/status-tone";
 
 /** A softened version of the text colour, so the label leads. */
 const SOFTENED_BORDER =
@@ -17,26 +20,30 @@ const STATUS_PRESENTATION: Record<StatusTone, string> = {
   negative: cn("text-status-negative", SOFTENED_BORDER),
 };
 
-/** A short outlined status, such as "Active", "Required" or "Rejected". */
+/**
+ * The one tag component: a short outlined status with an icon that stands
+ * for it, such as a siren for "Emergency". Pass a tag defined once in the
+ * owning feature as `{ label, tone, icon }`; pages never compose tags.
+ */
 export function StatusLabel({
+  label,
   tone,
-  children,
+  icon: Icon,
   className,
-}: {
-  tone: StatusTone;
-  children: string;
-  className?: string;
-}) {
+}: StatusPresentation & { className?: string }) {
   return (
     <Badge
       variant="outline"
       className={cn(
-        "whitespace-nowrap rounded-full bg-transparent px-2.5 py-0.5 text-xs font-medium",
+        // A fixed height with tight line height centres the icon and words
+        // on the same line, whatever the font's spacing above and below.
+        "h-6 items-center gap-1 whitespace-nowrap rounded-full bg-transparent px-2.5 py-0 text-xs font-medium leading-none",
         STATUS_PRESENTATION[tone],
         className
       )}
     >
-      {children}
+      <Icon aria-hidden="true" className="block size-3.5 shrink-0" />
+      <span className="leading-none">{label}</span>
     </Badge>
   );
 }

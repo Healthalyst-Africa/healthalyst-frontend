@@ -16,6 +16,7 @@ import { BRAND_MARK_SOURCE } from "~/config/brand";
 import {
   PLATFORM_SESSIONS_QUERY_KEY,
   SESSION_DATE_FORMATTER,
+  THIS_DEVICE_TAG,
 } from "~/features/account-security/config/account-security";
 import { isStepUpRequiredError } from "~/features/account-security/hooks/use-step-up-protection";
 import { describeSessionDevice } from "~/features/account-security/utilities/describe-session-device";
@@ -108,7 +109,7 @@ export function SignedInSessionsSection({
         <div className="flex flex-col gap-4">
           <SignedInSessionList
             accessibleLabel="Signed-in devices"
-            currentSessionLabel="This device"
+            currentSessionTag={THIS_DEVICE_TAG}
             sessions={sessions.map((session) => {
               const deviceName = describeSessionDevice(session.userAgent);
               const isEnding =

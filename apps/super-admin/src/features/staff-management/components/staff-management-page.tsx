@@ -14,6 +14,7 @@ import {
   PLATFORM_STAFF_STATUS_PRESENTATION,
   STAFF_DATE_TIME_FORMATTER,
   STAFF_MANAGEMENT_ROLES,
+  TWO_STEP_SIGN_IN_TAGS,
 } from "~/features/staff-management/config/staff-management";
 import { usePlatformStaffQuery } from "~/features/staff-management/hooks/use-platform-staff";
 import type { PlatformStaffMember } from "~/features/staff-management/types/staff-management";
@@ -48,8 +49,8 @@ const STAFF_COLUMNS: readonly DataTableColumn<PlatformStaffMember>[] = [
     size: "compact",
     getCell: (staffMember) =>
       staffMember.mfaEnrolled
-        ? { kind: "status", label: "Set up", tone: "positive" }
-        : { kind: "status", label: "Not set up", tone: "warning" },
+        ? { kind: "status", ...TWO_STEP_SIGN_IN_TAGS.setUp }
+        : { kind: "status", ...TWO_STEP_SIGN_IN_TAGS.notSetUp },
   },
   {
     key: "status",

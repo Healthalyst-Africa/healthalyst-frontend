@@ -9,6 +9,7 @@ import { announceSuccess } from "@healthalyst/ui/components/toast-region";
 import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import {
   APPOINTMENT_TEXT_LIMITS,
+  BOOKING_TAGS,
   TIME_OF_DAY_OPTIONS,
 } from "~/features/appointments/config/appointments";
 import {
@@ -75,8 +76,8 @@ const WAITLIST_COLUMNS: readonly DataTableColumn<WaitlistEntry>[] = [
     size: "compact",
     getCell: (entry) =>
       entry.isExpired
-        ? { kind: "status", label: "Dates passed", tone: "warning" }
-        : { kind: "status", label: "Waiting", tone: "information" },
+        ? { kind: "status", ...BOOKING_TAGS.datesPassed }
+        : { kind: "status", ...BOOKING_TAGS.waiting },
   },
 ];
 

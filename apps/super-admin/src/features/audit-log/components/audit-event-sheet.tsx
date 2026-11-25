@@ -53,11 +53,7 @@ export function AuditEventSheet({
       title={auditEvent?.action ?? ""}
       titleAccessory={
         auditEvent && (
-          <StatusLabel
-            tone={AUDIT_OUTCOME_PRESENTATION[auditEvent.outcome].tone}
-          >
-            {AUDIT_OUTCOME_PRESENTATION[auditEvent.outcome].label}
-          </StatusLabel>
+          <StatusLabel {...AUDIT_OUTCOME_PRESENTATION[auditEvent.outcome]} />
         )
       }
       description={

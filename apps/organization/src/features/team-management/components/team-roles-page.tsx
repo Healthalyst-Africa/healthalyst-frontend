@@ -18,7 +18,10 @@ import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import { ORGANIZATION_ROUTES } from "~/config/routes";
 import { OrganizationSettingsFrame } from "~/features/organization-settings/components/organization-settings-frame";
 import { TeamRoleDialog } from "~/features/team-management/components/team-role-dialog";
-import { TEAM_PERMISSIONS } from "~/features/team-management/config/team-management";
+import {
+  ROLE_TYPE_TAGS,
+  TEAM_PERMISSIONS,
+} from "~/features/team-management/config/team-management";
 import type { TeamScope } from "~/features/team-management/hooks/use-team-members";
 import {
   useTeamPermissionsQuery,
@@ -45,8 +48,7 @@ const ROLE_COLUMNS: readonly DataTableColumn<TeamRole>[] = [
     size: "compact",
     getCell: (role) => ({
       kind: "status",
-      label: role.isPreset ? "Preset" : "Custom",
-      tone: role.isPreset ? "neutral" : "information",
+      ...(role.isPreset ? ROLE_TYPE_TAGS.preset : ROLE_TYPE_TAGS.custom),
     }),
   },
   {
@@ -198,9 +200,11 @@ function RolesWorkspace({
         title={shownRole?.name ?? ""}
         titleAccessory={
           shownRole && (
-            <StatusLabel tone={shownRole.isPreset ? "neutral" : "information"}>
-              {shownRole.isPreset ? "Preset" : "Custom"}
-            </StatusLabel>
+            <StatusLabel
+              {...(shownRole.isPreset
+                ? ROLE_TYPE_TAGS.preset
+                : ROLE_TYPE_TAGS.custom)}
+            />
           )
         }
         description={

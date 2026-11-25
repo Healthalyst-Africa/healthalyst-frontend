@@ -21,6 +21,7 @@ import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import {
   ACCESS_REVIEW_OUTCOME_OPTIONS,
+  ACCESS_REVIEW_TAGS,
   SENSITIVE_RECORD_LIMITS as LIMITS,
   SENSITIVE_RECORD_PERMISSIONS,
 } from "~/features/sensitive-records/config/sensitive-records";
@@ -59,11 +60,10 @@ function describePatient(grant: ReviewableGrant): string {
 }
 
 function describeReviewState(grant: ReviewableGrant) {
-  if (!grant.review)
-    return { label: "Waiting for review", tone: "warning" } as const;
+  if (!grant.review) return ACCESS_REVIEW_TAGS.waiting;
   return grant.review.outcome === "JUSTIFIED"
-    ? ({ label: "Justified", tone: "positive" } as const)
-    : ({ label: "Not justified", tone: "negative" } as const);
+    ? ACCESS_REVIEW_TAGS.justified
+    : ACCESS_REVIEW_TAGS.notJustified;
 }
 
 function ReviewForm({
@@ -276,11 +276,7 @@ export function AccessReviewsPage() {
         onOpenChange={(open) => !open && setOpenGrantIdentifier(null)}
         title={openGrant ? describePatient(openGrant) : ""}
         titleAccessory={
-          openGrant && (
-            <StatusLabel tone={describeReviewState(openGrant).tone}>
-              {describeReviewState(openGrant).label}
-            </StatusLabel>
-          )
+          openGrant && <StatusLabel {...describeReviewState(openGrant)} />
         }
         description={openGrant?.patient.patientNumber}
       >

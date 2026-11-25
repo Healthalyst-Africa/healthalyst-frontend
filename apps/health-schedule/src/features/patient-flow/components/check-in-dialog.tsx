@@ -29,13 +29,13 @@ import {
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import { EligibilityDialog } from "~/features/patients/components/eligibility-dialog";
 import { PatientAllergyLine } from "~/features/patients/components/patient-banner";
-import {
-  ELIGIBILITY_PRESENTATION,
-  PATIENT_PERMISSIONS,
-} from "~/features/patients/config/patients";
+import { PATIENT_PERMISSIONS } from "~/features/patients/config/patients";
 import { usePatientDetail } from "~/features/patients/hooks/use-patients";
 import type { PatientCoverage } from "~/features/patients/schemas/patient-response-schemas";
-import { describeCoverage } from "~/features/patients/utilities/patient-presentation";
+import {
+  describeCoverage,
+  describeCoverTag,
+} from "~/features/patients/utilities/patient-presentation";
 import { applyFieldErrors } from "~/shared/forms/apply-field-errors";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
 import { focusFirstInvalidField } from "~/shared/forms/focus-first-invalid-field";
@@ -211,11 +211,7 @@ function CheckInPatientSummary({
   }
   const patient = patientQuery.data;
   const coverage = patient.primaryCoverage;
-  const eligibility = coverage
-    ? coverage.isExpired
-      ? { label: "Cover expired", tone: "negative" as const }
-      : ELIGIBILITY_PRESENTATION[coverage.eligibility]
-    : null;
+  const eligibility = coverage ? describeCoverTag(coverage) : null;
 
   return (
     <div className="flex flex-col gap-3 rounded-lg border bg-muted/40 p-4 text-sm">
@@ -228,9 +224,7 @@ function CheckInPatientSummary({
         {coverage && eligibility ? (
           <>
             <span className="font-medium">{describeCoverage(coverage)}</span>
-            <StatusLabel tone={eligibility.tone}>
-              {eligibility.label}
-            </StatusLabel>
+            <StatusLabel {...eligibility} />
             {canCheckCoverage && (
               <ActionButton
                 type="button"

@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   FinishVisitIcon,
+  WaitTimeIcon,
   PatientRecordsIcon,
   SendOnIcon,
 } from "@healthalyst/icons";
@@ -24,6 +25,10 @@ import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
 import { DocumentsCompleteIllustration } from "@healthalyst/ui/illustrations/documents-complete-illustration";
 import { EmptyReviewQueueIllustration } from "@healthalyst/ui/illustrations/empty-review-queue-illustration";
+import {
+  PatientQueueList,
+  type PatientQueueFact,
+} from "@healthalyst/ui/components/patient-queue-list";
 import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import type { WorkspaceBranch } from "~/features/branch-selection/schemas/branch-schema";
@@ -41,7 +46,6 @@ import { PatientFlowFrame } from "~/features/patient-flow/components/patient-flo
 import { SendOnDialog } from "~/features/patient-flow/components/send-on-dialog";
 import {
   PATIENT_FLOW_PERMISSIONS,
-  QUEUE_ENTRY_STATUS_PRESENTATION,
   TRIAGE_BAND_PRESENTATION,
 } from "~/features/patient-flow/config/patient-flow";
 import {
@@ -52,7 +56,9 @@ import {
 } from "~/features/patient-flow/hooks/use-patient-flow";
 import type { QueueEntry } from "~/features/patient-flow/schemas/patient-flow-response-schemas";
 import {
+  describeMinutes,
   describePatientName,
+  describeQueueStatusTag,
   describeWait,
 } from "~/features/patient-flow/utilities/front-desk";
 import {
@@ -63,7 +69,10 @@ import {
 } from "~/features/patient-flow/utilities/queue-targets";
 import { OrderTestsPanel } from "~/features/orders/components/order-tests-panel";
 import { PatientOrdersSection } from "~/features/orders/components/patient-orders-section";
-import { ORDER_PERMISSIONS } from "~/features/orders/config/orders";
+import {
+  ORDER_PERMISSIONS,
+  RESULTS_READY_TAG,
+} from "~/features/orders/config/orders";
 import { useResultsInbox } from "~/features/orders/hooks/use-orders";
 import { readPatientsWithResults } from "~/features/orders/utilities/order-rules";
 import { AllergiesSection } from "~/features/patients/components/allergies-section";
@@ -99,9 +108,7 @@ function TriageSummary({ visitId }: { visitId: string }) {
       {latest && (
         <div className="flex flex-col gap-4">
           <p className="flex flex-wrap items-center gap-2 text-sm">
-            <StatusLabel tone={TRIAGE_BAND_PRESENTATION[latest.band].tone}>
-              {TRIAGE_BAND_PRESENTATION[latest.band].label}
-            </StatusLabel>
+            <StatusLabel {...TRIAGE_BAND_PRESENTATION[latest.band]} />
             <span className="text-muted-foreground">
               Recorded {describeBranchClockTime(latest.recordedAt)}
             </span>
@@ -514,62 +521,19 @@ function ConsultationBoard({ branch }: { branch: WorkspaceBranch }) {
           />
         ) : (
           <ScrollRegion accessibleLabel="Patients waiting" size="large">
-            <ul className="flex flex-col gap-2">
-              {entries.map((entry) => {
-                const status =
-                  entry.status in QUEUE_ENTRY_STATUS_PRESENTATION
-                    ? QUEUE_ENTRY_STATUS_PRESENTATION[
-                        entry.status as keyof typeof QUEUE_ENTRY_STATUS_PRESENTATION
-                      ]
-                    : null;
-                const band = entry.triageBand
-                  ? TRIAGE_BAND_PRESENTATION[entry.triageBand]
-                  : null;
-                return (
-                  <li key={entry.id}>
-                    <button
-                      type="button"
-                      aria-current={
-                        entry.id === selectedEntryIdentifier
-                          ? "true"
-                          : undefined
-                      }
-                      onClick={() => setSelectedEntryIdentifier(entry.id)}
-                      className="flex w-full flex-col gap-1 rounded-xl border border-border bg-card p-3 text-left transition-colors hover:bg-accent focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 aria-[current=true]:border-primary aria-[current=true]:bg-accent"
-                    >
-                      <span className="flex items-center justify-between gap-2">
-                        <span className="font-medium">
-                          {describePatientName(entry.patient)}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {entry.token}
-                        </span>
-                      </span>
-                      <span className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                        {band && (
-                          <StatusLabel tone={band.tone}>
-                            {band.label}
-                          </StatusLabel>
-                        )}
-                        {status && (
-                          <StatusLabel tone={status.tone}>
-                            {status.label}
-                          </StatusLabel>
-                        )}
-                        {patientsWithResults.has(entry.patient.id) && (
-                          <StatusLabel tone="information">
-                            Results ready
-                          </StatusLabel>
-                        )}
-                        <span>
-                          {describeWait(entry.waitingMinutes, entry.waitState)}
-                        </span>
-                      </span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
+            <PatientQueueList
+              currentIdentifier={selectedEntryIdentifier}
+              onSelect={setSelectedEntryIdentifier}
+              items={entries.map((entry) => ({
+                id: entry.id,
+                name: describePatientName(entry.patient),
+                reference: entry.token,
+                facts: describeQueueFacts(
+                  entry,
+                  patientsWithResults.has(entry.patient.id)
+                ),
+              }))}
+            />
           </ScrollRegion>
         )}
       </aside>
@@ -606,6 +570,28 @@ function ConsultationBoard({ branch }: { branch: WorkspaceBranch }) {
  * The doctor's workspace: their queue beside the patient being seen, with
  * triage, allergies, the consultation note and diagnoses for the visit.
  */
+
+/**
+ * A waiting patient's urgency, where they are and whether results are back
+ * as icons, then how long they have waited, which sits at the end of the line.
+ */
+function describeQueueFacts(
+  entry: QueueEntry,
+  hasResults: boolean
+): PatientQueueFact[] {
+  return [
+    ...(entry.triageBand ? [TRIAGE_BAND_PRESENTATION[entry.triageBand]] : []),
+    describeQueueStatusTag(entry.status),
+    ...(hasResults ? [RESULTS_READY_TAG] : []),
+    {
+      icon: WaitTimeIcon,
+      label: `Waiting ${describeWait(entry.waitingMinutes, entry.waitState)}`,
+      value: describeMinutes(entry.waitingMinutes),
+      tone: entry.waitState === "RED" ? ("negative" as const) : undefined,
+    },
+  ];
+}
+
 export function ConsultationPage() {
   const { permissions } = useWorkspace();
   if (!permissions.includes(CONSULTATION_PERMISSIONS.writeNotes)) {
