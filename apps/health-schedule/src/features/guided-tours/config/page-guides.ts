@@ -50,6 +50,22 @@ export const PAGE_GUIDES = {
       "Order tests and scans below the diagnoses. A test the patient had in the last week shows its result first, so you can use it instead of repeating it.",
     ],
   },
+  cashier: {
+    title: "Cashier",
+    paragraphs: [
+      "Every bill with something still owed is listed here. Open one to see what was charged, what the insurer pays and what the patient still owes, then take their payment and give the receipt number.",
+      "Part payments are fine: the rest stays owed. With the right permission you can also waive part of a bill, remove a charge made by mistake or reverse a payment, each with a reason.",
+      "The figures at the top are what you took today, by cash and by card or transfer.",
+    ],
+  },
+  prices: {
+    title: "Prices",
+    paragraphs: [
+      "What the facility charges for each visit, test and service. Tests and scans linked to an item are charged on their own when a doctor orders them; charges already made keep their price.",
+      "For each item you can set what an insurer pays and the share its patients pay themselves. Other insurers pay the standard price.",
+      "Choose here whether patients pay at the end of the visit or before each service. Before each service, routine tests wait until they are paid; urgent tests never wait.",
+    ],
+  },
   results: {
     title: "Results to review",
     paragraphs: [

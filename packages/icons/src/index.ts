@@ -182,4 +182,12 @@ export {
   IconPower as DeactivatedIcon,
   IconBan as CancelledIcon,
   IconShieldOff as TwoStepOffIcon,
+  IconCashRegister as CashierIcon,
+  IconTag as PriceListIcon,
+  IconFileInvoice as BillIcon,
+  IconReceiptOff as VoidedChargeIcon,
+  IconReceiptRefund as ReversedPaymentIcon,
+  IconDiscount as WaiverIcon,
+  IconCoins as CashPaymentIcon,
+  IconCreditCard as CardPaymentIcon,
 } from "@tabler/icons-react";

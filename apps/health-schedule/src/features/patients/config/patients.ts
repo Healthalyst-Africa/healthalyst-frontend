@@ -384,7 +384,11 @@ export const PATIENT_RECORD_SECTIONS = [
   { value: "family", label: "Family and contacts" },
   { value: "consents", label: "Consents" },
   { value: "documents", label: "Documents" },
+  { value: "bills", label: "Bills", billing: true },
 ] as const;
+
+/** The permission that shows the Bills tab. */
+export const BILLS_SECTION_PERMISSION = "billing:read";
 
 /** The permission that shows the clinical tabs: notes, problems and the timeline. */
 export const CLINICAL_SECTIONS_PERMISSION = "note:read";

@@ -85,6 +85,31 @@ describe("HealthSchedule navigation", () => {
     ).toEqual(["Front desk", "Appointments", "Queues"]);
   });
 
+  it("shows the cashier to cashiers and the prices to price managers", () => {
+    const cashier = describeSections(
+      buildHealthScheduleNavigation({
+        permissions: ["billing:collect", "billing:read"],
+        organizationAppLinks: HUB_LINKS,
+      }).sidebar
+    );
+    expect(
+      cashier.find((section) => section.label === "Patient visits")?.items
+    ).toEqual(["Cashier"]);
+    expect(
+      cashier.find((section) => section.label === "Setup")
+    ).toBeUndefined();
+
+    const manager = describeSections(
+      buildHealthScheduleNavigation({
+        permissions: ["billing:manage"],
+        organizationAppLinks: HUB_LINKS,
+      }).sidebar
+    );
+    expect(manager.find((section) => section.label === "Setup")?.items).toEqual(
+      ["Prices"]
+    );
+  });
+
   it("keeps the consultation from people who cannot write doctors' notes", () => {
     const navigation = buildHealthScheduleNavigation({
       permissions: ["queue:read", "note:read"],
