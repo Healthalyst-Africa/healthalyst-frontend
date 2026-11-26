@@ -1,4 +1,17 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
+import {
+  ArrivedIcon,
+  CancelAppointmentIcon,
+  CompletedIcon,
+  DatesPassedIcon,
+  ExpectedArrivalsIcon,
+  HeldTimeIcon,
+  NeedsMovingIcon,
+  NoShowIcon,
+  NotCheckedInIcon,
+  ReleasedTimeIcon,
+  WaitlistIcon,
+} from "@healthalyst/icons";
 
 /** HealthSchedule API paths for free times, bookings and the waitlist. */
 export const APPOINTMENT_ENDPOINTS = {
@@ -50,14 +63,38 @@ export const HOLD_MINUTES = 5;
 export const UPCOMING_APPOINTMENT_DAYS = 90;
 
 export const APPOINTMENT_STATUS_PRESENTATION = {
-  HELD: { label: "Being booked", tone: "neutral" },
-  BOOKED: { label: "Booked", tone: "information" },
-  ARRIVED: { label: "Arrived", tone: "positive" },
-  COMPLETED: { label: "Seen", tone: "positive" },
-  CANCELLED: { label: "Cancelled", tone: "neutral" },
-  NO_SHOW: { label: "Did not come", tone: "warning" },
-  RELEASED: { label: "Not booked", tone: "neutral" },
-} as const satisfies Record<string, { label: string; tone: StatusTone }>;
+  HELD: { label: "Being booked", tone: "neutral", icon: HeldTimeIcon },
+  BOOKED: { label: "Booked", tone: "information", icon: ExpectedArrivalsIcon },
+  ARRIVED: { label: "Arrived", tone: "positive", icon: ArrivedIcon },
+  COMPLETED: { label: "Seen", tone: "positive", icon: CompletedIcon },
+  CANCELLED: {
+    label: "Cancelled",
+    tone: "neutral",
+    icon: CancelAppointmentIcon,
+  },
+  NO_SHOW: { label: "Did not come", tone: "warning", icon: NoShowIcon },
+  RELEASED: { label: "Not booked", tone: "neutral", icon: ReleasedTimeIcon },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** Tags for a booking's day and for the waitlist. */
+export const BOOKING_TAGS = {
+  notCheckedIn: {
+    label: "Not checked in",
+    tone: "neutral",
+    icon: NotCheckedInIcon,
+  },
+  needsMoving: {
+    label: "Needs moving",
+    tone: "warning",
+    icon: NeedsMovingIcon,
+  },
+  waiting: { label: "Waiting", tone: "information", icon: WaitlistIcon },
+  datesPassed: {
+    label: "Dates passed",
+    tone: "warning",
+    icon: DatesPassedIcon,
+  },
+} as const satisfies Record<string, StatusPresentation>;
 
 export const CANCELLED_BY_OPTIONS = [
   {

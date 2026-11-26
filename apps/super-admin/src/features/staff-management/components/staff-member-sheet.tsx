@@ -203,10 +203,8 @@ export function StaffMemberSheet({
         titleAccessory={
           staffMember && (
             <StatusLabel
-              tone={PLATFORM_STAFF_STATUS_PRESENTATION[staffMember.status].tone}
-            >
-              {PLATFORM_STAFF_STATUS_PRESENTATION[staffMember.status].label}
-            </StatusLabel>
+              {...PLATFORM_STAFF_STATUS_PRESENTATION[staffMember.status]}
+            />
           )
         }
         description={staffMember?.email ?? "No email address"}

@@ -1,4 +1,30 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
+import {
+  ArrivedIcon,
+  AwaitingPaymentIcon,
+  CancelOrderIcon,
+  CheckingResultIcon,
+  CoverConfirmedIcon,
+  CriticallyHighIcon,
+  CriticallyLowIcon,
+  CriticalResultIcon,
+  HighResultIcon,
+  ImmediatePriorityIcon,
+  InProgressIcon,
+  LowResultIcon,
+  NothingFlaggedIcon,
+  OrderedIcon,
+  OutsideRangeIcon,
+  PaidIcon,
+  RecentlyDoneIcon,
+  RetakeSampleIcon,
+  ReviewResultsIcon,
+  RoutineIcon,
+  SampleTakenIcon,
+  SwitchOffIcon,
+  SwitchOnIcon,
+  UrgentIcon,
+} from "@healthalyst/icons";
 
 /** HealthSchedule API paths for the test catalogue, orders and results. */
 export const ORDER_ENDPOINTS = {
@@ -55,26 +81,118 @@ export const ORDER_PRIORITY_OPTIONS = [
 ] as const;
 
 export const ORDER_PRIORITY_PRESENTATION = {
-  ROUTINE: { label: "Routine", tone: "neutral" },
-  URGENT: { label: "Urgent", tone: "warning" },
-  STAT: { label: "STAT", tone: "negative" },
-} as const satisfies Record<string, { label: string; tone: StatusTone }>;
+  ROUTINE: { label: "Routine", tone: "neutral", icon: RoutineIcon },
+  URGENT: { label: "Urgent", tone: "warning", icon: UrgentIcon },
+  STAT: { label: "STAT", tone: "negative", icon: ImmediatePriorityIcon },
+} as const satisfies Record<string, StatusPresentation>;
 
 export const RESULT_FLAG_PRESENTATION = {
-  LOW: { label: "Low", tone: "warning" },
-  HIGH: { label: "High", tone: "warning" },
-  CRITICAL_LOW: { label: "Critically low", tone: "negative" },
-  CRITICAL_HIGH: { label: "Critically high", tone: "negative" },
-  ABNORMAL: { label: "Abnormal", tone: "warning" },
-} as const satisfies Record<string, { label: string; tone: StatusTone }>;
+  LOW: { label: "Low", tone: "warning", icon: LowResultIcon },
+  HIGH: { label: "High", tone: "warning", icon: HighResultIcon },
+  CRITICAL_LOW: {
+    label: "Critically low",
+    tone: "negative",
+    icon: CriticallyLowIcon,
+  },
+  CRITICAL_HIGH: {
+    label: "Critically high",
+    tone: "negative",
+    icon: CriticallyHighIcon,
+  },
+  ABNORMAL: { label: "Abnormal", tone: "warning", icon: OutsideRangeIcon },
+} as const satisfies Record<string, StatusPresentation>;
 
 /** Only charges the patient must act on are shown with the order. */
 export const ORDER_PAYMENT_PRESENTATION = {
   NO_CHARGE: null,
-  COVERED: { label: "Covered by insurance", tone: "positive" },
-  PAID: { label: "Paid", tone: "positive" },
-  AWAITING_PAYMENT: { label: "Waiting for payment", tone: "warning" },
-} as const satisfies Record<string, { label: string; tone: StatusTone } | null>;
+  COVERED: {
+    label: "Covered by insurance",
+    tone: "positive",
+    icon: CoverConfirmedIcon,
+  },
+  PAID: { label: "Paid", tone: "positive", icon: PaidIcon },
+  AWAITING_PAYMENT: {
+    label: "Waiting for payment",
+    tone: "warning",
+    icon: AwaitingPaymentIcon,
+  },
+} as const satisfies Record<string, StatusPresentation | null>;
+
+/** Each stage of an order, and how its result reads, as tags. */
+export const ORDER_TAGS = {
+  ordered: { label: "Ordered", tone: "neutral", icon: OrderedIcon },
+  retakeSample: {
+    label: "Sample to take again",
+    tone: "warning",
+    icon: RetakeSampleIcon,
+  },
+  patientArrived: {
+    label: "Patient arrived",
+    tone: "information",
+    icon: ArrivedIcon,
+  },
+  sampleTaken: {
+    label: "Sample taken",
+    tone: "information",
+    icon: SampleTakenIcon,
+  },
+  inProgress: {
+    label: "In progress",
+    tone: "information",
+    icon: InProgressIcon,
+  },
+  checkingResult: {
+    label: "Result being checked",
+    tone: "information",
+    icon: CheckingResultIcon,
+  },
+  resultReady: {
+    label: "Result ready",
+    tone: "positive",
+    icon: ReviewResultsIcon,
+  },
+  cancelled: { label: "Cancelled", tone: "neutral", icon: CancelOrderIcon },
+  critical: { label: "Critical", tone: "negative", icon: CriticalResultIcon },
+  criticalResult: {
+    label: "Critical result",
+    tone: "negative",
+    icon: CriticalResultIcon,
+  },
+  outsideRange: {
+    label: "Outside range",
+    tone: "warning",
+    icon: OutsideRangeIcon,
+  },
+  resultOutsideRange: {
+    label: "Result outside range",
+    tone: "warning",
+    icon: OutsideRangeIcon,
+  },
+  nothingFlagged: {
+    label: "Nothing flagged",
+    tone: "neutral",
+    icon: NothingFlaggedIcon,
+  },
+  alreadyOrdered: {
+    label: "Already ordered",
+    tone: "warning",
+    icon: OrderedIcon,
+  },
+  doneRecently: {
+    label: "Done recently",
+    tone: "warning",
+    icon: RecentlyDoneIcon,
+  },
+  orderable: { label: "On", tone: "positive", icon: SwitchOnIcon },
+  notOrderable: { label: "Off", tone: "neutral", icon: SwitchOffIcon },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** Marks a waiting patient whose results are back. */
+export const RESULTS_READY_TAG = {
+  label: "Results ready",
+  tone: "information",
+  icon: ReviewResultsIcon,
+} as const satisfies StatusPresentation;
 
 export const SPECIMEN_LABELS = {
   BLOOD: "Blood",

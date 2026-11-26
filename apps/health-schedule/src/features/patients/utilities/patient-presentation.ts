@@ -5,7 +5,9 @@ import {
   parseISO,
 } from "date-fns";
 import {
+  COVER_TAGS,
   DUPLICATE_REASON_LABELS,
+  ELIGIBILITY_PRESENTATION,
   MISSING_FIELD_LABELS,
   PATIENT_SEX_LABELS,
   PAYER_TYPE_OPTIONS,
@@ -14,6 +16,7 @@ import type {
   Patient,
   PatientCoverage,
 } from "~/features/patients/schemas/patient-response-schemas";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 
 /** The name staff use, or the description of an unidentified patient. */
 export function describePatientFullName(
@@ -109,4 +112,13 @@ export function describeCoverage(
 /** The version a record was read at, as the API's `If-Match` value. */
 export function toEntityTag(version: number): string {
   return `"${version}"`;
+}
+
+/** A cover's standing as a tag: expired, or the payer's last answer. */
+export function describeCoverTag(
+  coverage: Pick<PatientCoverage, "isExpired" | "eligibility">
+): StatusPresentation {
+  return coverage.isExpired
+    ? COVER_TAGS.expired
+    : ELIGIBILITY_PRESENTATION[coverage.eligibility];
 }

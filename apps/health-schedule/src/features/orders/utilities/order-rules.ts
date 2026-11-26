@@ -1,6 +1,7 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 import {
   ORDER_LIMITS,
+  ORDER_TAGS,
   RECENT_RESULT_DAYS,
 } from "~/features/orders/config/orders";
 import type {
@@ -27,24 +28,24 @@ export function describeTurnaround(hours: number | null): string | null {
 /** Where an order is, in words that fit a test or a scan. */
 export function describeOrderStatus(
   order: Pick<Order, "status" | "kind" | "rejectedReason">
-): { label: string; tone: StatusTone } {
+): StatusPresentation {
   switch (order.status) {
     case "ORDERED":
       return order.rejectedReason
-        ? { label: "Sample to take again", tone: "warning" }
-        : { label: "Ordered", tone: "neutral" };
+        ? ORDER_TAGS.retakeSample
+        : ORDER_TAGS.ordered;
     case "COLLECTED":
       return order.kind === "IMAGING"
-        ? { label: "Patient arrived", tone: "information" }
-        : { label: "Sample taken", tone: "information" };
+        ? ORDER_TAGS.patientArrived
+        : ORDER_TAGS.sampleTaken;
     case "IN_PROGRESS":
-      return { label: "In progress", tone: "information" };
+      return ORDER_TAGS.inProgress;
     case "RESULTED":
-      return { label: "Result being checked", tone: "information" };
+      return ORDER_TAGS.checkingResult;
     case "RELEASED":
-      return { label: "Result ready", tone: "positive" };
+      return ORDER_TAGS.resultReady;
     case "CANCELLED":
-      return { label: "Cancelled", tone: "neutral" };
+      return ORDER_TAGS.cancelled;
   }
 }
 
@@ -173,13 +174,11 @@ export function describeResultValue(value: ResultValue): string {
  */
 export function describeResultFlags(
   order: Pick<Order, "critical" | "result">
-): { label: string; tone: StatusTone } {
-  if (order.critical) return { label: "Critical", tone: "negative" };
+): StatusPresentation {
+  if (order.critical) return ORDER_TAGS.critical;
   const isFlagged =
     order.result?.values.some((value) => value.flag !== null) ?? false;
-  return isFlagged
-    ? { label: "Outside range", tone: "warning" }
-    : { label: "Nothing flagged", tone: "neutral" };
+  return isFlagged ? ORDER_TAGS.outsideRange : ORDER_TAGS.nothingFlagged;
 }
 
 /**
@@ -191,13 +190,13 @@ export function describeOrderProgress(
     Order,
     "status" | "kind" | "rejectedReason" | "critical" | "result"
   >
-): { label: string; tone: StatusTone } {
+): StatusPresentation {
   if (order.status !== "RELEASED") return describeOrderStatus(order);
   const flags = describeResultFlags(order);
-  if (order.critical) return { label: "Critical result", tone: flags.tone };
-  return flags.label === "Outside range"
-    ? { label: "Result outside range", tone: flags.tone }
-    : { label: "Result ready", tone: "positive" };
+  if (order.critical) return ORDER_TAGS.criticalResult;
+  return flags === ORDER_TAGS.outsideRange
+    ? ORDER_TAGS.resultOutsideRange
+    : ORDER_TAGS.resultReady;
 }
 
 /** Patients with results waiting for the doctor, to mark in their queue. */

@@ -183,11 +183,9 @@ export function ResultSheet({
       }
       titleAccessory={
         result ? (
-          <StatusLabel tone={describeResultFlags(order).tone}>
-            {describeResultFlags(order).label}
-          </StatusLabel>
+          <StatusLabel {...describeResultFlags(order)} />
         ) : (
-          <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
+          <StatusLabel {...status} />
         )
       }
       footer={

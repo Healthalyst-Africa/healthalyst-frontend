@@ -1,3 +1,5 @@
+import { ThisDeviceIcon } from "@healthalyst/icons";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 /** The Platform API's error code when an action needs a recent authenticator check. */
 export const STEP_UP_REQUIRED_ERROR_CODE = "AUTH_STEP_UP_REQUIRED";
 
@@ -14,3 +16,10 @@ export const SESSION_DATE_FORMATTER = new Intl.DateTimeFormat("en-NG", {
 });
 
 export const PLATFORM_SESSIONS_QUERY_KEY = "platform-sessions";
+
+/** Marks the device someone is using now, among their signed-in sessions. */
+export const THIS_DEVICE_TAG = {
+  label: "This device",
+  tone: "information",
+  icon: ThisDeviceIcon,
+} as const satisfies StatusPresentation;

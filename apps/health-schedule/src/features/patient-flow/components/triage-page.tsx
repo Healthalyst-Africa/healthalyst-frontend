@@ -9,10 +9,7 @@ import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import type { WorkspaceBranch } from "~/features/branch-selection/schemas/branch-schema";
 import { PatientFlowFrame } from "~/features/patient-flow/components/patient-flow-frame";
 import { VitalsForm } from "~/features/patient-flow/components/vitals-form";
-import {
-  CLOCK_STATE_TONES,
-  PATIENT_FLOW_PERMISSIONS,
-} from "~/features/patient-flow/config/patient-flow";
+import { PATIENT_FLOW_PERMISSIONS } from "~/features/patient-flow/config/patient-flow";
 import { TRIAGE_PERMISSIONS } from "~/features/patient-flow/config/triage";
 import {
   useDayBoard,
@@ -23,6 +20,7 @@ import type {
   QueueEntry,
 } from "~/features/patient-flow/schemas/patient-flow-response-schemas";
 import {
+  describeClockTag,
   describePatientName,
   describeWait,
   readFlowEmphasis,
@@ -131,8 +129,10 @@ function TriageWorkspace({ branch }: { branch: WorkspaceBranch }) {
       size: "compact",
       getCell: (entry) => ({
         kind: "status",
-        label: describeWait(entry.waitingMinutes, entry.waitState),
-        tone: entry.waitState ? CLOCK_STATE_TONES[entry.waitState] : "neutral",
+        ...describeClockTag(
+          describeWait(entry.waitingMinutes, entry.waitState),
+          entry.waitState
+        ),
       }),
     },
   ];

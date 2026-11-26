@@ -19,6 +19,7 @@ import { LoadingPlaceholder } from "@healthalyst/ui/components/loading-placehold
 import { NoticeBanner } from "@healthalyst/ui/components/notice-banner";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import {
+  NOT_TRIAGED_TAG,
   QUEUE_ENTRY_STATUS_PRESENTATION,
   TRIAGE_BAND_PRESENTATION,
 } from "~/features/patient-flow/config/patient-flow";
@@ -93,11 +94,9 @@ export function QueueEntrySheet({
         {
           term: "Triage",
           description: entry.triageBand ? (
-            <StatusLabel tone={TRIAGE_BAND_PRESENTATION[entry.triageBand].tone}>
-              {TRIAGE_BAND_PRESENTATION[entry.triageBand].label}
-            </StatusLabel>
+            <StatusLabel {...TRIAGE_BAND_PRESENTATION[entry.triageBand]} />
           ) : (
-            "Not triaged yet"
+            <StatusLabel {...NOT_TRIAGED_TAG} />
           ),
         },
         {
@@ -131,11 +130,7 @@ export function QueueEntrySheet({
       titleAccessory={
         entry &&
         isLiveEntryStatus(entry.status) && (
-          <StatusLabel
-            tone={QUEUE_ENTRY_STATUS_PRESENTATION[entry.status].tone}
-          >
-            {QUEUE_ENTRY_STATUS_PRESENTATION[entry.status].label}
-          </StatusLabel>
+          <StatusLabel {...QUEUE_ENTRY_STATUS_PRESENTATION[entry.status]} />
         )
       }
       footer={
@@ -305,9 +300,7 @@ function EarlierTriage({ visitId }: { visitId: string }) {
       <h3 className="flex flex-wrap items-center gap-2 font-medium">
         Triage at {describeBranchClockTime(latest.recordedAt)}
         {earlier.length > 0 ? ` (and ${earlier.length} earlier)` : ""}
-        <StatusLabel tone={TRIAGE_BAND_PRESENTATION[latest.band].tone}>
-          {TRIAGE_BAND_PRESENTATION[latest.band].label}
-        </StatusLabel>
+        <StatusLabel {...TRIAGE_BAND_PRESENTATION[latest.band]} />
       </h3>
       {latest.complaint && <p>Complaint: {latest.complaint}</p>}
       {vitals && <p className="text-muted-foreground">{vitals}</p>}

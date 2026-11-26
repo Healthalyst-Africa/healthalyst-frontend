@@ -4,7 +4,7 @@ import type { DataTableCell } from "@healthalyst/ui/types/data-table";
 
 export function DataTableCellContent({ cell }: { cell: DataTableCell }) {
   if (cell.kind === "status") {
-    return <StatusLabel tone={cell.tone}>{cell.label}</StatusLabel>;
+    return <StatusLabel label={cell.label} tone={cell.tone} icon={cell.icon} />;
   }
 
   if (cell.kind === "progress") {

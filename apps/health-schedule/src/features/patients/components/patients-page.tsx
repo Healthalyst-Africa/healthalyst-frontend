@@ -14,7 +14,10 @@ import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import { RecentMergesPanel } from "~/features/patients/components/recent-merges-panel";
 import { RegisterPatientDialog } from "~/features/patients/components/register-patient-dialog";
-import { PATIENT_PERMISSIONS } from "~/features/patients/config/patients";
+import {
+  PATIENT_PERMISSIONS,
+  PATIENT_RECORD_TAGS,
+} from "~/features/patients/config/patients";
 import {
   useIncompletePatients,
   usePatientSearchResults,
@@ -56,14 +59,14 @@ const COLUMNS: readonly DataTableColumn<PatientMatch>[] = [
     size: "compact",
     getCell: (patient) =>
       patient.isTemporary
-        ? { kind: "status", label: "Not yet identified", tone: "warning" }
+        ? { kind: "status", ...PATIENT_RECORD_TAGS.unidentified }
         : patient.missingFields.length > 0
           ? {
               kind: "status",
+              ...PATIENT_RECORD_TAGS.incomplete,
               label: `Add ${describeMissingFields(patient.missingFields)}`,
-              tone: "warning",
             }
-          : { kind: "status", label: "Complete", tone: "positive" },
+          : { kind: "status", ...PATIENT_RECORD_TAGS.complete },
   },
 ];
 

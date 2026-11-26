@@ -20,6 +20,7 @@ import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import {
   CLINICAL_RECORD_LIMITS as LIMITS,
   CLINICAL_RECORD_PERMISSIONS,
+  NOTE_TEMPLATE_TAGS,
   NOTE_TYPE_OPTIONS,
 } from "~/features/clinical-record/config/clinical-record";
 import {
@@ -81,10 +82,10 @@ const COLUMNS: readonly DataTableColumn<NoteTemplate>[] = [
     size: "compact",
     getCell: (template) =>
       template.builtIn
-        ? { kind: "status", label: "Built in", tone: "neutral" }
+        ? { kind: "status", ...NOTE_TEMPLATE_TAGS.builtIn }
         : template.isActive
-          ? { kind: "status", label: "Offered", tone: "positive" }
-          : { kind: "status", label: "Switched off", tone: "neutral" },
+          ? { kind: "status", ...NOTE_TEMPLATE_TAGS.offered }
+          : { kind: "status", ...NOTE_TEMPLATE_TAGS.switchedOff },
   },
 ];
 

@@ -1,4 +1,18 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import {
+  CallPatientIcon,
+  EmergencyIcon,
+  ExpectedArrivalsIcon,
+  NotTriagedIcon,
+  RoutineIcon,
+  SeePatientIcon,
+  UrgentIcon,
+  WaitingPatientsIcon,
+  WalkInIcon,
+} from "@healthalyst/icons";
+import type {
+  StatusPresentation,
+  StatusTone,
+} from "@healthalyst/ui/types/status-tone";
 
 /** HealthSchedule API paths for check-in, queues and today's appointments. */
 export const PATIENT_FLOW_ENDPOINTS = {
@@ -54,17 +68,30 @@ export const QUEUE_KIND_LABELS = {
 } as const;
 
 export const QUEUE_ENTRY_STATUS_PRESENTATION = {
-  WAITING: { label: "Waiting", tone: "neutral" },
-  CALLED: { label: "Called", tone: "information" },
-  IN_SERVICE: { label: "With staff", tone: "positive" },
-} as const satisfies Record<string, { label: string; tone: StatusTone }>;
+  WAITING: { label: "Waiting", tone: "neutral", icon: WaitingPatientsIcon },
+  CALLED: { label: "Called", tone: "information", icon: CallPatientIcon },
+  IN_SERVICE: { label: "With staff", tone: "positive", icon: SeePatientIcon },
+} as const satisfies Record<string, StatusPresentation>;
 
-/** Triage bands, most urgent first. */
+/** Triage bands, most urgent first; a siren marks an emergency everywhere. */
 export const TRIAGE_BAND_PRESENTATION = {
-  RED: { label: "Emergency", tone: "negative" },
-  YELLOW: { label: "Urgent", tone: "warning" },
-  GREEN: { label: "Routine", tone: "neutral" },
-} as const satisfies Record<string, { label: string; tone: StatusTone }>;
+  RED: { label: "Emergency", tone: "negative", icon: EmergencyIcon },
+  YELLOW: { label: "Urgent", tone: "warning", icon: UrgentIcon },
+  GREEN: { label: "Routine", tone: "neutral", icon: RoutineIcon },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** How a patient came today, at the front desk. */
+export const ARRIVAL_TAGS = {
+  booked: { label: "Booked", tone: "information", icon: ExpectedArrivalsIcon },
+  walkIn: { label: "Walk-in", tone: "neutral", icon: WalkInIcon },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** A patient the nurse has not seen yet. */
+export const NOT_TRIAGED_TAG = {
+  label: "Not checked yet",
+  tone: "neutral",
+  icon: NotTriagedIcon,
+} as const satisfies StatusPresentation;
 
 /** Wait and visit clocks against the facility's targets. */
 export const CLOCK_STATE_TONES = {

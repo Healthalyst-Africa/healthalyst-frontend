@@ -2,6 +2,7 @@ import {
   CONTACT_CHANNEL_OPTIONS,
   CONTACT_LANGUAGE_OPTIONS,
   MERGE_FIELD_LABELS,
+  MERGE_TAGS,
   PATIENT_SEX_LABELS,
   STATE_OPTIONS,
 } from "~/features/patients/config/patients";
@@ -12,6 +13,7 @@ import type {
   PatientMerge,
 } from "~/features/patients/schemas/patient-response-schemas";
 import { describeDate } from "~/features/patients/utilities/patient-presentation";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 
 const BLANK = "Blank";
 
@@ -70,13 +72,13 @@ export function canUndoMerge(merge: PatientMerge, now: Date): boolean {
 export function describeMergeState(
   merge: PatientMerge,
   now: Date
-): { label: string; tone: "neutral" | "information" } {
-  if (merge.undoneAt) return { label: "Undone", tone: "neutral" };
+): StatusPresentation {
+  if (merge.undoneAt) return MERGE_TAGS.undone;
   if (canUndoMerge(merge, now)) {
     return {
+      ...MERGE_TAGS.canUndo,
       label: `Can undo until ${describeDate(merge.undoUntil)}`,
-      tone: "information",
     };
   }
-  return { label: "Final", tone: "neutral" };
+  return MERGE_TAGS.final;
 }

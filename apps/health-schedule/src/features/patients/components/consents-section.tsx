@@ -20,6 +20,7 @@ import { announceSuccess } from "@healthalyst/ui/components/toast-region";
 import {
   CONSENT_FIELD_LIMITS,
   CONSENT_METHOD_OPTIONS,
+  CONSENT_TAGS,
   CONSENT_TYPES,
   CONTACT_LANGUAGE_OPTIONS,
   PATIENT_PERMISSIONS,
@@ -101,13 +102,13 @@ export function ConsentsSection({ patient }: { patient: PatientDetail }) {
                 <div className="flex min-w-0 flex-col gap-1">
                   <span className="flex flex-wrap items-center gap-2 font-medium">
                     {row.label}
-                    <StatusLabel tone={row.isGiven ? "positive" : "neutral"}>
-                      {row.isGiven
-                        ? "Given"
+                    <StatusLabel
+                      {...(row.isGiven
+                        ? CONSENT_TAGS.given
                         : row.latestEntry?.revokedAt
-                          ? "Withdrawn"
-                          : "Not asked"}
-                    </StatusLabel>
+                          ? CONSENT_TAGS.withdrawn
+                          : CONSENT_TAGS.notAsked)}
+                    />
                   </span>
                   <span className="text-sm text-muted-foreground">
                     {row.description}

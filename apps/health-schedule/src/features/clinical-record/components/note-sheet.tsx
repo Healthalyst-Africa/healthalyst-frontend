@@ -207,9 +207,7 @@ export function NoteSheet({
       open={note !== null}
       onOpenChange={onOpenChange}
       title={note ? describeNoteTitle(note) : ""}
-      titleAccessory={
-        status && <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
-      }
+      titleAccessory={status && <StatusLabel {...status} />}
       description={
         note
           ? `${describeNoteType(note.type)} · ${describeStaff(note.authorId)} · ${describeBranchDateTime(note.signedAt ?? note.updatedAt)}`

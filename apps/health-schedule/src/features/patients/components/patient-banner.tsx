@@ -7,11 +7,13 @@ import {
 } from "@healthalyst/ui/components/record-header";
 import {
   ALLERGY_SEVERITY_OPTIONS,
-  ELIGIBILITY_PRESENTATION,
+  COVER_TAGS,
+  PATIENT_RECORD_TAGS,
 } from "~/features/patients/config/patients";
 import type { PatientDetail } from "~/features/patients/schemas/patient-response-schemas";
 import {
   describeCoverage,
+  describeCoverTag,
   describeMissingFields,
   describePatientFacts,
   describePatientFullName,
@@ -33,44 +35,30 @@ export function readPatientStatuses(
 ): RecordHeaderStatus[] {
   const statuses: RecordHeaderStatus[] = [];
   if (patient.primaryCoverage) {
-    const eligibility = patient.primaryCoverage.isExpired
-      ? { label: "Cover expired", tone: "negative" as const }
-      : ELIGIBILITY_PRESENTATION[patient.primaryCoverage.eligibility];
+    const coverTag = describeCoverTag(patient.primaryCoverage);
     statuses.push({
       key: "cover",
-      label: `${describeCoverage(patient.primaryCoverage)}: ${eligibility.label}`,
-      tone: eligibility.tone,
+      ...coverTag,
+      label: `${describeCoverage(patient.primaryCoverage)}: ${coverTag.label}`,
     });
   } else {
-    statuses.push({ key: "cover", label: "Self-pay", tone: "neutral" });
+    statuses.push({ key: "cover", ...COVER_TAGS.selfPay });
   }
   if (patient.restricted) {
-    statuses.push({
-      key: "restricted",
-      label: "Restricted record",
-      tone: "highlight",
-    });
+    statuses.push({ key: "restricted", ...PATIENT_RECORD_TAGS.restricted });
   }
   if (patient.isTemporary) {
-    statuses.push({
-      key: "temporary",
-      label: "Not yet identified",
-      tone: "warning",
-    });
+    statuses.push({ key: "temporary", ...PATIENT_RECORD_TAGS.unidentified });
   }
   if (patient.missingFields.length > 0) {
     statuses.push({
       key: "incomplete",
+      ...PATIENT_RECORD_TAGS.incomplete,
       label: `Add ${describeMissingFields(patient.missingFields)}`,
-      tone: "warning",
     });
   }
   if (!patient.messaging.canMessage) {
-    statuses.push({
-      key: "messages",
-      label: "No text reminders",
-      tone: "neutral",
-    });
+    statuses.push({ key: "messages", ...PATIENT_RECORD_TAGS.noReminders });
   }
   return statuses;
 }

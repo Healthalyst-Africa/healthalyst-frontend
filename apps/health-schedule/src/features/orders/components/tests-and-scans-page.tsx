@@ -16,6 +16,7 @@ import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import {
   ORDER_KIND_LABELS,
   ORDER_PERMISSIONS,
+  ORDER_TAGS,
   SPECIMEN_LABELS,
 } from "~/features/orders/config/orders";
 import {
@@ -75,8 +76,8 @@ const COLUMNS: readonly DataTableColumn<OrderableService>[] = [
     size: "compact",
     getCell: (service) =>
       service.isActive
-        ? { kind: "status", label: "On", tone: "positive" }
-        : { kind: "status", label: "Off", tone: "neutral" },
+        ? { kind: "status", ...ORDER_TAGS.orderable }
+        : { kind: "status", ...ORDER_TAGS.notOrderable },
   },
 ];
 

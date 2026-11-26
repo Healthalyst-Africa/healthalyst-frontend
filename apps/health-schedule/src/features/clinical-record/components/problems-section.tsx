@@ -158,9 +158,7 @@ export function ProblemsSection({
                       {problem.title}
                     </p>
                     <p className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                      <StatusLabel tone={status.tone}>
-                        {status.label}
-                      </StatusLabel>
+                      <StatusLabel {...status} />
                       {code && <span>{code}</span>}
                       {dates && <span>{dates}</span>}
                     </p>

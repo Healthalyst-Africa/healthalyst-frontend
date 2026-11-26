@@ -26,6 +26,7 @@ import {
   ORDER_LIMITS,
   ORDER_PERMISSIONS,
   ORDER_PRIORITY_OPTIONS,
+  ORDER_TAGS,
   RECENT_RESULT_DAYS,
 } from "~/features/orders/config/orders";
 import {
@@ -404,14 +405,10 @@ export function OrderTestsPanel({
                     <span className="flex flex-wrap items-center gap-2 text-sm font-medium">
                       {service.name}
                       {openOrders.has(service.id) ? (
-                        <StatusLabel tone="warning">
-                          Already ordered
-                        </StatusLabel>
+                        <StatusLabel {...ORDER_TAGS.alreadyOrdered} />
                       ) : (
                         recentResults.has(service.id) && (
-                          <StatusLabel tone="warning">
-                            Done recently
-                          </StatusLabel>
+                          <StatusLabel {...ORDER_TAGS.doneRecently} />
                         )
                       )}
                     </span>
