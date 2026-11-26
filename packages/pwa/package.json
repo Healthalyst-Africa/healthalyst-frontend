@@ -22,10 +22,10 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@serwist/turbopack": "^9.5.13",
-    "@serwist/window": "^9.5.13",
-    "esbuild": "^0.25.12",
-    "serwist": "^9.5.13"
+    "@serwist/turbopack": "^9.5.15",
+    "@serwist/window": "^9.5.15",
+    "esbuild": "^0.28.2",
+    "serwist": "^9.5.15"
   },
   "peerDependencies": {
     "next": ">=16.0.0",
@@ -34,12 +34,12 @@
   "devDependencies": {
     "@healthalyst/eslint-config": "workspace:*",
     "@healthalyst/typescript-config": "workspace:*",
-    "@types/node": "^22.0.0",
-    "@types/react": "19.2.7",
-    "eslint": "^10.12.0",
-    "next": "16.3.8",
-    "react": "19.2.4",
+    "@types/node": "^26.6.6",
+    "@types/react": "19.3.0",
+    "eslint": "^10.15.0",
+    "next": "16.4.6",
+    "react": "19.3.1",
     "typescript": "^5.9.3",
-    "vitest": "^5.0.3"
+    "vitest": "^5.1.1"
   }
 }
