@@ -16,6 +16,8 @@ const PAGES_BY_PATH: Record<string, HealthSchedulePage> = {
   [HEALTH_SCHEDULE_ROUTES.scheduleNoteTemplates]: "scheduleNoteTemplates",
   [HEALTH_SCHEDULE_ROUTES.scheduleTestsAndScans]: "scheduleTestsAndScans",
   [HEALTH_SCHEDULE_ROUTES.results]: "results",
+  [HEALTH_SCHEDULE_ROUTES.cashier]: "cashier",
+  [HEALTH_SCHEDULE_ROUTES.prices]: "prices",
 };
 
 /** The HealthSchedule page at an address, for its help and tour. */

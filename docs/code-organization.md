@@ -92,7 +92,9 @@ timeline) and `sensitive-records` (the access gate on restricted records,
 emergency access and its review, and sensitivity labels) and `appointments`
 (booking with five-minute holds on free times, moving, cancelling and "did
 not come", the day of bookings by calendar, the patient's appointments and
-the waitlist) and `consultation`
+the waitlist) and `billing` (the cashier's bills and payments, the
+patient's bills, the price list with insurer prices, and when patients pay)
+and `consultation`
 (the doctor's queue beside the patient being seen) and `orders` (ordering
 tests and scans with a check for recent results, results to review with
 marking as seen, the patient's tests and results, and the tests-and-scans
