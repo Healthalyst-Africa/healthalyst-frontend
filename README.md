@@ -78,3 +78,11 @@ pnpm test-all
 Create another app under `apps/` with a unique package name and its own `package.json`. Extend the shared ESLint and TypeScript presets, add the shared UI package as a dependency when needed, and define the app's tasks. Turborepo runs matching tasks across the workspace.
 
 Pull requests and pushes to `main` run formatting, lint, type checks, the app test suite, and production builds through GitHub Actions.
+
+Pull requests show their screens with images committed under
+`docs/screenshots/<topic>/`. The GitHub Slack app posts pull requests as text
+only, so the `Pull request screenshots` workflow posts those images to Slack
+when a pull request opens or is ready for review, and posts any added or
+changed images on later pushes. It needs the repository secret
+`SLACK_PULL_REQUEST_SCREENSHOTS_WEBHOOK_URL`, a Slack incoming webhook for the
+receiving channel; without it the workflow skips.
