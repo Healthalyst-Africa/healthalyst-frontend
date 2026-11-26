@@ -64,8 +64,7 @@ function createMemberColumns(
       size: "compact",
       getCell: (member) => ({
         kind: "status",
-        label: LICENCE_STATUS_PRESENTATION[member.licenceStatus].label,
-        tone: LICENCE_STATUS_PRESENTATION[member.licenceStatus].tone,
+        ...LICENCE_STATUS_PRESENTATION[member.licenceStatus],
       }),
     },
     {

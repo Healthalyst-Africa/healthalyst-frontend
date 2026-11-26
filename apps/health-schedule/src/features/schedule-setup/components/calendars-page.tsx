@@ -10,7 +10,10 @@ import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import { AddCalendarDialog } from "~/features/schedule-setup/components/add-calendar-dialog";
 import { CalendarSheet } from "~/features/schedule-setup/components/calendar-sheet";
 import { ScheduleSetupFrame } from "~/features/schedule-setup/components/schedule-setup-frame";
-import { CALENDAR_KIND_OPTIONS } from "~/features/schedule-setup/config/schedule-setup";
+import {
+  CALENDAR_KIND_OPTIONS,
+  SCHEDULE_TAGS,
+} from "~/features/schedule-setup/config/schedule-setup";
 import { useScheduleCalendars } from "~/features/schedule-setup/hooks/use-schedule-setup";
 import type { ScheduleCalendar } from "~/features/schedule-setup/schemas/schedule-response-schemas";
 import {
@@ -174,10 +177,10 @@ function CalendarsWorkspace({
       size: "compact",
       getCell: (calendar) =>
         !calendar.isActive
-          ? { kind: "status", label: "Paused", tone: "neutral" }
+          ? { kind: "status", ...SCHEDULE_TAGS.paused }
           : calendar.availability.length === 0
-            ? { kind: "status", label: "Needs hours", tone: "warning" }
-            : { kind: "status", label: "Taking bookings", tone: "positive" },
+            ? { kind: "status", ...SCHEDULE_TAGS.needsHours }
+            : { kind: "status", ...SCHEDULE_TAGS.takingBookings },
     },
   ];
 

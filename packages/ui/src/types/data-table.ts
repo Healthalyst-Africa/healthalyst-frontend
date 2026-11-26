@@ -1,16 +1,12 @@
 import type { ReactNode } from "react";
 import type { ActionMenuItem } from "@healthalyst/ui/types/action-menu";
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 import type { VisitProgressStep } from "@healthalyst/ui/types/visit-progress";
 
 export type DataTableCell =
   | { kind: "text"; primary: string; secondary?: string }
   | { kind: "date"; label: string; dateTime: string }
-  | {
-      kind: "status";
-      label: string;
-      tone: StatusTone;
-    }
+  | ({ kind: "status" } & StatusPresentation)
   | { kind: "progress"; steps: readonly VisitProgressStep[] };
 
 /**

@@ -193,11 +193,7 @@ export function ReviewApplicationSheet({
         open={open}
         onOpenChange={onOpenChange}
         title={organizationName}
-        titleAccessory={
-          <StatusLabel tone={statusPresentation.tone}>
-            {statusPresentation.label}
-          </StatusLabel>
-        }
+        titleAccessory={<StatusLabel {...statusPresentation} />}
         description={
           application.submittedAt
             ? `Submitted on ${APPLICATION_DATE_FORMATTER.format(new Date(application.submittedAt))}`

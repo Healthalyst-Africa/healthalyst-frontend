@@ -11,6 +11,7 @@ import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import { MergeDialog } from "~/features/patients/components/merge-dialog";
 import {
   DUPLICATE_SCORES,
+  DUPLICATE_TAGS,
   PATIENT_PERMISSIONS,
 } from "~/features/patients/config/patients";
 import { useDuplicates } from "~/features/patients/hooks/use-patient-record-sections";
@@ -90,16 +91,10 @@ export function DuplicatesPanel({ patient }: { patient: Patient }) {
                     {name}
                   </Link>
                   <StatusLabel
-                    tone={
-                      candidate.score >= DUPLICATE_SCORES.likely
-                        ? "warning"
-                        : "neutral"
-                    }
-                  >
-                    {candidate.score >= DUPLICATE_SCORES.likely
-                      ? "Likely the same person"
-                      : "Possibly the same person"}
-                  </StatusLabel>
+                    {...(candidate.score >= DUPLICATE_SCORES.likely
+                      ? DUPLICATE_TAGS.likely
+                      : DUPLICATE_TAGS.possible)}
+                  />
                 </span>
                 <span className="text-caption text-muted-foreground">
                   {describePatientFacts(candidate.patient).join(" · ")}

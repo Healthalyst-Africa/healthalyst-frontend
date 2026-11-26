@@ -1,4 +1,33 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
+import {
+  AllergyIcon,
+  CompletedIcon,
+  CoverConfirmedIcon,
+  CoverNotCheckedIcon,
+  DeleteIcon,
+  DuplicateIcon,
+  EmergencyContactIcon,
+  FileCheckedIcon,
+  FileRefusedIcon,
+  FinishVisitIcon,
+  GuardianIcon,
+  IncompleteRegistrationIcon,
+  LockedIcon,
+  MergeUndoneIcon,
+  NoKnownAllergiesIcon,
+  NoRemindersIcon,
+  NotAskedIcon,
+  NotCoveredIcon,
+  PrimaryIcon,
+  RefusedIcon,
+  SelfPayIcon,
+  SeverityIcon,
+  UndoIcon,
+  UnidentifiedPatientIcon,
+  UploadDocumentIcon,
+  VirusFoundIcon,
+  WaitingForPayerIcon,
+} from "@healthalyst/icons";
 
 /** HealthSchedule API paths for patient records. */
 export const PATIENT_ENDPOINTS = {
@@ -188,10 +217,29 @@ export const ALLERGY_END_OPTIONS = [
 ] as const;
 
 export const ALLERGY_STATUS_PRESENTATION = {
-  UNKNOWN: { label: "Allergies not asked", tone: "warning" },
-  NONE_KNOWN: { label: "No known allergies", tone: "positive" },
-  RECORDED: { label: "Allergies recorded", tone: "negative" },
-} as const satisfies Record<string, { label: string; tone: StatusTone }>;
+  UNKNOWN: {
+    label: "Allergies not asked",
+    tone: "warning",
+    icon: NotAskedIcon,
+  },
+  NONE_KNOWN: {
+    label: "No known allergies",
+    tone: "positive",
+    icon: NoKnownAllergiesIcon,
+  },
+  RECORDED: {
+    label: "Allergies recorded",
+    tone: "negative",
+    icon: AllergyIcon,
+  },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** How bad a reaction is; the label is the severity chosen. */
+export const ALLERGY_SEVERITY_TAG = {
+  label: "Severity",
+  tone: "negative",
+  icon: SeverityIcon,
+} as const satisfies StatusPresentation;
 
 export const PAYER_TYPE_OPTIONS = [
   { value: "HMO", label: "HMO" },
@@ -209,11 +257,98 @@ export const COVERAGE_RELATIONSHIP_OPTIONS = [
 ] as const;
 
 export const ELIGIBILITY_PRESENTATION = {
-  UNVERIFIED: { label: "Not checked", tone: "neutral" },
-  VERIFIED: { label: "Cover confirmed", tone: "positive" },
-  PENDING: { label: "Waiting for the payer", tone: "information" },
-  NOT_COVERED: { label: "Not covered", tone: "negative" },
-} as const satisfies Record<string, { label: string; tone: StatusTone }>;
+  UNVERIFIED: {
+    label: "Not checked",
+    tone: "neutral",
+    icon: CoverNotCheckedIcon,
+  },
+  VERIFIED: {
+    label: "Cover confirmed",
+    tone: "positive",
+    icon: CoverConfirmedIcon,
+  },
+  PENDING: {
+    label: "Waiting for the payer",
+    tone: "information",
+    icon: WaitingForPayerIcon,
+  },
+  NOT_COVERED: { label: "Not covered", tone: "negative", icon: NotCoveredIcon },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** Who pays, beyond the payer's own answer. */
+export const COVER_TAGS = {
+  expired: { label: "Cover expired", tone: "negative", icon: NotCoveredIcon },
+  selfPay: { label: "Self-pay", tone: "neutral", icon: SelfPayIcon },
+  primary: { label: "Primary", tone: "information", icon: PrimaryIcon },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** Whether a consent was given, withdrawn or never asked. */
+export const CONSENT_TAGS = {
+  given: { label: "Given", tone: "positive", icon: CompletedIcon },
+  withdrawn: { label: "Withdrawn", tone: "neutral", icon: RefusedIcon },
+  notAsked: { label: "Not asked", tone: "neutral", icon: NotAskedIcon },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** How close a possible duplicate record is. */
+export const DUPLICATE_TAGS = {
+  likely: {
+    label: "Likely the same person",
+    tone: "warning",
+    icon: DuplicateIcon,
+  },
+  possible: {
+    label: "Possibly the same person",
+    tone: "neutral",
+    icon: DuplicateIcon,
+  },
+  likelyShort: {
+    label: "Likely the same",
+    tone: "warning",
+    icon: DuplicateIcon,
+  },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** A family member's roles for the patient. */
+export const FAMILY_TAGS = {
+  guardian: { label: "Guardian", tone: "highlight", icon: GuardianIcon },
+  emergencyContact: {
+    label: "Emergency contact",
+    tone: "information",
+    icon: EmergencyContactIcon,
+  },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** The record's own state, shown under the patient's name and in lists. */
+export const PATIENT_RECORD_TAGS = {
+  restricted: {
+    label: "Restricted record",
+    tone: "highlight",
+    icon: LockedIcon,
+  },
+  unidentified: {
+    label: "Not yet identified",
+    tone: "warning",
+    icon: UnidentifiedPatientIcon,
+  },
+  incomplete: {
+    label: "Details missing",
+    tone: "warning",
+    icon: IncompleteRegistrationIcon,
+  },
+  complete: { label: "Complete", tone: "positive", icon: FinishVisitIcon },
+  noReminders: {
+    label: "No text reminders",
+    tone: "neutral",
+    icon: NoRemindersIcon,
+  },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** Whether a merge of two records can still be undone. */
+export const MERGE_TAGS = {
+  undone: { label: "Undone", tone: "neutral", icon: MergeUndoneIcon },
+  canUndo: { label: "Can undo", tone: "information", icon: UndoIcon },
+  final: { label: "Final", tone: "neutral", icon: LockedIcon },
+} as const satisfies Record<string, StatusPresentation>;
 
 export const ELIGIBILITY_RESULT_OPTIONS = [
   {
@@ -355,15 +490,24 @@ export const PHOTO_ACCEPTED_FILES = {
 
 /** How a document's virus check went, for the list and the upload dialog. */
 export const DOCUMENT_STATUS_PRESENTATION = {
-  PENDING_UPLOAD: { label: "Not finished uploading", tone: "warning" },
-  CLEAN: { label: "Checked", tone: "positive" },
+  PENDING_UPLOAD: {
+    label: "Not finished uploading",
+    tone: "warning",
+    icon: UploadDocumentIcon,
+  },
+  CLEAN: { label: "Checked", tone: "positive", icon: FileCheckedIcon },
   REJECTED: {
     label: "Refused: not the file type it claimed",
     tone: "negative",
+    icon: FileRefusedIcon,
   },
-  INFECTED: { label: "Refused: a virus was found", tone: "negative" },
-  REMOVED: { label: "Removed", tone: "neutral" },
-} as const satisfies Record<string, { label: string; tone: StatusTone }>;
+  INFECTED: {
+    label: "Refused: a virus was found",
+    tone: "negative",
+    icon: VirusFoundIcon,
+  },
+  REMOVED: { label: "Removed", tone: "neutral", icon: DeleteIcon },
+} as const satisfies Record<string, StatusPresentation>;
 
 /** Uploads are checked for viruses; when the scanner is busy, try again shortly. */
 export const DOCUMENT_CHECK_RETRY = {

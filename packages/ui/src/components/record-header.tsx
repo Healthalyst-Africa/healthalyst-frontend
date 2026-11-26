@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import { StatusLabel } from "@healthalyst/ui/components/status-label";
 import { cn } from "@healthalyst/ui/lib/utilities";
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 
-type RecordHeaderStatus = { key: string; label: string; tone: StatusTone };
+type RecordHeaderStatus = { key: string } & StatusPresentation;
 
 /**
  * The top of a record's page: its name as the page heading, short details
@@ -47,7 +47,11 @@ export function RecordHeader({
           <ul className="flex flex-wrap gap-2" aria-label="Status">
             {statuses.map((status) => (
               <li key={status.key}>
-                <StatusLabel tone={status.tone}>{status.label}</StatusLabel>
+                <StatusLabel
+                  label={status.label}
+                  tone={status.tone}
+                  icon={status.icon}
+                />
               </li>
             ))}
           </ul>

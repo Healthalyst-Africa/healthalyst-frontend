@@ -118,9 +118,11 @@ export function DataTableCardList<RowData>({
                 {titleColumn && <CardTitle cell={titleColumn.getCell(row)} />}
               </div>
               {statusEntry?.cell.kind === "status" && (
-                <StatusLabel tone={statusEntry.cell.tone}>
-                  {statusEntry.cell.label}
-                </StatusLabel>
+                <StatusLabel
+                  label={statusEntry.cell.label}
+                  tone={statusEntry.cell.tone}
+                  icon={statusEntry.cell.icon}
+                />
               )}
               {getRowActions && (
                 <DataTableRowActions

@@ -1,4 +1,20 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
+import {
+  CustomIcon,
+  ExpiredIcon,
+  ExpiringSoonIcon,
+  InvitationWithdrawnIcon,
+  InvitedIcon,
+  JoinedIcon,
+  LockedIcon,
+  MissingLicenceIcon,
+  NotNeededIcon,
+  NotVerifiedIcon,
+  PauseIcon,
+  PendingIcon,
+  RemovedMemberIcon,
+  VerifiedIcon,
+} from "@healthalyst/icons";
 
 export const UNEXPECTED_TEAM_RESPONSE =
   "We received an unexpected team response from HealthAlyst. Contact HealthAlyst for help.";
@@ -76,58 +92,64 @@ export type LicenceStatus =
 
 export const STAFF_STATUS_PRESENTATION: Record<
   StaffMemberStatus,
-  { label: string; tone: StatusTone }
+  StatusPresentation
 > = {
-  INVITED: { label: "Invited", tone: "information" },
-  ACTIVE: { label: "Active", tone: "positive" },
-  SUSPENDED: { label: "Suspended", tone: "warning" },
-  REVOKED: { label: "Removed", tone: "negative" },
+  INVITED: { label: "Invited", tone: "information", icon: InvitedIcon },
+  ACTIVE: { label: "Active", tone: "positive", icon: JoinedIcon },
+  SUSPENDED: { label: "Suspended", tone: "warning", icon: PauseIcon },
+  REVOKED: { label: "Removed", tone: "negative", icon: RemovedMemberIcon },
 };
 
 export const INVITATION_STATUS_PRESENTATION: Record<
   InvitationStatus,
-  { label: string; tone: StatusTone }
+  StatusPresentation
 > = {
-  PENDING: { label: "Waiting", tone: "information" },
-  ACCEPTED: { label: "Accepted", tone: "positive" },
-  REVOKED: { label: "Revoked", tone: "neutral" },
-  EXPIRED: { label: "Expired", tone: "warning" },
+  PENDING: { label: "Waiting", tone: "information", icon: PendingIcon },
+  ACCEPTED: { label: "Accepted", tone: "positive", icon: JoinedIcon },
+  REVOKED: { label: "Revoked", tone: "neutral", icon: InvitationWithdrawnIcon },
+  EXPIRED: { label: "Expired", tone: "warning", icon: ExpiredIcon },
 };
 
 export const LICENCE_STATUS_PRESENTATION: Record<
   LicenceStatus,
-  { label: string; tone: StatusTone; description: string }
+  StatusPresentation & { description: string }
 > = {
   NONE: {
     label: "Not needed",
     tone: "neutral",
+    icon: NotNeededIcon,
     description: "This person's roles do not include clinical work.",
   },
   MISSING: {
     label: "Missing",
     tone: "negative",
+    icon: MissingLicenceIcon,
     description:
       "This person has clinical permissions but no practising licence on record.",
   },
   UNVERIFIED: {
     label: "Not checked",
     tone: "highlight",
+    icon: NotVerifiedIcon,
     description:
       "A licence is on record but nobody has confirmed it with the regulator yet.",
   },
   VERIFIED: {
     label: "Verified",
     tone: "positive",
+    icon: VerifiedIcon,
     description: "The licence was confirmed and is current.",
   },
   EXPIRING: {
     label: "Expiring soon",
     tone: "warning",
+    icon: ExpiringSoonIcon,
     description: "The licence expires within 30 days.",
   },
   EXPIRED: {
     label: "Expired",
     tone: "negative",
+    icon: ExpiredIcon,
     description:
       "The licence has expired, so this person's clinical permissions are paused.",
   },
@@ -217,3 +239,9 @@ export const PERMISSION_AREAS = [
   { prefix: "queue", label: "Queue" },
   { prefix: "triage", label: "Triage" },
 ] as const;
+
+/** Whether a role came with HealthAlyst or was made by the organisation. */
+export const ROLE_TYPE_TAGS = {
+  preset: { label: "Preset", tone: "neutral", icon: LockedIcon },
+  custom: { label: "Custom", tone: "information", icon: CustomIcon },
+} as const satisfies Record<string, StatusPresentation>;

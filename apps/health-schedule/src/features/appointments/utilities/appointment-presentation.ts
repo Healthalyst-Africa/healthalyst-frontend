@@ -1,5 +1,8 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
-import { APPOINTMENT_STATUS_PRESENTATION } from "~/features/appointments/config/appointments";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
+import {
+  APPOINTMENT_STATUS_PRESENTATION,
+  BOOKING_TAGS,
+} from "~/features/appointments/config/appointments";
 import type {
   Appointment,
   DayBoardCalendar,
@@ -66,12 +69,12 @@ export function needsFreshSlots(code: string | null): boolean {
 export function describeAppointmentStatus(
   appointment: Pick<Appointment, "status" | "endsAt">,
   now: Date = new Date()
-): { label: string; tone: StatusTone } {
+): StatusPresentation {
   if (
     appointment.status === "BOOKED" &&
     new Date(appointment.endsAt).getTime() <= now.getTime()
   ) {
-    return { label: "Not checked in", tone: "neutral" };
+    return BOOKING_TAGS.notCheckedIn;
   }
   return APPOINTMENT_STATUS_PRESENTATION[appointment.status];
 }

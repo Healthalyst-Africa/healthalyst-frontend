@@ -19,9 +19,8 @@ import {
 import { LeftWithoutBeingSeenDialog } from "~/features/patient-flow/components/left-without-being-seen-dialog";
 import { SendOnDialog } from "~/features/patient-flow/components/send-on-dialog";
 import {
-  CLOCK_STATE_TONES,
+  NOT_TRIAGED_TAG,
   PATIENT_FLOW_PERMISSIONS,
-  QUEUE_ENTRY_STATUS_PRESENTATION,
   TRIAGE_BAND_PRESENTATION,
 } from "~/features/patient-flow/config/patient-flow";
 import {
@@ -32,9 +31,10 @@ import {
 } from "~/features/patient-flow/hooks/use-patient-flow";
 import type { QueueEntry } from "~/features/patient-flow/schemas/patient-flow-response-schemas";
 import {
+  describeClockTag,
   describePatientName,
+  describeQueueStatusTag,
   describeWait,
-  isLiveEntryStatus,
   readFlowEmphasis,
 } from "~/features/patient-flow/utilities/front-desk";
 import {
@@ -168,13 +168,10 @@ function QueueBoard({ branch }: { branch: WorkspaceBranch }) {
       key: "status",
       label: "Status",
       size: "compact",
-      getCell: (entry) =>
-        isLiveEntryStatus(entry.status)
-          ? {
-              kind: "status",
-              ...QUEUE_ENTRY_STATUS_PRESENTATION[entry.status],
-            }
-          : { kind: "status", label: entry.status, tone: "neutral" },
+      getCell: (entry) => ({
+        kind: "status",
+        ...describeQueueStatusTag(entry.status),
+      }),
     },
     {
       key: "triage",
@@ -183,7 +180,7 @@ function QueueBoard({ branch }: { branch: WorkspaceBranch }) {
       getCell: (entry) =>
         entry.triageBand
           ? { kind: "status", ...TRIAGE_BAND_PRESENTATION[entry.triageBand] }
-          : { kind: "status", label: "Not yet", tone: "neutral" },
+          : { kind: "status", ...NOT_TRIAGED_TAG },
     },
     {
       key: "waiting",
@@ -191,8 +188,10 @@ function QueueBoard({ branch }: { branch: WorkspaceBranch }) {
       size: "compact",
       getCell: (entry) => ({
         kind: "status",
-        label: describeWait(entry.waitingMinutes, entry.waitState),
-        tone: entry.waitState ? CLOCK_STATE_TONES[entry.waitState] : "neutral",
+        ...describeClockTag(
+          describeWait(entry.waitingMinutes, entry.waitState),
+          entry.waitState
+        ),
       }),
     },
   ];

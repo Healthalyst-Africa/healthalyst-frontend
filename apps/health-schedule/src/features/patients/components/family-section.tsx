@@ -27,6 +27,7 @@ import { EmptyOrganizationsIllustration } from "@healthalyst/ui/illustrations/em
 import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import { HEALTH_SCHEDULE_ROUTES } from "~/config/routes";
 import {
+  FAMILY_TAGS,
   PATIENT_FIELD_LIMITS,
   PATIENT_PERMISSIONS,
   RELATIONSHIP_TYPE_LABELS,
@@ -219,11 +220,9 @@ function RelationshipItem({
           ) : (
             name
           )}
-          {relationship.isGuardian && (
-            <StatusLabel tone="highlight">Guardian</StatusLabel>
-          )}
+          {relationship.isGuardian && <StatusLabel {...FAMILY_TAGS.guardian} />}
           {relationship.isEmergencyContact && (
-            <StatusLabel tone="information">Emergency contact</StatusLabel>
+            <StatusLabel {...FAMILY_TAGS.emergencyContact} />
           )}
         </span>
         <span className="text-caption text-muted-foreground">

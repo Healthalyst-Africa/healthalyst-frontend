@@ -172,11 +172,7 @@ export function TeamInvitationsSection({
         }
         title={selectedInvitation ? describeFullName(selectedInvitation) : ""}
         titleAccessory={
-          selectedPresentation && (
-            <StatusLabel tone={selectedPresentation.tone}>
-              {selectedPresentation.label}
-            </StatusLabel>
-          )
+          selectedPresentation && <StatusLabel {...selectedPresentation} />
         }
         description={
           selectedInvitation?.email ?? selectedInvitation?.phone ?? undefined

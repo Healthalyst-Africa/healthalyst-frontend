@@ -31,8 +31,8 @@ import { TextField } from "@healthalyst/ui/components/text-field";
 import { announceSuccess } from "@healthalyst/ui/components/toast-region";
 import { ScrollRegion } from "@healthalyst/ui/components/scroll-region";
 import {
+  COVER_TAGS,
   COVERAGE_RELATIONSHIP_OPTIONS,
-  ELIGIBILITY_PRESENTATION,
   PATIENT_FIELD_LIMITS,
   PATIENT_PERMISSIONS,
   PAYER_TYPE_OPTIONS,
@@ -54,6 +54,7 @@ import {
 import type { PatientCoverage } from "~/features/patients/schemas/patient-response-schemas";
 import {
   describeCoverage,
+  describeCoverTag,
   describeDate,
 } from "~/features/patients/utilities/patient-presentation";
 import {
@@ -183,9 +184,7 @@ export function CoverageSection({ patientId }: { patientId: string }) {
         <ScrollRegion accessibleLabel="Insurance cover" size="large">
           <ul className="flex flex-col gap-4">
             {activeCoverage.map((coverage) => {
-              const eligibility = coverage.isExpired
-                ? { label: "Cover expired", tone: "negative" as const }
-                : ELIGIBILITY_PRESENTATION[coverage.eligibility];
+              const coverTag = describeCoverTag(coverage);
               return (
                 <li
                   key={coverage.id}
@@ -197,11 +196,9 @@ export function CoverageSection({ patientId }: { patientId: string }) {
                         {describeCoverage(coverage)}
                       </span>
                       {coverage.isPrimary && (
-                        <StatusLabel tone="information">Primary</StatusLabel>
+                        <StatusLabel {...COVER_TAGS.primary} />
                       )}
-                      <StatusLabel tone={eligibility.tone}>
-                        {eligibility.label}
-                      </StatusLabel>
+                      <StatusLabel {...coverTag} />
                     </div>
                     {canEdit && (
                       <ActionMenu

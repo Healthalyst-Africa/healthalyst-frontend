@@ -1,7 +1,10 @@
+import { InProgressIcon, WaitTimeIcon } from "@healthalyst/icons";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 import type { DataTableRowEmphasis } from "@healthalyst/ui/types/data-table";
 import { differenceInYears, format, parseISO } from "date-fns";
 import {
   PATIENT_SEX_OPTIONS,
+  CLOCK_STATE_TONES,
   QUEUE_ENTRY_STATUS_PRESENTATION,
 } from "~/features/patient-flow/config/patient-flow";
 import type {
@@ -149,6 +152,28 @@ export function describeWait(
 ): string {
   const wait = describeMinutes(minutes);
   return waitState === "RED" ? `${wait}, over target` : wait;
+}
+
+/**
+ * A queue entry's status as a tag. A status the app does not know yet keeps
+ * its API name, with the in-progress icon.
+ */
+export function describeQueueStatusTag(status: string): StatusPresentation {
+  return isLiveEntryStatus(status)
+    ? QUEUE_ENTRY_STATUS_PRESENTATION[status]
+    : { label: status, tone: "neutral", icon: InProgressIcon };
+}
+
+/** A wait or visit clock as a tag, coloured against the facility's target. */
+export function describeClockTag(
+  label: string,
+  state: keyof typeof CLOCK_STATE_TONES | null
+): StatusPresentation {
+  return {
+    label,
+    tone: state ? CLOCK_STATE_TONES[state] : "neutral",
+    icon: WaitTimeIcon,
+  };
 }
 
 /** Emergencies first, then urgent, then routine; patients not yet triaged last. */

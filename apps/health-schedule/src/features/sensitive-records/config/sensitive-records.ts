@@ -1,3 +1,5 @@
+import { CompletedIcon, PendingIcon, RefusedIcon } from "@healthalyst/icons";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 /** HealthSchedule API paths for restricted records and emergency access. */
 export const SENSITIVE_RECORD_ENDPOINTS = {
   sensitivity: (patientId: string) =>
@@ -57,3 +59,10 @@ export const SENSITIVE_RECORD_LIMITS = {
   /** How long emergency access lasts, as the API grants it. */
   emergencyAccessHours: 4,
 } as const;
+
+/** Where an emergency opening of a restricted record stands. */
+export const ACCESS_REVIEW_TAGS = {
+  waiting: { label: "Waiting for review", tone: "warning", icon: PendingIcon },
+  justified: { label: "Justified", tone: "positive", icon: CompletedIcon },
+  notJustified: { label: "Not justified", tone: "negative", icon: RefusedIcon },
+} as const satisfies Record<string, StatusPresentation>;

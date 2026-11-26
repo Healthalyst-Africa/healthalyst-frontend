@@ -132,9 +132,7 @@ export function NotesSection({
                       >
                         {describeNoteTitle(note)}
                       </span>
-                      <StatusLabel tone={status.tone}>
-                        {status.label}
-                      </StatusLabel>
+                      <StatusLabel {...status} />
                     </span>
                     <span className="text-xs text-muted-foreground">
                       {describeNoteType(note.type)} ·{" "}

@@ -158,6 +158,24 @@ code, repository policies, or branding into it.
 - Decorative icons beside visible text are `aria-hidden`. Icon-only controls
   need an accessible name.
 
+### Tags
+
+- Every tag (status, urgency, role, flag or any short label in a pill) has an
+  icon that stands for its meaning, such as a siren for "Emergency". The
+  icon and words sit centred on the same line.
+- Tags are never built by hand on a page. The shared `StatusLabel` is the one
+  tag component, and a table's status cell renders the same tag. Both take a
+  `StatusPresentation`: `{ label, tone, icon }`, with the icon passed as a
+  component from `@healthalyst/icons`.
+- Define each tag once, in the owning feature's `config`, as a map that
+  `satisfies Record<string, StatusPresentation>`, such as
+  `TRIAGE_BAND_PRESENTATION` or `ORDER_TAGS`. Pages spread it:
+  `<StatusLabel {...TRIAGE_BAND_PRESENTATION[band]} />`. A label that
+  carries a value, such as "Booked 9:00 am", spreads the defined tag and
+  replaces only its `label`.
+- In compact lists, such as queue cards, a fact may show its icon alone,
+  with its words read out and shown on hover.
+
 ### Illustration sourcing and storage
 
 - Illustrations come from GitLab SVGs (`@gitlab/svgs`, MIT licence). Keep to

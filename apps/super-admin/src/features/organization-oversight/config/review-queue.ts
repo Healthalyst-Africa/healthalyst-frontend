@@ -1,6 +1,6 @@
 import type { DataTableColumn } from "@healthalyst/ui/types/data-table";
 import type { FilterBarOption } from "@healthalyst/ui/types/filter-bar";
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 import {
   APPLICATION_DATE_FORMATTER,
   APPLICATION_STATUS_PRESENTATION,
@@ -10,6 +10,18 @@ import type {
   OrganizationApplication,
   OrganizationDocument,
 } from "~/features/organization-oversight/types/organization-types";
+import {
+  CancelledIcon,
+  CompletedIcon,
+  FileCheckedIcon,
+  FileRefusedIcon,
+  PauseIcon,
+  PendingIcon,
+  SwitchOnIcon,
+  UnderReviewIcon,
+  UploadDocumentIcon,
+  VirusFoundIcon,
+} from "@healthalyst/icons";
 
 /** The address query parameter that holds the application open for review. */
 export const REVIEW_APPLICATION_QUERY_PARAMETER = "application";
@@ -116,14 +128,30 @@ export const REVIEW_DOCUMENT_TYPE_LABELS: Record<
 
 export const REVIEW_DOCUMENT_STATUS_PRESENTATION: Record<
   OrganizationDocument["status"],
-  { label: string; tone: StatusTone }
+  StatusPresentation
 > = {
-  UPLOADING: { label: "Upload not finished", tone: "warning" },
-  SCANNING: { label: "Checking file", tone: "information" },
-  CLEAN: { label: "Passed security check", tone: "positive" },
-  ACCEPTED: { label: "Accepted", tone: "positive" },
-  INFECTED: { label: "Failed security check", tone: "negative" },
-  REJECTED: { label: "Rejected", tone: "negative" },
+  UPLOADING: {
+    label: "Upload not finished",
+    tone: "warning",
+    icon: UploadDocumentIcon,
+  },
+  SCANNING: {
+    label: "Checking file",
+    tone: "information",
+    icon: UnderReviewIcon,
+  },
+  CLEAN: {
+    label: "Passed security check",
+    tone: "positive",
+    icon: FileCheckedIcon,
+  },
+  ACCEPTED: { label: "Accepted", tone: "positive", icon: CompletedIcon },
+  INFECTED: {
+    label: "Failed security check",
+    tone: "negative",
+    icon: VirusFoundIcon,
+  },
+  REJECTED: { label: "Rejected", tone: "negative", icon: FileRefusedIcon },
 };
 
 export const REVIEW_CONTENT_TYPE_LABELS: Record<string, string> = {
@@ -134,10 +162,10 @@ export const REVIEW_CONTENT_TYPE_LABELS: Record<string, string> = {
 
 export const REVIEW_PRODUCT_STATUS_PRESENTATION: Record<
   string,
-  { label: string; tone: StatusTone }
+  StatusPresentation
 > = {
-  PENDING: { label: "Requested", tone: "information" },
-  ACTIVE: { label: "Active", tone: "positive" },
-  SUSPENDED: { label: "Suspended", tone: "negative" },
-  CANCELLED: { label: "Cancelled", tone: "neutral" },
+  PENDING: { label: "Requested", tone: "information", icon: PendingIcon },
+  ACTIVE: { label: "Active", tone: "positive", icon: SwitchOnIcon },
+  SUSPENDED: { label: "Suspended", tone: "negative", icon: PauseIcon },
+  CANCELLED: { label: "Cancelled", tone: "neutral", icon: CancelledIcon },
 };

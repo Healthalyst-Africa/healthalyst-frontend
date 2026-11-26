@@ -1,4 +1,12 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
+import {
+  AccountSecurityIcon,
+  DeactivatedIcon,
+  InProgressIcon,
+  JoinedIcon,
+  PauseIcon,
+  TwoStepOffIcon,
+} from "@healthalyst/icons";
 
 export const PLATFORM_ROLES = [
   "SUPER_ADMIN",
@@ -80,12 +88,20 @@ export const PLATFORM_ROLE_PRESENTATION: Record<
 
 export const PLATFORM_STAFF_STATUS_PRESENTATION: Record<
   PlatformStaffStatus,
-  { label: string; tone: StatusTone }
+  StatusPresentation
 > = {
-  PENDING_VERIFICATION: { label: "Setting up", tone: "information" },
-  ACTIVE: { label: "Active", tone: "positive" },
-  SUSPENDED: { label: "Suspended", tone: "warning" },
-  DEACTIVATED: { label: "Deactivated", tone: "negative" },
+  PENDING_VERIFICATION: {
+    label: "Setting up",
+    tone: "information",
+    icon: InProgressIcon,
+  },
+  ACTIVE: { label: "Active", tone: "positive", icon: JoinedIcon },
+  SUSPENDED: { label: "Suspended", tone: "warning", icon: PauseIcon },
+  DEACTIVATED: {
+    label: "Deactivated",
+    tone: "negative",
+    icon: DeactivatedIcon,
+  },
 };
 
 export const STAFF_DATE_TIME_FORMATTER = new Intl.DateTimeFormat("en-NG", {
@@ -100,3 +116,9 @@ export const platformStaffWorkspaceQueryKey = (staffAccountId: string) =>
 
 export const platformStaffQueryKey = (staffAccountId: string) =>
   ["platform-staff", staffAccountId, "staff-members"] as const;
+
+/** Whether a staff member has set up two-step sign-in. */
+export const TWO_STEP_SIGN_IN_TAGS = {
+  setUp: { label: "Set up", tone: "positive", icon: AccountSecurityIcon },
+  notSetUp: { label: "Not set up", tone: "warning", icon: TwoStepOffIcon },
+} as const satisfies Record<string, StatusPresentation>;

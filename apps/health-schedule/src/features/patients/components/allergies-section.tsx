@@ -23,6 +23,7 @@ import {
   ALLERGY_CATEGORY_OPTIONS,
   ALLERGY_END_OPTIONS,
   ALLERGY_SEVERITY_OPTIONS,
+  ALLERGY_SEVERITY_TAG,
   ALLERGY_STATUS_PRESENTATION,
   PATIENT_FIELD_LIMITS,
   PATIENT_PERMISSIONS,
@@ -103,11 +104,7 @@ export function AllergiesSection({ patientId }: { patientId: string }) {
       headingLevel={2}
       headingAccessory={
         allergies && (
-          <StatusLabel
-            tone={ALLERGY_STATUS_PRESENTATION[allergies.status].tone}
-          >
-            {ALLERGY_STATUS_PRESENTATION[allergies.status].label}
-          </StatusLabel>
+          <StatusLabel {...ALLERGY_STATUS_PRESENTATION[allergies.status]} />
         )
       }
     >
@@ -151,12 +148,15 @@ export function AllergiesSection({ patientId }: { patientId: string }) {
                     <span className="flex flex-wrap items-center gap-2 font-medium text-destructive">
                       {describeAllergy(allergy)}
                       {allergy.severity && (
-                        <StatusLabel tone="negative">
-                          {labelOf(
-                            ALLERGY_SEVERITY_OPTIONS,
-                            allergy.severity
-                          ) ?? allergy.severity}
-                        </StatusLabel>
+                        <StatusLabel
+                          {...ALLERGY_SEVERITY_TAG}
+                          label={
+                            labelOf(
+                              ALLERGY_SEVERITY_OPTIONS,
+                              allergy.severity
+                            ) ?? allergy.severity
+                          }
+                        />
                       )}
                     </span>
                     <span className="text-caption text-muted-foreground">

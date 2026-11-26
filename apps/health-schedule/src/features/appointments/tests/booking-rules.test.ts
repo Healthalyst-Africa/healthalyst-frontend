@@ -248,7 +248,7 @@ describe("appointments", () => {
         appointment({ endsAt: "2026-11-23T09:20:00+01:00" }),
         now
       )
-    ).toEqual({ label: "Not checked in", tone: "neutral" });
+    ).toMatchObject({ label: "Not checked in", tone: "neutral" });
     expect(
       describeAppointmentStatus(
         appointment({ endsAt: "2026-11-23T10:20:00+01:00" }),

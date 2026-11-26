@@ -18,6 +18,7 @@ import {
 import {
   NEW_WORKING_PERIOD,
   SCHEDULE_FIELD_LIMITS,
+  SCHEDULE_TAGS,
 } from "~/features/schedule-setup/config/schedule-setup";
 import {
   useReplaceCalendarHours,
@@ -252,9 +253,11 @@ export function CalendarSheet({
       title={calendar?.name ?? ""}
       titleAccessory={
         calendar && (
-          <StatusLabel tone={calendar.isActive ? "positive" : "neutral"}>
-            {calendar.isActive ? "Taking bookings" : "Paused"}
-          </StatusLabel>
+          <StatusLabel
+            {...(calendar.isActive
+              ? SCHEDULE_TAGS.takingBookings
+              : SCHEDULE_TAGS.paused)}
+          />
         )
       }
       description={

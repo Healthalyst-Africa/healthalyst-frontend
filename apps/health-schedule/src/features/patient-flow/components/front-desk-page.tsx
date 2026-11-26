@@ -32,7 +32,8 @@ import { BOOKING_PERMISSIONS } from "~/features/appointments/config/appointments
 import { UnknownPatientDialog } from "~/features/patient-flow/components/unknown-patient-dialog";
 import { RegisterPatientDialog } from "~/features/patients/components/register-patient-dialog";
 import {
-  CLOCK_STATE_TONES,
+  ARRIVAL_TAGS,
+  NOT_TRIAGED_TAG,
   PATIENT_FLOW_PERMISSIONS,
   PATIENT_SEARCH_CONFIGURATION,
   TRIAGE_BAND_PRESENTATION,
@@ -49,16 +50,17 @@ import type {
   PatientMatch,
 } from "~/features/patient-flow/schemas/patient-flow-response-schemas";
 import {
+  describeClockTag,
   describeMinutes,
   describePatientMatch,
   describePatientMatchName,
   describePatientName,
+  type ExpectedArrival,
   findExpectedArrival,
   listExpectedArrivals,
   readFlowEmphasis,
   sortByTriage,
   summarizeFrontDesk,
-  type ExpectedArrival,
 } from "~/features/patient-flow/utilities/front-desk";
 import {
   buildQueueTargetOptions,
@@ -283,10 +285,10 @@ function FrontDeskWorkspace({
         return appointment
           ? {
               kind: "status",
+              ...ARRIVAL_TAGS.booked,
               label: `Booked ${describeBranchClockTime(appointment.startsAt)}`,
-              tone: "information",
             }
-          : { kind: "status", label: "Walk-in", tone: "neutral" };
+          : { kind: "status", ...ARRIVAL_TAGS.walkIn };
       },
     },
   ];
@@ -328,7 +330,7 @@ function FrontDeskWorkspace({
       getCell: (visit) =>
         visit.triageBand
           ? { kind: "status", ...TRIAGE_BAND_PRESENTATION[visit.triageBand] }
-          : { kind: "status", label: "Not checked yet", tone: "neutral" },
+          : { kind: "status", ...NOT_TRIAGED_TAG },
     },
     {
       key: "time",
@@ -336,8 +338,10 @@ function FrontDeskWorkspace({
       size: "compact",
       getCell: (visit) => ({
         kind: "status",
-        label: describeMinutes(visit.visitMinutes),
-        tone: CLOCK_STATE_TONES[visit.visitState],
+        ...describeClockTag(
+          describeMinutes(visit.visitMinutes),
+          visit.visitState
+        ),
       }),
     },
   ];

@@ -1,4 +1,14 @@
-import type { StatusTone } from "@healthalyst/ui/types/status-tone";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
+import {
+  ExpiredIcon,
+  InvitationWithdrawnIcon,
+  JoinedIcon,
+  PartnershipActiveIcon,
+  PartnershipEndedIcon,
+  PauseIcon,
+  PendingIcon,
+  RefusedIcon,
+} from "@healthalyst/icons";
 
 export const PARTNER_ENDPOINTS = {
   partnerships: "/v1/partners",
@@ -86,13 +96,17 @@ export type PartnershipStatus = (typeof PARTNERSHIP_STATUSES)[number];
 
 export const PARTNERSHIP_STATUS_PRESENTATION: Record<
   PartnershipStatus,
-  { label: string; tone: StatusTone }
+  StatusPresentation
 > = {
-  PENDING: { label: "Waiting for a reply", tone: "information" },
-  ACTIVE: { label: "Active", tone: "positive" },
-  SUSPENDED: { label: "Paused", tone: "warning" },
-  TERMINATED: { label: "Ended", tone: "neutral" },
-  DECLINED: { label: "Declined", tone: "negative" },
+  PENDING: {
+    label: "Waiting for a reply",
+    tone: "information",
+    icon: PendingIcon,
+  },
+  ACTIVE: { label: "Active", tone: "positive", icon: PartnershipActiveIcon },
+  SUSPENDED: { label: "Paused", tone: "warning", icon: PauseIcon },
+  TERMINATED: { label: "Ended", tone: "neutral", icon: PartnershipEndedIcon },
+  DECLINED: { label: "Declined", tone: "negative", icon: RefusedIcon },
 };
 
 export const ACCESS_LEVELS = [
@@ -128,12 +142,16 @@ export const INVITATION_ACCESS_OPTIONS = [
 
 export const PARTNER_INVITATION_STATUS_PRESENTATION: Record<
   "PENDING" | "ACCEPTED" | "REVOKED" | "EXPIRED",
-  { label: string; tone: StatusTone }
+  StatusPresentation
 > = {
-  PENDING: { label: "Waiting", tone: "information" },
-  ACCEPTED: { label: "Joined", tone: "positive" },
-  REVOKED: { label: "Withdrawn", tone: "neutral" },
-  EXPIRED: { label: "Expired", tone: "warning" },
+  PENDING: { label: "Waiting", tone: "information", icon: PendingIcon },
+  ACCEPTED: { label: "Joined", tone: "positive", icon: JoinedIcon },
+  REVOKED: {
+    label: "Withdrawn",
+    tone: "neutral",
+    icon: InvitationWithdrawnIcon,
+  },
+  EXPIRED: { label: "Expired", tone: "warning", icon: ExpiredIcon },
 };
 
 export const PARTNER_DATE_FORMATTER = new Intl.DateTimeFormat("en-NG", {

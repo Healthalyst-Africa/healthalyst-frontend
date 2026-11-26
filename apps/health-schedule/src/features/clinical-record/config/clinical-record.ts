@@ -1,3 +1,15 @@
+import {
+  ActiveProblemIcon,
+  DiscardedIcon,
+  DraftIcon,
+  EnteredInErrorIcon,
+  LockedIcon,
+  ResolvedIcon,
+  SignedIcon,
+  SwitchOffIcon,
+  SwitchOnIcon,
+} from "@healthalyst/icons";
+import type { StatusPresentation } from "@healthalyst/ui/types/status-tone";
 /** HealthSchedule API paths for notes, problems, diagnoses and the timeline. */
 export const CLINICAL_RECORD_ENDPOINTS = {
   patientNotes: (patientId: string) =>
@@ -59,17 +71,32 @@ export const DEFAULT_TEMPLATE_BY_NOTE_TYPE = {
 } as const;
 
 export const NOTE_STATUS_PRESENTATION = {
-  DRAFT: { label: "Draft", tone: "highlight" },
-  SIGNED: { label: "Signed", tone: "positive" },
-  ENTERED_IN_ERROR: { label: "Entered in error", tone: "negative" },
-  DISCARDED: { label: "Discarded", tone: "neutral" },
-} as const;
+  DRAFT: { label: "Draft", tone: "highlight", icon: DraftIcon },
+  SIGNED: { label: "Signed", tone: "positive", icon: SignedIcon },
+  ENTERED_IN_ERROR: {
+    label: "Entered in error",
+    tone: "negative",
+    icon: EnteredInErrorIcon,
+  },
+  DISCARDED: { label: "Discarded", tone: "neutral", icon: DiscardedIcon },
+} as const satisfies Record<string, StatusPresentation>;
 
 export const PROBLEM_STATUS_PRESENTATION = {
-  ACTIVE: { label: "Active", tone: "warning" },
-  RESOLVED: { label: "Resolved", tone: "neutral" },
-  ENTERED_IN_ERROR: { label: "Entered in error", tone: "negative" },
-} as const;
+  ACTIVE: { label: "Active", tone: "warning", icon: ActiveProblemIcon },
+  RESOLVED: { label: "Resolved", tone: "neutral", icon: ResolvedIcon },
+  ENTERED_IN_ERROR: {
+    label: "Entered in error",
+    tone: "negative",
+    icon: EnteredInErrorIcon,
+  },
+} as const satisfies Record<string, StatusPresentation>;
+
+/** Whether a note template is offered to clinicians. */
+export const NOTE_TEMPLATE_TAGS = {
+  builtIn: { label: "Built in", tone: "neutral", icon: LockedIcon },
+  offered: { label: "Offered", tone: "positive", icon: SwitchOnIcon },
+  switchedOff: { label: "Switched off", tone: "neutral", icon: SwitchOffIcon },
+} as const satisfies Record<string, StatusPresentation>;
 
 export const TIMELINE_KIND_LABELS = {
   VISIT: "Visit",
