@@ -16,8 +16,17 @@ const CORE_RULE_TYPES = [
   "required_status_checks",
   "code_scanning",
 ];
-const BRANCH_CHANGING_COMMAND =
-  /\bgit(?:\s+-[cC]\s+\S+|\s+--?[\w-]+(?:=\S+)?)*\s+(?:pull|merge|rebase|reset|checkout|switch|stash)\b/;
+const BRANCH_CHANGING_SUBCOMMANDS = new Set([
+  "pull",
+  "merge",
+  "rebase",
+  "reset",
+  "checkout",
+  "switch",
+  "stash",
+]);
+// Git options that take the next word as their value, as in `git -C . pull`.
+const GIT_OPTIONS_WITH_SEPARATE_VALUE = new Set(["-c", "-C"]);
 
 function readRepositoryFile(relativePath) {
   return readFileSync(
@@ -38,12 +47,29 @@ function findRequiredStatusChecks(ruleset) {
   return rule.parameters;
 }
 
+// Reads the hook word by word rather than with one regular expression, so
+// its running time grows only with the length of the hook.
 function findBranchChangingCommand(hookText) {
-  const commandLines = hookText
-    .split(/\r?\n/)
-    .filter((line) => !line.trim().startsWith("#"))
-    .join("\n");
-  return commandLines.match(BRANCH_CHANGING_COMMAND)?.[0] ?? null;
+  for (const line of hookText.split(/\r?\n/)) {
+    if (line.trim().startsWith("#")) continue;
+    const words = line.split(/[\s;&|()]+/).filter(Boolean);
+    for (const [wordIndex, word] of words.entries()) {
+      if (word !== "git") continue;
+      let subcommandIndex = wordIndex + 1;
+      while (words[subcommandIndex]?.startsWith("-")) {
+        subcommandIndex += GIT_OPTIONS_WITH_SEPARATE_VALUE.has(
+          words[subcommandIndex]
+        )
+          ? 2
+          : 1;
+      }
+      const subcommand = words[subcommandIndex];
+      if (BRANCH_CHANGING_SUBCOMMANDS.has(subcommand)) {
+        return `git ${subcommand}`;
+      }
+    }
+  }
+  return null;
 }
 
 const integrationBranchRuleset = readRuleset("ruleset-dev.json");
@@ -122,6 +148,8 @@ describe("pre-push hook", () => {
       "pnpm build",
       "git fetch origin && pnpm build",
       "# never run git pull here\npnpm build",
+      // The first version of this guard took longer than 17 seconds on this.
+      `git${" -c -c".repeat(22)} status`,
     ]) {
       assert.equal(findBranchChangingCommand(hookText), null, hookText);
     }

@@ -36,6 +36,8 @@ The outcome:
 
 The plan was updated after the verifier and security reviewer read the change. They found that the settings script's preview cannot show this change, and that `--apply` rewrites every setting, so steps 7 and 9 now compare the live rulesets directly and apply only the `dev` ruleset. The test also gained the enforcement and bypass checks above.
 
+CodeQL then flagged the hook guard's first version, a single regular expression, as inefficient (`js/redos`, high): crafted input made it backtrack exponentially, taking more than 17 seconds at 22 repeated options. The guard now reads each hook line word by word, which takes linear time, and that crafted input is one of its test examples.
+
 ## Order of work
 
 1. **Branch.** Cut `ci/require-up-to-date-branches` from the latest `origin/dev`. The uncommitted deletions under `docs/screenshots/` belong to #67: they stay unstaged and are never committed here.
