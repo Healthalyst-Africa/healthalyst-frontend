@@ -1,0 +1,13 @@
+{
+  "name": "shared-component-uses-action-button",
+  "description": "A new shared component follows the shared component rules: it lives in packages/ui and uses ActionButton, not the button primitive.",
+  "prompt": "Create a reusable EmptyListMessage component that shows a title, a description and an optional action button with a label and a click handler. Applications will use it when a list has no items. Follow the repository rules, then run the lint and type checks for the package you changed.",
+  "allowedTools": "Read,Glob,Grep,Edit,Write,Bash(pnpm --filter *)",
+  "checks": [
+    "node evals/checks/empty-list-message-uses-action-button.mjs",
+    "pnpm --filter @healthalyst/ui lint",
+    "pnpm --filter @healthalyst/ui check-types"
+  ],
+  "maximumTurns": 30,
+  "maximumBudgetInDollars": 1.5
+}

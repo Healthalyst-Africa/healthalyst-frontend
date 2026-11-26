@@ -1,0 +1,18 @@
+{
+  "metric": "Client CI failure rate",
+  "description": "Share of completed Client CI runs each day that failed or timed out. Cancelled and skipped runs are not counted.",
+  "events": ["push", "pull_request"],
+  "failedConclusions": ["failure", "timed_out", "startup_failure"],
+  "countedConclusions": ["success", "failure", "timed_out", "startup_failure"],
+  "baselineDays": 30,
+  "recentDays": 5,
+  "minimumBaselineDays": 7,
+  "minimumRunsPerDay": 2,
+  "minimumStandardDeviation": 0.05,
+  "tiers": {
+    "0": "Within the usual range. Nothing to do.",
+    "1": "Above one standard deviation. Logged in the workflow summary only.",
+    "2": "A sustained rise. The ci-health issue is opened or updated and Claude adds a read-only diagnosis.",
+    "3": "Above three standard deviations. Treat as urgent: fix forward or revert through a pull request."
+  }
+}

@@ -28,9 +28,10 @@ jobs:
       github.event.pull_request.draft == false &&
       github.event.pull_request.head.repo.full_name == github.repository
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Post new screenshots to Slack
-        uses: actions/github-script@v8
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PULL_REQUEST_SCREENSHOTS_WEBHOOK_URL }}
         with:

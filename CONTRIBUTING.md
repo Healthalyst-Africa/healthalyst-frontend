@@ -7,6 +7,44 @@ UI foundations. Their primary backend is the NestJS Platform API in the separate
 Read [AGENTS.md](./AGENTS.md) before changing code. It defines naming, shared
 component ownership, security, accessibility, and validation rules.
 
+## How we work
+
+Work follows HealthAlyst's AI-native delivery lifecycle
+([engineering handbook](https://github.com/Healthalyst-Africa/.github/tree/main/engineering),
+[ADR 001](docs/adrs/001-adopt-ai-native-delivery-lifecycle.md)):
+
+1. **Plan.** Open an issue with the **Change request** form, then write
+   `docs/changes/<issue-number>-<short-name>/intent.md`. The product owner
+   accepts it.
+2. **Design.** Write `spec.md` beside it. The lead developer accepts it.
+3. **Build.** In plan mode, write `plan.md`, then build to it. Nothing is
+   built without an accepted plan. Small fixes start here.
+4. **Test.** Prove the change with the checks in [CLAUDE.md](CLAUDE.md) and,
+   for screens, screenshots at desktop and mobile widths.
+5. **Deploy.** Open a pull request into `dev` using the template. Claude
+   reviews it against [REVIEW.md](REVIEW.md); a code owner approves. `dev`
+   reaches `main`, and production, through its own reviewed pull request.
+6. **Maintain.** Production incidents get an `incident` issue and a review in
+   [docs/incidents/](docs/incidents/), ending with what will catch the problem
+   next time.
+
+### Claude Code setup
+
+The repository's `.claude/settings.json` registers the HealthAlyst plugin,
+which provides the lifecycle skills (`/healthalyst-sdlc:write-intent`,
+`write-spec`, `write-plan`, `verify-change`, `write-adr`, `open-pull-request`,
+`prepare-release` and `review-incident`), a fresh-context `verifier`, a
+`security-reviewer`, and hooks that keep secrets unread and stop pushes or
+merges that skip review. Install it once per machine:
+
+```sh
+claude plugin marketplace add Healthalyst-Africa/claude-plugins
+claude plugin install healthalyst-sdlc@healthalyst --scope project
+```
+
+Never put patient records, personal details or credentials in a prompt,
+issue, change record or test fixture.
+
 ## Product scope
 
 The first product spoke is `apps/health-schedule`, package
@@ -88,12 +126,15 @@ pnpm check-format
 pnpm lint
 pnpm check-types
 pnpm test
+pnpm test-scripts
 pnpm build
 pnpm test-all
 ```
 
 Run the checks relevant to a change and report exactly what ran. `pnpm test-all`
-includes tests. Do not claim browser, API, or live service verification from a
+includes the app tests and `pnpm test-scripts`, which tests the CI health,
+delivery metrics and eval scripts. `pnpm lint` also enforces the shared
+component and icon import rules from `AGENTS.md`. Do not claim browser, API, or live service verification from a
 successful build alone.
 
 Do not commit, push, deploy, or publish without authorization. Keep local

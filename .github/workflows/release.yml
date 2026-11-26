@@ -1,0 +1,40 @@
+name: Release record
+
+# Vercel deploys main to production. Each push to main therefore gets a
+# GitHub Release named vYYYY.MM.DD.N with generated notes, so there is a
+# permanent record of what reached production and when. The delivery metrics
+# workflow measures deployment frequency and lead time from these releases.
+# See docs/adrs/002-release-records-for-vercel-deploys.md.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  record:
+    name: Record the release
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Create the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          COMMIT: ${{ github.sha }}
+        run: |
+          today="$(date -u +%Y.%m.%d)"
+          released_today="$(gh release list --repo "$REPOSITORY" --limit 100 \
+            --json tagName --jq "[.[] | select(.tagName | startswith(\"v${today}.\"))] | length")"
+          tag="v${today}.$((released_today + 1))"
+          gh release create "$tag" --repo "$REPOSITORY" --target "$COMMIT" \
+            --title "$tag" --generate-notes --latest
+          echo "Recorded release $tag for $COMMIT" >> "$GITHUB_STEP_SUMMARY"

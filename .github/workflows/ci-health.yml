@@ -1,0 +1,132 @@
+name: CI health
+
+# Closes the maintenance loop. Every day, a plain-arithmetic check compares
+# the Client CI failure rate with its own 30-day baseline using the bands in
+# scripts/ci-health/control-bands.json. No model decides whether something is
+# wrong. At tier 2 or 3 it opens (or updates) a ci-health issue; if an
+# ANTHROPIC_API_KEY secret exists, Claude then adds a read-only diagnosis.
+# Run /healthalyst-sdlc:review-incident on the issue to close the loop.
+
+on:
+  schedule:
+    - cron: "23 6 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  detect:
+    name: Detect drift
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+    outputs:
+      tier: ${{ steps.drift.outputs.tier }}
+      issue: ${{ steps.issue.outputs.number }}
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+
+      - name: Collect Client CI runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          since="$(date -u -d '45 days ago' +%Y-%m-%d)"
+          gh api --paginate \
+            "repos/${REPOSITORY}/actions/workflows/ci.yml/runs?per_page=100&status=completed&created=>=${since}" \
+            --jq '.workflow_runs[] | {conclusion, created_at, event, head_branch}' \
+            > ci-runs.jsonl
+
+      - name: Compare with the control bands
+        id: drift
+        run: >-
+          node scripts/ci-health/detect-drift.mjs
+          --runs ci-runs.jsonl
+          --bands scripts/ci-health/control-bands.json
+          --report ci-health-report.md
+          --summary "$GITHUB_STEP_SUMMARY"
+          --output "$GITHUB_OUTPUT"
+
+      - name: Open or update the CI health issue
+        id: issue
+        if: steps.drift.outputs.tier >= 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+          TIER: ${{ steps.drift.outputs.tier }}
+        run: |
+          gh label create ci-health --repo "$REPOSITORY" --color B42318 \
+            --description "Raised by the daily CI health check" --force
+          existing="$(gh issue list --repo "$REPOSITORY" --label ci-health --state open \
+            --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue comment "$existing" --repo "$REPOSITORY" --body-file ci-health-report.md
+            echo "number=$existing" >> "$GITHUB_OUTPUT"
+          else
+            title="CI failure rate above its control band (tier ${TIER})"
+            address="$(gh issue create --repo "$REPOSITORY" --label ci-health \
+              --title "$title" --body-file ci-health-report.md)"
+            echo "number=${address##*/}" >> "$GITHUB_OUTPUT"
+          fi
+
+  diagnose:
+    name: Diagnose with Claude
+    needs: detect
+    if: needs.detect.outputs.tier >= 2
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Check for the API key
+        id: key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::ANTHROPIC_API_KEY is not set, so no diagnosis was added."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out source
+        if: steps.key.outputs.available == 'true'
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Diagnose
+        if: steps.key.outputs.available == 'true'
+        uses: anthropics/claude-code-action@4411a9e9b0283becf4b924f7bce360fd7756c78c # v1.0.290
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            The daily CI health check opened or updated issue #${{ needs.detect.outputs.issue }} in ${{ github.repository }} because the Client CI failure rate rose above its control band.
+            Diagnose it without changing any code:
+            1. Read the issue, docs/incidents/ for past lessons, and the recent failed runs with `gh run list --workflow ci.yml --status failure --limit 10` and `gh run view <id> --log-failed`.
+            2. Group the failures by cause and say whether each is a real defect, a flaky test, an infrastructure problem or a dependency change. Separate what you observed from what you suspect.
+            3. Post one comment on the issue with `gh issue comment` giving the causes, the evidence and the smallest next step for each.
+            Never include secrets, personal data or patient data in the comment.
+          claude_args: >-
+            --max-turns 20
+            --allowedTools "Read,Grep,Glob,Bash(gh run list *),Bash(gh run view *),Bash(gh issue view *),Bash(gh issue comment *)"
