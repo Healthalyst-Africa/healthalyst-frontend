@@ -1,0 +1,17 @@
+{
+  "name": "clock-times-use-twelve-hour-format",
+  "description": "Claude formats displayed times the HealthAlyst way, such as 9:30 am, checked by a hidden test.",
+  "prompt": "In apps/health-schedule, add a function formatClockTime(date: Date): string in src/shared/time/format-clock-time.ts that returns the local time of day for display to clinic staff. Add a test beside it and run the HealthSchedule tests.",
+  "allowedTools": "Read,Glob,Grep,Edit,Write,Bash(pnpm --filter *)",
+  "hiddenChecks": [
+    {
+      "source": "evals/checks/format-clock-time.eval.test.ts",
+      "destination": "apps/health-schedule/src/shared/time/format-clock-time.eval.test.ts"
+    }
+  ],
+  "checks": [
+    "pnpm --filter @healthalyst/health-schedule exec vitest run src/shared/time/format-clock-time.eval.test.ts"
+  ],
+  "maximumTurns": 25,
+  "maximumBudgetInDollars": 1
+}

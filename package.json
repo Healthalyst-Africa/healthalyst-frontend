@@ -10,7 +10,8 @@
     "test": "turbo run test",
     "check-format": "prettier --check .",
     "format": "prettier --write .",
-    "test-all": "pnpm check-format && pnpm lint && pnpm check-types && pnpm test && pnpm build",
+    "test-scripts": "node --test \"scripts/**/*.test.mjs\" \"evals/**/*.test.mjs\"",
+    "test-all": "pnpm check-format && pnpm lint && pnpm check-types && pnpm test && pnpm test-scripts && pnpm build",
     "prepare": "husky",
     "pre-commit": "lint-staged",
     "commitlint": "commitlint"

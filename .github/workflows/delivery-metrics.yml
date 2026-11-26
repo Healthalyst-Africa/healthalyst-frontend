@@ -1,0 +1,64 @@
+name: Delivery metrics
+
+# Monthly DORA measures for the team's own use, built from release records,
+# merged pull requests and incident issues. Definitions are in
+# scripts/delivery-metrics/measure-delivery.mjs. Use them to start a
+# conversation, never as targets.
+
+on:
+  schedule:
+    - cron: "0 7 1 * *"
+  workflow_dispatch:
+    inputs:
+      days:
+        description: Number of days to measure
+        required: false
+        default: "90"
+
+permissions:
+  contents: read
+
+jobs:
+  measure:
+    name: Measure delivery
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: read
+    steps:
+      - name: Check out source
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+
+      - name: Collect releases, pull requests and incidents
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          gh release list --repo "$REPOSITORY" --limit 500 \
+            --json tagName,publishedAt,isDraft > releases.json
+          gh pr list --repo "$REPOSITORY" --base dev --state merged --limit 500 \
+            --json number,title,createdAt,mergedAt > pull-requests.json
+          gh label create incident --repo "$REPOSITORY" --color B42318 \
+            --description "A production incident; measured by delivery metrics" 2>/dev/null || true
+          gh issue list --repo "$REPOSITORY" --label incident --state all --limit 500 \
+            --json number,createdAt,closedAt > incidents.json
+
+      - name: Calculate the measures
+        env:
+          MEASURED_DAYS: ${{ inputs.days || '90' }}
+        run: >-
+          node scripts/delivery-metrics/measure-delivery.mjs
+          --releases releases.json
+          --pull-requests pull-requests.json
+          --incidents incidents.json
+          --days "$MEASURED_DAYS"
+          --summary "$GITHUB_STEP_SUMMARY"

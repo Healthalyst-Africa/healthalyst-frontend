@@ -1,0 +1,50 @@
+# Dependency updates arrive as pull requests into dev, like any other change.
+# Minor and patch updates are grouped to keep the review load small; major
+# updates arrive one at a time. A cooldown lets new releases settle before
+# they are proposed, which lowers the risk of pulling in a compromised
+# release. Security updates ignore the cooldown and the groups.
+
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Lagos
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      include: scope
+    labels:
+      - dependencies
+    groups:
+      minor-and-patch:
+        applies-to: version-updates
+        update-types:
+          - minor
+          - patch
+
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Africa/Lagos
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: ci
+      include: scope
+    labels:
+      - dependencies
+    groups:
+      github-actions:
+        patterns:
+          - "*"

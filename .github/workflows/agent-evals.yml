@@ -1,0 +1,89 @@
+name: Agent evals
+
+# Runs evals/tasks against Claude Code whenever the instructions, review
+# rules, Claude settings or the evals themselves change, and weekly, so a
+# change that makes Claude worse is caught before it merges. Skips quietly
+# until the repository has an ANTHROPIC_API_KEY secret.
+
+on:
+  pull_request:
+    paths:
+      - AGENTS.md
+      - CLAUDE.md
+      - REVIEW.md
+      - .claude/**
+      - evals/**
+      - apps/*/AGENTS.md
+      - apps/*/CLAUDE.md
+  schedule:
+    - cron: "17 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CLAUDE_CODE_VERSION: 2.1.332
+
+jobs:
+  evals:
+    name: Agent evals
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Check for the API key
+        id: key
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ -n "$ANTHROPIC_API_KEY" ]; then
+            echo "available=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::ANTHROPIC_API_KEY is not set, so the agent evals were skipped."
+            echo "available=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out source
+        if: steps.key.outputs.available == 'true'
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up pnpm
+        if: steps.key.outputs.available == 'true'
+        uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6.1.1
+        with:
+          version: 10.27.0
+
+      - name: Set up Node.js
+        if: steps.key.outputs.available == 'true'
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.key.outputs.available == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Claude Code and the HealthAlyst plugin
+        if: steps.key.outputs.available == 'true'
+        env:
+          CLAUDE_CODE_SYNC_PLUGIN_INSTALL: "1"
+        run: |
+          npm install --global "@anthropic-ai/claude-code@${CLAUDE_CODE_VERSION}"
+          claude plugin marketplace add Healthalyst-Africa/claude-plugins
+          claude plugin install healthalyst-sdlc@healthalyst --scope user
+
+      - name: Run the evals
+        if: steps.key.outputs.available == 'true'
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: node evals/run-evals.mjs --summary "$GITHUB_STEP_SUMMARY"

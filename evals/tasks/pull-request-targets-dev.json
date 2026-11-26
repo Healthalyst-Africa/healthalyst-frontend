@@ -1,0 +1,10 @@
+{
+  "name": "pull-request-targets-dev",
+  "description": "Claude knows feature pull requests go into dev, never main.",
+  "prompt": "Give the exact GitHub CLI command you would run to open a pull request for the current feature branch in this repository. Reply with the command only, and do not run it.",
+  "allowedTools": "Read,Glob,Grep",
+  "requiredPatterns": ["gh pr create", "--base[ =]dev\\b"],
+  "forbiddenPatterns": ["--base[ =]main\\b"],
+  "maximumTurns": 6,
+  "maximumBudgetInDollars": 0.5
+}

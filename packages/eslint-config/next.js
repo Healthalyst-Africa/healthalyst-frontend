@@ -2,10 +2,17 @@ import { globalIgnores } from "eslint/config";
 import nextPlugin from "@next/eslint-plugin-next";
 import prettier from "eslint-config-prettier/flat";
 import reactHooks from "eslint-plugin-react-hooks";
+import {
+  APPLICATION_RESTRICTIONS,
+  createArchitectureConfiguration,
+} from "./architecture.js";
 import baseConfiguration from "./base.js";
 
 const nextConfiguration = [
   ...baseConfiguration,
+  ...createArchitectureConfiguration({
+    restrictions: APPLICATION_RESTRICTIONS,
+  }),
   {
     plugins: { "@next/next": nextPlugin },
     rules: {

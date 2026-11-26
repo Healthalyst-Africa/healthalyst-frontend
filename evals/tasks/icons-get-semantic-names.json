@@ -1,0 +1,13 @@
+{
+  "name": "icons-get-semantic-names",
+  "description": "A new icon is exported from @healthalyst/icons under a semantic name, not imported from the vendor in an application.",
+  "prompt": "HealthSchedule needs an icon for the status 'Referral sent'. Make one available for applications to use, following the repository rules, and run the lint and type checks for what you changed.",
+  "allowedTools": "Read,Glob,Grep,Edit,Write,Bash(pnpm --filter *)",
+  "checks": [
+    "node evals/checks/referral-icon-is-semantic.mjs",
+    "pnpm --filter @healthalyst/icons lint",
+    "pnpm --filter @healthalyst/icons check-types"
+  ],
+  "maximumTurns": 20,
+  "maximumBudgetInDollars": 1
+}
