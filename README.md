@@ -1,5 +1,7 @@
 # Healthalyst Frontend
 
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Healthalyst-Africa/healthalyst-frontend/badge)](https://scorecard.dev/viewer/?uri=github.com/Healthalyst-Africa/healthalyst-frontend)
+
 This repository contains Healthalyst client applications. Other local repositories in the parent development workspace, such as mobile, desktop, or server projects, remain independent.
 
 ## Repository layout
@@ -77,4 +79,35 @@ pnpm test-all
 
 Create another app under `apps/` with a unique package name and its own `package.json`. Extend the shared ESLint and TypeScript presets, add the shared UI package as a dependency when needed, and define the app's tasks. Turborepo runs matching tasks across the workspace.
 
-Pull requests and pushes to `main` run formatting, lint, type checks, the app test suite, and production builds through GitHub Actions.
+Pull requests and pushes to `main` and `dev` run formatting, lint, type checks, the app and script test suites, and production builds through GitHub Actions.
+
+## How we work
+
+Changes follow HealthAlyst's AI-native delivery lifecycle, described in the
+[engineering handbook](https://github.com/Healthalyst-Africa/.github/tree/main/engineering)
+and [ADR 001](docs/adrs/001-adopt-ai-native-delivery-lifecycle.md): an issue,
+then `intent.md`, `spec.md` and `plan.md` in [`docs/changes/`](docs/changes/),
+a verified pull request into `dev`, and a release record when `dev` reaches
+`main`. [CONTRIBUTING.md](CONTRIBUTING.md) explains the setup and the checks.
+
+| Workflow                         | What it does                                                                      |
+| -------------------------------- | --------------------------------------------------------------------------------- |
+| Client CI                        | Every gate in `pnpm test-all`                                                     |
+| CodeQL, Dependency review        | Static analysis, and vulnerable or incompatible dependencies on each pull request |
+| OpenSSF Scorecard                | Weekly supply-chain and repository security score                                 |
+| Claude review, Claude            | Review against [`REVIEW.md`](REVIEW.md), and `@claude` requests                   |
+| Agent evals                      | Checks that Claude still follows this repository's rules ([`evals/`](evals/))     |
+| CI health                        | Daily control-band check on the CI failure rate                                   |
+| Release record, Delivery metrics | A release per production deploy, and monthly DORA measures                        |
+
+Repository settings, rulesets and security features are kept as code in
+`.github/settings/` and applied by an administrator with
+`scripts/github/apply-repository-settings.sh`.
+
+Pull requests show their screens with images committed under
+`docs/screenshots/<topic>/`. The GitHub Slack app posts pull requests as text
+only, so the `Pull request screenshots` workflow posts those images to Slack
+when a pull request opens or is ready for review, and posts any added or
+changed images on later pushes. It needs the repository secret
+`SLACK_PULL_REQUEST_SCREENSHOTS_WEBHOOK_URL`, a Slack incoming webhook for the
+receiving channel; without it the workflow skips.

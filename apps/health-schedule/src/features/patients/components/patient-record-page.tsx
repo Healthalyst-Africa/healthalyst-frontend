@@ -28,6 +28,7 @@ import { TodaysVisit } from "~/features/patients/components/todays-visit";
 import { PatientAppointments } from "~/features/appointments/components/patient-appointments";
 import { describePatientFullName } from "~/features/patients/utilities/patient-presentation";
 import {
+  BILLS_SECTION_PERMISSION,
   CLINICAL_SECTIONS_PERMISSION,
   PATIENT_PERMISSIONS,
   PATIENT_RECORD_SECTIONS,
@@ -41,6 +42,7 @@ import { readRecordSection } from "~/features/patients/utilities/record-section"
 import { RecordAccessGate } from "~/features/sensitive-records/components/record-access-gate";
 import { SensitivityPanel } from "~/features/sensitive-records/components/sensitivity-panel";
 import { useWorkspace } from "~/shared/workspace/workspace-context";
+import { PatientBillsSection } from "~/features/billing/components/patient-bills-section";
 
 const NOT_FOUND_CODES = ["PATIENT_NOT_FOUND", "NOT_FOUND"];
 
@@ -57,8 +59,11 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
   const canRead = permissions.includes(PATIENT_PERMISSIONS.read);
   const canReadClinical = permissions.includes(CLINICAL_SECTIONS_PERMISSION);
   const canOrder = permissions.includes(ORDER_PERMISSIONS.create);
+  const canReadBills = permissions.includes(BILLS_SECTION_PERMISSION);
   const recordSections = PATIENT_RECORD_SECTIONS.filter(
-    (recordSection) => !("clinical" in recordSection) || canReadClinical
+    (recordSection) =>
+      (!("clinical" in recordSection) || canReadClinical) &&
+      (!("billing" in recordSection) || canReadBills)
   );
   const requestedSection = readRecordSection(searchParameters.get("section"));
   const section = recordSections.some(
@@ -203,6 +208,11 @@ export function PatientRecordPage({ patientId }: { patientId: string }) {
                 <RecordAccessGate patientId={patientId}>
                   <ProblemsSection patientId={patientId} />
                 </RecordAccessGate>
+              ) : recordSection.value === "bills" ? (
+                <PatientBillsSection
+                  patientId={patientId}
+                  patientName={describePatientFullName(patientQuery.data)}
+                />
               ) : recordSection.value === "results" ? (
                 <RecordAccessGate patientId={patientId}>
                   <div className="flex flex-col gap-6">

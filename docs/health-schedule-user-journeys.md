@@ -89,6 +89,23 @@ permissions they hold.
 - **Setup, Tests and scans:** administrators add the starter list and switch
   off tests the facility does not offer.
 
+## Billing (phase 4)
+
+- **Cashier page:** every bill with something still owed, and what the
+  cashier took today by cash and by card or transfer. Opening a bill shows
+  its charges, who pays (the insurer's part and the patient's), payments
+  with receipt numbers, and what is still owed. The cashier takes full or
+  part payments by cash, card (POS) or bank transfer, and adds charges that
+  are not ordered elsewhere, such as a dressing.
+- **With the waive permission:** waive part of a bill within the person's
+  limit, remove a charge made by mistake, reverse a payment, and let one
+  bill be paid at the end or before each service. Each needs a reason.
+- **Bills tab on the patient record:** one bill per visit, with what is
+  still owed across all of them.
+- **Prices under Setup:** the price list, each insurer's price and patient
+  share, and whether the facility's patients pay at the end of the visit or
+  before each service.
+
 ## Still to do
 
 - **Booking above capacity or outside hours** (`appointment:override`) is

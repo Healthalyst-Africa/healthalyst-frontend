@@ -10,6 +10,8 @@ import {
   OrganizationIcon,
   PatientRecordsIcon,
   QueueIcon,
+  CashierIcon,
+  PriceListIcon,
   ReviewResultsIcon,
   ScheduleCalendarsIcon,
   TeamIcon,
@@ -44,6 +46,12 @@ const TESTS_AND_SCANS_PERMISSION = "patient:read";
 
 /** The HealthSchedule permission that shows patient records. */
 const PATIENT_RECORDS_PERMISSION = "patient:read";
+
+/** Cashiers take payments; managers set the prices. */
+const BILLING_PAGE_PERMISSIONS = {
+  cashier: "billing:collect",
+  prices: "billing:manage",
+} as const;
 
 /** Managers review emergency access to restricted records. */
 const ACCESS_REVIEW_PERMISSION = "audit:read";
@@ -140,7 +148,25 @@ export function buildHealthScheduleNavigation({
           },
         ]
       : []),
+    ...(permissions.includes(BILLING_PAGE_PERMISSIONS.cashier)
+      ? [
+          {
+            label: "Cashier",
+            href: HEALTH_SCHEDULE_ROUTES.cashier,
+            icon: CashierIcon,
+          },
+        ]
+      : []),
   ];
+  const pricesItems = permissions.includes(BILLING_PAGE_PERMISSIONS.prices)
+    ? [
+        {
+          label: "Prices",
+          href: HEALTH_SCHEDULE_ROUTES.prices,
+          icon: PriceListIcon,
+        },
+      ]
+    : [];
   const recordItems = [
     ...(permissions.includes(PATIENT_RECORDS_PERMISSION)
       ? [
@@ -157,6 +183,41 @@ export function buildHealthScheduleNavigation({
             label: "Access reviews",
             href: HEALTH_SCHEDULE_ROUTES.accessReviews,
             icon: AccessReviewIcon,
+          },
+        ]
+      : []),
+  ];
+  const scheduleSetupItems = [
+    {
+      label: "Calendars",
+      href: HEALTH_SCHEDULE_ROUTES.scheduleCalendars,
+      icon: ScheduleCalendarsIcon,
+    },
+    {
+      label: "Time off and holidays",
+      href: HEALTH_SCHEDULE_ROUTES.scheduleTimeOff,
+      icon: TimeOffIcon,
+    },
+    {
+      label: "Appointment types",
+      href: HEALTH_SCHEDULE_ROUTES.scheduleAppointmentTypes,
+      icon: AppointmentTypesIcon,
+    },
+    ...(permissions.includes(NOTE_TEMPLATES_PERMISSION)
+      ? [
+          {
+            label: "Note templates",
+            href: HEALTH_SCHEDULE_ROUTES.scheduleNoteTemplates,
+            icon: NoteTemplatesIcon,
+          },
+        ]
+      : []),
+    ...(permissions.includes(TESTS_AND_SCANS_PERMISSION)
+      ? [
+          {
+            label: "Tests and scans",
+            href: HEALTH_SCHEDULE_ROUTES.scheduleTestsAndScans,
+            icon: TestsAndScansIcon,
           },
         ]
       : []),
@@ -178,44 +239,15 @@ export function buildHealthScheduleNavigation({
     ...(recordItems.length > 0
       ? [{ label: "Patients", items: recordItems }]
       : []),
-    ...(permissions.includes(SCHEDULE_READ_PERMISSION)
+    ...(permissions.includes(SCHEDULE_READ_PERMISSION) || pricesItems.length > 0
       ? [
           {
             label: "Setup",
             items: [
-              {
-                label: "Calendars",
-                href: HEALTH_SCHEDULE_ROUTES.scheduleCalendars,
-                icon: ScheduleCalendarsIcon,
-              },
-              {
-                label: "Time off and holidays",
-                href: HEALTH_SCHEDULE_ROUTES.scheduleTimeOff,
-                icon: TimeOffIcon,
-              },
-              {
-                label: "Appointment types",
-                href: HEALTH_SCHEDULE_ROUTES.scheduleAppointmentTypes,
-                icon: AppointmentTypesIcon,
-              },
-              ...(permissions.includes(NOTE_TEMPLATES_PERMISSION)
-                ? [
-                    {
-                      label: "Note templates",
-                      href: HEALTH_SCHEDULE_ROUTES.scheduleNoteTemplates,
-                      icon: NoteTemplatesIcon,
-                    },
-                  ]
+              ...(permissions.includes(SCHEDULE_READ_PERMISSION)
+                ? scheduleSetupItems
                 : []),
-              ...(permissions.includes(TESTS_AND_SCANS_PERMISSION)
-                ? [
-                    {
-                      label: "Tests and scans",
-                      href: HEALTH_SCHEDULE_ROUTES.scheduleTestsAndScans,
-                      icon: TestsAndScansIcon,
-                    },
-                  ]
-                : []),
+              ...pricesItems,
             ],
           },
         ]

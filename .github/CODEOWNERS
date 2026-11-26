@@ -1,0 +1,16 @@
+# Code owners are asked to review every pull request that touches their paths.
+# The main ruleset requires a code owner's approval. When HealthAlyst creates
+# GitHub teams, replace the individual with a team such as
+# @Healthalyst-Africa/frontend (the team needs write access).
+
+*                   @gh-i19n
+
+# Changes to how code is built, reviewed, released and governed.
+/.github/           @gh-i19n
+/.claude/           @gh-i19n
+/AGENTS.md          @gh-i19n
+/CLAUDE.md          @gh-i19n
+/REVIEW.md          @gh-i19n
+/evals/             @gh-i19n
+/scripts/           @gh-i19n
+/packages/eslint-config/ @gh-i19n

@@ -1,0 +1,146 @@
+name: Pull request screenshots
+
+# The GitHub Slack app posts pull requests as text only, so screenshots in a
+# pull request description never appear in Slack. This posts the screenshots
+# a pull request adds under docs/screenshots/ to Slack as images.
+#
+# Needs the repository secret SLACK_PULL_REQUEST_SCREENSHOTS_WEBHOOK_URL: a
+# Slack incoming webhook for the channel that should receive them. Without it
+# the job skips quietly. The repository is public, so Slack can load each
+# image from raw.githubusercontent.com at the pull request's head commit.
+
+on:
+  pull_request:
+    types: [opened, reopened, ready_for_review, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+
+jobs:
+  post-to-slack:
+    # Draft pull requests wait until they are ready. Pull requests from forks
+    # receive no secrets, so they are skipped.
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Post new screenshots to Slack
+        uses: actions/github-script@ed597411d8f924073f98dfc5c65a23a2325f34cd # v8.0.0
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_PULL_REQUEST_SCREENSHOTS_WEBHOOK_URL }}
+        with:
+          script: |
+            const webhookAddress = process.env.SLACK_WEBHOOK_URL;
+            if (!webhookAddress) {
+              core.notice("SLACK_PULL_REQUEST_SCREENSHOTS_WEBHOOK_URL is not set, so no screenshots were posted.");
+              return;
+            }
+
+            const SCREENSHOT_PATTERN = /^docs\/screenshots\/.+\.(png|jpe?g|gif|webp)$/i;
+            // Slack allows 50 blocks in a message; one is the heading.
+            const IMAGES_PER_MESSAGE = 49;
+            const { owner, repo } = context.repo;
+            const pullRequest = context.payload.pull_request;
+
+            // A new push posts only the screenshots that push added or
+            // changed; opening or reopening posts every screenshot so far.
+            let changedFiles;
+            if (context.payload.action === "synchronize") {
+              try {
+                const comparison = await github.rest.repos.compareCommitsWithBasehead({
+                  owner,
+                  repo,
+                  basehead: `${context.payload.before}...${context.payload.after}`,
+                });
+                changedFiles = comparison.data.files ?? [];
+              } catch (comparisonError) {
+                core.warning(`Could not compare the push, so no screenshots were posted: ${comparisonError.message}`);
+                return;
+              }
+            } else {
+              changedFiles = await github.paginate(github.rest.pulls.listFiles, {
+                owner,
+                repo,
+                pull_number: pullRequest.number,
+                per_page: 100,
+              });
+            }
+
+            const screenshotPaths = changedFiles
+              .filter((file) => file.status !== "removed" && SCREENSHOT_PATTERN.test(file.filename))
+              .map((file) => file.filename)
+              .sort();
+            if (screenshotPaths.length === 0) {
+              core.info("This change adds no screenshots.");
+              return;
+            }
+
+            const escapeForSlack = (text) =>
+              text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            // "01-consultation-board.jpg" becomes "Consultation board".
+            const describeScreenshot = (path) => {
+              const words = path
+                .split("/")
+                .pop()
+                .replace(/\.[^.]+$/, "")
+                .replace(/^\d+[-_]/, "")
+                .replace(/[-_]+/g, " ")
+                .trim();
+              return words ? words.charAt(0).toUpperCase() + words.slice(1) : "Screenshot";
+            };
+            const toImageAddress = (path) =>
+              `https://raw.githubusercontent.com/${owner}/${repo}/${pullRequest.head.sha}/${path
+                .split("/")
+                .map(encodeURIComponent)
+                .join("/")}`;
+
+            const pullRequestLink = `<${pullRequest.html_url}|#${pullRequest.number} ${escapeForSlack(pullRequest.title)}>`;
+            const screenshotCount = `${screenshotPaths.length} ${screenshotPaths.length === 1 ? "screenshot" : "screenshots"}`;
+            const summary =
+              context.payload.action === "synchronize"
+                ? `${screenshotCount} updated by ${escapeForSlack(pullRequest.user.login)}`
+                : `${screenshotCount} from ${escapeForSlack(pullRequest.user.login)}`;
+
+            const messageCount = Math.ceil(screenshotPaths.length / IMAGES_PER_MESSAGE);
+            for (let messageIndex = 0; messageIndex < messageCount; messageIndex += 1) {
+              const pagePaths = screenshotPaths.slice(
+                messageIndex * IMAGES_PER_MESSAGE,
+                (messageIndex + 1) * IMAGES_PER_MESSAGE
+              );
+              const part = messageCount > 1 ? ` (part ${messageIndex + 1} of ${messageCount})` : "";
+              const blocks = [
+                {
+                  type: "section",
+                  text: { type: "mrkdwn", text: `*${pullRequestLink}*\n${summary}${part}` },
+                },
+                ...pagePaths.map((path) => ({
+                  type: "image",
+                  image_url: toImageAddress(path),
+                  alt_text: describeScreenshot(path),
+                  title: { type: "plain_text", text: describeScreenshot(path) },
+                })),
+              ];
+              const response = await fetch(webhookAddress, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  text: `Screenshots for #${pullRequest.number} ${pullRequest.title}`,
+                  blocks,
+                }),
+              });
+              if (!response.ok) {
+                core.setFailed(`Slack refused the screenshots (${response.status}): ${await response.text()}`);
+                return;
+              }
+              // Incoming webhooks accept about one message a second.
+              if (messageIndex < messageCount - 1) {
+                await new Promise((resolve) => setTimeout(resolve, 1100));
+              }
+            }
+            core.info(`Posted ${screenshotCount} to Slack.`);

@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./architecture": "./architecture.js",
     "./base": "./base.js",
     "./next": "./next.js"
   },

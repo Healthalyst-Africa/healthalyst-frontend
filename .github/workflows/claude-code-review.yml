@@ -1,0 +1,35 @@
+name: Claude review
+
+# Claude reviews each ready pull request against REVIEW.md, using the
+# organisation's shared review workflow. Its findings never approve or block a
+# pull request; a person approves. Skips quietly until the repository has an
+# ANTHROPIC_API_KEY secret. Pull requests from forks receive no secrets and
+# are skipped.
+#
+# Pinned to a reviewed commit of Healthalyst-Africa/.github. To update, review
+# that repository's changes, then replace the SHA and its comment.
+
+on:
+  pull_request:
+    types: [opened, synchronize, ready_for_review, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    if: >-
+      github.event.pull_request.draft == false &&
+      github.event.pull_request.head.repo.full_name == github.repository
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: write
+      id-token: write
+    uses: Healthalyst-Africa/.github/.github/workflows/claude-code-review.yml@10c3cbc1a468367f1b384e6632396a7a33726df6 # main, 2026-11-26
+    secrets:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

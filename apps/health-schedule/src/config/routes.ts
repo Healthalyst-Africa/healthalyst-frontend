@@ -15,4 +15,6 @@ export const HEALTH_SCHEDULE_ROUTES = {
   scheduleNoteTemplates: "/schedule/note-templates",
   scheduleTestsAndScans: "/schedule/tests-and-scans",
   results: "/results",
+  cashier: "/cashier",
+  prices: "/schedule/prices",
 } as const;
