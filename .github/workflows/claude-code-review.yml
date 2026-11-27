@@ -2,22 +2,27 @@ name: Claude review
 
 # Claude reviews each ready pull request against REVIEW.md, using the
 # organisation's shared review workflow. Its findings never approve or block a
-# pull request; a person approves. Skips quietly until the repository has an
-# ANTHROPIC_API_KEY secret. Pull requests from forks receive no secrets and
-# are skipped.
+# pull request; a person approves. Until the repository has an
+# ANTHROPIC_API_KEY secret, this check is a manual review gate: it fails until
+# the description's Manual review box is ticked with findings written, or
+# someone other than the author approves the latest commit. Editing the
+# description and submitting reviews re-run it. Pull requests from forks
+# receive no secrets and are skipped.
 #
 # Pinned to a reviewed commit of Healthalyst-Africa/.github. To update, review
 # that repository's changes, then replace the SHA and its comment.
 
 on:
   pull_request:
-    types: [opened, synchronize, ready_for_review, reopened]
+    types: [opened, synchronize, ready_for_review, reopened, edited]
+  pull_request_review:
+    types: [submitted, dismissed]
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}-${{ (github.event_name == 'pull_request' && github.event.action != 'edited') && 'code' || 'gate' }}
   cancel-in-progress: true
 
 jobs:
@@ -30,6 +35,6 @@ jobs:
       issues: read
       pull-requests: write
       id-token: write
-    uses: Healthalyst-Africa/.github/.github/workflows/claude-code-review.yml@10c3cbc1a468367f1b384e6632396a7a33726df6 # main, 2026-11-26
+    uses: Healthalyst-Africa/.github/.github/workflows/claude-code-review.yml@95be9136acc233166c72a736c51ff940e8048d77 # main, 2026-11-27
     secrets:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

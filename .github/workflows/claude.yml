@@ -38,6 +38,6 @@ jobs:
       issues: write
       pull-requests: write
       id-token: write
-    uses: Healthalyst-Africa/.github/.github/workflows/claude-mention.yml@10c3cbc1a468367f1b384e6632396a7a33726df6 # main, 2026-11-26
+    uses: Healthalyst-Africa/.github/.github/workflows/claude-mention.yml@95be9136acc233166c72a736c51ff940e8048d77 # main, 2026-11-27
     secrets:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

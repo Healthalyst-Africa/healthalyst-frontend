@@ -95,14 +95,14 @@ describe("branch rulesets", () => {
     );
   });
 
-  test("both branches still require the verify and Dependency review checks", () => {
+  test("both branches still require the verify, Dependency review and Claude review checks", () => {
     for (const ruleset of rulesets) {
       const checkNames = findRequiredStatusChecks(ruleset)
         .required_status_checks.map((check) => check.context)
         .sort();
       assert.deepEqual(
         checkNames,
-        ["Dependency review", "verify"],
+        ["Dependency review", "review / Claude review", "verify"],
         ruleset.name
       );
     }

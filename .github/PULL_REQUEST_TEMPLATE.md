@@ -26,6 +26,19 @@
 docs/screenshots/<change-name>/ and shown here. Write "No screen changes"
 if none changed. -->
 
+## Manual review
+
+<!-- Required while Claude review is not set up (no ANTHROPIC_API_KEY): the
+"Claude review" check fails until this box is ticked and the findings are
+written, or until someone other than the author approves the latest commit.
+Review the diff against REVIEW.md's bug, security and policy passes, or run
+/healthalyst-sdlc:verify-change and the security-reviewer agent locally.
+A person ticks this box, never an assistant. -->
+
+- [ ] I reviewed this change against REVIEW.md and recorded the findings below.
+
+Findings:
+
 ## Personal or health data
 
 - [ ] This change collects, shows, stores or sends personal or health data in
