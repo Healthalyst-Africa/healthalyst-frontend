@@ -22,8 +22,11 @@ Work follows HealthAlyst's AI-native delivery lifecycle
 4. **Test.** Prove the change with the checks in [CLAUDE.md](CLAUDE.md) and,
    for screens, screenshots at desktop and mobile widths.
 5. **Deploy.** Open a pull request into `dev` using the template. Claude
-   reviews it against [REVIEW.md](REVIEW.md); a code owner approves. `dev`
-   reaches `main`, and production, through its own reviewed pull request.
+   reviews it against [REVIEW.md](REVIEW.md); a code owner approves. If `dev`
+   moves on first, update the branch with the pull request's **Update
+   branch** button, or by merging `origin/dev`, so its checks run again on the
+   latest `dev`. `dev` reaches `main`, and production, through its own
+   reviewed pull request.
 6. **Maintain.** Production incidents get an `incident` issue and a review in
    [docs/incidents/](docs/incidents/), ending with what will catch the problem
    next time.
@@ -133,7 +136,8 @@ pnpm test-all
 
 Run the checks relevant to a change and report exactly what ran. `pnpm test-all`
 includes the app tests and `pnpm test-scripts`, which tests the CI health,
-delivery metrics and eval scripts. `pnpm lint` also enforces the shared
+delivery metrics and eval scripts, and checks the branch rules in
+`.github/settings/` and the pre-push hook. `pnpm lint` also enforces the shared
 component and icon import rules from `AGENTS.md`. Do not claim browser, API, or live service verification from a
 successful build alone.
 
